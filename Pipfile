@@ -7,6 +7,12 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
+click = "7.0"
+orjson = "2.1.4"
+jsonpath = "0.82"
+pytest = "5.3.3"
+gevent = "1.4.0"
+requests = "2.22.0"
 
 [requires]
-python_version = "3.7"
+python_version = "3.7+"
