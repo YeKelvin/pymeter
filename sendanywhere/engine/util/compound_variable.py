@@ -4,13 +4,15 @@
 # @Time    : 2020/1/20 14:50
 # @Author  : Kelvin.Ye
 from sendanywhere.engine.util.function_parser import FunctionParser
+from sendanywhere.functions import Function
+from sendanywhere.utils.class_finder import ClassFinder
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
 
 
 class CompoundVariable:
-    functions = {}
+    functions =
 
     def __init__(self, parameters: str = None):
         self.function_parser = FunctionParser()
@@ -20,6 +22,16 @@ class CompoundVariable:
         self.compiled_components = []
         if parameters:
             self.set_parameters(parameters)
+
+    @staticmethod
+    def __init_functions():
+        functions = {}
+        classes = ClassFinder.find_subclasses(Function)
+        for clazz in classes:
+            reference_key = clazz.reference_key
+            if reference_key:
+                functions[reference_key] = clazz
+        return functions
 
     def set_parameters(self, parameters: str):
         self.raw_parameters = parameters
