@@ -5,9 +5,10 @@
 # @Author  : KelvinYe
 import configparser
 import os
+from sendanywhere.utils.path_util import __RESOURCES_PATH__
 
 # 项目配置路径
-__CONFIG_PATH__ = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, 'resources', 'config.ini'))
+__CONFIG_PATH__ = os.path.join(__RESOURCES_PATH__, 'config.ini')
 
 
 def get(section: str, key: str, filepath: str = __CONFIG_PATH__) -> str:

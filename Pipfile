@@ -15,4 +15,4 @@ gevent = "1.4.0"
 requests = "2.22.0"
 
 [requires]
-python_version = "3.7+"
+python_version = "3.7"

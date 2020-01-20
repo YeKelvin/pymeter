@@ -3,6 +3,9 @@
 # @File    : function
 # @Time    : 2020/1/19 17:05
 # @Author  : Kelvin.Ye
+from sendanywhere.utils.log_util import get_logger
+
+log = get_logger(__name__)
 
 
 class Function:

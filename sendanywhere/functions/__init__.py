@@ -4,3 +4,7 @@
 # @Time    : 2019/3/14 10:06
 # @Author  : KelvinYe
 
+from .function import Function
+from .eval import Eval
+from .random import Random
+from .time import Time

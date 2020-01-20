@@ -3,29 +3,26 @@
 # @File    : log_util.py
 # @Time    : 2019/3/15 10:56
 # @Author  : KelvinYe
-
 import logging
+from sendanywhere.utils import config
 
-from src.core.pers.kelvin.pyautotest.utils import config
+# 日志输出格式
+FORMATTER = logging.Formatter('[%(asctime)s][%(levelname)s][%(name)s.%(funcName)s %(lineno)d] %(message)s')
 
-# LogLevel: NOTSET，DEBUG，INFO，WARNING，CRITICAL, ERROR
-level = config.get('log', 'level')
+# 输出到控制台
+CONSOLE_HANDLER = logging.StreamHandler()
+CONSOLE_HANDLER.setFormatter(FORMATTER)
+
+# 写入日志文件
+FILE_HANDLER = logging.FileHandler(config.get('log', 'name'))
+
+# 日志级别
+LEVEL = config.get('log', 'level')
 
 
-def getlogger(name):
+def get_logger(name):
     logger = logging.getLogger(name)
-    logger.setLevel(level)
-
-    # fh = logging.FileHandler(config.get('log').get('name'))  # 用于写入日志文件
-    ch = logging.StreamHandler()  # 用于输出到控制台
-
-    # 定义handler的输出格式
-    formatter = logging.Formatter('[%(asctime)s][%(levelname)s][%(name)s.%(funcName)s] %(message)s')
-    # fh.setFormatter(formatter)
-    ch.setFormatter(formatter)
-
-    # 给logger添加handler
-    # logger.addHandler(fh)
-    logger.addHandler(ch)
-
+    logger.propagate = False
+    logger.setLevel(LEVEL)
+    logger.addHandler(CONSOLE_HANDLER)
     return logger

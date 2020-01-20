@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : variables.py
+# @File    : variables
 # @Time    : 2019/3/14 11:08
 # @Author  : KelvinYe
-from typing import KeysView, _KT
+from sendanywhere.utils.log_util import get_logger
+
+log = get_logger(__name__)
 
 
 class PyatVariables:
@@ -22,5 +24,5 @@ class PyatVariables:
     def clear(self) -> None:
         self.variables.clear()
 
-    def keys(self) -> KeysView[_KT]:
+    def keys(self):
         return self.variables.keys()

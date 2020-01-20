@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : replacer.py
+# @File    : value_replacer
 # @Time    : 2019/3/15 9:47
 # @Author  : KelvinYe
+from sendanywhere.utils.log_util import get_logger
+
+log = get_logger(__name__)
 
 
 class ValueTransformer:

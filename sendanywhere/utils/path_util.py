@@ -8,7 +8,7 @@ import sys
 
 __PROJECT_PATH__ = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 __RESOURCES_PATH__ = os.path.join(__PROJECT_PATH__, 'resources')
-__SRC_PATH__ = os.path.join(__PROJECT_PATH__, 'send-anywhere')
+__SRC_PATH__ = os.path.join(__PROJECT_PATH__, 'sendanywhere')
 
 
 def add_project_to_pth():
