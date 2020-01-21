@@ -7,6 +7,7 @@
 
 class StringReader:
     def __init__(self, string: str):
+        self.raw = string
         self.__iter: iter = string.__iter__()
 
     @property
@@ -15,3 +16,6 @@ class StringReader:
             return self.__iter.__next__()
         except StopIteration:
             return None
+
+    def reset(self) -> None:
+        self.__iter = self.raw.__iter__()

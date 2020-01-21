@@ -14,7 +14,7 @@ CONSOLE_HANDLER = logging.StreamHandler()
 CONSOLE_HANDLER.setFormatter(FORMATTER)
 
 # 写入日志文件
-FILE_HANDLER = logging.FileHandler(config.get('log', 'name'))
+# FILE_HANDLER = logging.FileHandler(config.get('log', 'name'))
 
 # 日志级别
 LEVEL = config.get('log', 'level')

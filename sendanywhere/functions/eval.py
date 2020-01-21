@@ -10,4 +10,4 @@ log = get_logger(__name__)
 
 
 class Eval(Function):
-    pass
+    REF_KEY = '__eval'

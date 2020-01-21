@@ -3,7 +3,7 @@
 # @File    : replacer_test
 # @Time    : 2020/1/19 10:31
 # @Author  : Kelvin.Ye
-from sendanywhere.engine.util.replacer import ValueReplacer
+from sendanywhere.engine.util import ValueReplacer
 
 
 class TestValueReplacer:
