@@ -9,5 +9,7 @@ from sendanywhere.engine.util import FunctionParser
 class TestFunctionParser:
     def test_compile_str(self):
         parser = FunctionParser()
-        source = '{"keyAA":"valueAA","keyBB":"${__random()}"}'
-        print(parser.compile_str(source))
+        source = '{"keyAA":"valueAA","keyBB":"${__random(1, 10)}"}'
+        result = parser.compile_str(source)
+        print(result)
+        print(type(result))

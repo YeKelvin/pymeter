@@ -11,3 +11,9 @@ log = get_logger(__name__)
 
 class Time(Function):
     REF_KEY = '__time'
+
+    def execute(self):
+        pass
+
+    def set_parameters(self, parameters: list):
+        pass

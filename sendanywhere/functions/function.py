@@ -3,7 +3,7 @@
 # @File    : function
 # @Time    : 2020/1/19 17:05
 # @Author  : Kelvin.Ye
-from sendanywhere.utils.class_finder import ClassFinder
+from sendanywhere.engine.exceptions import InvalidVariableException
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -15,24 +15,26 @@ class Function:
     def execute(self):
         raise NotImplementedError
 
-    def set_parameters(self, parameters: []):
+    def set_parameters(self, parameters: list):
         raise NotImplementedError
 
-    def check_parameter_count(self, min=None, max=None, count=None):
-        raise NotImplementedError
+    def check_parameter_count(self, parameters: list, count: int) -> None:
+        num = len(parameters)
+        if num != count:
+            raise InvalidVariableException(
+                f'{self.REF_KEY} called with wrong number of parameters. Actual: {num}. Expected: {count}.'
+            )
 
-    def check_min_parameter_count(self):
-        raise NotImplementedError
+    def check_parameter_min(self, parameters: list, minimum: int) -> None:
+        num = len(parameters)
+        if num < minimum:
+            raise InvalidVariableException(
+                f'{self.REF_KEY} called with wrong number of parameters. Actual: {num}. Expected at least: {minimum}.'
+            )
 
-
-def __init_functions__():
-    functions = {}
-    classes = ClassFinder.find_subclasses(Function)
-    for clazz in classes:
-        reference_key = clazz.REF_KEY
-        if reference_key:
-            functions[reference_key] = clazz
-    return functions
-
-
-FUNCTIONS_STORE = __init_functions__()
+    def check_parameter_max(self, parameters: list, maximum: int = None) -> None:
+        num = len(parameters)
+        if num > maximum:
+            raise InvalidVariableException(
+                f'{self.REF_KEY} called with wrong number of parameters. Actual: {num}. Expected at most: {maximum}.'
+            )

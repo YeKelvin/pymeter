@@ -11,3 +11,9 @@ log = get_logger(__name__)
 
 class Eval(Function):
     REF_KEY = '__eval'
+
+    def execute(self):
+        pass
+
+    def set_parameters(self, parameters: []):
+        pass

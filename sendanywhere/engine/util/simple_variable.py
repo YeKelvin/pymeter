@@ -6,7 +6,7 @@
 
 
 class SimpleVariable:
-    def __init__(self, name: str = ''):
+    def __init__(self, name: str = None):
         self.name = name
 
     def __str__(self):
@@ -14,7 +14,7 @@ class SimpleVariable:
         if vars:
             return vars.get(self.name)
         else:
-            return f'${self.name}'
+            return '${' + self.name + '}'
 
     def get_variables(self):
         return {}

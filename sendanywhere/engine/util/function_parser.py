@@ -19,6 +19,7 @@ class FunctionParser:
         result = []
         buffer = []
         previous = ''
+        log.debug('开始编译字符串')
         while True:
             current = reader.next
             if current is None:  # end of reader
@@ -37,10 +38,11 @@ class FunctionParser:
                 previous = ''
                 buffer.append(current)
             elif current == '{' and previous == '$':  # 匹配 "${" 占位符前缀
+                log.debug('匹配到占位符前缀')
                 buffer = buffer[:-1]
                 if len(buffer) > 0:  # 保存 "${" 占位符前的字符串
                     before_placeholder_str = ''.join(buffer)
-                    log.debug(f'匹配到 "${{}}" 占位符，报错占位符前的字符串:[ {before_placeholder_str} ]')
+                    log.debug(f'保存占位符前的字符串： {before_placeholder_str}')
                     result.append(before_placeholder_str)
                     buffer.clear()
                     log.debug('清空 buffer')
@@ -82,9 +84,7 @@ class FunctionParser:
                     function.set_parameters(self._parse_params(reader))
                     current = reader.next
                     if current is None or current != '}':
-                        raise InvalidVariableException(
-                            f'Expected }} after {funcName} function call in {reader.raw}'
-                        )
+                        raise InvalidVariableException(f'Expected }} after {funcName} function call in {reader.raw}')
                     return function
                 else:  # 函数不存在，按普通字符处理
                     buffer.append(current)
@@ -164,7 +164,7 @@ class FunctionParser:
 
         # 退出，未匹配到参数列表结束符 "）"
         str_buffer = ''.join(buffer)
-        log.warn(f'可能是无效的函数字符串:[ {str_buffer} ]')
+        log.warn(f'可能是无效的函数字符串： {str_buffer}')
         var = CompoundVariable()
         var.set_parameters(str_buffer)
         result.append(var)
