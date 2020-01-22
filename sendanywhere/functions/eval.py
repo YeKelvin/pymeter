@@ -3,7 +3,6 @@
 # @File    : eval
 # @Time    : 2020/1/20 16:08
 # @Author  : Kelvin.Ye
-from sendanywhere.engine.util import CompoundVariable
 from sendanywhere.functions.function import Function
 from sendanywhere.utils.log_util import get_logger
 
@@ -19,6 +18,7 @@ class Eval(Function):
     def execute(self):
         log.debug(f'{self.REF_KEY} start execute')
         parameter = self.parameter.execute().strip()
+        from sendanywhere.engine.util import CompoundVariable
         return CompoundVariable(parameter).execute().strip()
 
     def set_parameters(self, parameters: []):

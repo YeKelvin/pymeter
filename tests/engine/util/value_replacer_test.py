@@ -7,12 +7,12 @@ from sendanywhere.engine.util import ValueReplacer
 
 
 class TestValueReplacer:
-    def test_replace_values(self):
+    def test_replace_values_not_exist(self):
         source = '{"keyA":"valueA","keyB":"${varKey}"}'
         replacer = ValueReplacer()
         result = replacer.replace_values(source)
         print(result)
-        # assert '{"keyA":"valueA","keyB":"actual value"}' == result
+        assert '{"keyA":"valueA","keyB":"${varKey}"}' == result
 
     def test_replace_values_multiple(self):
         source = '{"keyA":"${varKey22}","keyB":"${varKey11}","keyC":"valueC","keyD":"${varKey33}"}'

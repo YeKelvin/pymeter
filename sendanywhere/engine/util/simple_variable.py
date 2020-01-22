@@ -12,7 +12,7 @@ class SimpleVariable:
     @property
     def value(self):
         variables = self.get_variables()
-        if variables:
+        if self.name in variables:
             return variables.get(self.name)
         else:
             return '${' + self.name + '}'
