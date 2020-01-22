@@ -20,7 +20,7 @@ class ValueTransformer:
         raise NotImplementedError()
 
 
-class UndoFunctionReplacement(ValueTransformer):
+class ReplaceStringWithFunctions(ValueTransformer):
     """替换字符串中的 Function函数
     """
 
@@ -41,13 +41,9 @@ class UndoVariableReplacement(ValueTransformer):
 
 
 class ValueReplacer:
-    def __init__(self, variables: dict = None):
-        self.variables = variables
-        self.__function_replacer = UndoFunctionReplacement()
-        self.__variable_replacer = UndoVariableReplacement(variables)
+    def __init__(self, defined_variables: dict = None):
+        self.variables = defined_variables
+        self.__transformer = ReplaceStringWithFunctions(self.variables)
 
     def replace_values(self, source: str) -> str:
-        return self.__variable_replacer.transform_value(source)
-
-    def replace_functions(self, source: str) -> str:
-        return self.__function_replacer.transform_value(source)
+        return self.__transformer.transform_value(source)

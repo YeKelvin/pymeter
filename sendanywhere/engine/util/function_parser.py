@@ -45,7 +45,6 @@ class FunctionParser:
                     log.debug(f'保存占位符前的字符串： {before_placeholder_str}')
                     result.append(before_placeholder_str)
                     buffer.clear()
-                    log.debug('清空 buffer')
                 result.append(self._make_function(reader))
                 previous = ''
             else:
@@ -76,15 +75,15 @@ class FunctionParser:
                 previous = ''
                 buffer.append(current)
             elif current == '(' and previous != '':
-                funcName = ''.join(buffer)
-                log.debug(f'function name={funcName}')
-                function = CompoundVariable.get_named_function(funcName)
+                func_name = ''.join(buffer)
+                log.debug(f'function_reference_key={func_name}')
+                function = CompoundVariable.get_named_function(func_name)
                 log.debug(f'function={function}')
                 if isinstance(function, Function):
                     function.set_parameters(self._parse_params(reader))
                     current = reader.next
                     if current is None or current != '}':
-                        raise InvalidVariableException(f'Expected }} after {funcName} function call in {reader.raw}')
+                        raise InvalidVariableException(f'Expected }} after {func_name} function call in {reader.raw}')
                     return function
                 else:  # 函数不存在，按普通字符处理
                     buffer.append(current)
@@ -94,7 +93,6 @@ class FunctionParser:
                 if isinstance(function, Function):  # 确保调用 set_parameters()
                     function.set_parameters([])
                 buffer.clear()
-                log.debug('清空 buffer')
                 return function
             else:
                 buffer.append(current)
@@ -128,7 +126,6 @@ class FunctionParser:
                 log.debug(f'param str={param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
-                log.debug('清空 buffer')
                 result.append(param)
             elif current == ')' and function_recursion == 0 and parent_recursion == 0:
                 # 检测function name，防止生成空字符串作为参数
@@ -136,10 +133,9 @@ class FunctionParser:
                     return result
                 # 正常退出
                 param_str = ''.join(buffer)
-                log.debug(f'param str={param_str}')
+                log.debug(f'raw_parameter={param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
-                log.debug('清空 buffer')
                 result.append(param)
                 return result
             elif current == '{' and previous == '$':

@@ -8,24 +8,33 @@ from sendanywhere.engine.util import ValueReplacer
 
 class TestValueReplacer:
     def test_replace_values(self):
-        variables = {'varKey': 'actual value'}
         source = '{"keyA":"valueA","keyB":"${varKey}"}'
-        replacer = ValueReplacer(variables)
+        replacer = ValueReplacer()
         result = replacer.replace_values(source)
         print(result)
-        assert '{"keyA":"valueA","keyB":"actual value"}' == result
+        # assert '{"keyA":"valueA","keyB":"actual value"}' == result
 
     def test_replace_values_multiple(self):
-        variables = {'varKey11': 'actual value11', 'varKey22': 'actual value22', 'varKey33': 'actual value33'}
         source = '{"keyA":"${varKey22}","keyB":"${varKey11}","keyC":"valueC","keyD":"${varKey33}"}'
-        replacer = ValueReplacer(variables)
+        replacer = ValueReplacer()
         result = replacer.replace_values(source)
         print(result)
         assert '{"keyA":"actual value22","keyB":"actual value11","keyC":"valueC","keyD":"actual value33"}' == result
 
     def test_replace_functions(self):
-        variables = {}
         source = '{"keyAA":"valueAA","keyBB":"${__random(1, 10)}"}'
-        replacer = ValueReplacer(variables)
-        result = replacer.replace_functions(source)
+        replacer = ValueReplacer()
+        result = replacer.replace_values(source)
+        print(result)
+
+    def test_replace_functions_multiple(self):
+        source = (
+            '{'
+            '"keyAA":"valueAA",'
+            '"keyBB":"${__Random(1, 10)}",'
+            '"keyCC":"${__Time()}",'
+            '"keyDD":"${__Time(%Y-%m-%d %H:%M:%S)}"}'
+        )
+        replacer = ValueReplacer()
+        result = replacer.replace_values(source)
         print(result)

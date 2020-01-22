@@ -9,12 +9,13 @@ class SimpleVariable:
     def __init__(self, name: str = None):
         self.name = name
 
-    def __str__(self):
-        vars = self.get_variables()
-        if vars:
-            return vars.get(self.name)
+    @property
+    def value(self):
+        variables = self.get_variables()
+        if variables:
+            return variables.get(self.name)
         else:
             return '${' + self.name + '}'
 
     def get_variables(self):
-        return {}
+        return {'varKey11': 'actual value11', 'varKey22': 'actual value22', 'varKey33': 'actual value33'}

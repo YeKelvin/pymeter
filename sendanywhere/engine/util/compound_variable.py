@@ -44,13 +44,13 @@ class CompoundVariable:
             if isinstance(item, Function):
                 results.append(item.execute())
             elif isinstance(item, SimpleVariable):
-                results.append(str(item))
+                results.append(item.value)
             else:
                 results.append(item)
         results_str = ''.join(results)
 
         if not self.is_dynamic:
-            log.debug('函数非动态，缓存函数执行结果')
+            log.debug('非动态函数，缓存函数执行结果')
             self.permanent_results = results_str
 
         return results_str
@@ -72,7 +72,7 @@ class CompoundVariable:
 
         for item in self.compiled_components:
             if isinstance(item, Function) or isinstance(item, SimpleVariable):
-                log.debug('函数为动态函数')
+                log.debug('设置为动态函数')
                 self.is_dynamic = True
                 break
 

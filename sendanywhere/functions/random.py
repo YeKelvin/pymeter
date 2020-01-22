@@ -12,7 +12,7 @@ log = get_logger(__name__)
 
 
 class Random(Function):
-    REF_KEY = '__random'
+    REF_KEY = '__Random'
 
     def __init__(self):
         self.var_name = None
@@ -25,13 +25,13 @@ class Random(Function):
         minimum = int(self.minimum.execute().strip())
         maximum = int(self.maximum.execute().strip())
 
-        rand = random.randint(minimum, maximum)
+        result = random.randint(minimum, maximum)
 
         if self.var_name:
             # todo 存在 var_name时放入变量中
             var_name = self.var_name.execute().strip()
 
-        return str(rand)
+        return str(result)
 
     def set_parameters(self, parameters: list):
         log.debug(f'{self.REF_KEY} start to set parameters')
