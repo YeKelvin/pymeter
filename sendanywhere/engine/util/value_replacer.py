@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @File    : value_replacer
 # @Time    : 2019/3/15 9:47
-# @Author  : KelvinYe
+# @Author  : Kelvin.Ye
 from sendanywhere.engine.util.compound_variable import CompoundVariable
 from sendanywhere.utils.log_util import get_logger
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @File    : config.py
 # @Time    : 2019/3/15 10:54
-# @Author  : KelvinYe
+# @Author  : Kelvin.Ye
 import configparser
 import os
 from sendanywhere.utils.path_util import __RESOURCES_PATH__

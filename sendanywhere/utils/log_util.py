@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # @File    : log_util.py
 # @Time    : 2019/3/15 10:56
-# @Author  : KelvinYe
+# @Author  : Kelvin.Ye
 import logging
 from sendanywhere.utils import config
 
