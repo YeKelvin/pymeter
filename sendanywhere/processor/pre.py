@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : sampler.py
-# @Time    : 2020/1/24 23:47
+# @File    : pre.py
+# @Time    : 2020/2/13 13:05
 # @Author  : Kelvin.Ye
 
 
-class Sampler:
-    def sample(self):
+class PreProcessor:
+    def process(self) -> None:
         raise NotImplementedError

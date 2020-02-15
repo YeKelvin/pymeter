@@ -6,4 +6,15 @@
 
 
 class TestElement:
-    pass
+    running = False
+    name = ''
+    comment = ''
+
+    def get_property_as_str(self, key: str, default_value: str) -> str:
+        pass
+
+    def get_property_as_int(self, key: str, default_value: int) -> int:
+        pass
+
+    def get_property_as_bool(self, key: str, default_value: bool) -> bool:
+        pass

@@ -5,5 +5,5 @@
 # @Author  : Kelvin.Ye
 
 
-class StandardJMeterEngine:
+class StandardEngine:
     pass
