@@ -7,16 +7,14 @@ import time
 
 
 class SampleResult:
-    DEFAULT_ENCODING = ''
-    OK_CODE = ''
-    OK_MSG = ''
+    default_encoding = 'UTF-8'
 
     def __init__(self):
-        self.parent = None  # SampleResult
+        self.parent = None
         self.sample_label = None
 
         self.request_headers = None
-        self.request_data = None
+        self.request_body = None
 
         self.response_headers = None
         self.response_data = None
@@ -38,11 +36,7 @@ class SampleResult:
         self.stop_thread = None
 
     def sample_start(self):
-        self.start_time = time.time()
+        self.start_time = int(time.time() * 1000)
 
     def sample_end(self):
-        self.end_time = time.time()
-
-
-if __name__ == '__main__':
-    print(time.time())
+        self.end_time = int(time.time() * 1000)

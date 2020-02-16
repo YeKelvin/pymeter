@@ -13,6 +13,7 @@ jsonpath = "==0.82"
 pytest = "==5.3.3"
 gevent = "==1.4.0"
 requests = "==2.22.0"
+flask = "*"
 
 [requires]
 python_version = "3.7"

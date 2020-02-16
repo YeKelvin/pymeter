@@ -19,7 +19,7 @@ class Time(Function):
 
     def execute(self):
         log.debug(f'{self.REF_KEY} start execute')
-        timestamp = time.time()
+        timestamp = int(time.time() * 1000)
         result = str(timestamp)
 
         if self.format:
