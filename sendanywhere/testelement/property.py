@@ -44,5 +44,5 @@ class FunctionProperty(SenderProperty):
 
     def get_str_value(self):
         if not self.cache_value:
-            self.cache_value = self.value.execute()
+            self.cache_value = self.function.execute()
         return self.cache_value
