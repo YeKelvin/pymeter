@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : exception.py
-# @Time    : 2019/3/15 10:48
+# @File    : driver.py
+# @Time    : 2020/2/20 17:33
 # @Author  : Kelvin.Ye
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
 
-
-class InvalidVariableException(Exception):
-    pass
-
-
-class SenderEngineException(Exception):
+if __name__ == '__main__':
     pass
