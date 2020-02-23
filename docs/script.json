@@ -1,0 +1,20 @@
+{
+  "name": "测试计划",
+  "comments": "描述",
+  "class": "类",
+  "enabled": "是否启用",
+  "property": {
+    "key": "value"
+  },
+  "child": {
+    "name": "线程组",
+    "comments": "描述",
+    "class": "类",
+    "enabled": "是否启用",
+    "property": {
+      "key": "value"
+    },
+    "child": {
+    }
+  }
+}

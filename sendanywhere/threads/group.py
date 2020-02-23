@@ -6,5 +6,7 @@
 
 
 class SenderGroup:
+    """Coroutine
+    """
     on_sample_error = 'continue'
     pass
