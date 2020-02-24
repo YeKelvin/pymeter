@@ -14,3 +14,7 @@ class InvalidVariableException(Exception):
 
 class SenderEngineException(Exception):
     pass
+
+
+class ScriptParseException(Exception):
+    pass

@@ -14,8 +14,18 @@ class TestElement:
     LABEL = 'TestElement.label'
     COMMENTS = 'TestElement.comments'
 
-    def __init__(self):
+    def __init__(self, name: str = None, comments: str = None):
         self.__propertys: {str, SenderProperty} = {}
+        if name:
+            self.set_name(name)
+        if comments:
+            self.set_comments(comments)
+
+    def set_name(self, name: str):
+        self.set_property(self.LABEL, name)
+
+    def set_comments(self, comments: str):
+        self.set_property(self.COMMENTS, comments)
 
     def set_property(self, key: str, value: any) -> None:
         self.__propertys[key] = ValueReplacer.replace_values(key, value)

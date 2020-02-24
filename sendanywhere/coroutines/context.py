@@ -4,15 +4,15 @@
 # @Time    : 2019/3/15 9:39
 # @Author  : Kelvin.Ye
 import time
-
+from gevent.local import local
 from sendanywhere.engine.globalization import SenderUtils
-from sendanywhere.threads.variables import SenderVariables
+from sendanywhere.coroutines.variables import SenderVariables
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
 
 
-class SenderContext:
+class CoroutineContext:
     def __init__(self):
         self.variables = SenderVariables()
         self.previous_result = None
@@ -30,7 +30,8 @@ class SenderContext:
 
 
 class SenderContextService:
-    contexts: {str, SenderContext} = {}
+    # 协程本地变量
+    coroutine_local = local()
     test_start = 0
     number_of_active_threads = 0
     number_of_threads_started = 0
@@ -38,16 +39,18 @@ class SenderContextService:
     total_threads = 0
 
     @classmethod
-    def get_context(cls, id) -> SenderContext:
-        return cls.contexts.get(id)
+    def get_context(cls) -> CoroutineContext:
+        return getattr(cls.coroutine_local, 'coroutine_context', CoroutineContext())
 
     @classmethod
-    def remove_context(cls, id) -> None:
-        del cls.contexts[id]
+    def remove_context(cls) -> None:
+        if hasattr(cls.coroutine_local, 'coroutine_context'):
+            del cls.coroutine_local.coroutine_context
 
     @classmethod
-    def replace_context(cls, id, context) -> None:
-        cls.contexts[id] = context
+    def replace_context(cls, context) -> None:
+        if hasattr(cls.coroutine_local, 'coroutine_context'):
+            cls.coroutine_local.coroutine_context = context
 
     @classmethod
     def start_test(cls):

@@ -6,7 +6,7 @@
 import traceback
 
 from sendanywhere.engine.exceptions import SenderEngineException
-from sendanywhere.threads.context import SenderContextService
+from sendanywhere.coroutines.context import SenderContextService
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
