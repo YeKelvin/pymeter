@@ -5,21 +5,28 @@
 # @Author  : Kelvin.Ye
 from sendanywhere.engine.util import ValueReplacer
 from sendanywhere.testelement.property import SenderProperty
+from sendanywhere.utils import json_util
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
 
 
 class TestElement:
+    # 组件的名称
     LABEL = 'TestElement.label'
+
+    # 组件的备注
     COMMENTS = 'TestElement.comments'
 
-    def __init__(self, name: str = None, comments: str = None):
+    def __init__(self, name: str = None, comments: str = None, propertys: dict = None):
         self.__propertys: {str, SenderProperty} = {}
         if name:
             self.set_name(name)
         if comments:
             self.set_comments(comments)
+        if propertys:
+            for key, value in propertys.items():
+                self.set_property(key, value)
 
     def set_name(self, name: str):
         self.set_property(self.LABEL, name)

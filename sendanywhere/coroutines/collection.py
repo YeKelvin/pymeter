@@ -12,5 +12,3 @@ log = get_logger(__name__)
 class CoroutineCollection(TestElement):
     # 是否顺序执行线程组
     SERIALIZE_COROUTINEGROUPS = 'CoroutineCollection.serialize_coroutinegroups'
-
-
