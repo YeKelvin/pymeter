@@ -11,7 +11,7 @@ from sendanywhere.utils.path_util import __PROJECT_PATH__
 
 class TestScriptServer:
     def test_load_tree(self):
-        with open(os.path.join(__PROJECT_PATH__, 'docs','test-script.json'), 'r', encoding='utf-8') as f:
+        with open(os.path.join(__PROJECT_PATH__, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
             tree = ScriptServer.load_tree(script)
             print(tree)
