@@ -5,7 +5,7 @@
 # @Author  : Kelvin.Ye
 from gevent import Greenlet
 
-from sendanywhere.coroutines.context import CoroutineContext
+from sendanywhere.coroutines.context import CoroutineContext, ContextService
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 
@@ -53,21 +53,36 @@ class CoroutineGroup(TestElement):
         super().__init__(name, comments, propertys)
         self.running = False
         self.group_number = None
+        self.group_tree = None
 
-    def start(self, group_count: int, group_tree, engine):
-        pass
-
-
-class Coroutine(Greenlet):
-    LAST_SAMPLE_OK = 'Coroutine.last_sample_ok'
-
-    def __init__(self, tree, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.vars = {}
+    def start(self, group_number: int, group_tree, engine):
         self.running = True
+        self.group_number = group_number
+        self.group_tree = group_tree
+        number_coroutines = self.number_coroutines
+        context = ContextService.get_context()
 
-    def initial_context(self, context: CoroutineContext):
-        self.vars.update(context.variables)
+        for coroutine_number in range(number_coroutines):
+            if self.running:
+                self.start_new_coroutine(group_tree, coroutine_number, engine, context)
+            else:
+                break
 
-    def run(self):
+        log.info(f'Started thread group number {self.group_number}')
+
+    def start_new_coroutine(self, group_tree, coroutine_number, engine, context):
         pass
+
+    class Coroutine(Greenlet):
+        LAST_SAMPLE_OK = 'Coroutine.last_sample_ok'
+
+        def __init__(self, tree, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.vars = {}
+            self.running = True
+
+        def initial_context(self, context: CoroutineContext):
+            self.vars.update(context.variables)
+
+        def run(self):
+            pass

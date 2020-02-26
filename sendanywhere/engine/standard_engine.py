@@ -56,7 +56,6 @@ class StandardEngine(Greenlet):
 
         # 查找 CoroutineGroupListener对象
         group_searcher = SearchByClass(CoroutineGroup)
-        group_length = len(group_searcher.get_search_result())
         group_iter = iter(group_searcher.get_search_result())
 
         group_count = 0
@@ -71,7 +70,7 @@ class StandardEngine(Greenlet):
                 self.start_thread_group(group, group_count, group_searcher)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
-                if self.serialized and group_count < group_length:
+                if self.serialized:
                     log.info(f'Waiting for coroutine group: {group_name} to finish before starting next group')
                     group.wait_threads_stopped()
 
@@ -87,8 +86,9 @@ class StandardEngine(Greenlet):
             else:
                 log.info('Test stopped - no more coroutine groups will be started')
 
-        # wait for all test coroutines to exit
-        self.wait_threads_stopped()
+        if not self.serialized:
+            # wait for all test coroutines to exit
+            self.wait_threads_stopped()
 
         # 遍历执行 TestStateListener.test_ended()
         self.__notify_test_listeners_of_end(test_state_listener_searcher)
@@ -106,9 +106,10 @@ class StandardEngine(Greenlet):
         for listener in listeners:
             listener.test_ended()
 
-    def start_thread_group(self, group: CoroutineGroup, group_count: int):
+    def start_thread_group(self, group: CoroutineGroup, group_count: int, group_searcher: SearchByClass):
         number_coroutines = group.number_coroutines
         group_name = group.name
+        group_tree = group_searcher.get_subtree(group)
         log.info(f'Starting {number_coroutines} coroutines for group {group_name}.')
         group.start(group_count, group_tree, self)
 
