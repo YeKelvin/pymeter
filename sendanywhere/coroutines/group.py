@@ -73,16 +73,17 @@ class CoroutineGroup(TestElement):
     def start_new_coroutine(self, group_tree, coroutine_number, engine, context):
         pass
 
-    class Coroutine(Greenlet):
-        LAST_SAMPLE_OK = 'Coroutine.last_sample_ok'
 
-        def __init__(self, tree, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.vars = {}
-            self.running = True
+class Coroutine(Greenlet):
+    LAST_SAMPLE_OK = 'Coroutine.last_sample_ok'
 
-        def initial_context(self, context: CoroutineContext):
-            self.vars.update(context.variables)
+    def __init__(self, tree, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.vars = {}
+        self.running = True
 
-        def run(self):
-            pass
+    def initial_context(self, context: CoroutineContext):
+        self.vars.update(context.variables)
+
+    def run(self):
+        pass
