@@ -5,7 +5,7 @@
 # @Author  : Kelvin.Ye
 import sys
 
-from sendanywhere.engine.collection.traverser import ConvertToString
+from sendanywhere.engine.collection.traverser import ConvertToString, TreeSearcher
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -25,9 +25,6 @@ class HashTree(dict):
     def put(self, key: object, value: "HashTree"):
         self.__data[key] = value
 
-    def put_all(self, _dict: dict):
-        self.__data.update(_dict)
-
     def get(self, key: object) -> "HashTree":
         return self.__data.get(key)
 
@@ -43,14 +40,26 @@ class HashTree(dict):
     def list(self) -> list:
         return list(self.__data.keys())
 
+    def search(self, key: object) -> "HashTree":
+        result = self.get(key)
+        if result:
+            return result
+        searcher = TreeSearcher(key)
+        try:
+            self.traverse(searcher)
+        except RuntimeError as e:
+            if not str(e) == TreeSearcher.FOUND:
+                raise e
+        return searcher.result
+
     def traverse(self, visitor):
         """HashTree遍历（深度优先）
         """
         for item in self.list():
             visitor.add_node(item, self.get(item))
-            self.get(item).traverse_into(visitor)
+            self.get(item).__traverse_into(visitor)
 
-    def traverse_into(self, visitor):
+    def __traverse_into(self, visitor):
         """HashTree遍历回调
         """
         if not self.list():
@@ -59,7 +68,7 @@ class HashTree(dict):
             for item in self.list():
                 treeItem = self.get(item)
                 visitor.add_node(item, treeItem)
-                treeItem.traverse_into(visitor)
+                treeItem.__traverse_into(visitor)
 
         visitor.subtract_node()
 
@@ -73,4 +82,22 @@ class HashTree(dict):
 
 
 class ListedHashTree(HashTree):
-    pass
+    """
+    ListedHashTree是 HashTree的另一种实现。
+    在 ListedHashTree中，保留了添加值的顺序。
+    """
+    def __init__(self, key: object = None, value: "ListedHashTree" = None):
+        super().__init__(key, value)
+        self.order = []
+
+    def put(self, key: object, value: "ListedHashTree"):
+        if not self.contains(key):
+            self.order.append(key)
+        super().put(key, value)
+
+    def clear(self):
+        super().clear()
+        self.order.clear()
+
+    def list(self) -> list:
+        return self.order

@@ -27,8 +27,16 @@ class HashTreeTraverser:
 
 
 class TreeSearcher(HashTreeTraverser):
+    FOUND = 'found'
+
+    def __init__(self, target: object):
+        self.target = target
+        self.result = None
+
     def add_node(self, key, subtree) -> None:
-        pass
+        result = subtree.get(self.target)
+        if result:
+            raise RuntimeError(self.FOUND)
 
     def subtract_node(self) -> None:
         pass
@@ -73,3 +81,30 @@ class ConvertToString(HashTreeTraverser):
 
     def __repr__(self):
         return self.__str__()
+
+
+class SearchByClass(HashTreeTraverser):
+    def __init__(self, search_class: type):
+        self.objects_of_class = []
+        self.subtrees = {}
+        self.search_class = search_class
+
+    def get_search_result(self) -> list:
+        return self.objects_of_class
+
+    def get_subtree(self, key: object):
+        return self.subtrees.get(key)
+
+    def add_node(self, key, subtree) -> None:
+        if isinstance(key, self.search_class):
+            self.objects_of_class.append(key)
+            from sendanywhere.engine.collection.tree import HashTree
+            tree = HashTree()
+            tree.put(key, subtree)
+            self.subtrees[key] = tree
+
+    def subtract_node(self) -> None:
+        pass
+
+    def process_path(self) -> None:
+        pass

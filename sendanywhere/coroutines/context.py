@@ -4,9 +4,10 @@
 # @Time    : 2019/3/15 9:39
 # @Author  : Kelvin.Ye
 import time
+
 from gevent.local import local
+
 from sendanywhere.engine.globalization import SenderUtils
-from sendanywhere.coroutines.variables import SenderVariables
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -14,7 +15,7 @@ log = get_logger(__name__)
 
 class CoroutineContext:
     def __init__(self):
-        self.variables = SenderVariables()
+        self.variables = {}
         self.previous_result = None
         self.current_sampler = None
         self.previous_sampler = None
@@ -29,7 +30,7 @@ class CoroutineContext:
         self.current_sampler = sampler
 
 
-class SenderContextService:
+class ContextService:
     # 协程本地变量
     coroutine_local = local()
     test_start = 0

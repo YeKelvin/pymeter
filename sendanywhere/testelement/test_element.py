@@ -5,7 +5,6 @@
 # @Author  : Kelvin.Ye
 from sendanywhere.engine.util import ValueReplacer
 from sendanywhere.testelement.property import SenderProperty
-from sendanywhere.utils import json_util
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -27,6 +26,14 @@ class TestElement:
         if propertys:
             for key, value in propertys.items():
                 self.set_property(key, value)
+
+    @property
+    def name(self):
+        return self.get_property_as_str(self.LABEL)
+
+    @property
+    def comments(self):
+        return self.get_property_as_str(self.COMMENTS)
 
     def set_name(self, name: str):
         self.set_property(self.LABEL, name)
