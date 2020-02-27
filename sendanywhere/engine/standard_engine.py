@@ -12,8 +12,9 @@ from sendanywhere.coroutines.context import ContextService
 from sendanywhere.coroutines.group import CoroutineGroup
 from sendanywhere.engine.collection.traverser import SearchByClass
 from sendanywhere.engine.collection.tree import HashTree
-from sendanywhere.engine.exceptions import SenderEngineException
+from sendanywhere.engine.exceptions import EngineException, StopTestException
 from sendanywhere.engine.listener import TestStateListener
+from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -26,13 +27,14 @@ class StandardEngine(Greenlet):
         self.active = False
         self.tree = None
         self.serialized = True  # 线程组是否按顺序运行
+        self.groups = []
 
     def configure(self, tree: HashTree):
         searcher = SearchByClass(CoroutineCollection)
         tree.traverse(searcher)
         collections = searcher.get_search_result()
         if len(collections) == 0:
-            raise SenderEngineException('脚本集合数量少于1，请确保至少存在一个脚本集合')
+            raise EngineException('脚本集合数量少于1，请确保至少存在一个脚本集合')
 
         self.serialized = collections[0].serialized  # 线程组是否按顺序运行
         self.active = True
@@ -40,8 +42,8 @@ class StandardEngine(Greenlet):
 
     def run_test(self):
         try:
-            self.start()
-        except SenderEngineException:
+            self.run()
+        except EngineException:
             log.error(traceback.format_exc())
 
     def run(self):
@@ -49,13 +51,18 @@ class StandardEngine(Greenlet):
         self.running = True
 
         # 查找 TestStateListener对象
-        test_state_listener_searcher = SearchByClass(TestStateListener)
-        self.tree.traverse(test_state_listener_searcher)
+        test_listener_searcher = SearchByClass(TestStateListener)
+        self.tree.traverse(test_listener_searcher)
         # 遍历执行 TestStateListener.test_started()
-        self.__notify_test_listeners_of_start(test_state_listener_searcher)
+        self.__notify_test_listeners_of_start(test_listener_searcher)
+
+        # 储存 CoroutineCollection层的非 CoroutineGroup节点和 非 TestElement节点
+        test_level_elements = self.tree.list()
+        self.remove_coroutine_groups(test_level_elements)
 
         # 查找 CoroutineGroupListener对象
         group_searcher = SearchByClass(CoroutineGroup)
+        self.tree.traverse(group_searcher)
         group_iter = iter(group_searcher.get_search_result())
 
         group_count = 0
@@ -67,12 +74,12 @@ class StandardEngine(Greenlet):
                 group_count += 1
                 group_name = group.name
                 log.info(f'Starting coroutine group: {group_count} : {group_name}')
-                self.start_thread_group(group, group_count, group_searcher)
+                self.start_coroutine_group(group, group_count, group_searcher)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
                     log.info(f'Waiting for coroutine group: {group_name} to finish before starting next group')
-                    group.wait_threads_stopped()
+                    group.wait_coroutines_stopped()
 
             except StopIteration:
                 break
@@ -88,30 +95,51 @@ class StandardEngine(Greenlet):
 
         if not self.serialized:
             # wait for all test coroutines to exit
-            self.wait_threads_stopped()
+            self.wait_coroutines_stopped()
+
+        self.groups.clear()
 
         # 遍历执行 TestStateListener.test_ended()
-        self.__notify_test_listeners_of_end(test_state_listener_searcher)
+        self.__notify_test_listeners_of_end(test_listener_searcher)
 
         # 测试结束
         ContextService.end_test()
 
-    def __notify_test_listeners_of_start(self, searcher: SearchByClass) -> None:
+    @staticmethod
+    def __notify_test_listeners_of_start(searcher: SearchByClass) -> None:
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.test_started()
 
-    def __notify_test_listeners_of_end(self, searcher: SearchByClass) -> None:
+    @staticmethod
+    def __notify_test_listeners_of_end(searcher: SearchByClass) -> None:
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.test_ended()
 
-    def start_thread_group(self, group: CoroutineGroup, group_count: int, group_searcher: SearchByClass):
-        number_coroutines = group.number_coroutines
-        group_name = group.name
-        group_tree = group_searcher.get_subtree(group)
-        log.info(f'Starting {number_coroutines} coroutines for group {group_name}.')
-        group.start(group_count, group_tree, self)
+    def start_coroutine_group(self, group: CoroutineGroup, group_count: int, group_searcher: SearchByClass):
+        try:
+            number_coroutines = group.number_coroutines
+            group_name = group.name
+            group_tree = group_searcher.get_subtree(group)
+            log.info(f'Starting {number_coroutines} coroutines for group {group_name}.')
+            self.groups.append(group)
+            group.start(group_count, group_tree, self)
+        except StopTestException:
+            log.error(traceback.format_exc())
 
-    def wait_threads_stopped(self):
-        pass
+    def wait_coroutines_stopped(self):
+        """等待所有协程执行完成
+        """
+        for group in self.groups:
+            group.wait_coroutines_stopped()
+
+    def remove_coroutine_groups(self, elements):
+        it = iter(elements)
+        while True:
+            try:
+                node = next(it)
+                if isinstance(node, CoroutineGroup) or not isinstance(node, TestElement):
+                    node.remove()
+            except StopIteration:
+                break

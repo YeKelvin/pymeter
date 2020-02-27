@@ -5,8 +5,6 @@
 # @Author  : Kelvin.Ye
 import time
 
-from sendanywhere.engine.exceptions import SenderEngineException
-from sendanywhere.engine.globalization import SenderUtils
 from sendanywhere.engine.script import ScriptServer
 from sendanywhere.engine.standard_engine import StandardEngine
 from sendanywhere.utils.log_util import get_logger
@@ -30,7 +28,7 @@ class Sender:
         if script:
             Sender.run(script)
         else:
-            raise SenderEngineException('脚本不允许为空')
+            raise Exception('脚本不允许为空')
 
     @staticmethod
     def run(script: str):

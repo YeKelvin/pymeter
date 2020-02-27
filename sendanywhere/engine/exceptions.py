@@ -12,9 +12,13 @@ class InvalidVariableException(Exception):
     pass
 
 
-class SenderEngineException(Exception):
+class EngineException(Exception):
     pass
 
 
 class ScriptParseException(Exception):
+    pass
+
+
+class StopTestException(Exception):
     pass

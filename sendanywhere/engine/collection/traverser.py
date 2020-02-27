@@ -3,6 +3,9 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
+from queue import LifoQueue
+
+from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -108,3 +111,33 @@ class SearchByClass(HashTreeTraverser):
 
     def process_path(self) -> None:
         pass
+
+
+class TestCompiler(HashTreeTraverser):
+    def __init__(self, tree):
+        self.tree = tree
+        self.stack = LifoQueue()
+        self.sampler_config_map = {}
+
+    def add_node(self, key, subtree) -> None:
+        self.stack.put(key)
+
+    def subtract_node(self) -> None:
+        log.debug(f'Subtracting node, stack size = {self.stack.qsize()}')
+        child = self.stack.get()
+
+        if isinstance(child, Sampler):
+            self.save_sampler_configs(child)
+
+    def process_path(self) -> None:
+        pass
+
+    def save_sampler_configs(self):
+        configs = []
+        controllers = []
+        preProcessors = []
+        listeners = []
+        postProcessors = []
+        assertions = []
+        for node in range(self.stack.qsize(), -1, -1):
+            pass

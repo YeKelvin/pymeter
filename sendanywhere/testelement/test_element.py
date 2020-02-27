@@ -66,3 +66,7 @@ class TestElement:
     def get_property_as_bool(self, key: str, default: bool = None) -> bool:
         prop = self.get_property(key)
         return prop.get_bool_value() if prop else default
+
+
+class ConfigTestElement(TestElement):
+    pass

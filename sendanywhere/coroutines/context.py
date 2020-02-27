@@ -16,14 +16,15 @@ log = get_logger(__name__)
 class CoroutineContext:
     def __init__(self):
         self.variables = {}
-        self.previous_result = None
-        self.current_sampler = None
-        self.previous_sampler = None
+        self.coroutine = None
+        self.coroutine_group = None
+        self.coroutine_number = None
+        self.sampler_context = None
         self.sampling_started = False
-        self.thread = None
-        self.threadGroup = None
-        self.samplerContext = None
-        self.thread_num = None
+        self.current_sampler = None
+        self.previous_result = None
+        self.previous_sampler = None
+        self.engine = None
 
     def set_current_sampler(self, sampler):
         self.previous_sampler = self.current_sampler
