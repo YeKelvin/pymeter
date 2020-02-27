@@ -57,10 +57,10 @@ class StandardEngine(Greenlet):
         self.__notify_test_listeners_of_start(test_listener_searcher)
 
         # 储存 CoroutineCollection层的非 CoroutineGroup节点和 非 TestElement节点
-        test_level_elements = self.tree.list()
-        self.remove_coroutine_groups(test_level_elements)
+        test_level_elements = self.tree.get(self.tree.list()[0]).list()
+        self.__remove_coroutine_groups(test_level_elements)
 
-        # 查找 CoroutineGroupListener对象
+        # 查找 CoroutineGroup对象
         group_searcher = SearchByClass(CoroutineGroup)
         self.tree.traverse(group_searcher)
         group_iter = iter(group_searcher.get_search_result())
@@ -74,13 +74,12 @@ class StandardEngine(Greenlet):
                 group_count += 1
                 group_name = group.name
                 log.info(f'Starting coroutine group: {group_count} : {group_name}')
-                self.start_coroutine_group(group, group_count, group_searcher)
+                self.__start_coroutine_group(group, group_count, group_searcher, test_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
                     log.info(f'Waiting for coroutine group: {group_name} to finish before starting next group')
                     group.wait_coroutines_stopped()
-
             except StopIteration:
                 break
         #  end of coroutine groups
@@ -95,7 +94,7 @@ class StandardEngine(Greenlet):
 
         if not self.serialized:
             # wait for all test coroutines to exit
-            self.wait_coroutines_stopped()
+            self.__wait_coroutines_stopped()
 
         self.groups.clear()
 
@@ -104,6 +103,28 @@ class StandardEngine(Greenlet):
 
         # 测试结束
         ContextService.end_test()
+
+    def __start_coroutine_group(self,
+                              group: CoroutineGroup,
+                              group_count: int,
+                              group_searcher: SearchByClass,
+                              test_level_elements: list):
+        try:
+            number_coroutines = group.number_coroutines
+            group_name = group.name
+            group_tree = group_searcher.get_subtree(group)
+            group_tree.put(group, test_level_elements)  # todo 添加父级非 group节点
+            log.info(f'Starting {number_coroutines} coroutines for group {group_name}.')
+            self.groups.append(group)
+            group.start(group_count, group_tree, self)
+        except StopTestException:
+            log.error(traceback.format_exc())
+
+    def __wait_coroutines_stopped(self):
+        """等待所有协程执行完成
+        """
+        for group in self.groups:
+            group.wait_coroutines_stopped()
 
     @staticmethod
     def __notify_test_listeners_of_start(searcher: SearchByClass) -> None:
@@ -117,29 +138,8 @@ class StandardEngine(Greenlet):
         for listener in listeners:
             listener.test_ended()
 
-    def start_coroutine_group(self, group: CoroutineGroup, group_count: int, group_searcher: SearchByClass):
-        try:
-            number_coroutines = group.number_coroutines
-            group_name = group.name
-            group_tree = group_searcher.get_subtree(group)
-            log.info(f'Starting {number_coroutines} coroutines for group {group_name}.')
-            self.groups.append(group)
-            group.start(group_count, group_tree, self)
-        except StopTestException:
-            log.error(traceback.format_exc())
-
-    def wait_coroutines_stopped(self):
-        """等待所有协程执行完成
-        """
-        for group in self.groups:
-            group.wait_coroutines_stopped()
-
-    def remove_coroutine_groups(self, elements):
-        it = iter(elements)
-        while True:
-            try:
-                node = next(it)
-                if isinstance(node, CoroutineGroup) or not isinstance(node, TestElement):
-                    node.remove()
-            except StopIteration:
-                break
+    @staticmethod
+    def __remove_coroutine_groups(elements: list):
+        for node in elements[:]:
+            if isinstance(node, CoroutineGroup) or not isinstance(node, TestElement):
+                elements.remove(node)
