@@ -5,5 +5,5 @@
 # @Author  : Kelvin.Ye
 
 
-class Config:
+class ConfigElement:
     pass

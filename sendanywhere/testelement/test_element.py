@@ -3,6 +3,7 @@
 # @File    : test_element.py
 # @Time    : 2020/1/24 23:48
 # @Author  : Kelvin.Ye
+from sendanywhere.configs.config import ConfigElement
 from sendanywhere.engine.util import ValueReplacer
 from sendanywhere.testelement.property import SenderProperty
 from sendanywhere.utils.log_util import get_logger
@@ -68,5 +69,5 @@ class TestElement:
         return prop.get_bool_value() if prop else default
 
 
-class ConfigTestElement(TestElement):
+class ConfigTestElement(TestElement, ConfigElement):
     pass

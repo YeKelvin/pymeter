@@ -3,7 +3,7 @@
 # @File    : python_pre.py
 # @Time    : 2020/2/17 16:29
 # @Author  : Kelvin.Ye
-from sendanywhere.processor.pre import PreProcessor
+from sendanywhere.processors.pre import PreProcessor
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 

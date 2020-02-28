@@ -5,8 +5,11 @@
 # @Author  : Kelvin.Ye
 from gevent import Greenlet
 
+from sendanywhere.controls.loop_controller import LoopController
 from sendanywhere.coroutines.context import CoroutineContext, ContextService
+from sendanywhere.engine.collection.traverser import GroupCompiler
 from sendanywhere.engine.collection.tree import HashTree
+from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 
@@ -35,6 +38,7 @@ class CoroutineGroup(TestElement):
     # 启用线程的间隔时间，单位 s
     START_INTERVAL = 'CoroutineGroup.start_interval'
 
+    # 默认等待协程结束时间，单位 ms
     WAIT_TO_DIE = 5 * 1000
 
     @property
@@ -124,6 +128,8 @@ class Coroutine(Greenlet):
         self.engine = engine
         self.local_vars = {}
         self.running = True
+        self.group_compiler = None
+        self.sample_controller = None
 
     def initial_context(self, context: CoroutineContext):
         self.local_vars.update(context.variables)
@@ -132,11 +138,16 @@ class Coroutine(Greenlet):
         context = ContextService.get_context()
         try:
             self.init_run(context)
+            while self.running:
+                sample = next()
 
         except Exception:
             pass
 
-    def process_sampler(self):
+    def process_sampler(self, current: Sampler, parent: Sampler, context: CoroutineContext):
+        pass
+
+    def execute_sample_package(self, current: Sampler, context: CoroutineContext):
         pass
 
     def init_run(self, context: CoroutineContext):
@@ -146,3 +157,19 @@ class Coroutine(Greenlet):
         context.coroutine = self
         context.coroutine_group = self.coroutine_group
         context.engine = self.engine
+
+        # 储存 CoroutineGroup层的非 Sampler节点
+        group_level_elements = self.group_tree.index(0).list()
+        self.__remove_samplers(group_level_elements)
+
+        self.sample_controller = LoopController(self.coroutine_group.loops, self.coroutine_group.continue_forever)
+
+        # 编译 Sampler节点
+        self.group_compiler = GroupCompiler(group_level_elements, self.sample_controller)
+        self.group_tree.traverse(self.group_compiler)
+
+    @staticmethod
+    def __remove_samplers(elements: list):
+        for node in elements[:]:
+            if isinstance(node, Sampler) or not isinstance(node, TestElement):
+                elements.remove(node)

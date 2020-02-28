@@ -3,7 +3,7 @@
 # @File    : python_post.py
 # @Time    : 2020/2/17 16:29
 # @Author  : Kelvin.Ye
-from sendanywhere.processor.post import PostProcessor
+from sendanywhere.processors.post import PostProcessor
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 

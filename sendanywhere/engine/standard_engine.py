@@ -47,17 +47,20 @@ class StandardEngine(Greenlet):
             log.error(traceback.format_exc())
 
     def run(self):
-        log.info('Running the test!')
+        """脚本执行主体
+        """
+        log.info('开始运行脚本')
         self.running = True
 
         # 查找 TestStateListener对象
         test_listener_searcher = SearchByClass(TestStateListener)
         self.tree.traverse(test_listener_searcher)
+
         # 遍历执行 TestStateListener.test_started()
         self.__notify_test_listeners_of_start(test_listener_searcher)
 
-        # 储存 CoroutineCollection层的非 CoroutineGroup节点和 非 TestElement节点
-        test_level_elements = self.tree.get(self.tree.list()[0]).list()
+        # 储存 CoroutineCollection层的非 CoroutineGroup节点
+        test_level_elements = self.tree.index(0).list()
         self.__remove_coroutine_groups(test_level_elements)
 
         # 查找 CoroutineGroup对象
@@ -73,27 +76,27 @@ class StandardEngine(Greenlet):
                 group: CoroutineGroup = next(group_iter)
                 group_count += 1
                 group_name = group.name
-                log.info(f'Starting coroutine group: {group_count} : {group_name}')
+                log.info(f'开始协程组: [{group_count} : {group_name}]')
                 self.__start_coroutine_group(group, group_count, group_searcher, test_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'Waiting for coroutine group: {group_name} to finish before starting next group')
+                    log.info(f'在开始下一个协程组之前等待  [{group_name}] 协程组完成: ')
                     group.wait_coroutines_stopped()
             except StopIteration:
                 break
-        #  end of coroutine groups
+            #  所有协程组执行完成
 
-        if group_count == 0:  # No coroutine groups found
-            log.info('No enabled coroutine groups found')
+        if group_count == 0:
+            log.info('脚本集合下找不到可用的协程组')
         else:
             if self.running:
-                log.info('All coroutine groups have been started')
+                log.info('所有协程组已经开始')
             else:
-                log.info('Test stopped - no more coroutine groups will be started')
+                log.info('测试已停止，不再启动协程组')
 
         if not self.serialized:
-            # wait for all test coroutines to exit
+            # 并行执行，等待所有协程执行完成
             self.__wait_coroutines_stopped()
 
         self.groups.clear()
@@ -105,16 +108,17 @@ class StandardEngine(Greenlet):
         ContextService.end_test()
 
     def __start_coroutine_group(self,
-                              group: CoroutineGroup,
-                              group_count: int,
-                              group_searcher: SearchByClass,
-                              test_level_elements: list):
+                                group: CoroutineGroup,
+                                group_count: int,
+                                group_searcher: SearchByClass,
+                                test_level_elements: list):
         try:
             number_coroutines = group.number_coroutines
             group_name = group.name
             group_tree = group_searcher.get_subtree(group)
-            group_tree.put(group, test_level_elements)  # todo 添加父级非 group节点
-            log.info(f'Starting {number_coroutines} coroutines for group {group_name}.')
+            group_tree.put_all(group, test_level_elements)  # 把 collection层的非 group节点添加至 group层
+            log.info(f'为 [{group_name}] 协程组启动 [{number_coroutines}] 个协程')
+
             self.groups.append(group)
             group.start(group_count, group_tree, self)
         except StopTestException:

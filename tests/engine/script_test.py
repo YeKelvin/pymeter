@@ -15,3 +15,4 @@ class TestScriptServer:
             script = ''.join(f.readlines())
             tree = ScriptServer.load_tree(script)
             print(tree)
+            print(tree.index(0).list())

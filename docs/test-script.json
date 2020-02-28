@@ -9,6 +9,14 @@
     },
     "child": [
       {
+        "name": "配置元素-Collection层",
+        "comments": "描述",
+        "class": "ConfigTestElement",
+        "enabled": true,
+        "property": {},
+        "child": null
+      },
+      {
         "name": "线程组A",
         "comments": "描述",
         "class": "CoroutineGroup",
@@ -21,6 +29,14 @@
           "CoroutineGroup.start_interval": "0"
         },
         "child": [
+          {
+            "name": "配置元素-Group层",
+            "comments": "描述",
+            "class": "ConfigTestElement",
+            "enabled": true,
+            "property": {},
+            "child": null
+          },
           {
             "name": "取样器1",
             "comments": "描述",
@@ -42,7 +58,16 @@
               "HTTPSampler.connect_timeout": "",
               "HTTPSampler.response_timeout": ""
             },
-            "child": null
+            "child": [
+              {
+                "name": "配置元素-Sampler层",
+                "comments": "描述",
+                "class": "ConfigTestElement",
+                "enabled": true,
+                "property": {},
+                "child": null
+              }
+            ]
           },
           {
             "name": "取样器2",
@@ -68,7 +93,8 @@
             "child": null
           }
         ]
-      },{
+      },
+      {
         "name": "线程组B",
         "comments": "描述",
         "class": "CoroutineGroup",
