@@ -4,6 +4,7 @@
 # @Time    : 2020/2/28 17:25
 # @Author  : Kelvin.Ye
 from sendanywhere.controls.controller import Controller
+from sendanywhere.engine.exceptions import NextIsNullException
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.utils.log_util import get_logger
 
@@ -58,32 +59,63 @@ class GenericController(Controller):
         self.increment_iter_count()
         self.set_first(True)
 
+    def increment_current(self):
+        self.current += 1
+
     def increment_iter_count(self):
         self.iter_count += 1
 
-    def next(self) -> Sampler:
-        if self.done:
+    def next(self) -> Sampler or None:
+        if self.is_done():
             return None
         current_element = self.get_current_element()
         if current_element is None:
             return self.next_is_null()
         else:
             if isinstance(current_element, Sampler):
-                return self.next_is_sampler()
+                return self.next_is_sampler(current_element)
             elif isinstance(current_element, Controller):
-                return self.next_is_controller()
+                return self.next_is_controller(current_element)
 
     def get_current_element(self):
-        pass
+        if self.current < len(self.samplers_and_controllers):
+            return self.samplers_and_controllers[self.current]
 
-    def next_is_sampler(self):
-        pass
+        if not self.samplers_and_controllers:
+            self.set_done(True)
+            raise NextIsNullException()
 
-    def next_is_controller(self):
-        pass
+        return None
+
+    def next_is_sampler(self, sampler: Sampler):
+        self.increment_current()
+        return sampler
+
+    def next_is_controller(self, controller: Controller):
+        sampler = controller.next()
+        if sampler is None:
+            self.current_returned_null(controller)
+            sampler = self.next()
+        return sampler
 
     def next_is_null(self):
-        pass
+        self.re_initialize()
+        return None
+
+    def current_returned_null(self, controller: Controller) -> None:
+        if controller.is_done():
+            self.remove_current_element()
+        else:
+            self.increment_current()
 
     def add_element(self, element: Sampler or Controller):
         self.samplers_and_controllers.append(element)
+
+    def remove_current_element(self):
+        self.samplers_and_controllers.remove(self.samplers_and_controllers[self.current])
+
+    def is_done(self):
+        return self.done
+
+    def trigger_end_of_loop(self):
+        self.re_initialize()

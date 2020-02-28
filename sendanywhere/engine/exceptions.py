@@ -22,3 +22,7 @@ class ScriptParseException(Exception):
 
 class StopTestException(Exception):
     pass
+
+
+class NextIsNullException(Exception):
+    pass

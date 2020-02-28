@@ -18,7 +18,7 @@ class LoopController(GenericController):
         self.loopCount = 0
 
     def next(self) -> Sampler:
-        pass
+        self.update_iteration_index()
 
     def is_done(self):
         pass
@@ -27,4 +27,34 @@ class LoopController(GenericController):
         pass
 
     def trigger_end_of_loop(self):
+        pass
+
+    def update_iteration_index(self):
+        pass
+
+    def end_of_loop(self):
+        pass
+
+    def next_is_null(self):
+        pass
+
+    def increment_loop_count(self):
+        pass
+
+    def reset_loop_count(self):
+        pass
+
+    def re_initialize(self):
+        pass
+
+    def start_next_loop(self):
+        pass
+
+    def reset_break_loop(self):
+        pass
+
+    def break_loop(self):
+        pass
+
+    def iteration_start(self):
         pass
