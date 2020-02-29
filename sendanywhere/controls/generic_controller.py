@@ -3,6 +3,8 @@
 # @File    : generic_controller
 # @Time    : 2020/2/28 17:25
 # @Author  : Kelvin.Ye
+from typing import Union
+
 from sendanywhere.controls.controller import Controller
 from sendanywhere.engine.exceptions import NextIsNullException
 from sendanywhere.samplers.sampler import Sampler
@@ -65,17 +67,20 @@ class GenericController(Controller):
     def increment_iter_count(self):
         self.iter_count += 1
 
-    def next(self) -> Sampler or None:
+    def next(self) -> Union[Sampler, None]:
         if self.is_done():
             return None
-        current_element = self.get_current_element()
-        if current_element is None:
-            return self.next_is_null()
-        else:
-            if isinstance(current_element, Sampler):
-                return self.next_is_sampler(current_element)
-            elif isinstance(current_element, Controller):
-                return self.next_is_controller(current_element)
+        try:
+            current_element = self.get_current_element()
+            if current_element is None:
+                return self.next_is_null()
+            else:
+                if isinstance(current_element, Sampler):
+                    return self.next_is_sampler(current_element)
+                elif isinstance(current_element, Controller):
+                    return self.next_is_controller(current_element)
+        except NextIsNullException:
+            return None
 
     def get_current_element(self):
         if self.current < len(self.samplers_and_controllers):

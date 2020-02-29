@@ -17,16 +17,16 @@
         "child": null
       },
       {
-        "name": "线程组A",
+        "name": "协程组A",
         "comments": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
           "CoroutineGroup.on_sample_error": "start_next_loop",
-          "CoroutineGroup.continue_forever": "false",
-          "CoroutineGroup.loops": "1",
           "CoroutineGroup.number_coroutines": "1",
-          "CoroutineGroup.start_interval": "0"
+          "CoroutineGroup.start_interval": "0",
+          "LoopController.loops": "1",
+          "LoopController.continue_forever": "false"
         },
         "child": [
           {
@@ -70,6 +70,82 @@
             ]
           },
           {
+            "name": "循环控制器",
+            "comments": "描述",
+            "class": "LoopController",
+            "enabled": true,
+            "property": {
+              "LoopController.loops": "1",
+              "LoopController.continue_forever": "false"
+            },
+            "child": [
+              {
+                "name": "循环控制器下的取样器11",
+                "comments": "描述",
+                "class": "HTTPSampler",
+                "enabled": true,
+                "property": {
+                  "HTTPSampler.domain": "www.baidu.com",
+                  "HTTPSampler.port": "443",
+                  "HTTPSampler.protocol": "HTTPS",
+                  "HTTPSampler.encoding": "UTF-8",
+                  "HTTPSampler.path": "/s",
+                  "HTTPSampler.method": "GET",
+                  "HTTPSampler.params": "wd=test",
+                  "HTTPSampler.data": "",
+                  "HTTPSampler.files": "",
+                  "HTTPSampler.follow_redirects": "",
+                  "HTTPSampler.auto_redirects": "",
+                  "HTTPSampler.keep_alive": "",
+                  "HTTPSampler.connect_timeout": "",
+                  "HTTPSampler.response_timeout": ""
+                },
+                "child": [
+                  {
+                    "name": "配置元素-Sampler层",
+                    "comments": "描述",
+                    "class": "ConfigTestElement",
+                    "enabled": true,
+                    "property": {},
+                    "child": null
+                  }
+                ]
+              },
+              {
+                "name": "循环控制器下的取样器22",
+                "comments": "描述",
+                "class": "HTTPSampler",
+                "enabled": true,
+                "property": {
+                  "HTTPSampler.domain": "www.baidu.com",
+                  "HTTPSampler.port": "443",
+                  "HTTPSampler.protocol": "HTTPS",
+                  "HTTPSampler.encoding": "UTF-8",
+                  "HTTPSampler.path": "/s",
+                  "HTTPSampler.method": "GET",
+                  "HTTPSampler.params": "wd=test",
+                  "HTTPSampler.data": "",
+                  "HTTPSampler.files": "",
+                  "HTTPSampler.follow_redirects": "",
+                  "HTTPSampler.auto_redirects": "",
+                  "HTTPSampler.keep_alive": "",
+                  "HTTPSampler.connect_timeout": "",
+                  "HTTPSampler.response_timeout": ""
+                },
+                "child": [
+                  {
+                    "name": "配置元素-Sampler层",
+                    "comments": "描述",
+                    "class": "ConfigTestElement",
+                    "enabled": true,
+                    "property": {},
+                    "child": null
+                  }
+                ]
+              }
+            ]
+          },
+          {
             "name": "取样器2",
             "comments": "描述",
             "class": "HTTPSampler",
@@ -95,16 +171,16 @@
         ]
       },
       {
-        "name": "线程组B",
+        "name": "协程组B",
         "comments": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
           "CoroutineGroup.on_sample_error": "start_next_loop",
-          "CoroutineGroup.continue_forever": "false",
-          "CoroutineGroup.loops": "1",
           "CoroutineGroup.number_coroutines": "1",
-          "CoroutineGroup.start_interval": "0"
+          "CoroutineGroup.start_interval": "0",
+          "LoopController.loops": "1",
+          "LoopController.continue_forever": "false"
         },
         "child": [
           {

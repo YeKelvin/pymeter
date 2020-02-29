@@ -20,6 +20,8 @@ class ScriptServer:
         'PythonAssertion': 'sendanywhere.assertions.python_assertion',
         'ConfigTestElement': 'sendanywhere.testelement.test_element',
         'HTTPHeaders': 'sendanywhere.configs.http_headers',
+        'LoopController': 'sendanywhere.controls.loop_controller',
+        'IfController': 'sendanywhere.controls.if_controller',
         'CoroutineCollection': 'sendanywhere.coroutines.collection',
         'CoroutineGroup': 'sendanywhere.coroutines.group',
         'PythonPreProcessor': 'sendanywhere.processors.python_pre',

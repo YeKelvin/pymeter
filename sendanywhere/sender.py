@@ -41,3 +41,11 @@ class Sender:
         # 执行测试
         log.info('开始执行测试')
         engine.run_test()
+
+
+if __name__ == '__main__':
+    import os
+    from sendanywhere.utils.path_util import __PROJECT_PATH__
+    with open(os.path.join(__PROJECT_PATH__, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
+        script = ''.join(f.readlines())
+        Sender.start(script)

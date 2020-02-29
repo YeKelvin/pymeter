@@ -20,9 +20,17 @@ class ScriptParseException(Exception):
     pass
 
 
+class NextIsNullException(Exception):
+    pass
+
+
 class StopTestException(Exception):
     pass
 
 
-class NextIsNullException(Exception):
+class StopTestNowException(Exception):
+    pass
+
+
+class StopCoroutineException(Exception):
     pass

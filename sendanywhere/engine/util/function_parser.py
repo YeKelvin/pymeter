@@ -19,17 +19,17 @@ class FunctionParser:
         result = []
         buffer = []
         previous = ''
-        log.debug('开始编译字符串')
+        log.debug(f'Start compiling string, source={source}')
         while True:
             current = reader.next
             if current is None:  # end of reader
-                log.debug('end of reader')
+                log.debug('End of reader')
                 break
             if current == '\\':  # 匹配 "\" 转义符
                 previous = current
                 current = reader.next
                 if current is None:  # end of reader
-                    log.debug('end of reader')
+                    log.debug('End of reader')
                     break
                 # 保留 "\"，除非当前字符是 "$" 或 "\"
                 # 注意：此方法用于解析函数参数，因此必须将 "，" 视为特殊的字符
@@ -65,20 +65,20 @@ class FunctionParser:
         while True:
             current = reader.next
             if current is None:  # end of reader
-                log.debug('end of reader')
+                log.debug('End of reader')
                 break
             if current == '\\':
                 current = reader.next
                 if current is None:  # end of reader
-                    log.debug('end of reader')
+                    log.debug('End of reader')
                     break
                 previous = ''
                 buffer.append(current)
             elif current == '(' and previous != '':
                 func_name = ''.join(buffer)
-                log.debug(f'function_reference_key={func_name}')
+                log.debug(f'Function reference key={func_name}')
                 function = CompoundVariable.get_named_function(func_name)
-                log.debug(f'function={function}')
+                log.debug(f'Function={function}')
                 if isinstance(function, Function):
                     function.set_parameters(self._parse_params(reader))
                     current = reader.next
@@ -89,7 +89,7 @@ class FunctionParser:
                     buffer.append(current)
             elif current == '}':  # 变量 或者没有参数的函数
                 function = CompoundVariable.get_named_function(''.join(buffer))
-                log.debug(f'function={function}')
+                log.debug(f'Function={function}')
                 if isinstance(function, Function):  # 确保调用 set_parameters()
                     function.set_parameters([])
                 buffer.clear()
@@ -111,19 +111,19 @@ class FunctionParser:
         while True:
             current = reader.next
             if current is None:  # end of reader
-                log.debug('end of reader')
+                log.debug('End of reader')
                 break
             if current == '\\':
                 buffer.append(current)  # Store the \
                 current = reader.next
                 if current is None:  # end of reader
-                    log.debug('end of reader')
+                    log.debug('End of reader')
                     break
                 previous = ''
                 buffer.append(current)
             elif current == ',' and function_recursion == 0:
                 param_str = ''.join(buffer)
-                log.debug(f'param str={param_str}')
+                log.debug(f'Param str={param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
                 result.append(param)
@@ -133,7 +133,7 @@ class FunctionParser:
                     return result
                 # 正常退出
                 param_str = ''.join(buffer)
-                log.debug(f'raw_parameter={param_str}')
+                log.debug(f'Raw parameter={param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
                 result.append(param)

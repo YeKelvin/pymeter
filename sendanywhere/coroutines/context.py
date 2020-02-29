@@ -30,6 +30,9 @@ class CoroutineContext:
         self.previous_sampler = self.current_sampler
         self.current_sampler = sampler
 
+    def set_previous_result(self, result):
+        self.previous_result = result
+
 
 class ContextService:
     # 协程本地变量

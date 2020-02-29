@@ -12,7 +12,7 @@ log = get_logger(__name__)
 class HashTree(dict):
     def __init__(self, node: object = None, hash_tree: "HashTree" = None):
         super().__init__()
-        self.__data: {object, "HashTree"} = hash_tree if hash_tree else {}
+        self.__data: {object, "HashTree"} = hash_tree if hash_tree is not None else {}
 
         if node:
             self.__data[node] = HashTree()
@@ -20,7 +20,7 @@ class HashTree(dict):
     def put(self, node: object, hash_tree: "HashTree" = None) -> None:
         """添加 node和 hashtree，node存在时则替换 hashtree
         """
-        self.__data[node] = hash_tree if hash_tree else HashTree()
+        self.__data[node] = hash_tree if hash_tree is not None else HashTree()
 
     def put_all(self, node: object, collections: ["HashTree" or object]) -> None:
         """根据 node遍历添加 collections中的节点
@@ -28,7 +28,6 @@ class HashTree(dict):
         hash_tree = self.get(node) if self.contains(node) else HashTree()
 
         for item in collections:
-            log.debug(f'item={item}')
             if isinstance(item, HashTree):
                 hash_tree.merge(item)
             elif isinstance(item, object):
@@ -125,7 +124,7 @@ class ListedHashTree(HashTree):
     def put(self, node: object, hash_tree: "ListedHashTree" = None):
         if not self.contains(node):
             self.order.append(node)
-        super().put(node, hash_tree if hash_tree else ListedHashTree())
+        super().put(node, hash_tree if hash_tree is not None else ListedHashTree())
 
     def clear(self):
         super().clear()

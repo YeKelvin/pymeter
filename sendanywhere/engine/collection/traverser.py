@@ -3,17 +3,11 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
-from queue import LifoQueue
 
-from sendanywhere.assertions.assertion import Assertion
-from sendanywhere.configs.config import ConfigElement
-from sendanywhere.controls.controller import Controller
-from sendanywhere.controls.loop_controller import LoopController
+from sendanywhere.controls.generic_controller import GenericController
 from sendanywhere.coroutines.package import SamplePackage
-from sendanywhere.engine.listener import SampleListener
-from sendanywhere.processors.post import PostProcessor
-from sendanywhere.processors.pre import PreProcessor
 from sendanywhere.samplers.sampler import Sampler
+from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -121,15 +115,17 @@ class SearchByClass(HashTreeTraverser):
         pass
 
 
-class GroupCompiler(HashTreeTraverser):
-    def __init__(self, group_level_elements: list, sample_controller: LoopController):
+class TestCompiler(HashTreeTraverser):
+    def __init__(self, group_level_elements: list):
         self.group_level_elements = group_level_elements
-        self.sample_controller = sample_controller
         self.sampler_package_saver: {Sampler, SamplePackage} = {}
+        self.compiled_node = []
 
     def add_node(self, node, subtree) -> None:
         if isinstance(node, Sampler):
-            self.save_sampler_subnodes(node, subtree)
+            self.save_sampler_package(node, subtree)
+        if isinstance(node, GenericController):
+            self.compile_controller(node, subtree)
 
     def subtract_node(self) -> None:
         pass
@@ -137,11 +133,44 @@ class GroupCompiler(HashTreeTraverser):
     def process_path(self) -> None:
         pass
 
-    def save_sampler_subnodes(self, node, subtree):
+    def save_sampler_package(self, node, subtree):
         sample_package = SamplePackage()
         sample_package.add(subtree.list())  # 储存 Sampler下的子节点
         sample_package.add(self.group_level_elements)  # 把 group层的非 group节点添加至 Sampler节点下
         self.sampler_package_saver[node] = sample_package
 
+    def compile_controller(self, node, subtree):
+        if node not in self.compiled_node:
+            controller_level_elements = subtree.list()
+
+            # Controller节点储存 Sampler节点和 Controller节点
+            for element in controller_level_elements:
+                if (
+                        isinstance(element, Sampler) or
+                        isinstance(element, GenericController)
+                ):
+                    node.samplers_and_controllers.append(element)
+
+            # 移除 Controller层的非 Sampler节点和非 Controller节点，用于传递到子代
+            self.__remove_samplers_and_controllers(controller_level_elements)
+            parent_level_elements = self.group_level_elements + controller_level_elements
+            test_compiler = TestCompiler(parent_level_elements)
+            subtree.traverse(test_compiler)
+            self.sampler_package_saver.update(test_compiler.sampler_package_saver)
+
+            # 存储已编译过的 controller节点，避免递归遍历下有可能产生重复编译的问题
+            self.compiled_node.extend(test_compiler.compiled_node)
+            self.compiled_node.append(node)
+
     def get_sample_package(self, sampler: Sampler) -> SamplePackage:
         return self.sampler_package_saver.get(sampler)
+
+    @staticmethod
+    def __remove_samplers_and_controllers(elements: list):
+        for element in elements[:]:
+            if (
+                    isinstance(element, Sampler) or
+                    isinstance(element, GenericController) or
+                    not isinstance(element, TestElement)
+            ):
+                elements.remove(element)

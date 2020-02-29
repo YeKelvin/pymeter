@@ -25,15 +25,15 @@ class SampleResult:
         self.end_time = None
         self.elapsed_time = None
 
-        self.success = None
+        self.is_successful = None
 
         self.bytes = None
         self.headers_size = None
         self.body_size = None
 
-        self.stop_test = None
-        self.stop_test_now = None
-        self.stop_thread = None
+        self.is_stop_test = None
+        self.is_stop_test_now = None
+        self.is_stop_coroutine = None
 
     def sample_start(self):
         self.start_time = int(time.time() * 1000)
