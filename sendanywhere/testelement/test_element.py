@@ -28,6 +28,9 @@ class TestElement:
             for key, value in propertys.items():
                 self.set_property(key, value)
 
+        self.context = None
+        self.coroutine_name = None
+
     @property
     def name(self):
         return self.get_property_as_str(self.LABEL)

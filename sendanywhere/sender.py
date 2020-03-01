@@ -15,7 +15,9 @@ log = get_logger(__name__)
 class Sender:
 
     @staticmethod
-    def start(script: str):
+    def start(script: str) -> None:
+        """执行脚本主入口
+        """
         now = time.time()
         ymd = time.strftime("%Y-%m-%d", time.localtime(now))
         hms = time.strftime("%H:%M:%S", time.localtime(now))
@@ -31,14 +33,17 @@ class Sender:
             raise Exception('脚本不允许为空')
 
     @staticmethod
-    def run(script: str):
+    def run(script: str) -> None:
+        """加载并解析脚本，将脚本反序列化为 HashTree对象
+        """
         # 加载脚本
         tree = ScriptServer.load_tree(script)
 
-        # 将脚本配置到测试引擎里
+        # 将脚本配置到执行引擎中
         engine = StandardEngine()
         engine.configure(tree)
-        # 执行测试
+
+        # 开始执行测试
         log.info('开始执行测试')
         engine.run_test()
 
@@ -46,6 +51,7 @@ class Sender:
 if __name__ == '__main__':
     import os
     from sendanywhere.utils.path_util import __PROJECT_PATH__
+
     with open(os.path.join(__PROJECT_PATH__, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())
         Sender.start(script)

@@ -11,13 +11,13 @@ class AssertionResult:
         # Name of the assertion.
         self.name = None
         # True if the assertion failed.
-        self.failure = False
+        self.is_failure = False
         # True if there was an error checking the assertion.
-        self.error = False
+        self.is_error = False
         # A message describing the failure.
         self.failure_message = None
 
 
 class Assertion:
-    def get_result(self, response: SampleResult) -> AssertionResult:
+    def get_result(self, result: SampleResult) -> AssertionResult:
         raise NotImplementedError

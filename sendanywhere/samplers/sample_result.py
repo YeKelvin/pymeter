@@ -26,6 +26,7 @@ class SampleResult:
         self.elapsed_time = None
 
         self.is_successful = None
+        self.assertion_result = None
 
         self.bytes = None
         self.headers_size = None

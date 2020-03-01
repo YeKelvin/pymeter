@@ -30,17 +30,23 @@ class StandardEngine(Greenlet):
         self.groups = []
 
     def configure(self, tree: HashTree) -> None:
+        """将脚本配置到执行引擎中
+        """
+        # 查找 CoroutineCollection脚本顶层集合对象
         searcher = SearchByClass(CoroutineCollection)
         tree.traverse(searcher)
         collections = searcher.get_search_result()
+
         if len(collections) == 0:
             raise EngineException('脚本集合数量少于1，请确保至少存在一个脚本集合')
 
-        self.serialized = collections[0].serialized  # 线程组是否按顺序运行
+        self.serialized = collections[0].serialized  # 标记协程组是否顺序运行
         self.active = True
         self.tree = tree
 
     def run_test(self) -> None:
+        """执行脚本，这里主要做异常捕获
+        """
         try:
             self.run()
         except EngineException:
@@ -59,9 +65,9 @@ class StandardEngine(Greenlet):
         # 遍历执行 TestStateListener.test_started()
         self.__notify_test_listeners_of_start(test_listener_searcher)
 
-        # 储存 CoroutineCollection层的非 CoroutineGroup节点
+        # 储存 collection层的非 CoroutineGroup节点
         test_level_elements = self.tree.index(0).list()
-        self.__remove_coroutine_groups(test_level_elements)
+        self.__remove_coroutine_groups(test_level_elements)  # 删除 CoroutineGroup节点
 
         # 查找 CoroutineGroup对象
         group_searcher = SearchByClass(CoroutineGroup)
@@ -69,7 +75,7 @@ class StandardEngine(Greenlet):
         group_iter = iter(group_searcher.get_search_result())
 
         group_count = 0
-        ContextService.clear_total_threads()
+        ContextService.clear_total_threads()  # todo 还要修改
 
         if self.serialized:
             log.info('开始顺序执行协程组')
@@ -108,7 +114,19 @@ class StandardEngine(Greenlet):
             self.__notify_test_listeners_of_end(test_listener_searcher)
 
         # 测试结束
-        ContextService.end_test()
+        ContextService.end_test()  # todo 还要修改
+
+    def stop_test_now(self):
+        """立即停止测试
+        """
+        for group in self.groups:
+            group.tell_coroutines_to_stop()
+
+    def stop_all_coroutines(self):
+        """停止所有协程组
+        """
+        for group in self.groups:
+            group.stop()
 
     def __start_coroutine_group(self,
                                 group: CoroutineGroup,

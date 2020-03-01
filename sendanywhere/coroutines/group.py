@@ -9,6 +9,7 @@ from typing import Union
 
 from gevent import Greenlet
 
+from sendanywhere.assertions.assertion import AssertionResult
 from sendanywhere.controls.controller import Controller
 from sendanywhere.controls.loop_controller import LoopController
 from sendanywhere.coroutines.context import CoroutineContext, ContextService
@@ -126,6 +127,18 @@ class CoroutineGroup(LoopController):
         if not greenlet.dead():
             greenlet.join(self.WAIT_TO_DIE)
 
+    def stop(self) -> None:
+        self.running = False
+        for coroutine in self.all_coroutines.keys():
+            coroutine.stop()
+
+    def tell_coroutines_to_stop(self) -> None:
+        self.running = False
+        for coroutine, greenlet in self.all_coroutines.items():
+            coroutine.stop()
+            # coroutine.interrupt()  # todo 实现中断
+            greenlet.kill()
+
 
 class Coroutine(Greenlet):
     LAST_SAMPLE_OK = 'Coroutine.last_sample_ok'
@@ -222,24 +235,49 @@ class Coroutine(Greenlet):
             if result.is_stop_test_now() or (not result.is_successful and self.coroutine_group.on_error_stop_test_now):
                 self.stop_test_now()
 
-    def run_pre_processors(self, pre_processors: list):
-        pass
-
     def do_sampling(self, sampler: Sampler, context: CoroutineContext) -> SampleResult:
-        pass
+        sampler.context = context
+        sampler.coroutine_name = self.coroutine_name
+        return sampler.sample()
 
-    def run_post_processors(self, post_processors: list):
-        pass
+    def check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext) -> None:
+        for assertion in assertions:
+            self.process_assertion(assertion, result)
 
-    def check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext):
-        pass
+        context.variables.put(self.LAST_SAMPLE_OK, result.is_successful)
+
+    def process_assertion(self, assertion, result: SampleResult):
+        try:
+            assertion_result = assertion.get_result(result)
+        except AssertionError as e:
+            log.debug(f'Error processing Assertion: {e}')
+            assertion_result = AssertionResult()
+            assertion_result.is_failure = True
+            assertion_result.failure_message = str(e)
+        except RuntimeError as e:
+            log.error(f'Error processing Assertion: {e}')
+            assertion_result = AssertionResult()
+            assertion_result.is_error = True
+            assertion_result.failure_message = str(e)
+        except Exception as e:
+            log.error(f'Exception processing Assertion: {e}')
+            log.error(traceback.format_exc())
+            assertion_result = AssertionResult()
+            assertion_result.is_error = True
+            assertion_result.failure_message = str(e)
+
+        result.is_successful(result.is_successful and not (assertion_result.is_Error or assertion_result.is_failure))
+        result.assertion_result = assertion_result
 
     def stop_coroutine(self):
         self.running = False
         log.info(f'Stop Coroutine detected by coroutine: {self.coroutine_name}')
 
     def shutdown_test(self):
-        pass
+        self.running = False
+        log.info(f'Shutdown Test detected by thread: {self.coroutine_name}')
+        if self.engine:
+            self.engine.ask_coroutines_to_stop()
 
     def stop_test_now(self):
         self.running = False
@@ -262,6 +300,22 @@ class Coroutine(Greenlet):
         # 编译 Group层下的所有子代节点
         self.test_compiler = TestCompiler(group_level_elements)
         self.group_tree.traverse(self.test_compiler)
+
+    def stop(self):
+        self.running = False
+        log.info(f'Stopping: {self.coroutine_name}')
+
+    @staticmethod
+    def run_pre_processors(pre_processors: list) -> None:
+        for pre_processor in pre_processors:
+            log.debug(f'Running preprocessor: {pre_processor.name}')
+            pre_processor.process()
+
+    @staticmethod
+    def run_post_processors(post_processors: list):
+        for post_processor in post_processors:
+            log.debug(f'Running postprocessor: {post_processor.name}')
+            post_processor.process()
 
     @staticmethod
     def __remove_samplers_and_controllers(elements: list):
