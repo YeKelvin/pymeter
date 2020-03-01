@@ -26,7 +26,7 @@ class StandardEngine(Greenlet):
         self.running = False
         self.active = False
         self.tree = None
-        self.serialized = True  # 线程组是否按顺序运行
+        self.serialized = True  # 标记协程组是否顺序运行
         self.groups = []
 
     def configure(self, tree: HashTree) -> None:
@@ -40,7 +40,7 @@ class StandardEngine(Greenlet):
         if len(collections) == 0:
             raise EngineException('脚本集合数量少于1，请确保至少存在一个脚本集合')
 
-        self.serialized = collections[0].serialized  # 标记协程组是否顺序运行
+        self.serialized = collections[0].serialized
         self.active = True
         self.tree = tree
 
