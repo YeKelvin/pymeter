@@ -45,14 +45,15 @@ class LoopController(GenericController, TestElement):
             return None
         return super().next()
 
-    def initialize(self):
-        pass
-
     def trigger_end_of_loop(self):
+        """触发循环结束
+        """
         super().trigger_end_of_loop()
         self.reset_loop_count()
 
     def end_of_loop(self):
+        """循环结束
+        """
         return self.break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
 
     def set_done(self, is_done: bool):
@@ -81,6 +82,8 @@ class LoopController(GenericController, TestElement):
         self.increment_loop_count()
 
     def start_next_loop(self):
+        """implement IteratingController
+        """
         self.re_initialize()
 
     def reset_break_loop(self):
@@ -88,10 +91,16 @@ class LoopController(GenericController, TestElement):
             self.break_loop = False
 
     def break_loop(self):
+        """implement IteratingController
+        """
         self.break_loop = True
         self.set_first(True)
         self.reset_current()
         self.reset_loop_count()
 
     def iteration_start(self):
-        pass
+        """implement LoopIterationListener
+        """
+        log.info(f'控制器 [{self.name}] 开始新的迭代')
+        self.re_initialize()
+        self.reset_loop_count()

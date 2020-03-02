@@ -7,15 +7,12 @@ from sendanywhere.samplers.sampler import Sampler
 
 
 class Controller:
+    def __init__(self):
+        # 控制器是否已完成所有取样器的交付，当返回true时，协程完成
+        self.is_done = False
+
     def next(self) -> Sampler:
         """返回下一个取样器，末尾返回None
-        """
-        raise NotImplementedError
-
-    def is_done(self):
-        """
-        控制器是否已完成所有测试的交付
-        当返回true时，协程完成
         """
         raise NotImplementedError
 

@@ -7,9 +7,9 @@ from sendanywhere.samplers.sample_result import SampleResult
 
 
 class AssertionResult:
-    def __init__(self):
+    def __init__(self, name: str = None):
         # Name of the assertion.
-        self.name = None
+        self.name = name
         # True if the assertion failed.
         self.is_failure = False
         # True if there was an error checking the assertion.

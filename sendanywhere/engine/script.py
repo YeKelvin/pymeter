@@ -16,7 +16,7 @@ log = get_logger(__name__)
 
 class ScriptServer:
     module_path = {
-        'JsonAssertion': 'sendanywhere.assertions.json_assertion',
+        'JsonPathAssertion': 'sendanywhere.assertions.json_path_assertion',
         'PythonAssertion': 'sendanywhere.assertions.python_assertion',
         'ConfigTestElement': 'sendanywhere.testelement.test_element',
         'HTTPHeaders': 'sendanywhere.configs.http_headers',

@@ -26,8 +26,8 @@ class StandardEngine(Greenlet):
         self.running = False
         self.active = False
         self.tree = None
-        self.serialized = True  # 标记协程组是否顺序运行
-        self.groups = []
+        self.serialized = True  # 标识协程组是否顺序运行
+        self.groups = []  # 储存已启动的 CoroutineGroup
 
     def configure(self, tree: HashTree) -> None:
         """将脚本配置到执行引擎中
@@ -107,7 +107,7 @@ class StandardEngine(Greenlet):
                 log.info('等待所有协程组执行完成')
                 self.__wait_coroutines_stopped()
 
-            log.info('所有协程组执行完成')
+            log.info('脚本集合下的所有协程组已经执行完成')
             self.groups.clear()
 
             # 遍历执行 TestStateListener.test_ended()
@@ -139,10 +139,10 @@ class StandardEngine(Greenlet):
             number_coroutines = group.number_coroutines
             group_name = group.name
             group_tree = group_searcher.get_subtree(group)
-            group_tree.put_all(group, test_level_elements)  # 把 collection层的非 group节点添加至 group层
+            group_tree.put_all(group, test_level_elements)  # 把 collection层的非 group节点添加至 group层的 hashtree
             log.info(f'为 [{group_name}] 协程组启动 [{number_coroutines}] 个协程')
 
-            self.groups.append(group)
+            self.groups.append(group)  # 存储当前协程组，用于停止协程
             group.start(group_count, group_tree, self)
         except StopTestException:
             log.error(traceback.format_exc())
