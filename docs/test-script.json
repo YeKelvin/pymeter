@@ -22,7 +22,7 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "start_next_loop",
+          "CoroutineGroup.on_sample_error": "continue",
           "CoroutineGroup.number_coroutines": "1",
           "CoroutineGroup.start_interval": "0",
           "LoopController.loops": "1",

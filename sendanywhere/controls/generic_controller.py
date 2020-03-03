@@ -7,13 +7,14 @@ from typing import Union
 
 from sendanywhere.controls.controller import Controller
 from sendanywhere.engine.exceptions import NextIsNullException
+from sendanywhere.engine.listener import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
 
 
-class GenericController(Controller):
+class GenericController(Controller, LoopIterationListener):
     """所有控制器的基类
     """
 
@@ -137,4 +138,4 @@ class GenericController(Controller):
         self.re_initialize()
 
     def iteration_start(self):
-        pass
+        raise NotImplementedError

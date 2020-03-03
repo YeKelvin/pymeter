@@ -21,20 +21,26 @@ class SampleResult:
         self.response_code = None
         self.response_message = None
 
-        self.start_time = None
-        self.end_time = None
-        self.elapsed_time = None
+        self.start_time = 0
+        self.end_time = 0
+        self.idle_time = 0
+        self.pause_time = 0
+        self.connect_time = 0
 
-        self.is_successful = None
-        self.assertion_result = None
+        self.is_successful = True
+        self.assertion_results = []
 
         self.bytes = None
         self.headers_size = None
         self.body_size = None
 
-        self.is_stop_test = None
-        self.is_stop_test_now = None
-        self.is_stop_coroutine = None
+        self.is_stop_coroutine = False
+        self.is_stop_test = False
+        self.is_stop_test_now = False
+
+    @property
+    def elapsed_time(self) -> str:
+        return f'{self.end_time - self.start_time} ms'
 
     def sample_start(self):
         self.start_time = int(time.time() * 1000)

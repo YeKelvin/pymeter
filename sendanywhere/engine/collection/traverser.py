@@ -3,7 +3,7 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
-
+from sendanywhere.controls.controller import Controller
 from sendanywhere.controls.generic_controller import GenericController
 from sendanywhere.coroutines.package import SamplePackage
 from sendanywhere.samplers.sampler import Sampler
@@ -174,3 +174,36 @@ class TestCompiler(HashTreeTraverser):
                     not isinstance(element, TestElement)
             ):
                 elements.remove(element)
+
+
+class FindTestElementsUpToRoot(HashTreeTraverser):
+    def __init__(self, required_nodes: object):
+        self.node_list = []
+        self.required_nodes = required_nodes
+        self.stop_recording = False
+
+    def add_node(self, node, subtree) -> None:
+        if self.stop_recording:
+            return
+
+        if node is self.required_nodes:
+            self.stop_recording = True
+
+        self.node_list.append(node)
+
+    def subtract_node(self) -> None:
+        if self.stop_recording:
+            return
+
+        self.node_list.pop()  # 删除最后一个
+
+    def process_path(self) -> None:
+        pass
+
+    def get_controllers_to_root(self) -> list:
+        result = []
+        node_list = self.node_list[::-1]
+        for node in node_list:
+            if isinstance(node, Controller):
+                result.append(node)
+        return result

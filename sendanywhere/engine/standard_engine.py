@@ -116,17 +116,19 @@ class StandardEngine(Greenlet):
         # 测试结束
         ContextService.end_test()  # todo 还要修改
 
+    def stop_test(self):
+        """停止所有协程组
+        """
+        self.running = False
+        for group in self.groups:
+            group.stop_coroutines()
+
     def stop_test_now(self):
         """立即停止测试
         """
+        self.running = False
         for group in self.groups:
-            group.tell_coroutines_to_stop()
-
-    def stop_all_coroutines(self):
-        """停止所有协程组
-        """
-        for group in self.groups:
-            group.stop()
+            group.kill_coroutines()
 
     def __start_coroutine_group(self,
                                 group: CoroutineGroup,

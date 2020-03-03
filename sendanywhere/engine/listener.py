@@ -25,7 +25,7 @@ class SampleListener:
     def sample_started(self, sample) -> None:
         raise NotImplementedError
 
-    def sample_stopped(self, sample_result) -> None:
+    def sample_ended(self, sample_result) -> None:
         raise NotImplementedError
 
 
@@ -48,11 +48,8 @@ class LoopIterationListener:
 
 
 class IteratingController:
-    def start_next_loop(self):
+    def start_next_loop(self) -> None:
         raise NotImplementedError
 
-    def break_loop(self):
-        raise NotImplementedError
-
-    def update_iteration_index(self, element_name, iter_count):
+    def break_loop(self) -> None:
         raise NotImplementedError

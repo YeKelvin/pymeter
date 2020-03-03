@@ -30,7 +30,7 @@ class SenderProperty:
 
     def get_bool_value(self):
         value = self.get_str_value()
-        return bool(value) if value else None
+        return True if value.lower() == 'true' else False
 
 
 class FunctionProperty(SenderProperty):
