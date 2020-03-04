@@ -26,6 +26,7 @@ class ScriptServer:
         'CoroutineGroup': 'sendanywhere.coroutines.group',
         'PythonPreProcessor': 'sendanywhere.processors.python_pre',
         'PythonPostProcessor': 'sendanywhere.processors.python_post',
+        'TestSampler': 'sendanywhere.samplers.test_sampler',
         'HTTPSampler': 'sendanywhere.samplers.http_sampler',
         'PythonSampler': 'sendanywhere.samplers.python_sampler',
         'SQLSampler': 'sendanywhere.samplers.sql_sampler',

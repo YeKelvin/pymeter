@@ -29,19 +29,13 @@ class SampleListener:
         raise NotImplementedError
 
 
-class LoopIterationEvent:
-    def __init__(self, iteration: int, test_element):
-        self.iteration = iteration
-        self.source = test_element
-
-
 class TestIterationListener:
-    def test_iteration_start(self, event: LoopIterationEvent) -> None:
+    def test_iteration_start(self, controller) -> None:
         raise NotImplementedError
 
 
 class LoopIterationListener:
-    def iteration_start(self) -> None:
+    def iteration_start(self, source, iter_count) -> None:
         """在循环迭代即将开始时调用
         """
         raise NotImplementedError

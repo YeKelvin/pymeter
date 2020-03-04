@@ -14,7 +14,7 @@ from sendanywhere.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class GenericController(Controller, LoopIterationListener):
+class GenericController(Controller):
     """所有控制器的基类
     """
 
@@ -23,6 +23,9 @@ class GenericController(Controller, LoopIterationListener):
 
         # 存储 sampler或 controller
         self.samplers_and_controllers = []
+
+        # 存储子代控制器的 LoopIterationListener
+        self.sub_iteration_listeners = []
 
         # sampler或 controller的索引
         self.current = 0
@@ -58,7 +61,7 @@ class GenericController(Controller, LoopIterationListener):
         """初始化子 controller
         """
         for element in self.samplers_and_controllers:
-            if isinstance(element, Controller):
+            if isinstance(element, GenericController):
                 element.initialize()
 
     def re_initialize(self):
@@ -75,9 +78,7 @@ class GenericController(Controller, LoopIterationListener):
         self.iter_count += 1
 
     def next(self) -> Union[Sampler, None]:
-        if self.is_first:
-            self.iteration_start()
-            self.set_first(False)
+        self.fire_iter_events()
 
         if self.is_done:
             return None
@@ -96,6 +97,15 @@ class GenericController(Controller, LoopIterationListener):
             pass
 
         return next_sampler
+
+    def fire_iter_events(self):
+        if self.is_first:
+            self.fire_iteration_start()
+            self.set_first(False)
+
+    def fire_iteration_start(self):
+        for listener in self.sub_iteration_listeners:
+            listener.iteration_start(self, self.iter_count)
 
     def get_current_element(self):
         if self.current < len(self.samplers_and_controllers):
@@ -134,8 +144,11 @@ class GenericController(Controller, LoopIterationListener):
     def remove_current_element(self):
         self.samplers_and_controllers.remove(self.samplers_and_controllers[self.current])
 
+    def add_iteration_listener(self, listener: LoopIterationListener):
+        self.sub_iteration_listeners.append(listener)
+
+    def remove_iteration_listener(self, listener: LoopIterationListener):
+        self.sub_iteration_listeners.remove(listener)
+
     def trigger_end_of_loop(self):
         self.re_initialize()
-
-    def iteration_start(self):
-        raise NotImplementedError

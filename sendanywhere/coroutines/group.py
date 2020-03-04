@@ -13,10 +13,12 @@ from sendanywhere.assertions.assertion import AssertionResult
 from sendanywhere.controls.controller import Controller
 from sendanywhere.controls.loop_controller import LoopController
 from sendanywhere.coroutines.context import CoroutineContext, ContextService
-from sendanywhere.engine.collection.traverser import TestCompiler, FindTestElementsUpToRoot
+from sendanywhere.coroutines.variables import Variables
+from sendanywhere.engine.collection.traverser import TestCompiler, FindTestElementsUpToRoot, SearchByClass
 from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.engine.exceptions import StopTestException, StopTestNowException, StopCoroutineException
-from sendanywhere.engine.listener import IteratingController
+from sendanywhere.engine.listener import IteratingController, TestIterationListener, CoroutineGroupListener, \
+    LoopIterationListener
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
@@ -58,7 +60,7 @@ class CoroutineGroup(LoopController):
     # 线程数
     NUMBER_COROUTINES = 'CoroutineGroup.number_coroutines'
 
-    # 启用线程的间隔时间，单位 s
+    # 启用线程的间隔时间，单位 s todo 占坑，后面实现启动时间间隔
     START_INTERVAL = 'CoroutineGroup.start_interval'
 
     # 默认等待协程结束时间，单位 ms
@@ -217,19 +219,27 @@ class Coroutine(Greenlet):
         self.on_error_stop_test = False
         self.on_error_stop_test_now = False
         self.engine = engine
-        self.local_vars = {}
+        self.local_vars = Variables()
         self.test_compiler: Union[TestCompiler, None] = None
         self.start_time = 0
         self.end_time = 0
 
-        # todo SearchByClass(TestIterationListener)
+        # 搜索 CoroutineGroupListener节点
+        group_listener_searcher = SearchByClass(CoroutineGroupListener)
+        self.group_tree.traverse(group_listener_searcher)
+        self.coroutine_group_listeners = group_listener_searcher.get_search_result()
 
-    def initial_context(self, context: CoroutineContext):
+        # 搜索 TestIterationListener节点
+        test_iteration_listener_searcher = SearchByClass(TestIterationListener)
+        self.group_tree.traverse(test_iteration_listener_searcher)
+        self.test_iteration_listeners = test_iteration_listener_searcher.get_search_result()
+
+    def initial_context(self, context: CoroutineContext) -> None:
         """将父协程（运行 StandardEngine的协程）的本地变量赋值给子协程的本地变量中
         """
         self.local_vars.update(context.variables)
 
-    def init_run(self, context: CoroutineContext):
+    def init_run(self, context: CoroutineContext) -> None:
         """
         协程执行前的初始化动作，包括以下动作：
         1、给 CoroutineContext赋值
@@ -238,7 +248,7 @@ class Coroutine(Greenlet):
         """
         context.variables = self.local_vars
         context.coroutine_number = self.coroutine_number
-        context.variables[self.LAST_SAMPLE_OK] = 'true'
+        context.variables.put(self.LAST_SAMPLE_OK, 'true')
         context.coroutine = self
         context.coroutine_group = self.coroutine_group
         context.engine = self.engine
@@ -251,6 +261,16 @@ class Coroutine(Greenlet):
         self.test_compiler = TestCompiler(group_level_elements)
         self.group_tree.traverse(self.test_compiler)
 
+        # 初始化协程组控制器
+        self.coroutine_group.initialize()
+
+        # 添加 Group层循环迭代监听器
+        group_level_iteration_listener = self.GroupLevelIterationListener(self)
+        self.coroutine_group.add_iteration_listener(group_level_iteration_listener)
+
+        # 遍历执行 CoroutineGroupListener.group_started()
+        self.__coroutine_started()
+
     def run(self):
         context = ContextService.get_context()
         try:
@@ -258,16 +278,18 @@ class Coroutine(Greenlet):
 
             while self.running:
                 sampler = self.coroutine_group.next()
-                log.info(f'sample={sampler}, name={sampler.name if sampler else None}')
 
                 while self.running and sampler is not None:
+                    log.debug(
+                        f'Next Sampler:[{sampler.name if isinstance(sampler, TestElement) else None}] '
+                        f'class:[{sampler.__class__}]'
+                    )
                     # 处理取样器
                     self.__process_sampler(sampler, context)
                     # 根据取样器控制循环
                     self.__control_loop_by_logical_action(sampler, context)
                     # 继续获取下一个取样器
                     sampler = self.coroutine_group.next()
-                    log.info(f'sample={sampler}, name={sampler.name if sampler else None}')
 
                 if self.coroutine_group.is_done:
                     self.running = False
@@ -275,8 +297,33 @@ class Coroutine(Greenlet):
 
         except Exception:
             log.error(traceback.format_exc())
+        finally:
+            log.info(f'Coroutine finished: [{self.coroutine_name}]')
+            self.__coroutine_finished()
+            context.clear()
+            ContextService.remove_context()
 
-    def __control_loop_by_logical_action(self, sampler: Sampler, context: CoroutineContext):
+    def __coroutine_started(self) -> None:
+        """
+        协程开始时的动作
+        1、ContextService统计协程数
+        2、遍历执行 CoroutineGroupListener.group_started()
+        """
+        ContextService.incr_number_of_coroutines()
+        for listener in self.coroutine_group_listeners:
+            listener.group_started()
+
+    def __coroutine_finished(self) -> None:
+        """
+        协程结束时的动作
+        1、ContextService统计协程数
+        2、遍历执行 CoroutineGroupListener.group_finished()
+        """
+        for listener in self.coroutine_group_listeners:
+            listener.group_finished()
+        ContextService.decr_number_of_coroutines()
+
+    def __control_loop_by_logical_action(self, sampler: Sampler, context: CoroutineContext) -> None:
         last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
 
         if not last_sample_ok and not self.on_error_continue:
@@ -304,24 +351,24 @@ class Coroutine(Greenlet):
                 log.debug('Last sample failed, stoping test now')
                 self.stop_test_now()
 
-    def __process_sampler(self, current: Sampler, context: CoroutineContext):
+    def __process_sampler(self, current: Sampler, context: CoroutineContext) -> None:
         """
         执行取样器
-        这里主要是捕获异常，以控制是否需要停止测试
+        这里主要做异常捕获，以控制是否需要停止测试
         """
         try:
             if current:
                 self.__execute_sample_package(current, context)
+        except StopCoroutineException:
+            log.error(traceback.format_exc())
         except StopTestException:
             log.error(traceback.format_exc())
         except StopTestNowException:
             log.error(traceback.format_exc())
-        except StopCoroutineException:
-            log.error(traceback.format_exc())
         except Exception:
             log.error(traceback.format_exc())
 
-    def __execute_sample_package(self, current: Sampler, context: CoroutineContext):
+    def __execute_sample_package(self, current: Sampler, context: CoroutineContext) -> None:
         """根据取样器的子代执行取样器
         """
         context.set_current_sampler(current)
@@ -383,10 +430,10 @@ class Coroutine(Greenlet):
         for assertion in assertions:
             self.__process_assertion(assertion, result)
 
-        context.variables[self.LAST_SAMPLE_OK] = result.is_successful
+        context.variables.put(self.LAST_SAMPLE_OK, result.is_successful)
 
     @staticmethod
-    def __process_assertion(assertion, result: SampleResult):
+    def __process_assertion(assertion, result: SampleResult) -> None:
         """执行断言
         """
         try:
@@ -412,10 +459,10 @@ class Coroutine(Greenlet):
         result.is_successful(result.is_successful and not (assertion_result.is_Error or assertion_result.is_failure))
         result.assertion_result = assertion_result
 
-    def __continue_on_coroutine_loop(self):
+    def __continue_on_coroutine_loop(self) -> None:
         self.coroutine_group.start_next_loop()
 
-    def __continue_on_current_loop(self, sampler: Sampler):
+    def __continue_on_current_loop(self, sampler: Sampler) -> None:
         parent_controllers = self.__get_parent_controllers(sampler)
 
         for parent_controller in parent_controllers:
@@ -427,7 +474,7 @@ class Coroutine(Greenlet):
             else:
                 parent_controller.trigger_end_of_loop()
 
-    def __break_on_current_loop(self, sampler: Sampler):
+    def __break_on_current_loop(self, sampler: Sampler) -> None:
         parent_controllers = self.__get_parent_controllers(sampler)
 
         for parent_controller in parent_controllers:
@@ -444,19 +491,24 @@ class Coroutine(Greenlet):
         self.group_tree.traverse(find_test_elements_up_to_root)
         return find_test_elements_up_to_root.get_controllers_to_root()
 
-    def stop_coroutine(self):
+    def notify_test_listeners(self) -> None:
+        self.local_vars.inc_iteration()
+        for listener in self.test_iteration_listeners:
+            listener.test_iteration_start(self.coroutine_group)
+
+    def stop_coroutine(self) -> None:
         """停止协程
         """
         log.info(f'Stop Coroutine detected by coroutine: {self.coroutine_name}')
         self.running = False
 
-    def stop_test(self):
+    def stop_test(self) -> None:
         log.info(f'Stop Test detected by coroutine: {self.coroutine_name}')
         self.running = False
         if self.engine:
             self.engine.stop_test()
 
-    def stop_test_now(self):
+    def stop_test_now(self) -> None:
         log.info(f'Shutdown Test Now detected by coroutine: {self.coroutine_name}')
         self.running = False
         if self.engine:
@@ -471,7 +523,7 @@ class Coroutine(Greenlet):
             pre_processor.process()
 
     @staticmethod
-    def __run_post_processors(post_processors: list):
+    def __run_post_processors(post_processors: list) -> None:
         """执行后置处理器
         """
         for post_processor in post_processors:
@@ -479,7 +531,7 @@ class Coroutine(Greenlet):
             post_processor.process()
 
     @staticmethod
-    def __remove_samplers_and_controllers(elements: list):
+    def __remove_samplers_and_controllers(elements: list) -> None:
         """删除 Sampler和 Controller节点
         """
         for element in elements[:]:
@@ -489,3 +541,13 @@ class Coroutine(Greenlet):
                     not isinstance(element, TestElement)
             ):
                 elements.remove(element)
+
+    class GroupLevelIterationListener(LoopIterationListener):
+        """Coroutine内部类，用于在协程组循环迭代开始时触发所有实现类的开始动作
+        """
+
+        def __init__(self, parent: "Coroutine"):
+            self.parent = parent
+
+        def iteration_start(self, source, iter_count) -> None:
+            self.parent.notify_test_listeners()

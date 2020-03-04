@@ -6,7 +6,7 @@
 from typing import Union
 
 from sendanywhere.controls.generic_controller import GenericController
-from sendanywhere.engine.listener import IteratingController
+from sendanywhere.engine.listener import IteratingController, LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
@@ -14,7 +14,7 @@ from sendanywhere.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class LoopController(GenericController, IteratingController, TestElement):
+class LoopController(GenericController, IteratingController, LoopIterationListener, TestElement):
     # 是否无限循环
     CONTINUE_FOREVER = 'LoopController.continue_forever'
 
@@ -55,6 +55,10 @@ class LoopController(GenericController, IteratingController, TestElement):
     def end_of_loop(self) -> bool:
         """判断循环是否结束
         """
+        # log.debug(f'controller={self.name} '
+        #           f'loops={self.loops} loop_count={self.loop_count} continue_forever={self.continue_forever} '
+        #           f'break_loop={self.break_loop} '
+        #           f'end_of_loop={self.break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)}')
         return self.break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
 
     def set_done(self, is_done: bool):
@@ -87,8 +91,11 @@ class LoopController(GenericController, IteratingController, TestElement):
         if self.break_loop:
             self.break_loop = False
 
-    def iteration_start(self):
-        log.info(f'控制器 [{self.name}] 开始新的迭代')
+    def iteration_start(self, source, iter_count):
+        if not self.continue_forever:
+            log.info(f'控制器 [{self.name}] 开始第 [{self.loop_count + 1}] 次迭代')
+        else:
+            log.info(f'控制器 [{self.name}] 开始新的迭代')
         self.re_initialize()
         self.reset_loop_count()
 

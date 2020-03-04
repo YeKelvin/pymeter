@@ -75,7 +75,7 @@ class StandardEngine(Greenlet):
         group_iter = iter(group_searcher.get_search_result())
 
         group_count = 0
-        ContextService.clear_total_threads()  # todo 还要修改
+        ContextService.clear_total_coroutines()  # todo 还要修改
 
         if self.serialized:
             log.info('开始顺序执行协程组')
