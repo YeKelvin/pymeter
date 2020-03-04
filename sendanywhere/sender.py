@@ -36,8 +36,10 @@ class Sender:
     def run(script: str) -> None:
         """加载并解析脚本，将脚本反序列化为 HashTree对象
         """
+        log.info('开始加载脚本')
         # 加载脚本
         tree = ScriptServer.load_tree(script)
+        log.debug(f'Script HashTree:\n{tree}')
 
         # 将脚本配置到执行引擎中
         engine = StandardEngine()

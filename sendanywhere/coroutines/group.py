@@ -293,12 +293,12 @@ class Coroutine(Greenlet):
 
                 if self.coroutine_group.is_done:
                     self.running = False
-                    log.info(f'协程 [{self.coroutine_name}] 已执行完成')
+                    log.info(f'协程 [{self.coroutine_name}] 循环迭代已结束')
 
         except Exception:
             log.error(traceback.format_exc())
         finally:
-            log.info(f'Coroutine finished: [{self.coroutine_name}]')
+            log.info(f'协程 [{self.coroutine_name}] 已执行完成')
             self.__coroutine_finished()
             context.clear()
             ContextService.remove_context()
@@ -310,6 +310,8 @@ class Coroutine(Greenlet):
         2、遍历执行 CoroutineGroupListener.group_started()
         """
         ContextService.incr_number_of_coroutines()
+
+        log.debug('Notify all CoroutineGroupListener to start')
         for listener in self.coroutine_group_listeners:
             listener.group_started()
 
@@ -319,6 +321,7 @@ class Coroutine(Greenlet):
         1、ContextService统计协程数
         2、遍历执行 CoroutineGroupListener.group_finished()
         """
+        log.debug('Notify all CoroutineGroupListener to finish')
         for listener in self.coroutine_group_listeners:
             listener.group_finished()
         ContextService.decr_number_of_coroutines()
@@ -409,6 +412,7 @@ class Coroutine(Greenlet):
         sampler.coroutine_name = self.coroutine_name
 
         # 遍历执行 SampleListener.sample_started(sample)
+        log.debug('Notify all SampleListener to start')
         for listener in listeners:
             listener.sample_started(sampler)
 
@@ -419,6 +423,7 @@ class Coroutine(Greenlet):
             log.error(traceback.format_exc())
         finally:
             # 遍历执行 SampleListener.sample_ended(result)
+            log.debug('Notify all SampleListener to end')
             for listener in listeners:
                 listener.sample_ended(result)
 
@@ -491,8 +496,9 @@ class Coroutine(Greenlet):
         self.group_tree.traverse(find_test_elements_up_to_root)
         return find_test_elements_up_to_root.get_controllers_to_root()
 
-    def notify_test_listeners(self) -> None:
+    def _notify_test_listeners(self) -> None:
         self.local_vars.inc_iteration()
+        log.debug('Notify all TestIterationListener to start')
         for listener in self.test_iteration_listeners:
             listener.test_iteration_start(self.coroutine_group)
 
@@ -550,4 +556,4 @@ class Coroutine(Greenlet):
             self.parent = parent
 
         def iteration_start(self, source, iter_count) -> None:
-            self.parent.notify_test_listeners()
+            self.parent._notify_test_listeners()

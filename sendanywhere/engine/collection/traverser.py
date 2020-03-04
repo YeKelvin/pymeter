@@ -149,7 +149,7 @@ class TestCompiler(HashTreeTraverser):
             # Controller节点储存 Sampler节点和 Controller节点
             for element in controller_level_elements:
                 if isinstance(element, Sampler) or isinstance(element, GenericController):
-                    node.samplers_and_controllers.append(element)
+                    node.sub_samplers_and_controllers.append(element)
 
                 if isinstance(element, LoopIterationListener):
                     node.add_iteration_listener(element)

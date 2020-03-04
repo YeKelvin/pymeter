@@ -78,9 +78,9 @@ class StandardEngine(Greenlet):
         ContextService.clear_total_coroutines()  # todo 还要修改
 
         if self.serialized:
-            log.info('开始顺序执行协程组')
+            log.info('开始 [顺序] 执行协程组')
         else:
-            log.info('开始并行执行协程组')
+            log.info('开始 [并行] 执行协程组')
 
         while self.running:
             try:
@@ -159,6 +159,7 @@ class StandardEngine(Greenlet):
     def __notify_test_listeners_of_start(searcher: SearchByClass) -> None:
         """遍历调用 TestStateListener.test_start()
         """
+        log.debug('Notify all TestStateListener to start')
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.test_started()
@@ -167,6 +168,7 @@ class StandardEngine(Greenlet):
     def __notify_test_listeners_of_end(searcher: SearchByClass) -> None:
         """遍历调用 TestStateListener.test_ended()
         """
+        log.debug('Notify all TestStateListener to end')
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.test_ended()
