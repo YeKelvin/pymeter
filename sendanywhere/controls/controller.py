@@ -25,3 +25,18 @@ class Controller:
         """在控制器上触发循环结束条件
         """
         raise NotImplementedError
+
+
+class IteratingController:
+    """迭代控制器
+    """
+
+    def start_next_loop(self) -> None:
+        """开始下一个迭代
+        """
+        raise NotImplementedError
+
+    def break_loop(self) -> None:
+        """中断循环
+        """
+        raise NotImplementedError

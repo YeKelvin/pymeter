@@ -4,7 +4,7 @@
 # @Time    : 2019/3/15 9:47
 # @Author  : Kelvin.Ye
 from sendanywhere.engine.util.compound_variable import CompoundVariable
-from sendanywhere.testelement.property import FunctionProperty, SenderProperty
+from sendanywhere.testelement.property import FunctionProperty, BaseProperty
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -35,15 +35,15 @@ class ReplaceStrWithFunctions:
     """
 
     @staticmethod
-    def transform_value(key: str, source: str) -> SenderProperty:
+    def transform_value(key: str, source: str) -> BaseProperty:
         master_function = CompoundVariable()
         master_function.set_parameters(source)
         if master_function.has_function:
             return FunctionProperty(key, master_function)
-        return SenderProperty(key, source)
+        return BaseProperty(key, source)
 
 
 class ValueReplacer:
     @staticmethod
-    def replace_values(key: str, source: str) -> SenderProperty:
+    def replace_values(key: str, source: str) -> BaseProperty:
         return ReplaceStrWithFunctions.transform_value(key, source)

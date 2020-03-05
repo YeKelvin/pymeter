@@ -3,6 +3,8 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
+from copy import deepcopy
+
 from sendanywhere.controls.controller import Controller
 from sendanywhere.controls.generic_controller import GenericController
 from sendanywhere.coroutines.package import SamplePackage
@@ -26,7 +28,7 @@ class HashTreeTraverser:
         raise NotImplementedError
 
     def process_path(self) -> None:
-        """到达树底部时的处理
+        """到达子叶末尾时的处理
         """
         raise NotImplementedError
 
@@ -110,6 +112,43 @@ class SearchByClass(HashTreeTraverser):
 
     def subtract_node(self) -> None:
         pass
+
+    def process_path(self) -> None:
+        pass
+
+
+class TreeCloner(HashTreeTraverser):
+    """克隆 HashTree，默认情况下跳过实现 NoCoroutineClone的节点
+    """
+
+    def __init__(self, enable_no_clone: bool = True):
+        from sendanywhere.engine.collection.tree import HashTree
+        self.new_tree = HashTree()
+        self.tree_path = []
+        self.enable_no_clone = enable_no_clone
+
+    def get_cloned_tree(self):
+        return self.new_tree
+
+    def add_node(self, node, subtree) -> None:
+        from sendanywhere.coroutines.interface import NoCoroutineClone
+        if (
+                isinstance(node, TestElement) and
+                not (self.enable_no_clone and isinstance(node, NoCoroutineClone))
+        ):
+            cloned_node = deepcopy(node)
+        else:
+            cloned_node = node
+
+        tree = self.new_tree
+        for temp_node in self.tree_path:
+            tree.add(cloned_node)
+
+        self.tree_path.append(cloned_node)
+
+    def subtract_node(self) -> None:
+        if self.tree_path:
+            del self.tree_path[-1]
 
     def process_path(self) -> None:
         pass

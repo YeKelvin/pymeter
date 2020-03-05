@@ -31,7 +31,7 @@ class PythonSampler(Sampler, TestElement):
         exec(self.get_property_as_str(self.SOURCE), {}, locals())
 
         result.sample_end()
-        result.success = True
+        result.is_successful = True
         result.response_data = ''
         result.elapsed_time = f'{result.end_time - result.start_time} ms'
 

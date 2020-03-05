@@ -9,7 +9,7 @@ from sendanywhere.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class SenderProperty:
+class BaseProperty:
     def __init__(self, name: str, value: any):
         self.name = name
         self.value = value
@@ -33,7 +33,7 @@ class SenderProperty:
         return True if value.lower() == 'true' else False
 
 
-class FunctionProperty(SenderProperty):
+class FunctionProperty(BaseProperty):
     def __init__(self, name: str, function: CompoundVariable):
         super().__init__(name, None)
         self.function = function

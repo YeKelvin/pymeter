@@ -44,18 +44,25 @@ class CoroutineContext:
         self.previous_result = result
 
 
+class EngineContext:
+    def __init__(self):
+        self.test_start = 0
+        self.number_of_active_threads = 0
+        self.number_of_threads_started = 0
+        self.number_of_threads_finished = 0
+        self.total_threads = 0
+
+
 class ContextService:
     # 协程本地变量
     coroutine_local = local()
-    test_start = 0
-    number_of_active_threads = 0
-    number_of_threads_started = 0
-    number_of_threads_finished = 0
-    total_threads = 0
+    engines: {str, EngineContext} = {}
 
     @classmethod
     def get_context(cls) -> CoroutineContext:
-        return getattr(cls.coroutine_local, 'coroutine_context', CoroutineContext())
+        if not hasattr(cls.coroutine_local, 'coroutine_context'):
+            setattr(cls.coroutine_local, 'coroutine_context', CoroutineContext())
+        return cls.coroutine_local.coroutine_context
 
     @classmethod
     def remove_context(cls) -> None:
@@ -68,36 +75,48 @@ class ContextService:
             cls.coroutine_local.coroutine_context = context
 
     @classmethod
-    def start_test(cls):
-        if cls.test_start == 0:
-            cls.numberOfActiveThreads = 0
-            cls.test_start = int(time.time() * 1000)
-            SenderUtils.set_property('TESTSTART.MS', cls.test_start)
+    def start_test(cls, engine_id: str = None):
+        engine_ctx = cls.__get_engine_context(engine_id)
+        if engine_ctx.test_start == 0:
+            engine_ctx.numberOfActiveThreads = 0
+            engine_ctx.test_start = int(time.time() * 1000)
+            SenderUtils.set_property('TESTSTART.MS', engine_ctx.test_start)
 
     @classmethod
-    def end_test(cls):
-        cls.test_start = 0
+    def end_test(cls, engine_id: str = None):
+        engine_ctx = cls.__get_engine_context(engine_id)
+        engine_ctx.test_start = 0
 
     @classmethod
-    def incr_number_of_coroutines(cls):
+    def incr_number_of_coroutines(cls, engine_id: str = None):
         """增加活动线程的数量
         """
-        cls.number_of_active_threads += 1
-        cls.number_of_threads_started += 1
+        engine_ctx = cls.__get_engine_context(engine_id)
+        engine_ctx.number_of_active_threads += 1
+        engine_ctx.number_of_threads_started += 1
 
     @classmethod
-    def decr_number_of_coroutines(cls):
+    def decr_number_of_coroutines(cls, engine_id: str = None):
         """减少活动线程的数量
         """
-        cls.number_of_active_threads -= 1
-        cls.number_of_threads_finished += 1
+        engine_ctx = cls.__get_engine_context(engine_id)
+        engine_ctx.number_of_active_threads -= 1
+        engine_ctx.number_of_threads_finished += 1
 
     @classmethod
-    def add_total_coroutines(cls, group_number: int):
-        cls.total_threads += group_number
+    def add_total_coroutines(cls, group_number: int, engine_id: str = None):
+        engine_ctx = cls.__get_engine_context(engine_id)
+        engine_ctx.total_threads += group_number
 
     @classmethod
-    def clear_total_coroutines(cls):
-        cls.total_threads = 0
-        cls.number_of_threads_started = 0
-        cls.number_of_threads_finished = 0
+    def clear_total_coroutines(cls, engine_id: str = None):
+        engine_ctx = cls.__get_engine_context(engine_id)
+        engine_ctx.total_threads = 0
+        engine_ctx.number_of_threads_started = 0
+        engine_ctx.number_of_threads_finished = 0
+
+    @classmethod
+    def __get_engine_context(cls, engine_id) -> EngineContext:
+        if not engine_id:
+            engine_id = cls.get_context().engine.id
+        return cls.engines.get(engine_id, EngineContext())

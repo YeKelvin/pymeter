@@ -35,6 +35,17 @@ class HashTree(dict):
 
         self.put(node, hash_tree)
 
+    def add(self, key: object) -> "HashTree":
+        if not self.contains(key):
+            new_tree = HashTree()
+            self.__data[key] = new_tree
+            return new_tree
+        return self.get(key)
+
+    def add_by_list(self, keys: list) -> None:
+        for key in keys:
+            self.add(key)
+
     def get(self, node: object) -> "HashTree":
         """获取 node的 hashtree
         """

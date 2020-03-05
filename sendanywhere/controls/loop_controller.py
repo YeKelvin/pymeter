@@ -5,8 +5,9 @@
 # @Author  : Kelvin.Ye
 from typing import Union
 
+from sendanywhere.controls.controller import IteratingController
 from sendanywhere.controls.generic_controller import GenericController
-from sendanywhere.engine.listener import IteratingController, LoopIterationListener
+from sendanywhere.engine.listener import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
@@ -28,9 +29,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         GenericController.__init__(self)
         TestElement.__init__(self, name, comments, propertys)
         self.loop_count = 0
-        self.break_loop = False
-        # 循环控制器始终将 continue_forever设置为 true，以便下次父级调用它们时执行它们
-        # self.set_property(self.CONTINUE_FOREVER, 'true')
+        self.is_break_loop = False
 
     @property
     def loops(self) -> int:
@@ -38,6 +37,8 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
     @property
     def continue_forever(self) -> bool:
+        """循环控制器始终将 continue_forever设置为 true，以便下次父级调用它们时执行它们
+        """
         from sendanywhere.coroutines.group import CoroutineGroup
         if isinstance(self, CoroutineGroup):
             return self.get_property_as_bool(self.CONTINUE_FOREVER)
@@ -69,9 +70,9 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         """
         # log.debug(f'controller={self.name} '
         #           f'loops={self.loops} loop_count={self.loop_count} continue_forever={self.continue_forever} '
-        #           f'is_done={self.is_done} break_loop={self.break_loop} '
-        #           f'end_of_loop={self.break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)}')
-        return self.break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
+        #           f'is_done={self.is_done} is_break_loop={self.is_break_loop} '
+        #           f'end_of_loop={self.is_break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)}')
+        return self.is_break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
 
     def set_done(self, is_done: bool):
         log.debug(f'Controller [{self.name}] set done = {is_done}')
@@ -100,14 +101,14 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         self.increment_loop_count()
 
     def reset_break_loop(self):
-        if self.break_loop:
-            self.break_loop = False
+        if self.is_break_loop:
+            self.is_break_loop = False
 
     def start_next_loop(self):
         self.re_initialize()
 
     def break_loop(self):
-        self.break_loop = True
+        self.is_break_loop = True
         self.set_first(True)
         self.reset_current()
         self.reset_loop_count()

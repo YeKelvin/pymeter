@@ -22,7 +22,7 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "continue",
+          "CoroutineGroup.on_sample_error": "stop_test_now",
           "CoroutineGroup.number_coroutines": "1",
           "CoroutineGroup.start_interval": "0",
           "LoopController.loops": "2",
@@ -63,7 +63,7 @@
             "class": "LoopController",
             "enabled": true,
             "property": {
-              "LoopController.loops": "3",
+              "LoopController.loops": "2",
               "LoopController.continue_forever": "false"
             },
             "child": [
@@ -74,7 +74,7 @@
                 "enabled": true,
                 "property": {
                   "TestSampler.sampler_data": "test - test",
-                  "TestSampler.expected_success": "true"
+                  "TestSampler.expected_success": "false"
                 },
                 "child": [
                   {

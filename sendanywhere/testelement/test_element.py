@@ -5,7 +5,7 @@
 # @Author  : Kelvin.Ye
 from sendanywhere.configs.config import ConfigElement
 from sendanywhere.engine.util import ValueReplacer
-from sendanywhere.testelement.property import SenderProperty
+from sendanywhere.testelement.property import BaseProperty
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -19,7 +19,7 @@ class TestElement:
     COMMENTS = 'TestElement.comments'
 
     def __init__(self, name: str = None, comments: str = None, propertys: dict = None):
-        self.__propertys: {str, SenderProperty} = {}
+        self.__propertys: {str, BaseProperty} = {}
         if name:
             self.set_name(name)
         if comments:
@@ -29,7 +29,6 @@ class TestElement:
                 self.set_property(key, value)
 
         self.context = None
-        self.coroutine_name = None
 
     @property
     def name(self):
@@ -48,7 +47,7 @@ class TestElement:
     def set_property(self, key: str, value: any) -> None:
         self.__propertys[key] = ValueReplacer.replace_values(key, value)
 
-    def get_property(self, key: str, default: any = None) -> SenderProperty:
+    def get_property(self, key: str, default: any = None) -> BaseProperty:
         return self.__propertys.get(key, default)
 
     def get_raw_property(self, key: str) -> any:

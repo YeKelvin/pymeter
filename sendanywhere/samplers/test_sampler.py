@@ -32,7 +32,8 @@ class TestSampler(Sampler, TestElement):
         result.sample_start()
         gevent.sleep(0.5)
         result.sample_end()
+        result.is_successful = self.expected_success
         result.response_data = self.sampler_data
-        result.success = self.expected_success
+        result.calculate_elapsed_time()
 
         return result

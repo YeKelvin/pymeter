@@ -23,6 +23,7 @@ class SampleResult:
 
         self.start_time = 0
         self.end_time = 0
+        self.elapsed_time = None
         self.idle_time = 0
         self.pause_time = 0
         self.connect_time = 0
@@ -38,12 +39,13 @@ class SampleResult:
         self.is_stop_test = False
         self.is_stop_test_now = False
 
-    @property
-    def elapsed_time(self) -> str:
-        return f'{self.end_time - self.start_time} ms'
-
     def sample_start(self):
         self.start_time = int(time.time() * 1000)
 
     def sample_end(self):
         self.end_time = int(time.time() * 1000)
+
+    def calculate_elapsed_time(self):
+        """计算耗时
+        """
+        self.elapsed_time = f'{self.end_time - self.start_time} ms'

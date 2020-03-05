@@ -46,12 +46,12 @@ class HTTPSampler(Sampler, TestElement):
                                timeout=self.__get_timeout(),
                                allow_redirects=True)
         result.sample_end()
-        result.success = True
+        result.is_successful = True
         result.response_headers = res.headers
         result.response_data = res.text
         result.response_code = res.status_code
         result.response_message = STATUS_CODES.get(res.status_code)
-        result.elapsed_time = f'{result.end_time - result.start_time} ms'
+        result.calculate_elapsed_time()
 
         return result
 
@@ -82,28 +82,27 @@ class HTTPSampler(Sampler, TestElement):
         if files:
             return files
 
-
-if __name__ == '__main__':
-    domain = '127.0.0.1'
-    port = '5000'
-    protocol = 'http'
-    encoding = ''
-    path = '/get'
-    method = 'GET'
-    params = '{"aa":"bb","func":"${__Time()}"}'
-    data = '{"cc":"dd","func":"${__Time()}"}'
-    follow_redirects = ''
-    auto_redirects = ''
-    keep_alive = ''
-    connect_timeout = ''
-    response_timeout = ''
-    sample = HTTPSampler()
-    sample.set_property(sample.LABEL, '测试')
-    sample.set_property(sample.DOMAIN, domain)
-    sample.set_property(sample.PORT, port)
-    sample.set_property(sample.PROTOCOL, protocol)
-    sample.set_property(sample.PATH, path)
-    sample.set_property(sample.METHOD, method)
-    sample.set_property(sample.PARAMS, params)
-    result = sample.sample()
-    print(result.__dict__)
+# if __name__ == '__main__':
+#     domain = '127.0.0.1'
+#     port = '5000'
+#     protocol = 'http'
+#     encoding = ''
+#     path = '/get'
+#     method = 'GET'
+#     params = '{"aa":"bb","func":"${__Time()}"}'
+#     data = '{"cc":"dd","func":"${__Time()}"}'
+#     follow_redirects = ''
+#     auto_redirects = ''
+#     keep_alive = ''
+#     connect_timeout = ''
+#     response_timeout = ''
+#     sample = HTTPSampler()
+#     sample.set_property(sample.LABEL, '测试')
+#     sample.set_property(sample.DOMAIN, domain)
+#     sample.set_property(sample.PORT, port)
+#     sample.set_property(sample.PROTOCOL, protocol)
+#     sample.set_property(sample.PATH, path)
+#     sample.set_property(sample.METHOD, method)
+#     sample.set_property(sample.PARAMS, params)
+#     result = sample.sample()
+#     print(result.__dict__)

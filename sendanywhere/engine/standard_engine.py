@@ -3,6 +3,7 @@
 # @File    : standard_engine
 # @Time    : 2020/1/24 23:31
 # @Author  : Kelvin.Ye
+import time
 import traceback
 
 from gevent import Greenlet
@@ -23,6 +24,7 @@ log = get_logger(__name__)
 class StandardEngine(Greenlet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.id = None
         self.running = False
         self.active = False
         self.tree = None
@@ -52,10 +54,11 @@ class StandardEngine(Greenlet):
         except EngineException:
             log.error(traceback.format_exc())
 
-    def run(self) -> None:
+    def _run(self) -> None:
         """脚本执行主体
         """
         log.info('开始执行脚本')
+        self.id = f'{id(self)} - {self.minimal_ident}'
         self.running = True
 
         # 查找 TestStateListener对象
@@ -75,7 +78,7 @@ class StandardEngine(Greenlet):
         group_iter = iter(group_searcher.get_search_result())
 
         group_count = 0
-        ContextService.clear_total_coroutines()  # todo 还要修改
+        ContextService.clear_total_coroutines(self.id)  # todo 还要修改
 
         if self.serialized:
             log.info('开始 [顺序] 执行协程组')
@@ -102,7 +105,7 @@ class StandardEngine(Greenlet):
             log.info('脚本集合下找不到可用的协程组')
         else:
             if not self.running:
-                log.info('测试已停止，不再启动协程组')
+                log.info('测试已停止，不再启动剩余的协程组')
             if not self.serialized:
                 log.info('等待所有协程组执行完成')
                 self.__wait_coroutines_stopped()
@@ -114,17 +117,17 @@ class StandardEngine(Greenlet):
             self.__notify_test_listeners_of_end(test_listener_searcher)
 
         # 测试结束
-        ContextService.end_test()  # todo 还要修改
+        ContextService.end_test(self.id)  # todo 还要修改
 
     def stop_test(self):
-        """停止所有协程组
+        """停止所有协程组（等待当前已启动的所有的协程组执行完成且不再执行剩余的协程组）
         """
         self.running = False
         for group in self.groups:
             group.stop_coroutines()
 
     def stop_test_now(self):
-        """立即停止测试
+        """立即停止测试（强制中断所有的协程）
         """
         self.running = False
         for group in self.groups:

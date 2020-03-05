@@ -13,7 +13,7 @@ coroutine_local = local()
 
 
 class Test(Greenlet):
-    def run(self):
+    def _run(self):
         print('I am test')
         # start_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
         # print(f'startTime={start_time}')
@@ -26,5 +26,11 @@ class Test(Greenlet):
 
 if __name__ == '__main__':
     test = Test()
-    g = Greenlet(test.run)
-    g.run()
+    # g = Greenlet(test.run)
+    # g2 = Greenlet(test.run)
+    # g.run()
+    # g2.run()
+    print(test.minimal_ident)
+    # print(g.name)
+    # print(g2.name)
+
