@@ -10,9 +10,9 @@ log = get_logger(__name__)
 
 
 class HashTree(dict):
-    def __init__(self, node: object = None, hash_tree: "HashTree" = None):
+    def __init__(self, node: object = None, hash_tree: 'HashTree' = None):
         super().__init__()
-        self.__data: {object, "HashTree"} = hash_tree if hash_tree is not None else {}
+        self.__data: {object, 'HashTree'} = hash_tree if hash_tree is not None else {}
 
         if node:
             self.__data[node] = HashTree()
@@ -36,15 +36,10 @@ class HashTree(dict):
     #     self.put(node, hash_tree)
 
     def put(self, node: object, hashtree: 'HashTree') -> 'HashTree':
+        log.info(f'node={node}, hashtree={hashtree}')
         previous = self.get(node)
         self.add_node_and_subtree(node, hashtree)
         return previous
-
-    def put_all(self, d: dict) -> None:
-        if isinstance(d, HashTree):
-            self.add_newtree(d)
-        else:
-            raise RuntimeError('can only putAll other HashTree objects')
 
     # --------------------------------------------------------------------------
 
@@ -53,14 +48,14 @@ class HashTree(dict):
             new_tree = HashTree()
             self.__data[node] = new_tree
             return new_tree
-        return self.get(node)
+        return self.get_subtree(node)
 
     def add_node_and_subtree(self, node: object, subtree: 'HashTree') -> None:
         self.add_node(node).add_newtree(subtree)
 
     def add_newtree(self, newtree: 'HashTree') -> None:
-        for item in newtree.list():
-            self.add_node(item).add_newtree(newtree.get(item))
+        for node in newtree.list():
+            self.add_node(node).add_newtree(newtree.get(node))
 
     def add_list(self, nodes: list) -> None:
         for node in nodes:
@@ -88,19 +83,19 @@ class HashTree(dict):
 
     # --------------------------------------------------------------------------
 
-    def get(self, node: object) -> "HashTree":
+    def get_subtree(self, node: object) -> 'HashTree':
         """获取 node的 hashtree
         """
         return self.__data.get(node)
 
-    def merge(self, hash_tree: "HashTree"):
-        """合并 hashtree
-        """
-        node_list = hash_tree.list()
-        for node in node_list:
-            self.put(node, hash_tree.get(node))
+    # def merge(self, hash_tree: "HashTree"):
+    #     """合并 hashtree
+    #     """
+    #     node_list = hash_tree.list()
+    #     for node in node_list:
+    #         self.put(node, hash_tree.get(node))
 
-    def index(self, index) -> "HashTree":
+    def index(self, index) -> 'HashTree':
         return self.__data.get(self.list()[index])
 
     def clear(self) -> None:
@@ -116,9 +111,6 @@ class HashTree(dict):
         """
         return node in self.__data
 
-    def is_empty(self):
-        return len(self.__data) == 0
-
     def list(self) -> list:
         """返回 hashtree下 node的列表
         """
@@ -127,7 +119,7 @@ class HashTree(dict):
     def search(self, node: object) -> "HashTree":
         """在当前 hashtree下遍历搜索（深度优先） node
         """
-        result = self.get(node)
+        result = self.get_subtree(node)
         if result:
             return result
         searcher = TreeSearcher(node)
@@ -141,9 +133,9 @@ class HashTree(dict):
     def traverse(self, visitor) -> None:
         """HashTree遍历（深度优先）
         """
-        for item in self.list():
-            visitor.add_node(item, self.get(item))
-            self.get(item).__traverse_into(visitor)
+        for node in self.list():
+            visitor.add_node(node, self.get_subtree(node))
+            self.get_subtree(node).__traverse_into(visitor)
 
     def __traverse_into(self, visitor) -> None:
         """HashTree遍历回调
@@ -151,10 +143,10 @@ class HashTree(dict):
         if not self.list():
             visitor.process_path()
         else:
-            for item in self.list():
-                treeItem = self.get(item)
-                visitor.add_node(item, treeItem)
-                treeItem.__traverse_into(visitor)
+            for node in self.list():
+                subtree = self.get_subtree(node)
+                visitor.add_node(node, subtree)
+                subtree.__traverse_into(visitor)
 
         visitor.subtract_node()
 
@@ -173,11 +165,11 @@ class ListedHashTree(HashTree):
     在 ListedHashTree中，保留了添加值的顺序。
     """
 
-    def __init__(self, node: object = None, hash_tree: "ListedHashTree" = None):
+    def __init__(self, node: object = None, hash_tree: 'ListedHashTree' = None):
         super().__init__(node, hash_tree)
         self.order = []
 
-    def put(self, node: object, hash_tree: "ListedHashTree" = None):
+    def put(self, node: object, hash_tree: 'ListedHashTree' = None):
         if not self.contains(node):
             self.order.append(node)
         super().put(node, hash_tree if hash_tree is not None else ListedHashTree())
