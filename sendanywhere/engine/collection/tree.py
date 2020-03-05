@@ -17,34 +17,76 @@ class HashTree(dict):
         if node:
             self.__data[node] = HashTree()
 
-    def put(self, node: object, hash_tree: "HashTree" = None) -> None:
-        """添加 node和 hashtree，node存在时则替换 hashtree
-        """
-        self.__data[node] = hash_tree if hash_tree is not None else HashTree()
+    # def put(self, node: object, hash_tree: "HashTree" = None) -> None:
+    #     """添加 node和 hashtree，node存在时则替换 hashtree
+    #     """
+    #     self.__data[node] = hash_tree if hash_tree is not None else HashTree()
+    #
+    # def put_all(self, node: object, collections: ["HashTree" or object]) -> None:
+    #     """根据 node遍历添加 collections中的节点
+    #     """
+    #     hash_tree = self.get(node) if self.contains(node) else HashTree()
+    #
+    #     for item in collections:
+    #         if isinstance(item, HashTree):
+    #             hash_tree.merge(item)
+    #         elif isinstance(item, object):
+    #             hash_tree.put(item)
+    #
+    #     self.put(node, hash_tree)
 
-    def put_all(self, node: object, collections: ["HashTree" or object]) -> None:
-        """根据 node遍历添加 collections中的节点
-        """
-        hash_tree = self.get(node) if self.contains(node) else HashTree()
+    def put(self, node: object, hashtree: 'HashTree') -> 'HashTree':
+        previous = self.get(node)
+        self.add_node_and_subtree(node, hashtree)
+        return previous
 
-        for item in collections:
-            if isinstance(item, HashTree):
-                hash_tree.merge(item)
-            elif isinstance(item, object):
-                hash_tree.put(item)
+    def put_all(self, d: dict) -> None:
+        if isinstance(d, HashTree):
+            self.add_newtree(d)
+        else:
+            raise RuntimeError('can only putAll other HashTree objects')
 
-        self.put(node, hash_tree)
+    # --------------------------------------------------------------------------
 
-    def add(self, key: object) -> "HashTree":
-        if not self.contains(key):
+    def add_node(self, node: object) -> 'HashTree':
+        if not self.contains(node):
             new_tree = HashTree()
-            self.__data[key] = new_tree
+            self.__data[node] = new_tree
             return new_tree
-        return self.get(key)
+        return self.get(node)
 
-    def add_by_list(self, keys: list) -> None:
-        for key in keys:
-            self.add(key)
+    def add_node_and_subtree(self, node: object, subtree: 'HashTree') -> None:
+        self.add_node(node).add_newtree(subtree)
+
+    def add_newtree(self, newtree: 'HashTree') -> None:
+        for item in newtree.list():
+            self.add_node(item).add_newtree(newtree.get(item))
+
+    def add_list(self, nodes: list) -> None:
+        for node in nodes:
+            self.add_node(node)
+
+    def add_node_and_subnode(self, node: object, subnode: object) -> 'HashTree':
+        return self.add_node(node).add_node(subnode)
+
+    def add_node_and_sublist(self, node: object, subnodes: list) -> None:
+        self.add_node(node).add_list(subnodes)
+
+    def add_node_by_treepath(self, treepath: list, node: object) -> 'HashTree':
+        tree = self.__add_treepath(treepath)
+        return tree.add_key(node)
+
+    def add_nodes_by_treepath(self, treepath: list, nodes: list) -> None:
+        tree = self.__add_treepath(treepath)
+        tree.add_list(nodes)
+
+    def __add_treepath(self, treepath: list):
+        tree = self
+        for node in treepath:
+            tree = tree.add_key(node)
+        return tree
+
+    # --------------------------------------------------------------------------
 
     def get(self, node: object) -> "HashTree":
         """获取 node的 hashtree
@@ -73,6 +115,9 @@ class HashTree(dict):
         """判断是否存在 node
         """
         return node in self.__data
+
+    def is_empty(self):
+        return len(self.__data) == 0
 
     def list(self) -> list:
         """返回 hashtree下 node的列表
