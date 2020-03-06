@@ -6,6 +6,7 @@
 from typing import Union
 
 from sendanywhere.controls.controller import Controller
+from sendanywhere.coroutines.context import ContextService
 from sendanywhere.engine.exceptions import NextIsNullException
 from sendanywhere.engine.listener import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
@@ -104,7 +105,9 @@ class GenericController(Controller):
             self.set_first(False)
 
     def fire_iteration_start(self):
-        log.debug('Notify all LoopIterationListener to start')
+        log.debug(
+            f'coroutine:[{ContextService.get_context().coroutine_name}] notify all LoopIterationListener to start'
+        )
         for listener in self.sub_iteration_listeners[::-1]:
             listener.iteration_start(self, self.iter_count)
 

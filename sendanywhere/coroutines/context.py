@@ -20,6 +20,7 @@ class CoroutineContext:
         self.coroutine = None
         self.coroutine_group = None
         self.coroutine_number = None
+        self.coroutine_name = None
         # self.sampler_context = None  # todo 有啥用
         # self.sampling_started = False  # todo 有啥用
         self.current_sampler = None
@@ -75,7 +76,7 @@ class ContextService:
             cls.coroutine_local.coroutine_context = context
 
     @classmethod
-    def start_test(cls, engine_id: str = None):
+    def start_test(cls, engine_id=None):
         engine_ctx = cls.__get_engine_context(engine_id)
         if engine_ctx.test_start == 0:
             engine_ctx.numberOfActiveThreads = 0
@@ -83,12 +84,12 @@ class ContextService:
             SenderUtils.set_property('TESTSTART.MS', engine_ctx.test_start)
 
     @classmethod
-    def end_test(cls, engine_id: str = None):
+    def end_test(cls, engine_id=None):
         engine_ctx = cls.__get_engine_context(engine_id)
         engine_ctx.test_start = 0
 
     @classmethod
-    def incr_number_of_coroutines(cls, engine_id: str = None):
+    def incr_number_of_coroutines(cls, engine_id=None):
         """增加活动线程的数量
         """
         engine_ctx = cls.__get_engine_context(engine_id)
@@ -96,7 +97,7 @@ class ContextService:
         engine_ctx.number_of_threads_started += 1
 
     @classmethod
-    def decr_number_of_coroutines(cls, engine_id: str = None):
+    def decr_number_of_coroutines(cls, engine_id=None):
         """减少活动线程的数量
         """
         engine_ctx = cls.__get_engine_context(engine_id)
@@ -104,12 +105,12 @@ class ContextService:
         engine_ctx.number_of_threads_finished += 1
 
     @classmethod
-    def add_total_coroutines(cls, group_number: int, engine_id: str = None):
+    def add_total_coroutines(cls, group_number, engine_id=None):
         engine_ctx = cls.__get_engine_context(engine_id)
         engine_ctx.total_threads += group_number
 
     @classmethod
-    def clear_total_coroutines(cls, engine_id: str = None):
+    def clear_total_coroutines(cls, engine_id=None):
         engine_ctx = cls.__get_engine_context(engine_id)
         engine_ctx.total_threads = 0
         engine_ctx.number_of_threads_started = 0

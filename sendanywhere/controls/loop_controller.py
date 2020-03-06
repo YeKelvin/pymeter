@@ -7,6 +7,7 @@ from typing import Union
 
 from sendanywhere.controls.controller import IteratingController
 from sendanywhere.controls.generic_controller import GenericController
+from sendanywhere.coroutines.context import ContextService
 from sendanywhere.engine.listener import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
@@ -53,9 +54,12 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
         if self.is_first:
             if not self.continue_forever:
-                log.info(f'控制器 [{self.name}] 开始第 [{self.loop_count + 1}] 次迭代')
+                log.info(
+                    f'coroutine:[{ContextService.get_context().coroutine_name}] '
+                    f'控制器 [{self.name}] 开始第 [{self.loop_count + 1}] 次迭代'
+                )
             else:
-                log.info(f'控制器 [{self.name}] 开始新的迭代')
+                log.info(f'coroutine:[{ContextService.get_context().coroutine_name}] 控制器 [{self.name}] 开始新的迭代')
 
         return super().next()
 
@@ -68,14 +72,13 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
     def end_of_loop(self) -> bool:
         """判断循环是否结束
         """
-        # log.debug(f'controller={self.name} '
-        #           f'loops={self.loops} loop_count={self.loop_count} continue_forever={self.continue_forever} '
-        #           f'is_done={self.is_done} is_break_loop={self.is_break_loop} '
-        #           f'end_of_loop={self.is_break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)}')
         return self.is_break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
 
     def set_done(self, is_done: bool):
-        log.debug(f'Controller [{self.name}] set done = {is_done}')
+        log.debug(
+            f'coroutine:[{ContextService.get_context().coroutine_name}] '
+            f'controller [{self.name}] set done = {is_done}'
+        )
         self.reset_break_loop()
         super().set_done(is_done)
 

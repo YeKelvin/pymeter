@@ -22,8 +22,8 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "stop_test_now",
-          "CoroutineGroup.number_coroutines": "1",
+          "CoroutineGroup.on_sample_error": "continue",
+          "CoroutineGroup.number_coroutines": "2",
           "CoroutineGroup.start_interval": "0",
           "LoopController.loops": "2",
           "LoopController.continue_forever": "false"
@@ -63,7 +63,7 @@
             "class": "LoopController",
             "enabled": true,
             "property": {
-              "LoopController.loops": "2",
+              "LoopController.loops": "1",
               "LoopController.continue_forever": "false"
             },
             "child": [

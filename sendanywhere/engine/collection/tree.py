@@ -17,31 +17,13 @@ class HashTree(dict):
         if node:
             self.__data[node] = HashTree()
 
-    # def put(self, node: object, hash_tree: "HashTree" = None) -> None:
-    #     """添加 node和 hashtree，node存在时则替换 hashtree
-    #     """
-    #     self.__data[node] = hash_tree if hash_tree is not None else HashTree()
-    #
-    # def put_all(self, node: object, collections: ["HashTree" or object]) -> None:
-    #     """根据 node遍历添加 collections中的节点
-    #     """
-    #     hash_tree = self.get(node) if self.contains(node) else HashTree()
-    #
-    #     for item in collections:
-    #         if isinstance(item, HashTree):
-    #             hash_tree.merge(item)
-    #         elif isinstance(item, object):
-    #             hash_tree.put(item)
-    #
-    #     self.put(node, hash_tree)
-
     def put(self, node: object, hashtree: 'HashTree') -> 'HashTree':
-        log.info(f'node={node}, hashtree={hashtree}')
-        previous = self.get(node)
+        previous = self.get_subtree(node)
         self.add_node_and_subtree(node, hashtree)
         return previous
 
-    # --------------------------------------------------------------------------
+    def put_all(self, hashtree: 'HashTree'):
+        self.add_newtree(hashtree)
 
     def add_node(self, node: object) -> 'HashTree':
         if not self.contains(node):
@@ -55,7 +37,7 @@ class HashTree(dict):
 
     def add_newtree(self, newtree: 'HashTree') -> None:
         for node in newtree.list():
-            self.add_node(node).add_newtree(newtree.get(node))
+            self.add_node(node).add_newtree(newtree.get_subtree(node))
 
     def add_list(self, nodes: list) -> None:
         for node in nodes:
@@ -69,7 +51,7 @@ class HashTree(dict):
 
     def add_node_by_treepath(self, treepath: list, node: object) -> 'HashTree':
         tree = self.__add_treepath(treepath)
-        return tree.add_key(node)
+        return tree.add_node(node)
 
     def add_nodes_by_treepath(self, treepath: list, nodes: list) -> None:
         tree = self.__add_treepath(treepath)
@@ -78,25 +60,16 @@ class HashTree(dict):
     def __add_treepath(self, treepath: list):
         tree = self
         for node in treepath:
-            tree = tree.add_key(node)
+            tree = tree.add_node(node)
         return tree
-
-    # --------------------------------------------------------------------------
 
     def get_subtree(self, node: object) -> 'HashTree':
         """获取 node的 hashtree
         """
         return self.__data.get(node)
 
-    # def merge(self, hash_tree: "HashTree"):
-    #     """合并 hashtree
-    #     """
-    #     node_list = hash_tree.list()
-    #     for node in node_list:
-    #         self.put(node, hash_tree.get(node))
-
     def index(self, index) -> 'HashTree':
-        return self.__data.get(self.list()[index])
+        return self.get_subtree(self.list()[index])
 
     def clear(self) -> None:
         """清空 hashtree
@@ -169,10 +142,13 @@ class ListedHashTree(HashTree):
         super().__init__(node, hash_tree)
         self.order = []
 
-    def put(self, node: object, hash_tree: 'ListedHashTree' = None):
+    def add_node(self, node: object) -> 'ListedHashTree':
         if not self.contains(node):
+            new_tree = ListedHashTree()
+            self.__data[node] = new_tree
             self.order.append(node)
-        super().put(node, hash_tree if hash_tree is not None else ListedHashTree())
+            return new_tree
+        return self.get_subtree(node)
 
     def clear(self):
         super().clear()

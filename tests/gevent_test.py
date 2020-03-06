@@ -26,11 +26,8 @@ class Test(Greenlet):
 
 if __name__ == '__main__':
     test = Test()
-    # g = Greenlet(test.run)
-    # g2 = Greenlet(test.run)
-    # g.run()
-    # g2.run()
-    print(test.minimal_ident)
-    # print(g.name)
-    # print(g2.name)
+    g = Greenlet(test.run)
+    g.run()
+    print(g.minimal_ident)
+    print(gevent.getcurrent())
 

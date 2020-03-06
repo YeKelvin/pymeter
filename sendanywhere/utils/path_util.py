@@ -6,11 +6,11 @@
 import os
 import sys
 
-__PROJECT_PATH__ = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
-__RESOURCES_PATH__ = os.path.join(__PROJECT_PATH__, 'resources')
-__SRC_PATH__ = os.path.join(__PROJECT_PATH__, 'sendanywhere')
+PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+RESOURCES_PATH = os.path.join(PROJECT_PATH, 'resources')
+SRC_PATH = os.path.join(PROJECT_PATH, 'sendanywhere')
 
 
 def add_project_to_pth():
-    sys.path.append(__SRC_PATH__)
+    sys.path.append(SRC_PATH)
 

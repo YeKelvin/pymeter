@@ -5,13 +5,13 @@
 # @Author  : Kelvin.Ye
 import configparser
 import os
-from sendanywhere.utils.path_util import __RESOURCES_PATH__
+from sendanywhere.utils.path_util import RESOURCES_PATH
 
 # 项目配置路径
-__CONFIG_PATH__ = os.path.join(__RESOURCES_PATH__, 'config.ini')
+CONFIG_PATH = os.path.join(RESOURCES_PATH, 'config.ini')
 
 
-def get(section: str, key: str, filepath: str = __CONFIG_PATH__) -> str:
+def get(section: str, key: str, filepath: str = CONFIG_PATH) -> str:
     """获取配置文件中的属性值，默认读取config.ini
 
     Args:

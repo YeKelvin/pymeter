@@ -3,6 +3,8 @@
 # @File    : test_element.py
 # @Time    : 2020/1/24 23:48
 # @Author  : Kelvin.Ye
+from copy import deepcopy
+
 from sendanywhere.configs.config import ConfigElement
 from sendanywhere.engine.util import ValueReplacer
 from sendanywhere.testelement.property import BaseProperty
@@ -20,6 +22,8 @@ class TestElement:
 
     def __init__(self, name: str = None, comments: str = None, propertys: dict = None):
         self.__propertys: {str, BaseProperty} = {}
+        self.context = None
+
         if name:
             self.set_name(name)
         if comments:
@@ -27,8 +31,6 @@ class TestElement:
         if propertys:
             for key, value in propertys.items():
                 self.set_property(key, value)
-
-        self.context = None
 
     @property
     def name(self):
@@ -69,6 +71,13 @@ class TestElement:
     def get_property_as_bool(self, key: str, default: bool = None) -> bool:
         prop = self.get_property(key)
         return prop.get_bool_value() if prop else default
+
+    def clone(self) -> 'TestElement':
+        """克隆副本，如果子类有 property以外的属性，请在子类重写该方法
+        """
+        cloned_element = self.__class__()
+        cloned_element.__propertys = deepcopy(self.__propertys)
+        return cloned_element
 
 
 class ConfigTestElement(TestElement, ConfigElement):

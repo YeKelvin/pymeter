@@ -6,7 +6,7 @@
 import inspect
 import pkgutil
 import sys
-from sendanywhere.utils.path_util import __SRC_PATH__
+from sendanywhere.utils.path_util import SRC_PATH
 
 
 class Reflect:
@@ -43,5 +43,5 @@ instance = clazz()
 if __name__ == '__main__':
     # print(sys.modules)
     # print(getattr(sys.modules, 'Function'))
-    for obj in pkgutil.walk_packages([__SRC_PATH__],'sendanywhere.'):
+    for obj in pkgutil.walk_packages([SRC_PATH], 'sendanywhere.'):
         print(obj)

@@ -8,12 +8,12 @@ import os
 from sendanywhere.coroutines.collection import CoroutineCollection
 from sendanywhere.engine.collection.traverser import SearchByClass
 from sendanywhere.engine.script import ScriptServer
-from sendanywhere.utils.path_util import __PROJECT_PATH__
+from sendanywhere.utils.path_util import PROJECT_PATH
 
 
 class TestSearchByClass:
     def test_search_by_class(self):
-        with open(os.path.join(__PROJECT_PATH__, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
+        with open(os.path.join(PROJECT_PATH, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
             tree = ScriptServer.load_tree(script)
             searcher = SearchByClass(CoroutineCollection)

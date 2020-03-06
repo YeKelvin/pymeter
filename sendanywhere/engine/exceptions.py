@@ -24,13 +24,13 @@ class NextIsNullException(Exception):
     pass
 
 
+class StopCoroutineGroupException(Exception):
+    pass
+
+
 class StopTestException(Exception):
     pass
 
 
 class StopTestNowException(Exception):
-    pass
-
-
-class StopCoroutineException(Exception):
     pass

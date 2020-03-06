@@ -136,14 +136,11 @@ class TreeCloner(HashTreeTraverser):
                 isinstance(node, TestElement) and
                 not (self.enable_no_clone and isinstance(node, NoCoroutineClone))
         ):
-            cloned_node = deepcopy(node)
+            cloned_node = node.clone()
         else:
             cloned_node = node
 
-        tree = self.new_tree
-        for temp_node in self.tree_path:
-            tree.add(cloned_node)
-
+        self.new_tree.add_node_by_treepath(self.tree_path, cloned_node)
         self.tree_path.append(cloned_node)
 
     def subtract_node(self) -> None:

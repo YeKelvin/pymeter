@@ -3,7 +3,6 @@
 # @File    : standard_engine
 # @Time    : 2020/1/24 23:31
 # @Author  : Kelvin.Ye
-import time
 import traceback
 
 from gevent import Greenlet
@@ -50,7 +49,8 @@ class StandardEngine(Greenlet):
         """执行脚本，这里主要做异常捕获
         """
         try:
-            self.run()
+            self.start()
+            self.join()  # 等待主协程结束
         except EngineException:
             log.error(traceback.format_exc())
 
@@ -65,7 +65,7 @@ class StandardEngine(Greenlet):
         test_listener_searcher = SearchByClass(TestStateListener)
         self.tree.traverse(test_listener_searcher)
 
-        # 遍历执行 TestStateListener.test_started()
+        # 遍历执行 TestStateListener
         self.__notify_test_listeners_of_start(test_listener_searcher)
 
         # 储存 collection层的非 CoroutineGroup节点
@@ -110,10 +110,10 @@ class StandardEngine(Greenlet):
                 log.info('等待所有协程组执行完成')
                 self.__wait_coroutines_stopped()
 
-            log.info('脚本集合下的所有协程组已经执行完成')
+            log.info('脚本集合下的所有协程组已执行完成')
             self.groups.clear()
 
-            # 遍历执行 TestStateListener.test_ended()
+            # 遍历执行 TestStateListener
             self.__notify_test_listeners_of_end(test_listener_searcher)
 
         # 测试结束
@@ -143,9 +143,11 @@ class StandardEngine(Greenlet):
         try:
             number_coroutines = group.number_coroutines
             group_name = group.name
+
+            # 把 collection层的非 group节点添加至 group层的 hashtree
             group_tree = group_searcher.get_subtree(group)
-            group_tree.put_all(group, test_level_elements)  # 把 collection层的非 group节点添加至 group层的 hashtree
-            log.info(f'为 [{group_name}] 协程组启动 [{number_coroutines}] 个协程')
+            group_tree.add_node_and_sublist(group, test_level_elements)
+            log.info(f'为协程组 [{group_name}] 启动 [{number_coroutines}] 个协程')
 
             self.groups.append(group)  # 存储当前协程组，用于停止协程
             group.start(group_count, group_tree, self)
@@ -160,18 +162,18 @@ class StandardEngine(Greenlet):
 
     @staticmethod
     def __notify_test_listeners_of_start(searcher: SearchByClass) -> None:
-        """遍历调用 TestStateListener.test_start()
+        """遍历调用 TestStateListener
         """
-        log.debug('Notify all TestStateListener to start')
+        log.debug('notify all TestStateListener to start')
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.test_started()
 
     @staticmethod
     def __notify_test_listeners_of_end(searcher: SearchByClass) -> None:
-        """遍历调用 TestStateListener.test_ended()
+        """遍历调用 TestStateListener
         """
-        log.debug('Notify all TestStateListener to end')
+        log.debug('notify all TestStateListener to end')
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.test_ended()

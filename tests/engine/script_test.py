@@ -3,18 +3,19 @@
 # @File    : script_test
 # @Time    : 2020/2/25 15:17
 # @Author  : Kelvin.Ye
-import copy
 import os
 
+from sendanywhere.engine.collection.traverser import TreeCloner
 from sendanywhere.engine.script import ScriptServer
-from sendanywhere.utils.path_util import __PROJECT_PATH__
+from sendanywhere.utils.path_util import PROJECT_PATH
 
 
 class TestScriptServer:
     def test_load_tree(self):
-        with open(os.path.join(__PROJECT_PATH__, 'docs', 'test-sampler.json'), 'r', encoding='utf-8') as f:
+        with open(os.path.join(PROJECT_PATH, 'docs', 'test-sampler.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
             tree = ScriptServer.load_tree(script)
             print(f'tree=\n{tree}')
-            cloned_tree = copy.deepcopy(tree)
-            print(f'cloned_tree=\n{cloned_tree}')
+            cloner = TreeCloner(True)
+            tree.traverse(cloner)
+            print(f'cloned_tree=\n{cloner.get_cloned_tree()}')
