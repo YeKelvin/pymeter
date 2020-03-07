@@ -157,8 +157,16 @@ class TestCompiler(HashTreeTraverser):
         self.sampler_package_saver: {Sampler, SamplePackage} = {}
         self.compiled_node = []
 
-    def get_sample_package(self, sampler: Sampler) -> SamplePackage:
-        return self.sampler_package_saver.get(sampler)
+    def configure_sampler(self, sampler) -> SamplePackage:
+        """将 ConfigTestElement合并至取样器中
+        """
+        package = self.sampler_package_saver.get(sampler)
+        sampler.clear_test_element_children()
+        for config in package.configs:
+            from sendanywhere.configs.config import NoConfigMerge
+            if not isinstance(config, NoConfigMerge):
+                sampler.add_test_element(config)
+        return package
 
     def add_node(self, node, subtree) -> None:
         if isinstance(node, Sampler):

@@ -103,12 +103,12 @@ class ScriptServer:
         Returns:    object
 
         """
-        # 获取 TestElement类
+        # 获取 TestElement实现类
         class_name = script.get('class')
         clazz = cls.__get_class(class_name)
 
         # 实例化 TestElement实现类
-        node = clazz(script.get('name'), script.get('comments'), script.get('property'))
+        node = clazz(script.get('name'), script.get('comments'), script.get('property'), init_replece=True)
 
         return node
 

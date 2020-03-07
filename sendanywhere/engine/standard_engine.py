@@ -58,8 +58,10 @@ class StandardEngine(Greenlet):
         """脚本执行主体
         """
         log.info('开始执行脚本')
-        self.id = f'{id(self)} - {self.minimal_ident}'
         self.running = True
+
+        self.id = f'{id(self)} - {self.minimal_ident}'
+        ContextService.get_context().engine = self
 
         # 查找 TestStateListener对象
         test_listener_searcher = SearchByClass(TestStateListener)

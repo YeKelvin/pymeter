@@ -8,7 +8,6 @@ import time
 from gevent.local import local
 
 from sendanywhere.coroutines.variables import Variables
-from sendanywhere.engine.globalization import SenderUtils
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -81,7 +80,8 @@ class ContextService:
         if engine_ctx.test_start == 0:
             engine_ctx.numberOfActiveThreads = 0
             engine_ctx.test_start = int(time.time() * 1000)
-            SenderUtils.set_property('TESTSTART.MS', engine_ctx.test_start)
+            from sendanywhere.engine.globalization import GlobalUtils
+            GlobalUtils.set_property('TESTSTART.MS', engine_ctx.test_start)
 
     @classmethod
     def end_test(cls, engine_id=None):

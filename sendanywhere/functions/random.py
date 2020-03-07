@@ -5,6 +5,7 @@
 # @Author  : Kelvin.Ye
 import random
 
+from sendanywhere.coroutines.context import ContextService
 from sendanywhere.functions.function import Function
 from sendanywhere.utils.log_util import get_logger
 
@@ -28,8 +29,9 @@ class Random(Function):
         result = random.randint(minimum, maximum)
 
         if self.var_name:
-            # todo 存在 var_name时放入变量中
+            # 存在 var_name时放入本地变量中
             var_name = self.var_name.execute().strip()
+            ContextService.get_context().variables.put(var_name, result)
 
         return str(result)
 

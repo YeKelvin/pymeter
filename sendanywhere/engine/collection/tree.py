@@ -18,14 +18,20 @@ class HashTree(dict):
             self.__data[node] = HashTree()
 
     def put(self, node: object, hashtree: 'HashTree') -> 'HashTree':
+        """添加 node和它的 subtree
+        """
         previous = self.get_subtree(node)
         self.add_node_and_subtree(node, hashtree)
         return previous
 
     def put_all(self, hashtree: 'HashTree'):
+        """添加 hasttree
+        """
         self.add_newtree(hashtree)
 
     def add_node(self, node: object) -> 'HashTree':
+        """添加 node
+        """
         if not self.contains(node):
             new_tree = HashTree()
             self.__data[node] = new_tree
@@ -33,42 +39,60 @@ class HashTree(dict):
         return self.get_subtree(node)
 
     def add_node_and_subtree(self, node: object, subtree: 'HashTree') -> None:
+        """添加 node和它的 subtree
+        """
         self.add_node(node).add_newtree(subtree)
 
     def add_newtree(self, newtree: 'HashTree') -> None:
+        """添加 hasttree
+        """
         for node in newtree.list():
             self.add_node(node).add_newtree(newtree.get_subtree(node))
 
     def add_list(self, nodes: list) -> None:
+        """添加 node列表
+        """
         for node in nodes:
             self.add_node(node)
 
     def add_node_and_subnode(self, node: object, subnode: object) -> 'HashTree':
+        """添加 node，并在第一个 node下再继续添加 subnode
+        """
         return self.add_node(node).add_node(subnode)
 
     def add_node_and_sublist(self, node: object, subnodes: list) -> None:
+        """添加 node，并在第一个 node下再继续添加 subnode列表
+        """
         self.add_node(node).add_list(subnodes)
 
     def add_node_by_treepath(self, treepath: list, node: object) -> 'HashTree':
+        """在 treepath末尾添加 node
+        """
         tree = self.__add_treepath(treepath)
         return tree.add_node(node)
 
     def add_nodes_by_treepath(self, treepath: list, nodes: list) -> None:
+        """在 treepath末尾添加 node列表
+        """
         tree = self.__add_treepath(treepath)
         tree.add_list(nodes)
 
     def __add_treepath(self, treepath: list):
+        """添加 treepath（不存在时添加）
+        """
         tree = self
         for node in treepath:
             tree = tree.add_node(node)
         return tree
 
     def get_subtree(self, node: object) -> 'HashTree':
-        """获取 node的 hashtree
+        """返回 node的 hashtree
         """
         return self.__data.get(node)
 
     def index(self, index) -> 'HashTree':
+        """根据下标返回对应 node的 hashtree
+        """
         return self.get_subtree(self.list()[index])
 
     def clear(self) -> None:
@@ -77,6 +101,8 @@ class HashTree(dict):
         self.__data.clear()
 
     def values(self):
+        """返回当前 hashtree下的所有 subtree列表
+        """
         return self.__data.values()
 
     def contains(self, node: object) -> bool:
@@ -85,7 +111,7 @@ class HashTree(dict):
         return node in self.__data
 
     def list(self) -> list:
-        """返回 hashtree下 node的列表
+        """返回当前 hashtree下 node的列表
         """
         return list(self.__data.keys())
 
@@ -104,14 +130,14 @@ class HashTree(dict):
         return searcher.result
 
     def traverse(self, visitor) -> None:
-        """HashTree遍历（深度优先）
+        """hashtree遍历（深度优先）
         """
         for node in self.list():
             visitor.add_node(node, self.get_subtree(node))
             self.get_subtree(node).__traverse_into(visitor)
 
     def __traverse_into(self, visitor) -> None:
-        """HashTree遍历回调
+        """hashtree遍历回调
         """
         if not self.list():
             visitor.process_path()

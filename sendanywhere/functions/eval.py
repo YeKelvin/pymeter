@@ -13,7 +13,7 @@ class Eval(Function):
     REF_KEY = '__Eval'
 
     def __init__(self):
-        self.parameters = None
+        self.parameter = None
 
     def execute(self):
         log.debug(f'{self.REF_KEY} start execute')

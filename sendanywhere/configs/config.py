@@ -7,3 +7,7 @@
 
 class ConfigElement:
     pass
+
+
+class NoConfigMerge:
+    pass

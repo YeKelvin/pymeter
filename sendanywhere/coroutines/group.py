@@ -113,8 +113,8 @@ class CoroutineGroup(LoopController):
     def start_interval(self) -> float:
         return self.get_property_as_float(self.START_INTERVAL)
 
-    def __init__(self, name: str = None, comments: str = None, propertys: dict = None):
-        super().__init__(name, comments, propertys)
+    def __init__(self, name: str = None, comments: str = None, propertys: dict = None, init_replece: bool = False):
+        super().__init__(name, comments, propertys, init_replece)
         self.running = False
         self.group_number = None
         self.group_tree = None
@@ -380,7 +380,9 @@ class Coroutine(Greenlet):
         """根据取样器的子代执行取样器
         """
         context.set_current_sampler(sampler)
-        package = self.test_compiler.get_sample_package(sampler)
+
+        # 将 ConfigTestElement合并至取样器中
+        package = self.test_compiler.configure_sampler(sampler)
 
         # 执行前置处理器
         self.__run_pre_processors(package.pre_processors)
@@ -404,10 +406,13 @@ class Coroutine(Greenlet):
 
             # 检查是否需要停止协程或测试
             if result.is_stop_coroutine or (not result.is_successful and self.on_error_stop_coroutine_group):
+                log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置停止协程组')
                 self.stop_coroutine()
             if result.is_stop_test or (not result.is_successful and self.on_error_stop_test):
+                log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置停止测试')
                 self.stop_test()
             if result.is_stop_test_now or (not result.is_successful and self.on_error_stop_test_now):
+                log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置立即停止测试')
                 self.stop_test_now()
 
     def __do_sampling(self, sampler: Sampler, context: CoroutineContext, listeners: list) -> SampleResult:

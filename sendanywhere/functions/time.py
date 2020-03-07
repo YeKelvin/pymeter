@@ -4,6 +4,8 @@
 # @Time    : 2020/1/20 16:07
 # @Author  : Kelvin.Ye
 import time
+
+from sendanywhere.coroutines.context import ContextService
 from sendanywhere.functions.function import Function
 from sendanywhere.utils.log_util import get_logger
 
@@ -27,8 +29,10 @@ class Time(Function):
             result = time.strftime(str_format, time.localtime(timestamp))
 
         if self.var_name:
-            # todo 存在 var_name时放入变量中
+            # 存在 var_name时放入本地变量中
             var_name = self.var_name.execute().strip()
+            ContextService.get_context().variables.put(var_name, result)
+
 
         return result
 
