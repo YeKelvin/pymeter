@@ -4,6 +4,7 @@
 # @Time    : 2020/2/16 14:16
 # @Author  : Kelvin.Ye
 from sendanywhere.engine.util import CompoundVariable
+from sendanywhere.utils.json_util import to_json
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -31,6 +32,12 @@ class BaseProperty:
     def get_bool_value(self):
         value = self.get_str_value()
         return True if value.lower() == 'true' else False
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class FunctionProperty(BaseProperty):

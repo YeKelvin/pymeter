@@ -113,8 +113,8 @@ class CoroutineGroup(LoopController):
     def start_interval(self) -> float:
         return self.get_property_as_float(self.START_INTERVAL)
 
-    def __init__(self, name: str = None, comments: str = None, propertys: dict = None, init_replece: bool = False):
-        super().__init__(name, comments, propertys, init_replece)
+    def __init__(self, name: str = None, comments: str = None):
+        super().__init__(name, comments)
         self.running = False
         self.group_number = None
         self.group_tree = None

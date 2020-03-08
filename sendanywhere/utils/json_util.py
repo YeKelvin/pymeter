@@ -6,13 +6,13 @@
 import orjson
 
 
-def to_json(obj: dict or list) -> str:
+def to_json(obj: dict or list):
     """序列化
     """
     return orjson.dumps(obj)
 
 
-def from_json(json_text: str) -> dict or list:
+def from_json(json_text: str):
     """反序列化
     """
     return orjson.loads(json_text)

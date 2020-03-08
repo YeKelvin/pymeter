@@ -18,8 +18,8 @@ class ScriptServer:
     module_path = {
         'JsonPathAssertion': 'sendanywhere.assertions.json_path_assertion',
         'PythonAssertion': 'sendanywhere.assertions.python_assertion',
-        'ConfigTestElement': 'sendanywhere.testelement.test_element',
-        'HTTPHeaders': 'sendanywhere.configs.http_headers',
+        'HttpHeader': 'sendanywhere.configs.http_headers',
+        'HttpHeaderManager': 'sendanywhere.configs.http_headers',
         'LoopController': 'sendanywhere.controls.loop_controller',
         'IfController': 'sendanywhere.controls.if_controller',
         'CoroutineCollection': 'sendanywhere.coroutines.collection',
@@ -79,18 +79,18 @@ class ScriptServer:
     def __check(cls, script: [dict]) -> None:
         if not script:
             raise ScriptParseException('脚本解析失败，当前节点为空')
-        for itme in script:
-            if 'name' not in itme:
+        for item in script:
+            if 'name' not in item:
                 raise ScriptParseException('脚本解析失败，当前节点缺少 name属性')
-            if 'comments' not in itme:
+            if 'comments' not in item:
                 raise ScriptParseException('脚本解析失败，当前节点缺少 comments属性')
-            if 'class' not in itme:
+            if 'class' not in item:
                 raise ScriptParseException('脚本解析失败，当前节点缺少 class属性')
-            if 'enabled' not in itme:
+            if 'enabled' not in item:
                 raise ScriptParseException('脚本解析失败，当前节点缺少 enabled属性')
-            if 'property' not in itme:
+            if 'property' not in item:
                 raise ScriptParseException('脚本解析失败，当前节点缺少 property属性')
-            if 'child' not in itme:
+            if 'child' not in item:
                 raise ScriptParseException('脚本解析失败，当前节点缺少 child属性')
 
     @classmethod
@@ -108,8 +108,30 @@ class ScriptServer:
         clazz = cls.__get_class(class_name)
 
         # 实例化 TestElement实现类
-        node = clazz(script.get('name'), script.get('comments'), script.get('property'), init_replece=True)
-
+        node = clazz()
+        node.set_property_by_replace(TestElement.LABEL, script.get('name'))
+        node.set_property_by_replace(TestElement.COMMENTS, script.get('comments'))
+        for key, value in script.get('property').items():
+            if isinstance(value, str):
+                node.set_property_by_replace(key, value)
+            elif isinstance(value, dict):
+                if 'class' in value:
+                    sub_node = cls.__get_node(value)
+                    node.set_property(key, sub_node)
+                else:
+                    raise ScriptParseException('脚本解析失败，当前节点缺少 class属性')
+            elif isinstance(value, list):
+                collection = []
+                for item in value:
+                    if isinstance(item, dict):
+                        if 'class' in item:
+                            sub_node = cls.__get_node(item)
+                            collection.append(sub_node)
+                        else:
+                            raise ScriptParseException('脚本解析失败，当前节点缺少 class属性')
+                    else:
+                        raise ScriptParseException('脚本解析失败，当前节点缺少 class属性')
+                node.set_property(key, collection)
         return node
 
     @classmethod

@@ -26,9 +26,9 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
     # 无限循环数
     INFINITE_LOOP_COUNT = -1
 
-    def __init__(self, name: str = None, comments: str = None, propertys: dict = None, init_replece: bool = False):
+    def __init__(self, name: str = None, comments: str = None):
         GenericController.__init__(self)
-        TestElement.__init__(self, name, comments, propertys, init_replece)
+        TestElement.__init__(self, name, comments)
         self.loop_count = 0
         self.is_break_loop = False
 

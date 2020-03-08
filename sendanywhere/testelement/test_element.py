@@ -20,12 +20,7 @@ class TestElement:
     # 组件的备注
     COMMENTS = 'TestElement.comments'
 
-    def __init__(self,
-                 name: str = None,
-                 comments: str = None,
-                 propertys: dict = None,
-                 init_replece: bool = False,
-                 *args, **kwargs):
+    def __init__(self, name: str = None, comments: str = None):
         self.__propertys: {str, BaseProperty} = {}
         self.context = None
 
@@ -33,12 +28,6 @@ class TestElement:
             self.name = name
         if comments:
             self.comments = comments
-        if propertys:
-            for key, value in propertys.items():
-                if init_replece:
-                    self.set_property_by_replace(key, value)
-                else:
-                    self.set_property(key, value)
 
     @property
     def name(self):
@@ -57,10 +46,15 @@ class TestElement:
         self.set_property(self.COMMENTS, comments)
 
     def set_property(self, key: str, value: any) -> None:
-        self.__propertys[key] = BaseProperty(key, value)
+        if key and value:
+            self.add_property(key, BaseProperty(key, value))
 
     def set_property_by_replace(self, key: str, value: any) -> None:
-        self.__propertys[key] = ValueReplacer.replace_values(key, value)
+        if key and value:
+            self.add_property(key, ValueReplacer.replace_values(key, value))
+
+    def add_property(self, key: str, prop: BaseProperty) -> None:
+        self.__propertys[key] = prop
 
     def get_property(self, key: str, default: any = None) -> BaseProperty:
         return self.__propertys.get(key, default)
@@ -84,9 +78,6 @@ class TestElement:
     def get_property_as_bool(self, key: str, default: bool = None) -> bool:
         prop = self.get_property(key)
         return prop.get_bool_value() if prop else default
-
-    def add_property(self, key: str, prop: BaseProperty) -> None:
-        self.__propertys[key] = prop
 
     def add_test_element(self, element: 'TestElement') -> None:
         """merge in
@@ -114,4 +105,5 @@ class TestElement:
 
 
 class ConfigTestElement(TestElement, ConfigElement):
-    pass
+    def __init__(self, name: str = None, comments: str = None):
+        super().__init__(name, comments)

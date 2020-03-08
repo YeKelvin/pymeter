@@ -11,9 +11,19 @@
       {
         "name": "配置元素-Collection层",
         "comments": "描述",
-        "class": "ConfigTestElement",
+        "class": "HttpHeaderManager",
         "enabled": true,
-        "property": {},
+        "property": {
+          "HeaderManager.headers": [
+            {
+              "class": "HttpHeader",
+              "property": {
+                "key": "Cookies",
+                "value": "ccc"
+              }
+            }
+          ]
+        },
         "child": null
       },
       {
@@ -32,7 +42,7 @@
           {
             "name": "配置元素-Group层",
             "comments": "描述",
-            "class": "ConfigTestElement",
+            "class": "HttpHeaderManager",
             "enabled": true,
             "property": {},
             "child": null
@@ -50,7 +60,7 @@
               {
                 "name": "配置元素-Sampler层",
                 "comments": "描述",
-                "class": "ConfigTestElement",
+                "class": "HttpHeaderManager",
                 "enabled": true,
                 "property": {},
                 "child": null
@@ -80,7 +90,7 @@
                   {
                     "name": "配置元素-Sampler层",
                     "comments": "描述",
-                    "class": "ConfigTestElement",
+                    "class": "HttpHeaderManager",
                     "enabled": true,
                     "property": {},
                     "child": null
@@ -100,7 +110,7 @@
                   {
                     "name": "配置元素-Sampler层",
                     "comments": "描述",
-                    "class": "ConfigTestElement",
+                    "class": "HttpHeaderManager",
                     "enabled": true,
                     "property": {},
                     "child": null
