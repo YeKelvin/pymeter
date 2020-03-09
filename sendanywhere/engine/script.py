@@ -30,6 +30,7 @@ class ScriptServer:
         'HTTPSampler': 'sendanywhere.samplers.http_sampler',
         'PythonSampler': 'sendanywhere.samplers.python_sampler',
         'SQLSampler': 'sendanywhere.samplers.sql_sampler',
+        'ResultCollector': 'sendanywhere.listeners.result_collector'
     }
 
     @classmethod
