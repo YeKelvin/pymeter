@@ -3,6 +3,8 @@
 # @File    : python_sampler.py
 # @Time    : 2020/2/16 21:29
 # @Author  : Kelvin.Ye
+import traceback
+
 from sendanywhere.engine.globalization import GlobalUtils
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.samplers.sampler import Sampler
@@ -25,28 +27,22 @@ class PythonSampler(Sampler, TestElement):
         result.request_body = self.source
         result.sample_start()
 
-        local_vars = {
-            'log': log,
-            'ctx': self.context,
-            'vars': self.context.variables,
-            'props': GlobalUtils.get_properties(),
-            'prev': self.context.previous_result,
-            'result': result,
-            'is_successful': result.is_successful,
-            'response_data': result.response_data
-        }
-        exec(self.source, {}, local_vars)
+        try:
+            local_vars = {
+                'log': log,
+                'ctx': self.context,
+                'vars': self.context.variables,
+                'props': GlobalUtils.get_properties(),
+                'prev': self.context.previous_result,
+                'result': result,
+                'success': result.success,
+                'response_data': result.response_data
+            }
+            exec(self.source, {}, local_vars)
+        except Exception:
+            result.response_data = traceback.format_exc()
 
         result.sample_end()
         result.calculate_elapsed_time()
 
         return result
-
-
-if __name__ == '__main__':
-    code = '''
-aa = 'bb'
-log.info('11')
-print(aa)
-'''
-    result = exec(code, {'log': log})

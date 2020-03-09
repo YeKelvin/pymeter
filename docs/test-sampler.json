@@ -5,13 +5,13 @@
     "class": "CoroutineCollection",
     "enabled": true,
     "property": {
-      "CoroutineCollection.serialize_coroutinegroups": "True"
+      "CoroutineCollection.serialized": "True"
     },
     "child": [
       {
         "name": "配置元素-Collection层",
         "comments": "描述",
-        "class": "HttpHeaderManager",
+        "class": "TestConfig",
         "enabled": true,
         "property": {
           "HeaderManager.headers": [
@@ -42,7 +42,7 @@
           {
             "name": "配置元素-Group层",
             "comments": "描述",
-            "class": "HttpHeaderManager",
+            "class": "TestConfig",
             "enabled": true,
             "property": {},
             "child": null
@@ -60,7 +60,7 @@
               {
                 "name": "配置元素-Sampler层",
                 "comments": "描述",
-                "class": "HttpHeaderManager",
+                "class": "TestConfig",
                 "enabled": true,
                 "property": {},
                 "child": null
@@ -90,7 +90,7 @@
                   {
                     "name": "配置元素-Sampler层",
                     "comments": "描述",
-                    "class": "HttpHeaderManager",
+                    "class": "TestConfig",
                     "enabled": true,
                     "property": {},
                     "child": null
@@ -110,7 +110,7 @@
                   {
                     "name": "配置元素-Sampler层",
                     "comments": "描述",
-                    "class": "HttpHeaderManager",
+                    "class": "TestConfig",
                     "enabled": true,
                     "property": {},
                     "child": null

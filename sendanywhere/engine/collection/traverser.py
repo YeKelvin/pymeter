@@ -8,7 +8,7 @@ from copy import deepcopy
 from sendanywhere.controls.controller import Controller
 from sendanywhere.controls.generic_controller import GenericController
 from sendanywhere.coroutines.package import SamplePackage
-from sendanywhere.engine.listener import LoopIterationListener
+from sendanywhere.engine.interface import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
@@ -131,7 +131,7 @@ class TreeCloner(HashTreeTraverser):
         return self.new_tree
 
     def add_node(self, node, subtree) -> None:
-        from sendanywhere.coroutines.interface import NoCoroutineClone
+        from sendanywhere.engine.interface import NoCoroutineClone
         if (
                 isinstance(node, TestElement) and
                 not (self.enable_no_clone and isinstance(node, NoCoroutineClone))

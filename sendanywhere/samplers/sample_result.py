@@ -28,7 +28,7 @@ class SampleResult:
         self.pause_time = 0
         self.connect_time = 0
 
-        self.is_successful = True
+        self.success = True
         self.assertion_results = []
 
         self.bytes = None
@@ -38,6 +38,10 @@ class SampleResult:
         self.is_stop_coroutine = False
         self.is_stop_test = False
         self.is_stop_test_now = False
+
+    @property
+    def started(self):
+        return self.start_time != 0
 
     def sample_start(self):
         self.start_time = int(time.time() * 1000)

@@ -13,7 +13,7 @@ from sendanywhere.coroutines.group import CoroutineGroup
 from sendanywhere.engine.collection.traverser import SearchByClass
 from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.engine.exceptions import EngineException, StopTestException
-from sendanywhere.engine.listener import TestStateListener
+from sendanywhere.engine.interface import TestStateListener
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 
@@ -33,7 +33,7 @@ class StandardEngine(Greenlet):
     def configure(self, tree: HashTree) -> None:
         """将脚本配置到执行引擎中
         """
-        # 查找 CoroutineCollection脚本顶层集合对象
+        # 查找脚本顶层列表中的 CoroutineCollection对象
         searcher = SearchByClass(CoroutineCollection)
         tree.traverse(searcher)
         collections = searcher.get_search_result()
@@ -70,7 +70,7 @@ class StandardEngine(Greenlet):
         # 遍历执行 TestStateListener
         self.__notify_test_listeners_of_start(test_listener_searcher)
 
-        # 储存 collection层的非 CoroutineGroup节点
+        # 存储 collection层一级子代的节点(非 CoroutineGroup节点)
         test_level_elements = self.tree.index(0).list()
         self.__remove_coroutine_groups(test_level_elements)  # 删除 CoroutineGroup节点
 
@@ -119,6 +119,7 @@ class StandardEngine(Greenlet):
             self.__notify_test_listeners_of_end(test_listener_searcher)
 
         # 测试结束
+        self.active = False
         ContextService.end_test(self.id)  # todo 还要修改
 
     def stop_test(self):
@@ -141,12 +142,21 @@ class StandardEngine(Greenlet):
                                 group_searcher: SearchByClass,
                                 test_level_elements: list) -> None:
         """启动协程组
+
+        Args:
+            group:                  CoroutineGroup对象
+            group_count:            group的总数（这里指序号，每启动一个 Gourp+1）
+            group_searcher:         SearchByClass(CoroutineGroup)对象
+            test_level_elements:    collection层一级子代的节点（非 CoroutineGroup节点）
+
+        Returns: None
+
         """
         try:
             number_coroutines = group.number_coroutines
             group_name = group.name
 
-            # 把 collection层的非 group节点添加至 group层的 hashtree
+            # 把 collection层一级子代的节点（非 CoroutineGroup节点）添加至 group层
             group_tree = group_searcher.get_subtree(group)
             group_tree.add_node_and_sublist(group, test_level_elements)
             log.info(f'为协程组 [{group_name}] 启动 [{number_coroutines}] 个协程')
@@ -165,6 +175,12 @@ class StandardEngine(Greenlet):
     @staticmethod
     def __notify_test_listeners_of_start(searcher: SearchByClass) -> None:
         """遍历调用 TestStateListener
+
+        Args:
+            searcher: SearchByClass(TestStateListener)对象
+
+        Returns: None
+
         """
         log.debug('notify all TestStateListener to start')
         listeners = searcher.get_search_result()
@@ -174,6 +190,12 @@ class StandardEngine(Greenlet):
     @staticmethod
     def __notify_test_listeners_of_end(searcher: SearchByClass) -> None:
         """遍历调用 TestStateListener
+
+        Args:
+            searcher: SearchByClass(TestStateListener)对象
+
+        Returns: None
+
         """
         log.debug('notify all TestStateListener to end')
         listeners = searcher.get_search_result()
@@ -183,6 +205,12 @@ class StandardEngine(Greenlet):
     @staticmethod
     def __remove_coroutine_groups(elements: list) -> None:
         """遍历删除 CoroutineGroup节点
+
+        Args:
+            elements: collection层一级子代节点的列表
+
+        Returns: None
+
         """
         for node in elements[:]:
             if isinstance(node, CoroutineGroup) or not isinstance(node, TestElement):

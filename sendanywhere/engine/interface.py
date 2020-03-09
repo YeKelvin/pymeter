@@ -53,3 +53,7 @@ class LoopIterationListener:
         """控制器在循环迭代即将开始时调用
         """
         raise NotImplementedError
+
+
+class NoCoroutineClone:
+    pass

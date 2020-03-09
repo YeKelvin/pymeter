@@ -17,7 +17,7 @@ from sendanywhere.coroutines.variables import Variables
 from sendanywhere.engine.collection.traverser import TestCompiler, FindTestElementsUpToRoot, SearchByClass, TreeCloner
 from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.engine.exceptions import StopTestException, StopTestNowException, StopCoroutineGroupException
-from sendanywhere.engine.listener import TestIterationListener, CoroutineGroupListener, LoopIterationListener
+from sendanywhere.engine.interface import TestIterationListener, CoroutineGroupListener, LoopIterationListener
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
@@ -121,13 +121,22 @@ class CoroutineGroup(LoopController):
         self.all_coroutines: [Coroutine] = []
 
     def start(self, group_number, group_tree, engine) -> None:
+        """启动CoroutineGroup
+
+        Args:
+            group_number:   group的序号
+            group_tree:     group的HashTree
+            engine:         Engine对象
+
+        Returns: None
+
+        """
         self.running = True
         self.group_number = group_number
         self.group_tree = group_tree
-        number_coroutines = self.number_coroutines
         context = ContextService.get_context()
 
-        for coroutine_number in range(number_coroutines):
+        for coroutine_number in range(self.number_coroutines):
             if self.running:
                 self.__start_new_coroutine(coroutine_number, engine, context)
             else:
@@ -158,7 +167,15 @@ class CoroutineGroup(LoopController):
             coroutine.kill()  # todo 重写 kill方法，添加中断时的操作
 
     def __start_new_coroutine(self, coroutine_number, engine, context) -> 'Coroutine':
-        """以一个协程执行协程组
+        """创建一个协程去执行协程组
+
+        Args:
+            coroutine_number:   协程的序号
+            engine:             Engine对象
+            context:            当前协程的 CoroutineContext对象
+
+        Returns: Coroutine对象
+
         """
         coroutine = self.__make_coroutine(coroutine_number, engine, context)
         self.all_coroutines.append(coroutine)
@@ -167,6 +184,14 @@ class CoroutineGroup(LoopController):
 
     def __make_coroutine(self, coroutine_number, engine, context) -> 'Coroutine':
         """创建一个协程
+
+        Args:
+            coroutine_number:   协程的序号
+            engine:             Engine对象
+            context:            当前协程的 CoroutineContext对象
+
+        Returns:
+
         """
         coroutine_name = f'{self.name} g{self.group_number}-c{coroutine_number + 1}'
         coroutine = Coroutine(self.__clone_group_tree())
@@ -405,13 +430,13 @@ class Coroutine(Greenlet):
             self.__check_assertions(package.assertions, result, context)
 
             # 检查是否需要停止协程或测试
-            if result.is_stop_coroutine or (not result.is_successful and self.on_error_stop_coroutine_group):
+            if result.is_stop_coroutine or (not result.success and self.on_error_stop_coroutine_group):
                 log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置停止协程组')
                 self.stop_coroutine()
-            if result.is_stop_test or (not result.is_successful and self.on_error_stop_test):
+            if result.is_stop_test or (not result.success and self.on_error_stop_test):
                 log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置停止测试')
                 self.stop_test()
-            if result.is_stop_test_now or (not result.is_successful and self.on_error_stop_test_now):
+            if result.is_stop_test_now or (not result.success and self.on_error_stop_test_now):
                 log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置立即停止测试')
                 self.stop_test_now()
 
@@ -447,9 +472,9 @@ class Coroutine(Greenlet):
 
         log.debug(
             f'coroutine:[{self.coroutine_name}] '
-            f'last sampler [{result.sample_label}] is {"ok" if result.is_successful else "failed"}'
+            f'last sampler [{result.sample_label}] is {"ok" if result.success else "failed"}'
         )
-        context.variables.put(self.LAST_SAMPLE_OK, result.is_successful)
+        context.variables.put(self.LAST_SAMPLE_OK, result.success)
 
     def __process_assertion(self, assertion, result: SampleResult) -> None:
         """执行断言
@@ -474,7 +499,7 @@ class Coroutine(Greenlet):
             assertion_result.is_error = True
             assertion_result.failure_message = str(e)
 
-        result.is_successful(result.is_successful and not (assertion_result.is_Error or assertion_result.is_failure))
+        result.success(result.success and not (assertion_result.is_Error or assertion_result.is_failure))
         result.assertion_result = assertion_result
 
     def __continue_on_coroutine_loop(self) -> None:

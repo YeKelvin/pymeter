@@ -8,7 +8,7 @@ from typing import Union
 from sendanywhere.controls.controller import IteratingController
 from sendanywhere.controls.generic_controller import GenericController
 from sendanywhere.coroutines.context import ContextService
-from sendanywhere.engine.listener import LoopIterationListener
+from sendanywhere.engine.interface import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger

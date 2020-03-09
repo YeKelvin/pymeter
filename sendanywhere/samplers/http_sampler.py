@@ -3,6 +3,8 @@
 # @File    : http_sampler.py
 # @Time    : 2020/2/13 16:14
 # @Author  : Kelvin.Ye
+import traceback
+
 import requests
 
 from sendanywhere.samplers.http_cons import STATUS_CODES
@@ -30,57 +32,112 @@ class HTTPSampler(Sampler, TestElement):
     CONNECT_TIMEOUT = 'HTTPSampler.connect_timeout'
     RESPONSE_TIMEOUT = 'HTTPSampler.response_timeout'
 
+    @property
+    def domain(self):
+        return self.get_property_as_str(self.DOMAIN)
+
+    @property
+    def port(self):
+        return self.get_property_as_str(self.PORT)
+
+    @property
+    def protocol(self):
+        return self.get_property_as_str(self.PROTOCOL)
+
+    @property
+    def encoding(self):
+        return self.get_property_as_str(self.ENCODING)
+
+    @property
+    def path(self):
+        return self.get_property_as_str(self.PATH)
+
+    @property
+    def method(self):
+        return self.get_property_as_str(self.METHOD)
+
+    @property
+    def params(self):
+        return self.get_property_as_str(self.PARAMS)
+
+    @property
+    def data(self):
+        return self.get_property_as_str(self.DATA)
+
+    @property
+    def files(self):
+        return self.get_property_as_str(self.FILES)
+
+    @property
+    def follow_redirects(self) -> bool:
+        return self.get_property_as_bool(self.FOLLOW_REDIRECTS)
+
+    @property
+    def auto_redirects(self) -> bool:
+        return self.get_property_as_bool(self.AUTO_REDIRECTS)
+
+    @property
+    def keep_alive(self) -> bool:
+        return self.get_property_as_bool(self.KEEP_ALIVE)
+
+    @property
+    def connect_timeout(self) -> float:
+        return self.get_property_as_float(self.CONNECT_TIMEOUT)
+
+    @property
+    def response_timeout(self) -> float:
+        return self.get_property_as_float(self.RESPONSE_TIMEOUT)
+
     def sample(self) -> SampleResult:
         result = SampleResult()
-        result.sample_label = self.get_property_as_str(self.LABEL)
+        result.sample_label = self.name
         result.request_headers = ''
         result.request_body = self.__get_request_body()
         result.sample_start()
-        res = requests.request(method=self.get_property_as_str(self.METHOD),
-                               url=self.__get_url(),
-                               headers=None,
-                               params=self.get_property_as_str(self.PARAMS),
-                               data=self.get_property_as_str(self.DATA),
-                               files=self.get_property_as_str(self.FILES),
-                               cookies=None,
-                               timeout=self.__get_timeout(),
-                               allow_redirects=True)
+        res = None
+
+        try:
+            res = requests.request(method=self.method,
+                                   url=self.__get_url(),
+                                   headers=None,
+                                   params=self.params,
+                                   data=self.data,
+                                   files=self.files,
+                                   cookies=None,
+                                   timeout=self.__get_timeout(),
+                                   allow_redirects=True)
+        except Exception:
+            result.response_data = traceback.format_exc()
+
         result.sample_end()
-        result.is_successful = True
-        result.response_headers = res.headers
-        result.response_data = res.text
-        result.response_code = res.status_code
-        result.response_message = STATUS_CODES.get(res.status_code)
         result.calculate_elapsed_time()
+
+        if res:
+            result.response_headers = res.headers
+            result.response_data = res.text
+            result.response_code = res.status_code
+            result.response_message = STATUS_CODES.get(res.status_code)
 
         return result
 
     def __get_url(self) -> str:
-        protocol = self.get_property_as_str(self.PROTOCOL)
-        domain = self.get_property_as_str(self.DOMAIN)
-        port = self.get_property_as_str(self.PORT)
-        path = self.get_property_as_str(self.PATH)
+        path = self.path
         if not path.startswith('/'):
             path = '/' + path
-        return f'{protocol}://{domain}:{port}{path}'
+        return f'{self.protocol}://{self.domain}:{self.port}{path}'
 
     def __get_timeout(self) -> tuple or None:
-        connect_timeout = self.get_property_as_float(self.CONNECT_TIMEOUT)
-        response_timeout = self.get_property_as_float(self.RESPONSE_TIMEOUT)
-        if not (connect_timeout and response_timeout):
+        if not (self.connect_timeout and self.response_timeout):
             return None
-        return connect_timeout or 0, response_timeout or 0
+        return self.connect_timeout or 0, self.response_timeout or 0
 
     def __get_request_body(self):
-        params = self.get_property_as_str(self.PARAMS)
-        data = self.get_property_as_str(self.DATA)
-        files = self.get_property_as_str(self.FILES)
-        if params:
-            return params
-        if data:
-            return data
-        if files:
-            return files
+        if self.params:
+            return self.params
+        if self.data:
+            return self.data
+        if self.files:
+            return self.files
 
 # if __name__ == '__main__':
 #     domain = '127.0.0.1'

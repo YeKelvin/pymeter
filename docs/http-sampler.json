@@ -5,7 +5,7 @@
     "class": "CoroutineCollection",
     "enabled": true,
     "property": {
-      "CoroutineCollection.serialize_coroutinegroups": "True"
+      "CoroutineCollection.serialized": "True"
     },
     "child": [
       {
