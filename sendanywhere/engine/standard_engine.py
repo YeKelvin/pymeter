@@ -8,7 +8,7 @@ import traceback
 
 from gevent import Greenlet
 
-from sendanywhere.coroutines.collection import CoroutineCollection
+from sendanywhere.testelement.collection import TestCollection
 from sendanywhere.coroutines.context import ContextService
 from sendanywhere.coroutines.group import CoroutineGroup
 from sendanywhere.engine.collection.traverser import SearchByClass
@@ -35,8 +35,8 @@ class StandardEngine(Greenlet):
     def configure(self, tree: HashTree) -> None:
         """将脚本配置到执行引擎中
         """
-        # 查找脚本顶层列表中的 CoroutineCollection对象
-        searcher = SearchByClass(CoroutineCollection)
+        # 查找脚本顶层列表中的 TestCollection对象
+        searcher = SearchByClass(TestCollection)
         tree.traverse(searcher)
         collections = searcher.get_search_result()
 
@@ -64,6 +64,7 @@ class StandardEngine(Greenlet):
 
         self.id = f'{id(self)} - {self.minimal_ident}'
         ContextService.get_context().engine = self
+        ContextService.start_test()
 
         # 查找 TestStateListener对象
         test_listener_searcher = SearchByClass(TestStateListener)

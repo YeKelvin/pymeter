@@ -8,6 +8,7 @@ import time
 from gevent.local import local
 
 from sendanywhere.coroutines.variables import Variables
+from sendanywhere.utils import time_util
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
@@ -47,9 +48,9 @@ class CoroutineContext:
 class EngineContext:
     def __init__(self):
         self.test_start = 0
-        self.number_of_active_threads = 0
-        self.number_of_threads_started = 0
-        self.number_of_threads_finished = 0
+        self.number_of_active_coroutine = 0
+        self.number_of_coroutines_started = 0
+        self.number_of_coroutines_finished = 0
         self.total_threads = 0
 
 
@@ -78,8 +79,8 @@ class ContextService:
     def start_test(cls, engine_id=None):
         engine_ctx = cls.__get_engine_context(engine_id)
         if engine_ctx.test_start == 0:
-            engine_ctx.numberOfActiveThreads = 0
-            engine_ctx.test_start = int(time.time() * 1000)
+            engine_ctx.number_of_active_coroutine = 0
+            engine_ctx.test_start = time_util.timestamp_as_ms()
             from sendanywhere.engine.globalization import GlobalUtils
             GlobalUtils.set_property('TESTSTART.MS', engine_ctx.test_start)
 
@@ -93,16 +94,16 @@ class ContextService:
         """增加活动线程的数量
         """
         engine_ctx = cls.__get_engine_context(engine_id)
-        engine_ctx.number_of_active_threads += 1
-        engine_ctx.number_of_threads_started += 1
+        engine_ctx.number_of_active_coroutine += 1
+        engine_ctx.number_of_coroutines_started += 1
 
     @classmethod
     def decr_number_of_coroutines(cls, engine_id=None):
         """减少活动线程的数量
         """
         engine_ctx = cls.__get_engine_context(engine_id)
-        engine_ctx.number_of_active_threads -= 1
-        engine_ctx.number_of_threads_finished += 1
+        engine_ctx.number_of_active_coroutine -= 1
+        engine_ctx.number_of_coroutines_finished += 1
 
     @classmethod
     def add_total_coroutines(cls, group_number, engine_id=None):
@@ -113,8 +114,8 @@ class ContextService:
     def clear_total_coroutines(cls, engine_id=None):
         engine_ctx = cls.__get_engine_context(engine_id)
         engine_ctx.total_threads = 0
-        engine_ctx.number_of_threads_started = 0
-        engine_ctx.number_of_threads_finished = 0
+        engine_ctx.number_of_coroutines_started = 0
+        engine_ctx.number_of_coroutines_finished = 0
 
     @classmethod
     def __get_engine_context(cls, engine_id) -> EngineContext:

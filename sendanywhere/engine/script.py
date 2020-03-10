@@ -16,21 +16,38 @@ log = get_logger(__name__)
 
 class ScriptServer:
     module_path = {
+        # 测试集合
+        'TestCollection': 'sendanywhere.testelement.collection',
+
+        # 协程组
+        'CoroutineGroup': 'sendanywhere.coroutines.group',
+
+        # 断言器
         'JsonPathAssertion': 'sendanywhere.assertions.json_path_assertion',
         'PythonAssertion': 'sendanywhere.assertions.python_assertion',
+
+        # 配置器
         'TestConfig': 'sendanywhere.configs.test_config',
         'HttpHeader': 'sendanywhere.configs.http_headers',
         'HttpHeaderManager': 'sendanywhere.configs.http_headers',
+
+        # 逻辑控制器
         'LoopController': 'sendanywhere.controls.loop_controller',
         'IfController': 'sendanywhere.controls.if_controller',
-        'CoroutineCollection': 'sendanywhere.coroutines.collection',
-        'CoroutineGroup': 'sendanywhere.coroutines.group',
+
+        # 前置处理器
         'PythonPreProcessor': 'sendanywhere.processors.python_pre',
+
+        # 后置处理器
         'PythonPostProcessor': 'sendanywhere.processors.python_post',
+
+        # 取样器
         'TestSampler': 'sendanywhere.samplers.test_sampler',
         'HTTPSampler': 'sendanywhere.samplers.http_sampler',
         'PythonSampler': 'sendanywhere.samplers.python_sampler',
         'SQLSampler': 'sendanywhere.samplers.sql_sampler',
+
+        # 监听器
         'ResultCollector': 'sendanywhere.listeners.result_collector'
     }
 

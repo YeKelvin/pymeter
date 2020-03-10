@@ -2,10 +2,10 @@
   {
     "name": "测试函数",
     "comments": "描述",
-    "class": "CoroutineCollection",
+    "class": "TestCollection",
     "enabled": true,
     "property": {
-      "CoroutineCollection.serialized": "True"
+      "TestCollection.serialized": "True"
     },
     "child": [
       {

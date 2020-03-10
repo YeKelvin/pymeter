@@ -9,9 +9,9 @@ from sendanywhere.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class CoroutineCollection(TestElement):
+class TestCollection(TestElement):
     # 是否顺序执行线程组
-    SERIALIZE_COROUTINEGROUPS = 'CoroutineCollection.serialized'
+    SERIALIZE_COROUTINEGROUPS = 'TestCollection.serialized'
 
     @property
     def serialized(self):
