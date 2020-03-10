@@ -21,18 +21,19 @@ class Time(Function):
 
     def execute(self):
         log.debug(f'{self.REF_KEY} start execute')
-        timestamp = int(time.time() * 1000)
-        result = str(timestamp)
+        timestamp = time.time()
+        result = str(int(timestamp * 1000))
 
         if self.format:
-            str_format = self.format.execute().strip()
-            result = time.strftime(str_format, time.localtime(timestamp))
+            # 格式化时间
+            time_format = self.format.execute().strip()
+            struct_time = time.localtime(timestamp)
+            result = time.strftime(time_format, struct_time)
 
         if self.var_name:
             # 存在 var_name时放入本地变量中
             var_name = self.var_name.execute().strip()
             ContextService.get_context().variables.put(var_name, result)
-
 
         return result
 

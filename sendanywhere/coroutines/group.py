@@ -142,7 +142,7 @@ class CoroutineGroup(LoopController):
             else:
                 break
 
-        log.info(f'已开始第 [{self.group_number}] 个协程组')
+        log.info(f'已开始第 {self.group_number} 个协程组')
 
     def wait_coroutines_stopped(self) -> None:
         """等待所有协程停止
@@ -314,23 +314,23 @@ class Coroutine(Greenlet):
 
                 if self.coroutine_group_loop_controller.is_done:
                     self.running = False
-                    log.info(f'协程 [{self.coroutine_name}] 循环迭代已结束')
+                    log.info(f'协程:[{self.coroutine_name}] 循环迭代已结束')
 
         except StopCoroutineGroupException:
             log.debug(
-                f'coroutine:[{self.coroutine_name}] except [StopCoroutineGroupException] Exception, stoping coroutine'
+                f'coroutine:[{self.coroutine_name}] except StopCoroutineGroupException Exception, stoping coroutine'
             )
             self.stop_coroutine_group()
         except StopTestException:
-            log.debug(f'coroutine:[{self.coroutine_name}] except [StopTestException] Exception, stoping test')
+            log.debug(f'coroutine:[{self.coroutine_name}] except StopTestException Exception, stoping test')
             self.stop_test()
         except StopTestNowException:
-            log.debug(f'coroutine:[{self.coroutine_name}] except [StopTestNowException] Exception, stoping test now')
+            log.debug(f'coroutine:[{self.coroutine_name}] except StopTestNowException Exception, stoping test now')
             self.stop_test_now()
         except Exception:
             log.error(traceback.format_exc())
         finally:
-            log.info(f'协程 [{self.coroutine_name}] 已执行完成')
+            log.info(f'协程:[{self.coroutine_name}] 已执行完成')
             # 遍历执行 CoroutineGroupListener
             self.__coroutine_finished()
             context.clear()
@@ -431,13 +431,13 @@ class Coroutine(Greenlet):
 
             # 检查是否需要停止协程或测试
             if result.is_stop_coroutine or (not result.success and self.on_error_stop_coroutine_group):
-                log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置停止协程组')
+                log.info(f'协程:[{self.coroutine_name}] 用户主动设置停止协程组')
                 self.stop_coroutine()
             if result.is_stop_test or (not result.success and self.on_error_stop_test):
-                log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置停止测试')
+                log.info(f'协程:[{self.coroutine_name}] 用户主动设置停止测试')
                 self.stop_test()
             if result.is_stop_test_now or (not result.success and self.on_error_stop_test_now):
-                log.info(f'coroutine:[{self.coroutine_name}] 用户主动设置立即停止测试')
+                log.info(f'协程:[{self.coroutine_name}] 用户主动设置立即停止测试')
                 self.stop_test_now()
 
     def __do_sampling(self, sampler: Sampler, context: CoroutineContext, listeners: list) -> SampleResult:
@@ -472,7 +472,7 @@ class Coroutine(Greenlet):
 
         log.debug(
             f'coroutine:[{self.coroutine_name}] '
-            f'last sampler [{result.sample_label}] is {"ok" if result.success else "failed"}'
+            f'last sampler:[{result.sample_label}] is {"ok" if result.success else "failed"}'
         )
         context.variables.put(self.LAST_SAMPLE_OK, result.success)
 
@@ -554,17 +554,17 @@ class Coroutine(Greenlet):
         self.running = False
 
     def stop_coroutine_group(self) -> None:
-        log.info(f'协程 [{self.coroutine_name}] 发起 [Stop Coroutine Group] 请求')
+        log.info(f'协程:[{self.coroutine_name}] 发起 Stop Coroutine Group 请求')
         self.coroutine_group.stop_coroutines()
 
     def stop_test(self) -> None:
-        log.info(f'协程 [{self.coroutine_name}] 发起 [Stop Test] 请求')
+        log.info(f'协程:[{self.coroutine_name}] 发起 Stop Test 请求')
         self.running = False
         if self.engine:
             self.engine.stop_test()
 
     def stop_test_now(self) -> None:
-        log.info(f'协程 [{self.coroutine_name}] 发起 [Stop Test Now] 请求')
+        log.info(f'协程:[{self.coroutine_name}] 发起 Stop Test Now 请求')
         self.running = False
         if self.engine:
             self.engine.stop_test_now()

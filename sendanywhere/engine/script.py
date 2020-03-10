@@ -18,6 +18,7 @@ class ScriptServer:
     module_path = {
         'JsonPathAssertion': 'sendanywhere.assertions.json_path_assertion',
         'PythonAssertion': 'sendanywhere.assertions.python_assertion',
+        'TestConfig': 'sendanywhere.configs.test_config',
         'HttpHeader': 'sendanywhere.configs.http_headers',
         'HttpHeaderManager': 'sendanywhere.configs.http_headers',
         'LoopController': 'sendanywhere.controls.loop_controller',
@@ -147,7 +148,7 @@ class ScriptServer:
         """
         module_path = cls.module_path.get(name)
         if not module_path:
-            raise ScriptParseException(f'class_name={name} 找不到对应的节点类名称')
+            raise ScriptParseException(f'类名:[{name}] 找不到对应的节点类名称')
 
         module = importlib.import_module(module_path)
         return getattr(module, name)

@@ -17,9 +17,9 @@ class CompoundVariable:
     functions = {}
 
     def __init__(self, parameters: str = None):
-        self.__init_functions__()
-        from sendanywhere.engine.util import FunctionParser
-        self.function_parser = FunctionParser()
+        if not self.functions:
+            self.__init_functions__()
+
         self.raw_parameters = None
         self.has_function = False
         self.is_dynamic = False
@@ -32,25 +32,27 @@ class CompoundVariable:
         """执行函数
         """
         if not self.is_dynamic and self.permanent_results:  # 优先返回函数执行结果缓存
-            log.debug('返回缓存结果')
+            log.debug('return cache results')
             return self.permanent_results
 
         if not self.compiled_components:
-            log.debug('编译的组件为空')
+            log.debug('compiled component is empty')
             return ''
 
         results = []
         for item in self.compiled_components:
             if isinstance(item, Function):
+                log.debug(f'appending function:[{item.REF_KEY}] execution result')
                 results.append(item.execute())
             elif isinstance(item, SimpleVariable):
+                log.debug(f'appending variable:[{item.name}] actual value')
                 results.append(item.value)
             else:
                 results.append(item)
         results_str = ''.join(results)
 
         if not self.is_dynamic:
-            log.debug('非动态函数，缓存函数执行结果')
+            log.debug('non-dynamic functions, cache function execution results')
             self.permanent_results = results_str
 
         return results_str
@@ -62,17 +64,18 @@ class CompoundVariable:
         if not parameters:
             return
 
-        self.compiled_components = self.function_parser.compile_str(parameters)
+        from sendanywhere.engine.util import FunctionParser
+        self.compiled_components = FunctionParser.compile_str(parameters)
 
         if len(self.compiled_components) > 1 or not isinstance(self.compiled_components[0], str):
-            log.debug('编译的字符串中存在函数')
+            log.debug('function in compiled string')
             self.has_function = True
 
         self.permanent_results = None  # 在首次执行时进行计算和缓存
 
         for item in self.compiled_components:
             if isinstance(item, Function) or isinstance(item, SimpleVariable):
-                log.debug('设置为动态函数')
+                log.debug('set as dynamic function')
                 self.is_dynamic = True
                 break
 

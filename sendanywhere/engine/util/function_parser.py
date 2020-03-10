@@ -13,23 +13,23 @@ log = get_logger(__name__)
 
 
 class FunctionParser:
-
-    def compile_str(self, source: str) -> []:
+    @staticmethod
+    def compile_str(source: str) -> []:
         reader = StringReader(source)
         result = []
         buffer = []
         previous = ''
-        log.debug(f'Start compiling string, source={source}')
+        log.debug(f'start compiling string, source: {source}')
         while True:
             current = reader.next
             if current is None:  # end of reader
-                log.debug('End of reader')
+                log.debug('end of reader')
                 break
             if current == '\\':  # 匹配 "\" 转义符
                 previous = current
                 current = reader.next
                 if current is None:  # end of reader
-                    log.debug('End of reader')
+                    log.debug('end of reader')
                     break
                 # 保留 "\"，除非当前字符是 "$" 或 "\"
                 # 注意：此方法用于解析函数参数，因此必须将 "，" 视为特殊的字符
@@ -38,14 +38,14 @@ class FunctionParser:
                 previous = ''
                 buffer.append(current)
             elif current == '{' and previous == '$':  # 匹配 "${" 占位符前缀
-                log.debug('匹配到占位符前缀')
+                log.debug('found a "${"')
                 buffer = buffer[:-1]
                 if len(buffer) > 0:  # 保存 "${" 占位符前的字符串
                     before_placeholder_str = ''.join(buffer)
-                    log.debug(f'保存占位符前的字符串： {before_placeholder_str}')
+                    log.debug(f'save the string before the placeholder: {before_placeholder_str}')
                     result.append(before_placeholder_str)
                     buffer.clear()
-                result.append(self._make_function(reader))
+                result.append(FunctionParser.__make_function(reader))
                 previous = ''
             else:
                 buffer.append(current)
@@ -59,37 +59,38 @@ class FunctionParser:
 
         return result
 
-    def _make_function(self, reader: StringReader) -> Function or str:
+    @staticmethod
+    def __make_function(reader: StringReader) -> Function or str:
         buffer = []
         previous = ''
         while True:
             current = reader.next
             if current is None:  # end of reader
-                log.debug('End of reader')
+                log.debug('end of reader')
                 break
             if current == '\\':
                 current = reader.next
                 if current is None:  # end of reader
-                    log.debug('End of reader')
+                    log.debug('end of reader')
                     break
                 previous = ''
                 buffer.append(current)
             elif current == '(' and previous != '':
                 func_name = ''.join(buffer)
-                log.debug(f'Function reference key={func_name}')
+                log.debug(f'function reference key: {func_name}')
                 function = CompoundVariable.get_named_function(func_name)
-                log.debug(f'Function={function}')
                 if isinstance(function, Function):
-                    function.set_parameters(self._parse_params(reader))
+                    function.set_parameters(FunctionParser.__parse_params(reader))
                     current = reader.next
                     if current is None or current != '}':
-                        raise InvalidVariableException(f'Expected }} after {func_name} function call in {reader.raw}')
+                        raise InvalidVariableException(f'expected }} after {func_name} function call in {reader.raw}')
                     return function
                 else:  # 函数不存在，按普通字符处理
                     buffer.append(current)
             elif current == '}':  # 变量 或者没有参数的函数
-                function = CompoundVariable.get_named_function(''.join(buffer))
-                log.debug(f'Function={function}')
+                func_name = ''.join(buffer)
+                log.debug(f'function reference key: {func_name}')
+                function = CompoundVariable.get_named_function(func_name)
                 if isinstance(function, Function):  # 确保调用 set_parameters()
                     function.set_parameters([])
                 buffer.clear()
@@ -99,10 +100,11 @@ class FunctionParser:
                 previous = current
 
         str_buffer = ''.join(buffer)
-        log.warn(f'可能是无效的函数字符串:[ {str_buffer} ]')
+        log.warn(f'may be invalid function string: {str_buffer}')
         return str_buffer
 
-    def _parse_params(self, reader: StringReader) -> [CompoundVariable]:
+    @staticmethod
+    def __parse_params(reader: StringReader) -> [CompoundVariable]:
         result = []
         buffer = []
         previous = ''
@@ -111,29 +113,29 @@ class FunctionParser:
         while True:
             current = reader.next
             if current is None:  # end of reader
-                log.debug('End of reader')
+                log.debug('end of reader')
                 break
             if current == '\\':
                 buffer.append(current)  # Store the \
                 current = reader.next
                 if current is None:  # end of reader
-                    log.debug('End of reader')
+                    log.debug('end of reader')
                     break
                 previous = ''
                 buffer.append(current)
             elif current == ',' and function_recursion == 0:
                 param_str = ''.join(buffer)
-                log.debug(f'Param str={param_str}')
+                log.debug(f'parameter str: {param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
                 result.append(param)
             elif current == ')' and function_recursion == 0 and parent_recursion == 0:
-                # 检测function name，防止生成空字符串作为参数
+                # 检测 function name，防止生成空字符串作为参数
                 if len(buffer) == 0 and len(result) == 0:
                     return result
                 # 正常退出
                 param_str = ''.join(buffer)
-                log.debug(f'Raw parameter={param_str}')
+                log.debug(f'raw parameter: {param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
                 result.append(param)
@@ -160,7 +162,7 @@ class FunctionParser:
 
         # 退出，未匹配到参数列表结束符 "）"
         str_buffer = ''.join(buffer)
-        log.warn(f'可能是无效的函数字符串： {str_buffer}')
+        log.warn(f'may be invalid function string: {str_buffer}')
         var = CompoundVariable()
         var.set_parameters(str_buffer)
         result.append(var)

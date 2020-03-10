@@ -21,50 +21,55 @@ class ResultCollector(TestElement,
                       NoCoroutineClone):
     def __init__(self, name: str = None, comments: str = None):
         super().__init__(name, comments)
-        self.start_time = 0
-        self.end_time = 0
+        self.reportName = None
+        self.startTime = 0
+        self.endTime = 0
         self.groups = {}
 
+    @property
+    def __group_id(self) -> str:
+        coroutine_group = ContextService.get_context().coroutine_group
+        return f'{coroutine_group.name}-{coroutine_group.group_number}'
+
+    @property
+    def __group_name(self):
+        return ContextService.get_context().coroutine_group.name
+
     def test_started(self) -> None:
-        self.start_time = time_util.timestamp_as_ms()
+        self.startTime = time_util.timestamp_as_ms()
 
     def test_ended(self) -> None:
-        self.end_time = time_util.timestamp_as_ms()
+        self.endTime = time_util.timestamp_as_ms()
 
     def group_started(self) -> None:
-        coroutine_group = ContextService.get_context().coroutine_group
-        group_id = coroutine_group.name + coroutine_group.group_number
-        self.groups[group_id] = {
-            'start_time': time_util.timestamp_as_ms(),
-            'end_time': 0,
+        self.groups[self.__group_id] = {
+            'startTime': time_util.timestamp_as_ms(),
+            'endTime': 0,
             'success': True,
-            'group_name': ContextService.get_context().coroutine_name,
+            'groupName': self.__group_name,
             'samplers': []
         }
 
     def group_finished(self) -> None:
-        coroutine_group = ContextService.get_context().coroutine_group
-        group_id = coroutine_group.name + coroutine_group.group_number
-        self.groups[group_id]['end_time'] = time_util.timestamp_as_ms()
+        self.groups[self.__group_id]['endTime'] = time_util.timestamp_as_ms()
 
     def sample_started(self, sample) -> None:
         pass
 
     def sample_ended(self, sample_result) -> None:
-        coroutine_group = ContextService.get_context().coroutine_group
-        group_id = coroutine_group.name + coroutine_group.group_number
-        self.groups[group_id]['samplers'].append({
-            'start_time': sample_result.start_time,
-            'end_time': sample_result.end_time,
-            'elapsed_time': sample_result.elapsed_time,
-            'success': sample_result.success,
-            'sampler_name': sample_result.sample_label,
-            'request': sample_result.request_body,
-            'response': sample_result.response_data
-        })
+        if sample_result:
+            self.groups[self.__group_id]['samplers'].append({
+                'startTime': sample_result.start_time,
+                'endTime': sample_result.end_time,
+                'elapsedTime': sample_result.elapsed_time,
+                'success': sample_result.success,
+                'samplerName': sample_result.sample_label,
+                'request': sample_result.request_body,
+                'response': sample_result.response_data
+            })
 
-        if not sample_result.success:
-            self.groups[group_id]['success'] = False
+            if not sample_result.success:
+                self.groups[self.__group_id]['success'] = False
 
     def test_iteration_start(self, controller) -> None:
         pass

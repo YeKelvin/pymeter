@@ -55,11 +55,11 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         if self.is_first:
             if not self.continue_forever:
                 log.info(
-                    f'coroutine:[{ContextService.get_context().coroutine_name}] '
-                    f'控制器 [{self.name}] 开始第 [{self.loop_count + 1}] 次迭代'
+                    f'协程:[{ContextService.get_context().coroutine_name}] '
+                    f'控制器:[{self.name}] 开始第 {self.loop_count + 1} 次迭代'
                 )
             else:
-                log.info(f'coroutine:[{ContextService.get_context().coroutine_name}] 控制器 [{self.name}] 开始新的迭代')
+                log.info(f'协程:[{ContextService.get_context().coroutine_name}] 控制器:[{self.name}] 开始新的迭代')
 
         return super().next()
 
@@ -77,7 +77,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
     def set_done(self, is_done: bool):
         log.debug(
             f'coroutine:[{ContextService.get_context().coroutine_name}] '
-            f'controller [{self.name}] set done = {is_done}'
+            f'controller:[{self.name}] set done = {is_done}'
         )
         self.reset_break_loop()
         super().set_done(is_done)

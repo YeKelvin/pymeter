@@ -1,6 +1,6 @@
 [
   {
-    "name": "测试计划一",
+    "name": "测试流程",
     "comments": "描述",
     "class": "CoroutineCollection",
     "enabled": true,
@@ -27,15 +27,23 @@
         "child": null
       },
       {
+        "name": "结果收集器",
+        "comments": "描述",
+        "class": "ResultCollector",
+        "enabled": true,
+        "property": {},
+        "child": null
+      },
+      {
         "name": "协程组A",
         "comments": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
           "CoroutineGroup.on_sample_error": "continue",
-          "CoroutineGroup.number_coroutines": "2",
+          "CoroutineGroup.number_coroutines": "1",
           "CoroutineGroup.start_interval": "0",
-          "LoopController.loops": "2",
+          "LoopController.loops": "1",
           "LoopController.continue_forever": "false"
         },
         "child": [
@@ -53,7 +61,7 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "test - test",
+              "TestSampler.sampler_data": "request-data",
               "TestSampler.expected_success": "false"
             },
             "child": [
@@ -83,7 +91,7 @@
                 "class": "TestSampler",
                 "enabled": true,
                 "property": {
-                  "TestSampler.sampler_data": "test - test",
+                  "TestSampler.sampler_data": "request-data",
                   "TestSampler.expected_success": "false"
                 },
                 "child": [
@@ -103,7 +111,7 @@
                 "class": "TestSampler",
                 "enabled": true,
                 "property": {
-                  "TestSampler.sampler_data": "test - test",
+                  "TestSampler.sampler_data": "request-data",
                   "TestSampler.expected_success": "true"
                 },
                 "child": [
@@ -125,7 +133,7 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "test - test",
+              "TestSampler.sampler_data": "request-data",
               "TestSampler.expected_success": "true"
             },
             "child": null
@@ -151,7 +159,7 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "test - test",
+              "TestSampler.sampler_data": "request-data",
               "TestSampler.expected_success": "true"
             },
             "child": null
@@ -162,7 +170,7 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "test - test",
+              "TestSampler.sampler_data": "request-data",
               "TestSampler.expected_success": "true"
             },
             "child": null

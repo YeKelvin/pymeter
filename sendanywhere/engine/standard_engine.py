@@ -3,6 +3,7 @@
 # @File    : standard_engine
 # @Time    : 2020/1/24 23:31
 # @Author  : Kelvin.Ye
+import logging
 import traceback
 
 from gevent import Greenlet
@@ -14,6 +15,7 @@ from sendanywhere.engine.collection.traverser import SearchByClass
 from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.engine.exceptions import EngineException, StopTestException
 from sendanywhere.engine.interface import TestStateListener
+from sendanywhere.listeners.result_collector import ResultCollector
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
 
@@ -83,21 +85,21 @@ class StandardEngine(Greenlet):
         ContextService.clear_total_coroutines(self.id)  # todo 还要修改
 
         if self.serialized:
-            log.info('开始 [顺序] 执行协程组')
+            log.info('开始 顺序 执行协程组')
         else:
-            log.info('开始 [并行] 执行协程组')
+            log.info('开始 并行 执行协程组')
 
         while self.running:
             try:
                 group: CoroutineGroup = next(group_iter)
                 group_count += 1
                 group_name = group.name
-                log.info(f'开始第 [{group_count}] 个协程组: [{group_name}]')
+                log.info(f'开始第 {group_count} 个协程组: {group_name}')
                 self.__start_coroutine_group(group, group_count, group_searcher, test_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'在开始下一个协程组之前等待 [{group_name}] 协程组完成')
+                    log.info(f'在开始下一个协程组之前等待 {group_name} 协程组完成')
                     group.wait_coroutines_stopped()
             except StopIteration:
                 log.info('所有协程组已启动')
@@ -117,6 +119,13 @@ class StandardEngine(Greenlet):
 
             # 遍历执行 TestStateListener
             self.__notify_test_listeners_of_end(test_listener_searcher)
+
+        # debug打印结果
+        if log.level == logging.DEBUG:
+            result_collector_searcher = SearchByClass(ResultCollector)
+            self.tree.traverse(result_collector_searcher)
+            result_collectors = result_collector_searcher.get_search_result()
+            log.debug(f'result_collector={result_collectors[0].__dict__}')
 
         # 测试结束
         self.active = False
@@ -159,7 +168,7 @@ class StandardEngine(Greenlet):
             # 把 collection层一级子代的节点（非 CoroutineGroup节点）添加至 group层
             group_tree = group_searcher.get_subtree(group)
             group_tree.add_node_and_sublist(group, test_level_elements)
-            log.info(f'为协程组 [{group_name}] 启动 [{number_coroutines}] 个协程')
+            log.info(f'为协程组 {group_name} 启动 {number_coroutines} 个协程')
 
             self.groups.append(group)  # 存储当前协程组，用于停止协程
             group.start(group_count, group_tree, self)

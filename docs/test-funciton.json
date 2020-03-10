@@ -1,0 +1,85 @@
+[
+  {
+    "name": "测试函数",
+    "comments": "描述",
+    "class": "CoroutineCollection",
+    "enabled": true,
+    "property": {
+      "CoroutineCollection.serialized": "True"
+    },
+    "child": [
+      {
+        "name": "结果收集器",
+        "comments": "描述",
+        "class": "ResultCollector",
+        "enabled": true,
+        "property": {},
+        "child": null
+      },
+      {
+        "name": "协程组A",
+        "comments": "描述",
+        "class": "CoroutineGroup",
+        "enabled": true,
+        "property": {
+          "CoroutineGroup.on_sample_error": "continue",
+          "CoroutineGroup.number_coroutines": "2",
+          "CoroutineGroup.start_interval": "0",
+          "LoopController.loops": "1",
+          "LoopController.continue_forever": "false"
+        },
+        "child": [
+
+          {
+            "name": "测试取样器 - 1",
+            "comments": "描述",
+            "class": "TestSampler",
+            "enabled": true,
+            "property": {
+              "TestSampler.sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+              "TestSampler.expected_success": "true"
+            },
+            "child": null
+          }
+        ]
+      },
+      {
+        "name": "协程组B",
+        "comments": "描述",
+        "class": "CoroutineGroup",
+        "enabled": true,
+        "property": {
+          "CoroutineGroup.on_sample_error": "start_next_loop",
+          "CoroutineGroup.number_coroutines": "1",
+          "CoroutineGroup.start_interval": "0",
+          "LoopController.loops": "1",
+          "LoopController.continue_forever": "false"
+        },
+        "child": [
+          {
+            "name": "测试取样器 - 1",
+            "comments": "描述",
+            "class": "TestSampler",
+            "enabled": true,
+            "property": {
+              "TestSampler.sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+              "TestSampler.expected_success": "true"
+            },
+            "child": null
+          },
+          {
+            "name": "测试取样器 - 2",
+            "comments": "描述",
+            "class": "TestSampler",
+            "enabled": true,
+            "property": {
+              "TestSampler.sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+              "TestSampler.expected_success": "true"
+            },
+            "child": null
+          }
+        ]
+      }
+    ]
+  }
+]

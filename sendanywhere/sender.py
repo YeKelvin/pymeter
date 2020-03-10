@@ -55,6 +55,7 @@ if __name__ == '__main__':
     from sendanywhere.utils.path_util import PROJECT_PATH
 
     # with open(os.path.join(PROJECT_PATH, 'docs', 'http-sampler.json'), 'r', encoding='utf-8') as f:
-    with open(os.path.join(PROJECT_PATH, 'docs', 'test-sampler.json'), 'r', encoding='utf-8') as f:
+    # with open(os.path.join(PROJECT_PATH, 'docs', 'test-sampler.json'), 'r', encoding='utf-8') as f:
+    with open(os.path.join(PROJECT_PATH, 'docs', 'test-funciton.json'), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())
         Sender.start(script)
