@@ -1,22 +1,23 @@
-# py-auto-test
-测试脚本执行引擎。
+# Send-Anywhere
+测试脚本执行引擎
 
 ## 项目结构
 ```
-py-auto-test
-    |-src
-		|-core
-			|-pers.kelvin.pyautotest
-				|-assertion
-				|-config
-				|-engine
-				|-exception
-				|-function
-				|-processor
-				|-sample
-				|-testelement
-				|-thread
-				|-util
+send-anywhere
+    |-resources
+        |-config.ini
+	|-sendanywhere
+        |-assertions
+        |-configs
+        |-controls
+        |-engine
+        |-functions
+        |-listeners
+        |-processors
+        |-samplers
+        |-testelement
+        |-timers
+        |-utils
 ```
 
 ## pipenv

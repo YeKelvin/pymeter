@@ -1,0 +1,76 @@
+脚本结构说明
+
+1、脚本用Json描述
+
+2、Json顶层为list结构
+
+3、脚本中所有节点均包含以下属性
+    - name: str
+    - comments: str
+    - class: str
+    - enabled: bool
+    - property: dict
+    - child: list
+
+4、脚本层级说明（可参照JMeter中的概念）
+    - 一级节点为测试集合节点（TestCollection）
+    - 二级节点为集合节点的子代，包含组节点（CoroutineGroup）、 配置节点（ConfigTestElement）、监听器（listeners）
+    - 三级节点为组节点的子代，包含配置器（ConfigTestElement）、逻辑控制器（Controller）、取样器（Sampler）、监听器（listeners）
+    - 四级节点为取样器的子代，包含配置器（ConfigTestElement）、前置处理器（PreProcessor）、后置处理器（PostProcessor）、断言器（Assertion）
+
+5、脚本demo
+[
+  {
+    "name": "测试集合",
+    "comments": "描述",
+    "class": "TestCollection",
+    "enabled": true,
+    "property": {
+      "TestCollection.serialized": "True"
+    },
+    "child": [
+      {
+        "name": "配置器",
+        "comments": "描述",
+        "class": "TestConfig",
+        "enabled": true,
+        "property": {},
+        "child": null
+      },
+      {
+        "name": "结果收集器",
+        "comments": "描述",
+        "class": "ResultCollector",
+        "enabled": true,
+        "property": {},
+        "child": null
+      },
+      {
+        "name": "组节点",
+        "comments": "描述",
+        "class": "CoroutineGroup",
+        "enabled": true,
+        "property": {
+          "CoroutineGroup.on_sample_error": "continue",
+          "CoroutineGroup.number_coroutines": "1",
+          "CoroutineGroup.start_interval": "0",
+          "LoopController.loops": "1",
+          "LoopController.continue_forever": "false"
+        },
+        "child": [
+          {
+            "name": "测试取样器",
+            "comments": "描述",
+            "class": "TestSampler",
+            "enabled": true,
+            "property": {
+              "TestSampler.sampler_data": "request-data",
+              "TestSampler.expected_success": "false"
+            },
+            "child": []
+          }
+        ]
+      }
+    ]
+  }
+]
