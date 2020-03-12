@@ -26,3 +26,8 @@ def get_logger(name):
     logger.setLevel(LEVEL)
     logger.addHandler(CONSOLE_HANDLER)
     return logger
+
+
+# 打印traceback
+# logging.error(msg, exc_info=True)
+# logging.exception(msg)

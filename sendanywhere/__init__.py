@@ -4,3 +4,4 @@
 # @Time    : 2020/1/18 16:37
 # @Author  : Kelvin.Ye
 
+__version__ = '0.0.1'
