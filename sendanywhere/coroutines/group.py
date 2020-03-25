@@ -56,11 +56,11 @@ class CoroutineGroup(LoopController):
     # Sampler失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR = 'CoroutineGroup.on_sample_error'
 
-    # 线程数
+    # 协程数
     NUMBER_COROUTINES = 'CoroutineGroup.number_coroutines'
 
-    # 启用线程的间隔时间，单位 s todo 占坑，后面实现启动时间间隔
-    START_INTERVAL = 'CoroutineGroup.start_interval'
+    # 一秒内启动的协程数  todo 占坑，后面实现
+    STARTUPS_PER_SECOND = 'CoroutineGroup.startups_per_second'
 
     # 默认等待协程结束时间，单位 ms
     WAIT_TO_DIE = 5 * 1000
@@ -110,8 +110,8 @@ class CoroutineGroup(LoopController):
         return self.get_property_as_int(self.NUMBER_COROUTINES)
 
     @property
-    def start_interval(self) -> float:
-        return self.get_property_as_float(self.START_INTERVAL)
+    def startups_per_second(self) -> float:
+        return self.get_property_as_int(self.STARTUPS_PER_SECOND)
 
     def __init__(self, name: str = None, comments: str = None):
         super().__init__(name, comments)
