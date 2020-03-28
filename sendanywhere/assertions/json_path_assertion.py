@@ -12,8 +12,8 @@ log = get_logger(__name__)
 
 
 class JsonPathAssertion(Assertion, TestElement):
-    JSONPATH = 'JsonPathAssertion.jsonpath'
-    EXPECTED_VALUE = 'JsonPathAssertion.expected_value'
+    JSONPATH = 'JsonPathAssertion__jsonpath'
+    EXPECTED_VALUE = 'JsonPathAssertion__expected_value'
 
     @property
     def jsonpath(self):

@@ -18,10 +18,10 @@ log = get_logger(__name__)
 
 class LoopController(GenericController, IteratingController, LoopIterationListener, TestElement):
     # 循环次数
-    LOOPS = 'LoopController.loops'
+    LOOPS = 'LoopController__loops'
 
     # 是否无限循环
-    CONTINUE_FOREVER = 'LoopController.continue_forever'
+    CONTINUE_FOREVER = 'LoopController.continue__forever'
 
     # 无限循环数
     INFINITE_LOOP_COUNT = -1

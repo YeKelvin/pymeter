@@ -7,8 +7,8 @@ from sendanywhere.testelement.test_element import ConfigTestElement, TestElement
 
 
 class HttpHeader(TestElement):
-    HEADER_NAME = 'Header.name'
-    HEADER_VALUE = 'Header.value'
+    HEADER_NAME = 'Header__name'
+    HEADER_VALUE = 'Header__value'
 
     @property
     def key(self):
@@ -20,7 +20,7 @@ class HttpHeader(TestElement):
 
 
 class HttpHeaderManager(ConfigTestElement):
-    HEADERS = 'HeaderManager.headers'
+    HEADERS = 'HeaderManager__headers'
 
     def __init__(self, name: str = None, comments: str = None):
         super().__init__(name, comments)

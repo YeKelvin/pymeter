@@ -5,7 +5,7 @@
     "class": "TestCollection",
     "enabled": true,
     "property": {
-      "TestCollection.serialized": "True"
+      "TestCollection__serialized": "True"
     },
     "child": [
       {
@@ -22,11 +22,11 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "continue",
-          "CoroutineGroup.number_coroutines": "1",
-          "CoroutineGroup.start_interval": "0",
-          "LoopController.loops": "1",
-          "LoopController.continue_forever": "false"
+          "CoroutineGroup__on_sample_error": "continue",
+          "CoroutineGroup__number_coroutines": "1",
+          "CoroutineGroup__start_interval": "0",
+          "LoopController__loops": "1",
+          "LoopController__continue_forever": "false"
         },
         "child": [
           {
@@ -43,20 +43,20 @@
             "class": "HTTPSampler",
             "enabled": true,
             "property": {
-              "HTTPSampler.domain": "www.baidu.com",
-              "HTTPSampler.port": "443",
-              "HTTPSampler.protocol": "HTTPS",
-              "HTTPSampler.encoding": "UTF-8",
-              "HTTPSampler.path": "/s",
-              "HTTPSampler.method": "GET",
-              "HTTPSampler.params": "wd=test",
-              "HTTPSampler.data": "",
-              "HTTPSampler.files": "",
-              "HTTPSampler.follow_redirects": "",
-              "HTTPSampler.auto_redirects": "",
-              "HTTPSampler.keep_alive": "",
-              "HTTPSampler.connect_timeout": "",
-              "HTTPSampler.response_timeout": ""
+              "HTTPSampler__domain": "www.baidu.com",
+              "HTTPSampler__port": "443",
+              "HTTPSampler__protocol": "HTTPS",
+              "HTTPSampler__encoding": "UTF-8",
+              "HTTPSampler__path": "/s",
+              "HTTPSampler__method": "GET",
+              "HTTPSampler__params": "wd=test",
+              "HTTPSampler__data": "",
+              "HTTPSampler__files": "",
+              "HTTPSampler__follow_redirects": "",
+              "HTTPSampler__auto_redirects": "",
+              "HTTPSampler__keep_alive": "",
+              "HTTPSampler__connect_timeout": "",
+              "HTTPSampler__response_timeout": ""
             },
             "child": [
               {
@@ -75,8 +75,8 @@
             "class": "LoopController",
             "enabled": true,
             "property": {
-              "LoopController.loops": "1",
-              "LoopController.continue_forever": "false"
+              "LoopController__loops": "1",
+              "LoopController__continue_forever": "false"
             },
             "child": [
               {
@@ -85,20 +85,20 @@
                 "class": "HTTPSampler",
                 "enabled": true,
                 "property": {
-                  "HTTPSampler.domain": "www.baidu.com",
-                  "HTTPSampler.port": "443",
-                  "HTTPSampler.protocol": "HTTPS",
-                  "HTTPSampler.encoding": "UTF-8",
-                  "HTTPSampler.path": "/s",
-                  "HTTPSampler.method": "GET",
-                  "HTTPSampler.params": "wd=test",
-                  "HTTPSampler.data": "",
-                  "HTTPSampler.files": "",
-                  "HTTPSampler.follow_redirects": "",
-                  "HTTPSampler.auto_redirects": "",
-                  "HTTPSampler.keep_alive": "",
-                  "HTTPSampler.connect_timeout": "",
-                  "HTTPSampler.response_timeout": ""
+                  "HTTPSampler__domain": "www.baidu.com",
+                  "HTTPSampler__port": "443",
+                  "HTTPSampler__protocol": "HTTPS",
+                  "HTTPSampler__encoding": "UTF-8",
+                  "HTTPSampler__path": "/s",
+                  "HTTPSampler__method": "GET",
+                  "HTTPSampler__params": "wd=test",
+                  "HTTPSampler__data": "",
+                  "HTTPSampler__files": "",
+                  "HTTPSampler__follow_redirects": "",
+                  "HTTPSampler__auto_redirects": "",
+                  "HTTPSampler__keep_alive": "",
+                  "HTTPSampler__connect_timeout": "",
+                  "HTTPSampler__response_timeout": ""
                 },
                 "child": [
                   {
@@ -117,20 +117,20 @@
                 "class": "HTTPSampler",
                 "enabled": true,
                 "property": {
-                  "HTTPSampler.domain": "www.baidu.com",
-                  "HTTPSampler.port": "443",
-                  "HTTPSampler.protocol": "HTTPS",
-                  "HTTPSampler.encoding": "UTF-8",
-                  "HTTPSampler.path": "/s",
-                  "HTTPSampler.method": "GET",
-                  "HTTPSampler.params": "wd=test",
-                  "HTTPSampler.data": "",
-                  "HTTPSampler.files": "",
-                  "HTTPSampler.follow_redirects": "",
-                  "HTTPSampler.auto_redirects": "",
-                  "HTTPSampler.keep_alive": "",
-                  "HTTPSampler.connect_timeout": "",
-                  "HTTPSampler.response_timeout": ""
+                  "HTTPSampler__domain": "www.baidu.com",
+                  "HTTPSampler__port": "443",
+                  "HTTPSampler__protocol": "HTTPS",
+                  "HTTPSampler__encoding": "UTF-8",
+                  "HTTPSampler__path": "/s",
+                  "HTTPSampler__method": "GET",
+                  "HTTPSampler__params": "wd=test",
+                  "HTTPSampler__data": "",
+                  "HTTPSampler__files": "",
+                  "HTTPSampler__follow_redirects": "",
+                  "HTTPSampler__auto_redirects": "",
+                  "HTTPSampler__keep_alive": "",
+                  "HTTPSampler__connect_timeout": "",
+                  "HTTPSampler__response_timeout": ""
                 },
                 "child": [
                   {
@@ -151,20 +151,20 @@
             "class": "HTTPSampler",
             "enabled": true,
             "property": {
-              "HTTPSampler.domain": "www.baidu.com",
-              "HTTPSampler.port": "443",
-              "HTTPSampler.protocol": "HTTPS",
-              "HTTPSampler.encoding": "UTF-8",
-              "HTTPSampler.path": "/s",
-              "HTTPSampler.method": "GET",
-              "HTTPSampler.params": "wd=test",
-              "HTTPSampler.data": "",
-              "HTTPSampler.files": "",
-              "HTTPSampler.follow_redirects": "",
-              "HTTPSampler.auto_redirects": "",
-              "HTTPSampler.keep_alive": "",
-              "HTTPSampler.connect_timeout": "",
-              "HTTPSampler.response_timeout": ""
+              "HTTPSampler__domain": "www.baidu.com",
+              "HTTPSampler__port": "443",
+              "HTTPSampler__protocol": "HTTPS",
+              "HTTPSampler__encoding": "UTF-8",
+              "HTTPSampler__path": "/s",
+              "HTTPSampler__method": "GET",
+              "HTTPSampler__params": "wd=test",
+              "HTTPSampler__data": "",
+              "HTTPSampler__files": "",
+              "HTTPSampler__follow_redirects": "",
+              "HTTPSampler__auto_redirects": "",
+              "HTTPSampler__keep_alive": "",
+              "HTTPSampler__connect_timeout": "",
+              "HTTPSampler__response_timeout": ""
             },
             "child": null
           }
@@ -176,11 +176,11 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "start_next_loop",
-          "CoroutineGroup.number_coroutines": "1",
-          "CoroutineGroup.start_interval": "0",
-          "LoopController.loops": "1",
-          "LoopController.continue_forever": "false"
+          "CoroutineGroup__on_sample_error": "start_next_loop",
+          "CoroutineGroup__number_coroutines": "1",
+          "CoroutineGroup__start_interval": "0",
+          "LoopController__loops": "1",
+          "LoopController__continue_forever": "false"
         },
         "child": [
           {
@@ -189,20 +189,20 @@
             "class": "HTTPSampler",
             "enabled": true,
             "property": {
-              "HTTPSampler.domain": "www.baidu.com",
-              "HTTPSampler.port": "443",
-              "HTTPSampler.protocol": "HTTPS",
-              "HTTPSampler.encoding": "UTF-8",
-              "HTTPSampler.path": "/s",
-              "HTTPSampler.method": "GET",
-              "HTTPSampler.params": "wd=test",
-              "HTTPSampler.data": "",
-              "HTTPSampler.files": "",
-              "HTTPSampler.follow_redirects": "",
-              "HTTPSampler.auto_redirects": "",
-              "HTTPSampler.keep_alive": "",
-              "HTTPSampler.connect_timeout": "",
-              "HTTPSampler.response_timeout": ""
+              "HTTPSampler__domain": "www.baidu.com",
+              "HTTPSampler__port": "443",
+              "HTTPSampler__protocol": "HTTPS",
+              "HTTPSampler__encoding": "UTF-8",
+              "HTTPSampler__path": "/s",
+              "HTTPSampler__method": "GET",
+              "HTTPSampler__params": "wd=test",
+              "HTTPSampler__data": "",
+              "HTTPSampler__files": "",
+              "HTTPSampler__follow_redirects": "",
+              "HTTPSampler__auto_redirects": "",
+              "HTTPSampler__keep_alive": "",
+              "HTTPSampler__connect_timeout": "",
+              "HTTPSampler__response_timeout": ""
             },
             "child": null
           },
@@ -212,20 +212,20 @@
             "class": "HTTPSampler",
             "enabled": true,
             "property": {
-              "HTTPSampler.domain": "www.baidu.com",
-              "HTTPSampler.port": "443",
-              "HTTPSampler.protocol": "HTTPS",
-              "HTTPSampler.encoding": "UTF-8",
-              "HTTPSampler.path": "/s",
-              "HTTPSampler.method": "GET",
-              "HTTPSampler.params": "wd=test",
-              "HTTPSampler.data": "",
-              "HTTPSampler.files": "",
-              "HTTPSampler.follow_redirects": "",
-              "HTTPSampler.auto_redirects": "",
-              "HTTPSampler.keep_alive": "",
-              "HTTPSampler.connect_timeout": "",
-              "HTTPSampler.response_timeout": ""
+              "HTTPSampler__domain": "www.baidu.com",
+              "HTTPSampler__port": "443",
+              "HTTPSampler__protocol": "HTTPS",
+              "HTTPSampler__encoding": "UTF-8",
+              "HTTPSampler__path": "/s",
+              "HTTPSampler__method": "GET",
+              "HTTPSampler__params": "wd=test",
+              "HTTPSampler__data": "",
+              "HTTPSampler__files": "",
+              "HTTPSampler__follow_redirects": "",
+              "HTTPSampler__auto_redirects": "",
+              "HTTPSampler__keep_alive": "",
+              "HTTPSampler__connect_timeout": "",
+              "HTTPSampler__response_timeout": ""
             },
             "child": null
           }

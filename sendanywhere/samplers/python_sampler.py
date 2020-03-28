@@ -15,7 +15,7 @@ log = get_logger(__name__)
 
 
 class PythonSampler(Sampler, TestElement):
-    SOURCE = 'PythonSampler.source'
+    SOURCE = 'PythonSampler__source'
 
     @property
     def source(self):

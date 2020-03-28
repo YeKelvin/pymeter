@@ -5,7 +5,7 @@
     "class": "TestCollection",
     "enabled": true,
     "property": {
-      "TestCollection.serialized": "True"
+      "TestCollection__serialized": "True"
     },
     "child": [
       {
@@ -22,11 +22,11 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "continue",
-          "CoroutineGroup.number_coroutines": "2",
-          "CoroutineGroup.start_interval": "0",
-          "LoopController.loops": "1",
-          "LoopController.continue_forever": "false"
+          "CoroutineGroup__on_sample_error": "continue",
+          "CoroutineGroup__number_coroutines": "2",
+          "CoroutineGroup__start_interval": "0",
+          "LoopController__loops": "1",
+          "LoopController__continue_forever": "false"
         },
         "child": [
 
@@ -36,8 +36,8 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
-              "TestSampler.expected_success": "true"
+              "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+              "TestSampler__expected_success": "true"
             },
             "child": null
           }
@@ -49,11 +49,11 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "start_next_loop",
-          "CoroutineGroup.number_coroutines": "1",
-          "CoroutineGroup.start_interval": "0",
-          "LoopController.loops": "1",
-          "LoopController.continue_forever": "false"
+          "CoroutineGroup__on_sample_error": "start_next_loop",
+          "CoroutineGroup__number_coroutines": "1",
+          "CoroutineGroup__start_interval": "0",
+          "LoopController__loops": "1",
+          "LoopController__continue_forever": "false"
         },
         "child": [
           {
@@ -62,8 +62,8 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
-              "TestSampler.expected_success": "true"
+              "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+              "TestSampler__expected_success": "true"
             },
             "child": null
           },
@@ -73,8 +73,8 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
-              "TestSampler.expected_success": "true"
+              "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+              "TestSampler__expected_success": "true"
             },
             "child": null
           }

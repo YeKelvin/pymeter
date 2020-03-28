@@ -54,13 +54,13 @@ class TestLogicalAction(Enum):
 
 class CoroutineGroup(LoopController):
     # Sampler失败时的处理动作，枚举 LogicalAction
-    ON_SAMPLE_ERROR = 'CoroutineGroup.on_sample_error'
+    ON_SAMPLE_ERROR = 'CoroutineGroup__on_sample_error'
 
     # 协程数
-    NUMBER_COROUTINES = 'CoroutineGroup.number_coroutines'
+    NUMBER_COROUTINES = 'CoroutineGroup__number_coroutines'
 
     # 每秒启动的协程数  todo 占坑，后面实现
-    STARTUPS_PER_SECOND = 'CoroutineGroup.startups_per_second'
+    STARTUPS_PER_SECOND = 'CoroutineGroup__startups_per_second'
 
     # 默认等待协程结束时间，单位 ms
     WAIT_TO_DIE = 5 * 1000

@@ -11,10 +11,10 @@ log = get_logger(__name__)
 
 class TestCollection(TestElement):
     # 是否顺序执行协程组
-    SERIALIZE_COROUTINEGROUPS = 'TestCollection.serialized'
+    SERIALIZE_COROUTINEGROUPS = 'TestCollection__serialized'
 
     # 延迟启动协程组，单位ms
-    DELAY = 'TestCollection.delay'
+    DELAY = 'TestCollection__delay'
 
     @property
     def serialized(self):

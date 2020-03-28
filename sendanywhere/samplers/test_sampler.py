@@ -14,8 +14,8 @@ log = get_logger(__name__)
 
 
 class TestSampler(Sampler, TestElement):
-    SAMPLER_DATA = 'TestSampler.sampler_data'
-    EXPECTED_SUCCESS = 'TestSampler.expected_success'
+    SAMPLER_DATA = 'TestSampler__sampler_data'
+    EXPECTED_SUCCESS = 'TestSampler__expected_success'
 
     @property
     def sampler_data(self):

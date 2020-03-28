@@ -12,7 +12,7 @@ log = get_logger(__name__)
 
 
 class PythonAssertion(Assertion, TestElement):
-    SOURCE = 'PythonAssertion.source'
+    SOURCE = 'PythonAssertion__source'
 
     def get_result(self, response: SampleResult) -> AssertionResult:
         pass

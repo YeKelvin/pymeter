@@ -15,10 +15,10 @@ log = get_logger(__name__)
 
 class TestElement:
     # 组件的名称
-    LABEL = 'TestElement.label'
+    LABEL = 'TestElement__label'
 
     # 组件的备注
-    COMMENTS = 'TestElement.comments'
+    COMMENTS = 'TestElement__comments'
 
     def __init__(self, name: str = None, comments: str = None):
         self.__propertys: {str, BaseProperty} = {}

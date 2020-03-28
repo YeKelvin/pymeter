@@ -5,7 +5,7 @@
     "class": "TestCollection",
     "enabled": true,
     "property": {
-      "TestCollection.serialized": "True"
+      "TestCollection__serialized": "True"
     },
     "child": [
       {
@@ -14,12 +14,12 @@
         "class": "TestConfig",
         "enabled": true,
         "property": {
-          "HeaderManager.headers": [
+          "HeaderManager__headers": [
             {
               "class": "HttpHeader",
               "property": {
-                "key": "Cookies",
-                "value": "ccc"
+                "Header__name": "Cookies",
+                "Header__value": "ccc"
               }
             }
           ]
@@ -40,11 +40,11 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "continue",
-          "CoroutineGroup.number_coroutines": "1",
-          "CoroutineGroup.start_interval": "0",
-          "LoopController.loops": "1",
-          "LoopController.continue_forever": "false"
+          "CoroutineGroup__on_sample_error": "continue",
+          "CoroutineGroup__number_coroutines": "1",
+          "CoroutineGroup__start_interval": "0",
+          "LoopController__loops": "1",
+          "LoopController__continue_forever": "false"
         },
         "child": [
           {
@@ -61,8 +61,8 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "request-data",
-              "TestSampler.expected_success": "false"
+              "TestSampler__sampler_data": "request-data",
+              "TestSampler__expected_success": "false"
             },
             "child": [
               {
@@ -81,8 +81,8 @@
             "class": "LoopController",
             "enabled": true,
             "property": {
-              "LoopController.loops": "1",
-              "LoopController.continue_forever": "false"
+              "LoopController__loops": "1",
+              "LoopController__continue_forever": "false"
             },
             "child": [
               {
@@ -91,8 +91,8 @@
                 "class": "TestSampler",
                 "enabled": true,
                 "property": {
-                  "TestSampler.sampler_data": "request-data",
-                  "TestSampler.expected_success": "false"
+                  "TestSampler__sampler_data": "request-data",
+                  "TestSampler__expected_success": "false"
                 },
                 "child": [
                   {
@@ -111,8 +111,8 @@
                 "class": "TestSampler",
                 "enabled": true,
                 "property": {
-                  "TestSampler.sampler_data": "request-data",
-                  "TestSampler.expected_success": "true"
+                  "TestSampler__sampler_data": "request-data",
+                  "TestSampler__expected_success": "true"
                 },
                 "child": [
                   {
@@ -133,8 +133,8 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "request-data",
-              "TestSampler.expected_success": "true"
+              "TestSampler__sampler_data": "request-data",
+              "TestSampler__expected_success": "true"
             },
             "child": null
           }
@@ -146,11 +146,11 @@
         "class": "CoroutineGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup.on_sample_error": "start_next_loop",
-          "CoroutineGroup.number_coroutines": "1",
-          "CoroutineGroup.start_interval": "0",
-          "LoopController.loops": "1",
-          "LoopController.continue_forever": "false"
+          "CoroutineGroup__on_sample_error": "start_next_loop",
+          "CoroutineGroup__number_coroutines": "1",
+          "CoroutineGroup__start_interval": "0",
+          "LoopController__loops": "1",
+          "LoopController__continue_forever": "false"
         },
         "child": [
           {
@@ -159,8 +159,8 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "request-data",
-              "TestSampler.expected_success": "true"
+              "TestSampler__sampler_data": "request-data",
+              "TestSampler__expected_success": "true"
             },
             "child": null
           },
@@ -170,8 +170,8 @@
             "class": "TestSampler",
             "enabled": true,
             "property": {
-              "TestSampler.sampler_data": "request-data",
-              "TestSampler.expected_success": "true"
+              "TestSampler__sampler_data": "request-data",
+              "TestSampler__expected_success": "true"
             },
             "child": null
           }

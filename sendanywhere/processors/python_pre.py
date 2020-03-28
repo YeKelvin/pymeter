@@ -11,7 +11,7 @@ log = get_logger(__name__)
 
 
 class PythonPreProcessor(PreProcessor, TestElement):
-    SOURCE = 'PythonPreProcessor.source'
+    SOURCE = 'PythonPreProcessor__source'
 
     def process(self) -> None:
         exec(self.get_property_as_str(self.SOURCE), {}, locals())

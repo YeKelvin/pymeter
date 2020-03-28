@@ -17,20 +17,20 @@ log = get_logger(__name__)
 
 
 class HTTPSampler(Sampler, TestElement):
-    DOMAIN = 'HTTPSampler.domain'
-    PORT = 'HTTPSampler.port'
-    PROTOCOL = 'HTTPSampler.protocol'
-    ENCODING = 'HTTPSampler.encoding'
-    PATH = 'HTTPSampler.path'
-    METHOD = 'HTTPSampler.method'
-    PARAMS = 'HTTPSampler.params'
-    DATA = 'HTTPSampler.data'
-    FILES = 'HTTPSampler.files'
-    FOLLOW_REDIRECTS = 'HTTPSampler.follow_redirects'
-    AUTO_REDIRECTS = 'HTTPSampler.auto_redirects'
-    KEEP_ALIVE = 'HTTPSampler.keep_alive'
-    CONNECT_TIMEOUT = 'HTTPSampler.connect_timeout'
-    RESPONSE_TIMEOUT = 'HTTPSampler.response_timeout'
+    DOMAIN = 'HTTPSampler__domain'
+    PORT = 'HTTPSampler__port'
+    PROTOCOL = 'HTTPSampler__protocol'
+    ENCODING = 'HTTPSampler__encoding'
+    PATH = 'HTTPSampler__path'
+    METHOD = 'HTTPSampler__method'
+    PARAMS = 'HTTPSampler__params'
+    DATA = 'HTTPSampler__data'
+    FILES = 'HTTPSampler__files'
+    FOLLOW_REDIRECTS = 'HTTPSampler__follow_redirects'
+    AUTO_REDIRECTS = 'HTTPSampler__auto_redirects'
+    KEEP_ALIVE = 'HTTPSampler__keep_alive'
+    CONNECT_TIMEOUT = 'HTTPSampler__connect_timeout'
+    RESPONSE_TIMEOUT = 'HTTPSampler__response_timeout'
 
     @property
     def domain(self):

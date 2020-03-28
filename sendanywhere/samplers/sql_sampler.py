@@ -12,7 +12,7 @@ log = get_logger(__name__)
 
 
 class SQLSampler(Sampler, TestElement):
-    expression = 'SQLSampler.expression'
+    expression = 'SQLSampler__expression'
 
     def sample(self) -> SampleResult:
         pass
