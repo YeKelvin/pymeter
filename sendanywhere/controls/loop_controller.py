@@ -21,7 +21,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
     LOOPS = 'LoopController__loops'
 
     # 是否无限循环
-    CONTINUE_FOREVER = 'LoopController.continue__forever'
+    CONTINUE_FOREVER = 'LoopController__continue__forever'
 
     # 无限循环数
     INFINITE_LOOP_COUNT = -1
