@@ -59,7 +59,7 @@ class CoroutineGroup(LoopController):
     # 协程数
     NUMBER_COROUTINES = 'CoroutineGroup.number_coroutines'
 
-    # 一秒内启动的协程数  todo 占坑，后面实现
+    # 每秒启动协程数  todo 占坑，后面实现
     STARTUPS_PER_SECOND = 'CoroutineGroup.startups_per_second'
 
     # 默认等待协程结束时间，单位 ms
