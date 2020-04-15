@@ -34,10 +34,6 @@ class HTTPSampler(Sampler, TestElement):
         return self.get_property_as_str(self.URL)
 
     @property
-    def encoding(self):
-        return self.get_property_as_str(self.ENCODING)
-
-    @property
     def method(self):
         return self.get_property_as_str(self.METHOD)
 
@@ -52,6 +48,10 @@ class HTTPSampler(Sampler, TestElement):
     @property
     def files(self):
         return self.get_property_as_str(self.FILES)
+
+    @property
+    def encoding(self):
+        return self.get_property_as_str(self.ENCODING)
 
     @property
     def follow_redirects(self) -> bool:
