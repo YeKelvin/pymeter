@@ -17,11 +17,8 @@ log = get_logger(__name__)
 
 
 class HTTPSampler(Sampler, TestElement):
-    DOMAIN = 'HTTPSampler__domain'
-    PORT = 'HTTPSampler__port'
-    PROTOCOL = 'HTTPSampler__protocol'
+    URL = 'HTTPSampler__url'
     ENCODING = 'HTTPSampler__encoding'
-    PATH = 'HTTPSampler__path'
     METHOD = 'HTTPSampler__method'
     PARAMS = 'HTTPSampler__params'
     DATA = 'HTTPSampler__data'
@@ -33,24 +30,12 @@ class HTTPSampler(Sampler, TestElement):
     RESPONSE_TIMEOUT = 'HTTPSampler__response_timeout'
 
     @property
-    def domain(self):
-        return self.get_property_as_str(self.DOMAIN)
-
-    @property
-    def port(self):
-        return self.get_property_as_str(self.PORT)
-
-    @property
-    def protocol(self):
-        return self.get_property_as_str(self.PROTOCOL)
+    def url(self):
+        return self.get_property_as_str(self.URL)
 
     @property
     def encoding(self):
         return self.get_property_as_str(self.ENCODING)
-
-    @property
-    def path(self):
-        return self.get_property_as_str(self.PATH)
 
     @property
     def method(self):
@@ -98,7 +83,7 @@ class HTTPSampler(Sampler, TestElement):
 
         try:
             res = requests.request(method=self.method,
-                                   url=self.__get_url(),
+                                   url=self.url,
                                    headers=None,
                                    params=self.params,
                                    data=self.data,
@@ -120,12 +105,6 @@ class HTTPSampler(Sampler, TestElement):
 
         return result
 
-    def __get_url(self) -> str:
-        path = self.path
-        if not path.startswith('/'):
-            path = '/' + path
-        return f'{self.protocol}://{self.domain}:{self.port}{path}'
-
     def __get_timeout(self) -> tuple or None:
         if not (self.connect_timeout and self.response_timeout):
             return None
@@ -140,11 +119,8 @@ class HTTPSampler(Sampler, TestElement):
             return self.files
 
 # if __name__ == '__main__':
-#     domain = '127.0.0.1'
-#     port = '5000'
-#     protocol = 'http'
+#     url = 'http://127.0.0.1/5000/get'
 #     encoding = ''
-#     path = '/get'
 #     method = 'GET'
 #     params = '{"aa":"bb","func":"${__Time()}"}'
 #     data = '{"cc":"dd","func":"${__Time()}"}'
