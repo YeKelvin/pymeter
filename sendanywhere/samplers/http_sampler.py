@@ -18,11 +18,11 @@ log = get_logger(__name__)
 
 class HTTPSampler(Sampler, TestElement):
     URL = 'HTTPSampler__url'
-    ENCODING = 'HTTPSampler__encoding'
     METHOD = 'HTTPSampler__method'
     PARAMS = 'HTTPSampler__params'
     DATA = 'HTTPSampler__data'
     FILES = 'HTTPSampler__files'
+    ENCODING = 'HTTPSampler__encoding'
     FOLLOW_REDIRECTS = 'HTTPSampler__follow_redirects'
     AUTO_REDIRECTS = 'HTTPSampler__auto_redirects'
     KEEP_ALIVE = 'HTTPSampler__keep_alive'
