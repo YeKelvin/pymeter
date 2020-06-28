@@ -3,29 +3,27 @@
 # @File    : setup.py
 # @Time    : 2020/3/12 10:57
 # @Author  : Kelvin.Ye
-import os
-from setuptools import setup
+import pathlib
 
-from setuptools import find_packages
+from setuptools import setup, find_packages
+
 from sendanywhere import __version__
 
-with open(os.path.join('.', 'README.md'), encoding='utf-8') as f:
-    long_description = f.read()
+HERE = pathlib.Path(__file__).parent
+README = (HERE / "README.md").read_text()
 
 setup(
     name='send-anywhere',
     version=__version__,
     description='Json script execution module.',
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    license='',
+    long_description=README,
+    long_description_content_type="text/markdown",
     url='',
+    license='',
     author='Kelvin.Ye',
     author_email='',
-    packages=find_packages(),
+    packages=find_packages(exclude=("tests",)),
     include_package_data=True,
-    zip_safe=False,
-    python_requires=">=3.7",
     install_requires=[
         'click==7.0',
         'orjson==2.1.4',
@@ -36,8 +34,18 @@ setup(
         'sqlalchemy==1.3.13',
         'sshtunnel==0.1.5',
     ],
-    tests_require=[
-        'pytest==5.3.3',
-    ],
-    entry_points={}
+    extras_require={
+        'test': [
+            'pytest==5.3.3',
+        ]
+    },
+    entry_points={},
+    python_requires=">=3.6",
+    classifiers=[
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8'
+    ]
 )
