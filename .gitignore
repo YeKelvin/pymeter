@@ -1,5 +1,9 @@
-.pycharm
-.idea
-.venv
-__pycache__
-Pipfile.lock
+.pycharm/
+.idea/
+.vscode/
+.cache/
+.venv/
+__pycache__/
+.pytest_cache/
+
+*.lock

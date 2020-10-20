@@ -1,0 +1,5 @@
+cache-dir = ".cache"
+
+[virtualenvs]
+create = true
+path = "{cache-dir}/virtualenvs"

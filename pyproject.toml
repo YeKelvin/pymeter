@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "send-anywhere"
+version = "0.1.0"
+description = ""
+authors = ["Kelvin.Ye <testmankelvin@163.com>"]
+readme = 'README.md'
+
+[[tool.poetry.source]]
+name = "aliyun"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+default = true
+#secondary = true
+
+[[tool.poetry.source]]
+name = "baidu"
+url = "https://mirror.baidu.com/pypi/simple/"
+#default = true
+secondary = true
+
+[tool.poetry.dependencies]
+python = "^3.6"
+click = "^7.1.2"
+jsonpath = "^0.82"
+orjson = "^3.4.0"
+pytest = "^5.4.3"
+pytest-html = "^2.1.1"
+sqlalchemy = "^1.3.20"
+cx-Oracle = "^8.0.1"
+sshtunnel = "^0.1.5"
+flake8 = "^3.8.4"
+yapf = "^0.30.0"
+pycryptodome = "^3.9.8"
+gevent = "^20.9.0"
+
+[tool.poetry.dev-dependencies]
+flask = "^1.1.2"
+
+[tool.poetry.scripts]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
