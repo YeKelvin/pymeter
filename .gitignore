@@ -4,6 +4,11 @@
 .cache/
 .venv/
 __pycache__/
+
+# pytest
 .pytest_cache/
-assert/
+assets/
+report.html
+
 *.lock
+*.log
