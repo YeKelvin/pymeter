@@ -15,13 +15,13 @@ README = (HERE / "README.md").read_text()
 setup(
     name='send-anywhere',
     version=__version__,
-    description='Json script execution module.',
+    description='Json script execution module',
     long_description=README,
     long_description_content_type="text/markdown",
     url='',
     license='',
     author='Kelvin.Ye',
-    author_email='',
+    author_email='testmankelvin@163.com',
     packages=find_packages(exclude=("tests",)),
     include_package_data=True,
     install_requires=[
