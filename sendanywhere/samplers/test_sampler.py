@@ -3,6 +3,7 @@
 # @File    : test_sampler
 # @Time    : 2020/3/3 17:58
 # @Author  : Kelvin.Ye
+from typing import Final
 import gevent
 
 from sendanywhere.samplers.sample_result import SampleResult
@@ -14,8 +15,8 @@ log = get_logger(__name__)
 
 
 class TestSampler(Sampler, TestElement):
-    SAMPLER_DATA = 'TestSampler__sampler_data'
-    EXPECTED_SUCCESS = 'TestSampler__expected_success'
+    SAMPLER_DATA: Final = 'TestSampler__sampler_data'
+    EXPECTED_SUCCESS: Final = 'TestSampler__expected_success'
 
     @property
     def sampler_data(self):

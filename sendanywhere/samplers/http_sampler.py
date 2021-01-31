@@ -4,9 +4,9 @@
 # @Time    : 2020/2/13 16:14
 # @Author  : Kelvin.Ye
 import traceback
+from typing import Final
 
 import requests
-
 from sendanywhere.samplers.http_cons import STATUS_CODES
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.samplers.sampler import Sampler
@@ -17,17 +17,17 @@ log = get_logger(__name__)
 
 
 class HTTPSampler(Sampler, TestElement):
-    URL = 'HTTPSampler__url'
-    METHOD = 'HTTPSampler__method'
-    PARAMS = 'HTTPSampler__params'
-    DATA = 'HTTPSampler__data'
-    FILES = 'HTTPSampler__files'
-    ENCODING = 'HTTPSampler__encoding'
-    FOLLOW_REDIRECTS = 'HTTPSampler__follow_redirects'
-    AUTO_REDIRECTS = 'HTTPSampler__auto_redirects'
-    KEEP_ALIVE = 'HTTPSampler__keep_alive'
-    CONNECT_TIMEOUT = 'HTTPSampler__connect_timeout'
-    RESPONSE_TIMEOUT = 'HTTPSampler__response_timeout'
+    URL: Final = 'HTTPSampler__url'
+    METHOD: Final = 'HTTPSampler__method'
+    PARAMS: Final = 'HTTPSampler__params'
+    DATA: Final = 'HTTPSampler__data'
+    FILES: Final = 'HTTPSampler__files'
+    ENCODING: Final = 'HTTPSampler__encoding'
+    FOLLOW_REDIRECTS: Final = 'HTTPSampler__follow_redirects'
+    AUTO_REDIRECTS: Final = 'HTTPSampler__auto_redirects'
+    KEEP_ALIVE: Final = 'HTTPSampler__keep_alive'
+    CONNECT_TIMEOUT: Final = 'HTTPSampler__connect_timeout'
+    RESPONSE_TIMEOUT: Final = 'HTTPSampler__response_timeout'
 
     @property
     def url(self):

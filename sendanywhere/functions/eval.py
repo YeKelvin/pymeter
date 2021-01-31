@@ -3,6 +3,7 @@
 # @File    : eval
 # @Time    : 2020/1/20 16:08
 # @Author  : Kelvin.Ye
+from typing import Final
 from sendanywhere.functions.function import Function
 from sendanywhere.utils.log_util import get_logger
 
@@ -10,7 +11,7 @@ log = get_logger(__name__)
 
 
 class Eval(Function):
-    REF_KEY = '__Eval'
+    REF_KEY: Final = '__Eval'
 
     def __init__(self):
         self.parameter = None

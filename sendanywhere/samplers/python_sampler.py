@@ -4,6 +4,7 @@
 # @Time    : 2020/2/16 21:29
 # @Author  : Kelvin.Ye
 import traceback
+from typing import Final
 
 from sendanywhere.engine.globalization import GlobalUtils
 from sendanywhere.samplers.sample_result import SampleResult
@@ -15,7 +16,7 @@ log = get_logger(__name__)
 
 
 class PythonSampler(Sampler, TestElement):
-    SOURCE = 'PythonSampler__source'
+    SOURCE: Final = 'PythonSampler__source'
 
     @property
     def source(self):

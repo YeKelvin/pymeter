@@ -4,6 +4,7 @@
 # @Time    : 2020/1/20 16:06
 # @Author  : Kelvin.Ye
 import random
+from typing import Final
 
 from sendanywhere.coroutines.context import ContextService
 from sendanywhere.functions.function import Function
@@ -13,7 +14,7 @@ log = get_logger(__name__)
 
 
 class Random(Function):
-    REF_KEY = '__Random'
+    REF_KEY: Final = '__Random'
 
     def __init__(self):
         self.var_name = None

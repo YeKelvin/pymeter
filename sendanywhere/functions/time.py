@@ -4,6 +4,7 @@
 # @Time    : 2020/1/20 16:07
 # @Author  : Kelvin.Ye
 import time
+from typing import Final
 
 from sendanywhere.coroutines.context import ContextService
 from sendanywhere.functions.function import Function
@@ -13,7 +14,7 @@ log = get_logger(__name__)
 
 
 class Time(Function):
-    REF_KEY = '__Time'
+    REF_KEY: Final = '__Time'
 
     def __init__(self):
         self.var_name = None
