@@ -9,7 +9,7 @@ from sendanywhere.runner import Runner
 from sendanywhere.utils.path_util import PROJECT_PATH
 
 
-class TestSender:
+class TestRunner:
     def test_start(self):
         with open(os.path.join(PROJECT_PATH, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())

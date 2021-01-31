@@ -4,6 +4,8 @@
 # @Time    : 2020/2/20 21:13
 # @Author  : Kelvin.Ye
 import importlib
+import os
+from typing import List, Tuple, Iterable
 
 from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.engine.exceptions import ScriptParseException
@@ -52,6 +54,21 @@ class ScriptServer:
     }
 
     @classmethod
+    def __deserial_script(cls, content) -> List[dict]:
+        script = []
+        if isinstance(content, list):
+            script = content
+        elif isinstance(content, str):
+            path_exists = os.path.exists(content)
+            if not path_exists:
+                script = json_util.from_json(content)
+            else:
+                with open(content, 'r', encoding='utf-8') as f:
+                    json = ''.join(f.readlines())
+                    script = json_util.from_json(json)
+        return script
+
+    @classmethod
     def load_tree(cls, content: str) -> HashTree:
         """脚本反序列化为对象
 
@@ -61,7 +78,7 @@ class ScriptServer:
         Returns:        脚本的 HashTree对象
 
         """
-        script: [dict] = json_util.from_json(content)
+        script = cls.__deserial_script(content)
         nodes = cls.__parse(script)
         if not nodes:
             raise ScriptParseException('脚本为空或脚本已被禁用')
@@ -71,7 +88,7 @@ class ScriptServer:
         return root_tree
 
     @classmethod
-    def __parse(cls, script: [dict]) -> [(object, HashTree)]:
+    def __parse(cls, script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
         # 校验节点是否有必须的属性
         cls.__check(script)
         nodes = []
@@ -95,7 +112,7 @@ class ScriptServer:
         return nodes
 
     @classmethod
-    def __check(cls, script: [dict]) -> None:
+    def __check(cls, script: Iterable[dict]) -> None:
         if not script:
             raise ScriptParseException('脚本解析失败，当前节点为空')
         for item in script:
