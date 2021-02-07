@@ -55,6 +55,8 @@ class ScriptServer:
 
     @classmethod
     def __deserial_script(cls, content) -> List[dict]:
+        """反序列化脚本
+        """
         script = []
         if isinstance(content, list):
             script = content
