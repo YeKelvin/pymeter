@@ -34,8 +34,9 @@ cx-Oracle = "^8.0.1"
 sshtunnel = "^0.1.5"
 flake8 = "^3.8.4"
 yapf = "^0.30.0"
-pycryptodome = "^3.9.8"
+pycryptodome = "^3.9.9"
 gevent = "^20.9.0"
+python-socketio = "^5.0.4"
 
 [tool.poetry.dev-dependencies]
 flask = "^1.1.2"
