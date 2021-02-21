@@ -19,8 +19,8 @@ class Runner:
         """执行脚本主入口
         """
         now = time.time()
-        ymd = time.strftime("%Y-%m-%d", time.localtime(now))
-        hms = time.strftime("%H:%M:%S", time.localtime(now))
+        ymd = time.strftime('%Y-%m-%d', time.localtime(now))
+        hms = time.strftime('%H:%M:%S', time.localtime(now))
 
         log.info(f'START.MS={int(now * 1000)}')
         log.info(f'START.YMD={ymd}')

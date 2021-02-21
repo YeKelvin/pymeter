@@ -30,4 +30,3 @@ if __name__ == '__main__':
     g.run()
     print(g.minimal_ident)
     print(gevent.getcurrent())
-
