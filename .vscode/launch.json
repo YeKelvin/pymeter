@@ -7,8 +7,9 @@
             "request": "launch",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
-            "stopOnEntry": true,
+            "stopOnEntry": false,
             "console": "internalConsole",
+            "justMyCode": false,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
@@ -20,6 +21,7 @@
             "cwd": "${workspaceFolder}",
             "stopOnEntry": false,
             "console": "internalConsole",
+            "justMyCode": false,
             "module": "pytest",
             "args": [
                 "-sv",
