@@ -6,28 +6,32 @@
 import logging
 from sendanywhere.utils import config
 
-# 日志输出格式
-FORMATTER = logging.Formatter('[%(asctime)s][%(levelname)s][%(name)s.%(funcName)s %(lineno)d] %(message)s')
+
+# 日志格式
+LOG_FORMAT = '[%(asctime)s][%(levelname)s][%(threadName)s][%(name)s.%(funcName)s %(lineno)d] %(message)s'
+
+# 日志级别
+LEVEL = config.get('log', 'level')
+
+# 日志文件名称
+LOG_FILE_NAME = config.get('log', 'name')
+
+# 日志格式
+FORMATTER = logging.Formatter(LOG_FORMAT)
 
 # 输出到控制台
 CONSOLE_HANDLER = logging.StreamHandler()
 CONSOLE_HANDLER.setFormatter(FORMATTER)
 
 # 写入日志文件
-# FILE_HANDLER = logging.FileHandler(config.get('log', 'name'))
-
-# 日志级别
-LEVEL = config.get('log', 'level')
+# FILE_HANDLER = logging.FileHandler(LOG_FILE_NAME, encoding='utf-8')
+# FILE_HANDLER.setFormatter(FORMATTER)
 
 
-def get_logger(name):
+def get_logger(name) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.propagate = False
     logger.setLevel(LEVEL)
     logger.addHandler(CONSOLE_HANDLER)
+    # logger.addHandler(FILE_HANDLER)
     return logger
-
-
-# 打印traceback
-# logging.error(msg, exc_info=True)
-# logging.exception(msg)

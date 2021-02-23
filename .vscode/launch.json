@@ -7,7 +7,6 @@
             "request": "launch",
             "program": "${file}",
             "cwd": "${workspaceFolder}",
-            "stopOnEntry": false,
             "console": "internalConsole",
             "justMyCode": false,
             "env": {
@@ -19,10 +18,9 @@
             "type": "python",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "stopOnEntry": false,
             "console": "internalConsole",
-            "justMyCode": false,
             "module": "pytest",
+            "justMyCode": false,
             "args": [
                 "-sv",
                 "--disable-pytest-warnings",

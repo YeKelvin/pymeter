@@ -4,7 +4,10 @@
 # @Time    : 2020/2/18 17:20
 # @Author  : Kelvin.Ye
 from sendanywhere.coroutines.context import ContextService
-from sendanywhere.engine.interface import (TestStateListener, CoroutineGroupListener, SampleListener, TestIterationListener, NoCoroutineClone)
+from sendanywhere.engine.interface import (CoroutineGroupListener,
+                                           NoCoroutineClone, SampleListener,
+                                           TestIterationListener,
+                                           TestStateListener)
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils import time_util
 from sendanywhere.utils.log_util import get_logger
