@@ -25,12 +25,11 @@ def on_message(data):
 
 
 if __name__ == '__main__':
-    sio.connect('http://127.0.0.1:5000', namespaces=['/'])
+    sio.connect('http://127.0.0.1:5000')
     sio.sleep(2.0)
 
-    sio.emit('test', {'data': 'emit: i am sendanywhere'})
-    sio.send('send: i am sendanywhere')
+    sio.emit('execution_result', {'data': 'i am sendanywhere'}, namespace='/script')
 
-    print('done')
     sio.sleep(2.0)
     sio.disconnect()
+    print('done')
