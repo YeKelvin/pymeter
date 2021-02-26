@@ -10,26 +10,26 @@ sio = socketio.Client(logger=True, engineio_logger=True)
 
 
 @sio.on('connect')
-def on_connect():
-    print(f'i am connect, sid={sio.sid}')
+def handle_connect():
+    print(f'socket sid:[ {sio.sid} ] event:[ connect ]')
 
 
 @sio.on('disconnect')
-def on_disconnect():
-    print(f'disconnect, sid={sio.sid}')
+def handle_disconnect():
+    print(f'socket sid:[ {sio.sid} ] event:[ disconnect ]')
 
 
-@sio.on('message')
-def on_message(data):
-    print(f'I received a message, data={data}')
+@sio.on('execution_result')
+def handle_execution_result(data):
+    print(f'socket sid:[ {sio.sid} ] event:[ execution_result ] received data:[ {data} ]')
 
 
 if __name__ == '__main__':
     sio.connect('http://127.0.0.1:5000')
     sio.sleep(2.0)
 
-    sio.emit('execution_result', {'data': 'i am sendanywhere'}, namespace='/script')
+    sio.emit('execution_result', {'to': '-1IB6-NAOtyKQdeiAAAB', 'data': 'i am sendanywhere'})
 
-    sio.sleep(2.0)
-    sio.disconnect()
-    print('done')
+    sio.sleep(5.0)
+    # sio.disconnect()
+    # print('done')

@@ -12,7 +12,7 @@ def to_json(obj: dict or list):
     return orjson.dumps(obj)
 
 
-def from_json(json_text: str):
+def from_json(content: str):
     """反序列化
     """
-    return orjson.loads(json_text)
+    return orjson.loads(content)
