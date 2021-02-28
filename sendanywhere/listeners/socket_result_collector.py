@@ -78,7 +78,7 @@ class SocketResultCollector(TestElement,
 
         self.sio = socketio.AsyncClient()
 
-    def __socket_connect__(self):
+    def __socket_connect(self):
         """连接socket.io"""
         namespace = None
         headers = {}
@@ -90,17 +90,25 @@ class SocketResultCollector(TestElement,
 
         self.sio.connect(self.url, headers=headers, namespaces=namespace)
 
+    def __socket_disconnect(self):
+        """关闭socket.io"""
+        if self.sio.connected:
+            self.sio.emit('execution_completed')
+            self.sio.emit('disconnect')
+
+        self.sio.close()
+
     def emit(self, data: dict):
         data['to'] = self.target_sid
         self.sio.emit(self.event_name, data)
 
     def test_started(self) -> None:
         self.startTime = time_util.timestamp_as_ms()
-        self.__socket_connect__()
+        self.__socket_connect()
 
     def test_ended(self) -> None:
         self.endTime = time_util.timestamp_as_ms()
-        self.sio.close()
+        self.__socket_disconnect()
 
     def group_started(self) -> None:
         group_id = self.__group_id
