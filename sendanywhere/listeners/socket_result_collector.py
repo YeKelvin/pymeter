@@ -74,7 +74,6 @@ class SocketResultCollector(TestElement,
         self.reportName = None
         self.startTime = 0
         self.endTime = 0
-        self.groups = {}
 
         self.sio = socketio.AsyncClient()
 
@@ -93,12 +92,14 @@ class SocketResultCollector(TestElement,
     def __socket_disconnect(self):
         """关闭socket.io"""
         if self.sio.connected:
+            # 断开socket连接前先发送执行完成的事件
             self.sio.emit('execution_completed')
             self.sio.emit('disconnect')
 
         self.sio.close()
 
     def emit(self, data: dict):
+        """发送消息，data自动添加转发目标的sid"""
         data['to'] = self.target_sid
         self.sio.emit(self.event_name, data)
 
@@ -115,14 +116,6 @@ class SocketResultCollector(TestElement,
         start_time = time_util.timestamp_as_ms()
         group_name = self.__group_name
 
-        self.groups[group_id] = {
-            'startTime': start_time,
-            'endTime': 0,
-            'success': True,
-            'groupName': group_name,
-            'samplers': []
-        }
-
         self.emit({
             'group': {
                 'id': group_id,
@@ -137,8 +130,6 @@ class SocketResultCollector(TestElement,
     def group_finished(self) -> None:
         group_id = self.__group_id
         end_time = time_util.timestamp_as_ms()
-
-        self.groups[group_id]['endTime'] = end_time
 
         self.emit({
             'group': {
@@ -156,16 +147,6 @@ class SocketResultCollector(TestElement,
 
         group_id = self.__group_id
 
-        self.groups[group_id]['samplers'].append({
-            'startTime': sample_result.start_time,
-            'endTime': sample_result.end_time,
-            'elapsedTime': sample_result.elapsed_time,
-            'success': sample_result.success,
-            'samplerName': sample_result.sample_label,
-            'request': sample_result.request_body,
-            'response': sample_result.response_data
-        })
-
         self.emit({
             'sampler': {
                 'groupId': group_id,
@@ -180,7 +161,6 @@ class SocketResultCollector(TestElement,
         })
 
         if not sample_result.success:
-            self.groups[self.__group_id]['success'] = False
             self.emit({
                 'group': {
                     'id': group_id,
