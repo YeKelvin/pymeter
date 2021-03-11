@@ -28,6 +28,7 @@ class Runner:
 
         # 校验 script脚本不能为空
         if script:
+            log.debug(f'script:[ {script} ]')
             Runner.run(script)
         else:
             raise Exception('脚本不允许为空')
@@ -38,12 +39,12 @@ class Runner:
         """
         log.info('开始加载脚本')
         # 加载脚本
-        tree = ScriptServer.load_tree(script)
-        log.debug(f'Script HashTree:\n{tree}')
+        hashtree = ScriptServer.load_tree(script)
+        log.debug(f'script hashtree:\n{hashtree}')
 
         # 将脚本配置到执行引擎中
         engine = StandardEngine()
-        engine.configure(tree)
+        engine.configure(hashtree)
 
         # 开始执行测试
         log.info('开始执行测试')
