@@ -38,10 +38,10 @@ class ScriptServer:
         'IfController': 'sendanywhere.controls.if_controller',
 
         # 前置处理器
-        'PythonPreProcessor': 'sendanywhere.processors.python_pre',
+        'PythonPreProcessor': 'sendanywhere.processors.python_pre_processor',
 
         # 后置处理器
-        'PythonPostProcessor': 'sendanywhere.processors.python_post',
+        'PythonPostProcessor': 'sendanywhere.processors.python_post_processor',
 
         # 取样器
         'TestSampler': 'sendanywhere.samplers.test_sampler',
@@ -50,7 +50,8 @@ class ScriptServer:
         'SQLSampler': 'sendanywhere.samplers.sql_sampler',
 
         # 监听器
-        'ResultCollector': 'sendanywhere.listeners.result_collector'
+        'ResultCollector': 'sendanywhere.listeners.result_collector',
+        'SocketResultCollector': 'sendanywhere.listeners.socket_result_collector'
     }
 
     @classmethod
