@@ -7,7 +7,6 @@ from typing import Final
 
 import socketio
 from sendanywhere.coroutines.context import ContextService
-from sendanywhere.engine.exceptions import InvalidPropertyException
 from sendanywhere.engine.interface import (CoroutineGroupListener,
                                            NoCoroutineClone, SampleListener,
                                            TestIterationListener,
@@ -72,18 +71,10 @@ class SocketResultCollector(TestElement,
 
     def __init__(self, name: str = None, comments: str = None):
         super().__init__(name, comments)
-        self.__check_propertys()
-
         self.reportName = None
         self.startTime = 0
         self.endTime = 0
         self.sio = socketio.AsyncClient()
-
-    def __check_propertys(self):
-        """校验property"""
-        # url必填
-        if not self.url:
-            raise InvalidPropertyException()
 
     def __socket_connect(self):
         """连接socket.io"""
