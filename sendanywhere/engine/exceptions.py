@@ -12,6 +12,10 @@ class InvalidVariableException(Exception):
     pass
 
 
+class InvalidPropertyException(Exception):
+    pass
+
+
 class EngineException(Exception):
     pass
 
