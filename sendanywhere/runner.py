@@ -4,6 +4,7 @@
 # @Time    : 2020/2/12 11:46
 # @Author  : Kelvin.Ye
 import time
+import traceback
 
 from sendanywhere.engine.script import ScriptServer
 from sendanywhere.engine.standard_engine import StandardEngine
@@ -16,7 +17,7 @@ class Runner:
 
     @staticmethod
     def start(script: str) -> None:
-        """执行脚本主入口
+        """脚本执行主入口
         """
         now = time.time()
         ymd = time.strftime('%Y-%m-%d', time.localtime(now))
@@ -27,11 +28,14 @@ class Runner:
         log.info(f'START.HMS={hms}')
 
         # 校验 script脚本不能为空
-        if script:
-            log.debug(f'script:[ {script} ]')
-            Runner.run(script)
-        else:
+        if not script:
             raise Exception('脚本不允许为空')
+
+        log.debug(f'script:[ {script} ]')
+        try:
+            Runner.run(script)
+        except Exception:
+            log.error(traceback.format_exc())
 
     @staticmethod
     def run(script: str) -> None:
@@ -53,6 +57,7 @@ class Runner:
 
 if __name__ == '__main__':
     import os
+
     from sendanywhere.utils.path_util import PROJECT_PATH
 
     # with open(os.path.join(PROJECT_PATH, 'docs', 'http-sampler.json'), 'r', encoding='utf-8') as f:
