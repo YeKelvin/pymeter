@@ -71,9 +71,9 @@ class SocketResultCollector(TestElement,
         return ContextService.get_context().coroutine_group.name
 
     def __init__(self, name: str = None, comments: str = None):
+        super().__init__(name, comments)
         self.__check_propertys()
 
-        super().__init__(name, comments)
         self.reportName = None
         self.startTime = 0
         self.endTime = 0
@@ -95,10 +95,12 @@ class SocketResultCollector(TestElement,
         if self.headers:
             headers = from_json(self.headers)
 
+        log.debug(f'socket start to connect url:[ {self.url} ] namespaces:[ {namespace} ]')
         self.sio.connect(self.url, headers=headers, namespaces=namespace)
 
     def __socket_disconnect(self):
         """关闭socket.io"""
+        log.debug('socket start to disconnect')
         if self.sio.connected:
             # 断开socket连接前先发送执行完成的事件
             self.sio.emit('execution_completed')

@@ -3,6 +3,8 @@
 # @File    : function_parser
 # @Time    : 2020/1/19 16:17
 # @Author  : Kelvin.Ye
+from typing import List
+
 from sendanywhere.engine.exceptions import InvalidVariableException
 from sendanywhere.engine.util import CompoundVariable
 from sendanywhere.functions import Function
@@ -14,7 +16,7 @@ log = get_logger(__name__)
 
 class FunctionParser:
     @staticmethod
-    def compile_str(source: str) -> []:
+    def compile_str(source: str) -> List:
         reader = StringReader(source)
         result = []
         buffer = []
@@ -104,7 +106,7 @@ class FunctionParser:
         return str_buffer
 
     @staticmethod
-    def __parse_params(reader: StringReader) -> [CompoundVariable]:
+    def __parse_params(reader: StringReader) -> List[CompoundVariable]:
         result = []
         buffer = []
         previous = ''
