@@ -38,6 +38,8 @@ pycryptodome = "^3.9.9"
 gevent = "^20.9.0"
 python-socketio = "^5.0.4"
 requests="^2.25.1"
+flask = "^1.1.2"
+flask_socketio = "^5.0.1"
 
 [tool.poetry.dev-dependencies]
 flask = "^1.1.2"
