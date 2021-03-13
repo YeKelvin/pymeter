@@ -59,19 +59,21 @@ class ResultCollector(TestElement,
         pass
 
     def sample_ended(self, sample_result) -> None:
-        if sample_result:
-            self.groups[self.__group_id]['samplers'].append({
-                'startTime': sample_result.start_time,
-                'endTime': sample_result.end_time,
-                'elapsedTime': sample_result.elapsed_time,
-                'success': sample_result.success,
-                'samplerName': sample_result.sample_label,
-                'request': sample_result.request_body,
-                'response': sample_result.response_data
-            })
+        if not sample_result:
+            return
 
-            if not sample_result.success:
-                self.groups[self.__group_id]['success'] = False
+        self.groups[self.__group_id]['samplers'].append({
+            'startTime': sample_result.start_time,
+            'endTime': sample_result.end_time,
+            'elapsedTime': sample_result.elapsed_time,
+            'success': sample_result.success,
+            'samplerName': sample_result.sample_label,
+            'request': sample_result.request_body,
+            'response': sample_result.response_data
+        })
+
+        if not sample_result.success:
+            self.groups[self.__group_id]['success'] = False
 
     def test_iteration_start(self, controller) -> None:
         pass

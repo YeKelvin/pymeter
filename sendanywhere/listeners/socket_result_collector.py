@@ -3,6 +3,7 @@
 # @File    : socket_result_collector.py
 # @Time    : 2021/2/9 11:48
 # @Author  : Kelvin.Ye
+import logging
 from typing import Final
 
 import socketio
@@ -74,11 +75,12 @@ class SocketResultCollector(TestElement,
         self.reportName = None
         self.startTime = 0
         self.endTime = 0
-        self.sio = socketio.AsyncClient()
+        debug = True if log.level <= logging.DEBUG else False
+        self.sio = socketio.Client(logger=debug, engineio_logger=debug)
 
     def __socket_connect(self):
         """连接socket.io"""
-        namespace = None
+        namespace = '/'
         headers = {}
 
         if self.namespace:
@@ -86,20 +88,21 @@ class SocketResultCollector(TestElement,
         if self.headers:
             headers = from_json(self.headers)
 
-        log.debug(f'socket start to connect url:[ {self.url} ] namespaces:[ {namespace} ]')
+        log.info(f'socket start to connect url:[ {self.url} ] namespaces:[ {namespace} ]')
         self.sio.connect(self.url, headers=headers, namespaces=namespace)
+        log.info(f'socket state:[ {self.sio.eio.state} ] sid:[ {self.sio.sid} ]')
 
     def __socket_disconnect(self):
         """关闭socket.io"""
-        log.debug('socket start to disconnect')
+        log.info('sid:[ {self.sio.sid} ] socket start to disconnect')
         if self.sio.connected:
-            # 断开socket连接前先发送执行完成的事件
-            self.sio.emit('execution_completed')
+            # 通知前端已执行完成
+            self.sio.emit('execution_completed', {'to': self.target_sid})
             self.sio.emit('disconnect')
 
-        self.sio.close()
+        self.sio.disconnect()
 
-    def emit(self, data: dict):
+    def __emit_to_target(self, data: dict):
         """发送消息，data自动添加转发目标的sid"""
         data['to'] = self.target_sid
         self.sio.emit(self.event_name, data)
@@ -117,7 +120,7 @@ class SocketResultCollector(TestElement,
         start_time = time_util.timestamp_as_ms()
         group_name = self.__group_name
 
-        self.emit({
+        self.__emit_to_target({
             'group': {
                 'id': group_id,
                 'startTime': start_time,
@@ -132,7 +135,7 @@ class SocketResultCollector(TestElement,
         group_id = self.__group_id
         end_time = time_util.timestamp_as_ms()
 
-        self.emit({
+        self.__emit_to_target({
             'group': {
                 'id': group_id,
                 'endTime': end_time
@@ -143,12 +146,12 @@ class SocketResultCollector(TestElement,
         pass
 
     def sample_ended(self, sample_result) -> None:
-        if sample_result:
+        if not sample_result:
             return
 
         group_id = self.__group_id
 
-        self.emit({
+        self.__emit_to_target({
             'sampler': {
                 'groupId': group_id,
                 'startTime': sample_result.start_time,
@@ -162,7 +165,7 @@ class SocketResultCollector(TestElement,
         })
 
         if not sample_result.success:
-            self.emit({
+            self.__emit_to_target({
                 'group': {
                     'id': group_id,
                     'success': False
