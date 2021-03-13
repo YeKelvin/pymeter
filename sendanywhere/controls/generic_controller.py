@@ -106,7 +106,7 @@ class GenericController(Controller):
 
     def fire_iteration_start(self):
         log.debug(
-            f'coroutine:[{ContextService.get_context().coroutine_name}] notify all LoopIterationListener to start'
+            f'coroutine:[ {ContextService.get_context().coroutine_name} ] notify all LoopIterationListener to start'
         )
         for listener in self.sub_iteration_listeners[::-1]:
             listener.iteration_start(self, self.iter_count)

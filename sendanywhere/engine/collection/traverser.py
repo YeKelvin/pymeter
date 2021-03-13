@@ -3,7 +3,7 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
-from copy import deepcopy
+from typing import Dict
 
 from sendanywhere.controls.controller import Controller
 from sendanywhere.controls.generic_controller import GenericController
@@ -154,7 +154,7 @@ class TreeCloner(HashTreeTraverser):
 class TestCompiler(HashTreeTraverser):
     def __init__(self, group_level_elements: list):
         self.group_level_elements = group_level_elements
-        self.sampler_package_saver: {Sampler, SamplePackage} = {}
+        self.sampler_package_saver: Dict[Sampler, SamplePackage] = {}
         self.compiled_node = []
 
     def configure_sampler(self, sampler) -> SamplePackage:
@@ -182,8 +182,10 @@ class TestCompiler(HashTreeTraverser):
 
     def __save_sampler_package(self, node, subtree):
         sample_package = SamplePackage()
-        sample_package.add(subtree.list())  # 储存 Sampler下的子节点
-        sample_package.add(self.group_level_elements)  # 把 group层的非 group节点添加至 Sampler节点下
+        # 储存 Sampler的子节点
+        sample_package.add(subtree.list())
+        # 储存 Group层的非 Group节点添加至 Sampler节点下
+        sample_package.add(self.group_level_elements)
         self.sampler_package_saver[node] = sample_package
 
     def __compile_controller(self, node, subtree):

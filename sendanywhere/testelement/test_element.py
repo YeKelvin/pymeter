@@ -4,6 +4,7 @@
 # @Time    : 2020/1/24 23:48
 # @Author  : Kelvin.Ye
 from copy import deepcopy
+from typing import Dict
 
 from sendanywhere.configs.config import ConfigElement
 from sendanywhere.engine.util import ValueReplacer
@@ -21,7 +22,7 @@ class TestElement:
     COMMENTS = 'TestElement__comments'
 
     def __init__(self, name: str = None, comments: str = None):
-        self.__propertys: {str, BaseProperty} = {}
+        self.__propertys: Dict[str, BaseProperty] = {}
         self.context = None
 
         if name:

@@ -185,7 +185,7 @@ class ScriptServer:
         """
         module_path = cls.module_path.get(name)
         if not module_path:
-            raise ScriptParseException(f'类名:[{name}] 找不到对应的节点类名称')
+            raise ScriptParseException(f'类名:[ {name} ] 找不到对应的节点类名称')
 
         module = importlib.import_module(module_path)
         return getattr(module, name)
