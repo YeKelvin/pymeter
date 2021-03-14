@@ -3,7 +3,8 @@
 # @File    : flask_socket_result_collector.py
 # @Time    : 2021/3/13 23:14
 # @Author  : Kelvin.Ye
-from flask_socketio import emit
+import importlib
+from typing import Final
 from sendanywhere.coroutines.context import ContextService
 from sendanywhere.engine.interface import (CoroutineGroupListener,
                                            NoCoroutineClone, SampleListener,
@@ -16,12 +17,48 @@ from sendanywhere.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class FlaskSocketResultCollector(TestElement,
-                                 TestStateListener,
-                                 CoroutineGroupListener,
-                                 SampleListener,
-                                 TestIterationListener,
-                                 NoCoroutineClone):
+class FlaskSocketIOResultCollector(TestElement,
+                                   TestStateListener,
+                                   CoroutineGroupListener,
+                                   SampleListener,
+                                   TestIterationListener,
+                                   NoCoroutineClone):
+
+    # 命名空间
+    NAMESPACE = 'FlaskSocketIOResultCollector__namespace'  # type: Final
+
+    # 事件名称
+    EVENT_NAME = 'FlaskSocketIOResultCollector__event_name'  # type: Final
+
+    # 发送消息目标的sid
+    TARGET_SID = 'FlaskSocketIOResultCollector__target_sid'  # type: Final
+
+    # Flask-SocketIO实例所在的模块路径
+    FLASK_SIO_INSTANCE_MODULE = 'FlaskSocketIOResultCollector__flask_sio_instance_module'  # type: Final
+
+    # Flask-SocketIO实例的名称
+    FLASK_SIO_INSTANCE_NAME = 'FlaskSocketIOResultCollector__flask_sio_instance_name'  # type: Final
+
+    @property
+    def namespace(self):
+        return self.get_property_as_str(self.NAMESPACE)
+
+    @property
+    def event_name(self):
+        return self.get_property_as_str(self.EVENT_NAME)
+
+    @property
+    def target_sid(self):
+        return self.get_property_as_str(self.TARGET_SID)
+
+    @property
+    def flask_sio_instance_module(self):
+        return self.get_property_as_str(self.FLASK_SIO_INSTANCE_MODULE)
+
+    @property
+    def flask_sio_instance_name(self):
+        return self.get_property_as_str(self.FLASK_SIO_INSTANCE_NAME)
+
     @property
     def __group_id(self) -> str:
         coroutine_group = ContextService.get_context().coroutine_group
@@ -36,21 +73,29 @@ class FlaskSocketResultCollector(TestElement,
         self.reportName = None
         self.startTime = 0
         self.endTime = 0
+        self.flask_sio = None
+
+    def __set_flask_sio(self) -> type:
+        module = importlib.import_module(self.flask_sio_instance_module)
+        self.flask_sio = getattr(module, self.flask_sio_instance_name)
+
+    def __emit_to_target(self, data):
+        self.flask_sio.emit(self.event_name, data, namespace=self.namespace, to=self.target_sid)
 
     def test_started(self) -> None:
         self.startTime = time_util.timestamp_as_ms()
-        self.__socket_connect()
+        self.__set_flask_sio()
 
     def test_ended(self) -> None:
         self.endTime = time_util.timestamp_as_ms()
-        self.__socket_disconnect()
+        self.flask_sio.emit('disconnect', namespace=self.namespace, to=self.target_sid)
 
     def group_started(self) -> None:
         group_id = self.__group_id
         start_time = time_util.timestamp_as_ms()
         group_name = self.__group_name
 
-        emit({
+        self.__emit_to_target({
             'group': {
                 'id': group_id,
                 'startTime': start_time,
@@ -65,7 +110,7 @@ class FlaskSocketResultCollector(TestElement,
         group_id = self.__group_id
         end_time = time_util.timestamp_as_ms()
 
-        emit({
+        self.__emit_to_target({
             'group': {
                 'id': group_id,
                 'endTime': end_time
@@ -81,7 +126,7 @@ class FlaskSocketResultCollector(TestElement,
 
         group_id = self.__group_id
 
-        emit({
+        self.__emit_to_target({
             'sampler': {
                 'groupId': group_id,
                 'startTime': sample_result.start_time,
@@ -95,7 +140,7 @@ class FlaskSocketResultCollector(TestElement,
         })
 
         if not sample_result.success:
-            emit({
+            self.__emit_to_target({
                 'group': {
                     'id': group_id,
                     'success': False

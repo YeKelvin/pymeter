@@ -51,7 +51,8 @@ class ScriptServer:
 
         # 监听器
         'ResultCollector': 'sendanywhere.listeners.result_collector',
-        'SocketResultCollector': 'sendanywhere.listeners.socket_result_collector'
+        'SocketResultCollector': 'sendanywhere.listeners.socket_result_collector',
+        'FlaskSocketIOResultCollector': 'sendanywhere.listeners.flask_socketio_result_collector'
     }
 
     @classmethod
@@ -134,7 +135,7 @@ class ScriptServer:
 
     @classmethod
     def __get_node(cls, script: dict) -> TestElement:
-        """根据脚本中节点的 class属性转换为对应的 class对象
+        """根据元素的class属性实例化为对象
 
         Args:
             script: 脚本节点
@@ -142,15 +143,26 @@ class ScriptServer:
         Returns:    object
 
         """
-        # 获取 TestElement实现类
+        # 获取 TestElement的类型
         class_name = script.get('class')
+        # 根据 ClassName获取 Class对象
         clazz = cls.__get_class(class_name)
 
-        # 实例化 TestElement实现类
+        # 实例化 TestElement
         node = clazz()
         node.set_property_by_replace(TestElement.LABEL, script.get('name'))
         node.set_property_by_replace(TestElement.COMMENTS, script.get('comments'))
-        for key, value in script.get('property').items():
+
+        # 设置 TestElement的属性
+        cls.__set_node_property(node, script.get('property'))
+
+        return node
+
+    @classmethod
+    def __set_node_property(cls, node, property):
+        if not property:
+            return
+        for key, value in property.items():
             if isinstance(value, str):
                 node.set_property_by_replace(key, value)
             elif isinstance(value, dict):
@@ -171,7 +183,6 @@ class ScriptServer:
                     else:
                         raise ScriptParseException('脚本解析失败，当前节点缺少 class属性')
                 node.set_property(key, collection)
-        return node
 
     @classmethod
     def __get_class(cls, name: str) -> type:
