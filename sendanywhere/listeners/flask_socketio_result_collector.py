@@ -97,11 +97,12 @@ class FlaskSocketIOResultCollector(TestElement,
 
         self.__emit_to_target({
             'group': {
-                'id': group_id,
+                'groupId': group_id,
+                'groupName': group_name,
                 'startTime': start_time,
                 'endTime': 0,
+                'elapsedTime': 0,
                 'success': True,
-                'groupName': group_name,
                 'samplers': []
             }
         })
@@ -112,8 +113,9 @@ class FlaskSocketIOResultCollector(TestElement,
 
         self.__emit_to_target({
             'group': {
-                'id': group_id,
-                'endTime': end_time
+                'groupId': group_id,
+                'endTime': end_time,
+                'elapsedTime': 0
             }
         })
 
@@ -129,20 +131,20 @@ class FlaskSocketIOResultCollector(TestElement,
         self.__emit_to_target({
             'sampler': {
                 'groupId': group_id,
+                'samplerName': sample_result.sample_label,
                 'startTime': sample_result.start_time,
                 'endTime': sample_result.end_time,
                 'elapsedTime': sample_result.elapsed_time,
-                'success': sample_result.success,
-                'samplerName': sample_result.sample_label,
                 'request': sample_result.request_body,
-                'response': sample_result.response_data
+                'response': sample_result.response_data,
+                'success': sample_result.success,
             }
         })
 
         if not sample_result.success:
             self.__emit_to_target({
                 'group': {
-                    'id': group_id,
+                    'groupId': group_id,
                     'success': False
                 }
             })
