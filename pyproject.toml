@@ -14,21 +14,12 @@ packages = [
 name = "aliyun"
 url = "https://mirrors.aliyun.com/pypi/simple/"
 default = true
-#secondary = true
-
-[[tool.poetry.source]]
-name = "baidu"
-url = "https://mirror.baidu.com/pypi/simple/"
-#default = true
-secondary = true
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.8"
 click = "^7.1.2"
 jsonpath = "^0.82"
 orjson = "^3.5.2"
-pytest = "^5.4.3"
-pytest-html = "^3.1.1"
 sqlalchemy = "^1.3.20"
 cx-Oracle = "^8.1.0"
 sshtunnel = "^0.4.0"
@@ -38,17 +29,25 @@ python-socketio = "^5.2.1"
 requests="^2.25.1"
 flask = "^1.1.2"
 flask_socketio = "^5.0.1"
-flake8 = "*"
-yapf = "*"
 
 [tool.poetry.dev-dependencies]
-flask = "^1.1.2"
-
-[tool.poetry.scripts]
+pytest = "*"
+pytest-html = "*"
+flake8 = "*"
+yapf = "*"
+isort = "*"
 
 [build-system]
 requires = [
-    "setuptools!=50.0",
-    "poetry>=0.12"
+    "setuptools>=50.0",
+    "poetry>=1.1.5"
 ]
 build-backend = "poetry.masonry.api"
+
+[tool.isort]
+profile = "google"
+line_length = 120
+multi_line_output = 3
+group_by_package = true
+include_trailing_comma = true
+force_sort_within_sections = true
