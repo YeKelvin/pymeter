@@ -1,15 +1,16 @@
 .idea/
 .cache/
-.venv/
+.pytest_cache/
+.html/
+.report/
 __pycache__/
+
+*.lock
+*.log
 
 # build
 *.egg-info/
 
 # pytest
-.pytest_cache/
-assets/
-report.html
-
-*.lock
-*.log
+**/assets/
+**/report.html
