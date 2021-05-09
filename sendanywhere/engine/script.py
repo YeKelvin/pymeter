@@ -8,7 +8,7 @@ import os
 from typing import List, Tuple, Iterable
 
 from sendanywhere.engine.collection.tree import HashTree
-from sendanywhere.engine.exceptions import ScriptParseException
+from sendanywhere.common.exceptions import ScriptParseException
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils import json_util
 from sendanywhere.utils.log_util import get_logger

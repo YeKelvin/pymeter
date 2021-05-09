@@ -5,7 +5,7 @@
 # @Author  : Kelvin.Ye
 from typing import List
 
-from sendanywhere.engine.exceptions import InvalidVariableException
+from sendanywhere.common.exceptions import InvalidVariableException
 from sendanywhere.engine.util import CompoundVariable
 from sendanywhere.functions import Function
 from sendanywhere.utils.log_util import get_logger

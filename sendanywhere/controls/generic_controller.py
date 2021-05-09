@@ -7,7 +7,7 @@ from typing import Union
 
 from sendanywhere.controls.controller import Controller
 from sendanywhere.coroutines.context import ContextService
-from sendanywhere.engine.exceptions import NextIsNullException
+from sendanywhere.common.exceptions import NextIsNullException
 from sendanywhere.engine.interface import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.utils.log_util import get_logger

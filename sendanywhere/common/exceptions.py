@@ -9,32 +9,36 @@ log = get_logger(__name__)
 
 
 class InvalidVariableException(Exception):
-    pass
+    ...
 
 
 class InvalidPropertyException(Exception):
-    pass
+    ...
 
 
 class EngineException(Exception):
-    pass
+    ...
 
 
 class ScriptParseException(Exception):
-    pass
+    ...
 
 
 class NextIsNullException(Exception):
-    pass
+    ...
 
 
 class StopCoroutineGroupException(Exception):
-    pass
+    ...
 
 
 class StopTestException(Exception):
-    pass
+    ...
 
 
 class StopTestNowException(Exception):
-    pass
+    ...
+
+
+class ProjectBaseDirectoryNotFoundException(Exception):
+    ...

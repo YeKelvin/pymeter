@@ -16,7 +16,7 @@ from sendanywhere.coroutines.context import CoroutineContext, ContextService
 from sendanywhere.coroutines.variables import Variables
 from sendanywhere.engine.collection.traverser import TestCompiler, FindTestElementsUpToRoot, SearchByClass, TreeCloner
 from sendanywhere.engine.collection.tree import HashTree
-from sendanywhere.engine.exceptions import StopTestException, StopTestNowException, StopCoroutineGroupException
+from sendanywhere.common.exceptions import StopTestException, StopTestNowException, StopCoroutineGroupException
 from sendanywhere.engine.interface import TestIterationListener, CoroutineGroupListener, LoopIterationListener
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.samplers.sampler import Sampler

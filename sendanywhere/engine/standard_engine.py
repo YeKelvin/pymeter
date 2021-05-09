@@ -13,7 +13,7 @@ from sendanywhere.coroutines.context import ContextService
 from sendanywhere.coroutines.group import CoroutineGroup
 from sendanywhere.engine.collection.traverser import SearchByClass
 from sendanywhere.engine.collection.tree import HashTree
-from sendanywhere.engine.exceptions import EngineException, StopTestException
+from sendanywhere.common.exceptions import EngineException, StopTestException
 from sendanywhere.engine.interface import TestStateListener
 from sendanywhere.listeners.result_collector import ResultCollector
 from sendanywhere.testelement.test_element import TestElement
