@@ -4,17 +4,18 @@
 # @Time    : 2019/3/15 10:56
 # @Author  : Kelvin.Ye
 import logging
-from sendanywhere.utils import config
+
+from sendanywhere.utils import project
 
 
 # 日志格式
 LOG_FORMAT = '[%(asctime)s][%(levelname)s][%(threadName)s][%(name)s.%(funcName)s %(lineno)d] %(message)s'
 
 # 日志级别
-LEVEL = config.get('log', 'level')
+LEVEL = project.config.get('log', 'level', default='INFO')
 
 # 日志文件名称
-LOG_FILE_NAME = config.get('log', 'name')
+LOG_FILE_NAME = project.config.get('log', 'name', default='sendanywhere')
 
 # 日志格式
 FORMATTER = logging.Formatter(LOG_FORMAT)
