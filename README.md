@@ -6,10 +6,9 @@
 
 ```text
 send-anywhere/
-    |-resources
-        |-config.ini
-        |-sendanywhere
+    |-sendanywhere/
         |-assertions
+        |-common
         |-configs
         |-controls
         |-engine
@@ -20,4 +19,7 @@ send-anywhere/
         |-testelement
         |-timers
         |-utils
+    |-config.ini
+    |-pytest.ini
+    |-pyproject.toml
 ```
