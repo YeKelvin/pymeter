@@ -3,92 +3,145 @@
 # @File    : hash_tree
 # @Time    : 2020/2/24 14:54
 # @Author  : Kelvin.Ye
-from sendanywhere.engine.collection.traverser import ConvertToString, TreeSearcher
+from typing import Dict
+
+from sendanywhere.common.exceptions import UnsupportedOperationException
+from sendanywhere.engine.collection.traverser import ConvertToString
+from sendanywhere.engine.collection.traverser import TreeSearcher
 from sendanywhere.utils.log_util import get_logger
 
 log = get_logger(__name__)
 
 
 class HashTree(dict):
-    def __init__(self, node: object = None, hash_tree: 'HashTree' = None):
+
+    def __init__(self, _dict: Dict(object, 'HashTree') = None, key: object = None):
         super().__init__()
-        self.__data: {object, 'HashTree'} = hash_tree if hash_tree is not None else {}
+        # self.__data: Dict(object, 'HashTree') = hash_tree if hash_tree is not None else {}
+        self._data: Dict(object, 'HashTree') = _dict or {}
 
-        if node:
-            self.__data[node] = HashTree()
+        if key:
+            self._data[key] = HashTree()
 
-    def put(self, node: object, hashtree: 'HashTree') -> 'HashTree':
+    def put(self, key: object, value: 'HashTree') -> 'HashTree':
         """添加 node和它的 subtree
         """
-        previous = self.get_subtree(node)
-        self.add_node_and_subtree(node, hashtree)
+        previous = self.get_subtree(key)
+        self.add_key_and_subtree(key, value)
         return previous
 
-    def put_all(self, hashtree: 'HashTree'):
+    def put_all(self, _dict: Dict(object, 'HashTree')):
         """添加 hasttree
         """
-        self.add_newtree(hashtree)
+        if isinstance(_dict, HashTree):
+            self.add_newtree(_dict)
+        else:
+            raise UnsupportedOperationException('can only putAll other HashTree objects')
 
-    def add_node(self, node: object) -> 'HashTree':
-        """添加 node
+    def add_key(self, key: object) -> 'HashTree':
         """
-        if not self.contains(node):
+        Adds an key into the HashTree at the current level.
+        If a HashTree exists for the key already, no new tree will be added
+
+        @param key key to be added to HashTree
+        @return newly generated tree, if no tree was found for the given key;
+                existing key otherwise
+        """
+        if not self.contains(key):
             new_tree = HashTree()
-            self.__data[node] = new_tree
+            self._data[key] = new_tree
             return new_tree
-        return self.get_subtree(node)
 
-    def add_node_and_subtree(self, node: object, subtree: 'HashTree') -> None:
-        """添加 node和它的 subtree
+        return self.get_subtree(key)
+
+    def add_key_and_subtree(self, key: object, subtree: 'HashTree') -> None:
         """
-        self.add_node(node).add_newtree(subtree)
+        Adds a key as a node at the current level and then adds the given
+        HashTree to that new node.
+
+        @param key     key to create in this tree
+        @param subTree sub tree to add to the node created for the first argument.
+        """
+        self.add_key(key).add_newtree(subtree)
 
     def add_newtree(self, newtree: 'HashTree') -> None:
-        """添加 hasttree
         """
-        for node in newtree.list():
-            self.add_node(node).add_newtree(newtree.get_subtree(node))
+        Adds all the nodes and branches of the given tree to this tree.
+        Is like merging two trees. Duplicates are ignored.
 
-    def add_list(self, nodes: list) -> None:
-        """添加 node列表
+        @param newTree the tree to be added
         """
-        for node in nodes:
-            self.add_node(node)
+        for item in newtree.list():
+            self.add_key(item).add_newtree(newtree.get_subtree(item))
 
-    def add_node_and_subnode(self, node: object, subnode: object) -> 'HashTree':
-        """添加 node，并在第一个 node下再继续添加 subnode
+    def add_keys(self, keys: list) -> None:
         """
-        return self.add_node(node).add_node(subnode)
+        Adds all the given objects as nodes at the current level.
 
-    def add_node_and_sublist(self, node: object, subnodes: list) -> None:
-        """添加 node，并在第一个 node下再继续添加 subnode列表
+        @param keys Array of Keys to be added to HashTree.
         """
-        self.add_node(node).add_list(subnodes)
+        for key in keys:
+            self.add_key(key)
 
-    def add_node_by_treepath(self, treepath: list, node: object) -> 'HashTree':
-        """在 treepath末尾添加 node
+    def add_key_and_subkey(self, key: object, subkey: object) -> 'HashTree':
+        """添加key，并在第一个key下再继续添加key
+        Adds a key and it's values in the HashTree.
+        The first argument becomes a node at the current level,
+        and adds all the values in the array to the new node.
+
+        @param key    key to be added
+        @param values array of objects to be added as keys in the secondary node
         """
-        tree = self.__add_treepath(treepath)
-        return tree.add_node(node)
+        return self.add_key(key).add_key(subkey)
 
-    def add_nodes_by_treepath(self, treepath: list, nodes: list) -> None:
-        """在 treepath末尾添加 node列表
+    def add_key_and_subkeys(self, key: object, subkeys: list) -> None:
+        """添加key，并在第一个key下再继续添加keys列表
+        Adds a key as a node at the current level and then adds all the objects in the second argument as nodes of the new node.
+
+        @param key    key to be added
+        @param values Collection of objects to be added as keys in the secondary node
         """
-        tree = self.__add_treepath(treepath)
-        tree.add_list(nodes)
+        self.add_key(key).add_keys(subkeys)
 
-    def __add_treepath(self, treepath: list):
+    def add_key_by_treepath(self, treepath: list, key: object) -> 'HashTree':
+        """在treepath末尾添加key
+        Adds a series of nodes into the HashTree using the given path.
+        The first argument is a List that represents a path to a specific node in the tree.
+        If the path doesn't already exist, it is created (the objects are added along the way).
+        At the path, the object in the second argument is added as a node.
+
+        @param treePath a list of objects representing a path
+        @param value    Object to add as a node to bottom-most node
+        @return HashTree for which <code>value</code> is the key
+        """
+        tree = self._add_treepath(treepath)
+        return tree.add_key(key)
+
+    def add_keys_by_treepath(self, treepath: list, keys: list) -> None:
+        """在treepath末尾添加keys列表
+        Adds a series of nodes into the HashTree using the given path.
+        The first argument is a SortedSet that represents a path to a specific node in the tree.
+        If the path doesn't already exist, it is created (the objects are added along the way).
+        At the path, all the objects in the second argument are added as nodes.
+
+        @param treePath a SortedSet of objects representing a path
+        @param values   Collection of values to be added as keys to bottom-most node
+        """
+        tree = self._add_treepath(treepath)
+        tree.add_keys(keys)
+
+    def _add_treepath(self, treepath: list) -> 'HashTree':
         """添加 treepath（不存在时添加）
         """
         tree = self
-        for node in treepath:
-            tree = tree.add_node(node)
+        for item in treepath:
+            tree = tree.add_key(item)
         return tree
 
     def get_subtree(self, node: object) -> 'HashTree':
-        """返回 node的 hashtree
+        """返回key的hashtree，这个hashtree其实就是节点下的子节点
         """
-        return self.__data.get(node)
+        return self._data.get(node)
 
     def index(self, index) -> 'HashTree':
         """根据下标返回对应 node的 hashtree
@@ -98,22 +151,22 @@ class HashTree(dict):
     def clear(self) -> None:
         """清空 hashtree
         """
-        self.__data.clear()
+        self._data.clear()
 
     def values(self):
         """返回当前 hashtree下的所有 subtree列表
         """
-        return self.__data.values()
+        return self._data.values()
 
     def contains(self, node: object) -> bool:
         """判断是否存在 node
         """
-        return node in self.__data
+        return node in self._data
 
     def list(self) -> list:
         """返回当前 hashtree下 node的列表
         """
-        return list(self.__data.keys())
+        return list(self._data.keys())
 
     def search(self, node: object) -> "HashTree":
         """在当前 hashtree下遍历搜索（深度优先） node
@@ -171,7 +224,7 @@ class ListedHashTree(HashTree):
     def add_node(self, node: object) -> 'ListedHashTree':
         if not self.contains(node):
             new_tree = ListedHashTree()
-            self.__data[node] = new_tree
+            self._data[node] = new_tree
             self.order.append(node)
             return new_tree
         return self.get_subtree(node)

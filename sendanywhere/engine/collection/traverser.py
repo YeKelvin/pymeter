@@ -140,7 +140,7 @@ class TreeCloner(HashTreeTraverser):
         else:
             cloned_node = node
 
-        self.new_tree.add_node_by_treepath(self.tree_path, cloned_node)
+        self.new_tree.add_key_by_treepath(self.tree_path, cloned_node)
         self.tree_path.append(cloned_node)
 
     def subtract_node(self) -> None:
