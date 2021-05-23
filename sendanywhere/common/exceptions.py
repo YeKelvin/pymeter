@@ -42,3 +42,7 @@ class StopTestNowException(Exception):
 
 class ProjectBaseDirectoryNotFoundException(Exception):
     ...
+
+
+class UnsupportedOperationException(Exception):
+    ...
