@@ -27,13 +27,13 @@ pycryptodome = "^3.10.1"
 gevent = "^21.1.2"
 python-socketio = "^5.2.1"
 requests="^2.25.1"
+httpx="^0.18.1"
 flask = "^1.1.2"
 flask_socketio = "^5.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
 pytest-html = "*"
-flake8 = "*"
 yapf = "*"
 isort = "*"
 
