@@ -24,14 +24,14 @@ class HashTree(dict):
             self._data[key] = HashTree()
 
     def put(self, key: object, value: 'HashTree') -> 'HashTree':
-        """添加 node和它的 subtree
+        """添加key和subtree
         """
         previous = self.get_subtree(key)
         self.add_key_and_subtree(key, value)
         return previous
 
     def put_all(self, _dict: Dict(object, 'HashTree')):
-        """添加 hasttree
+        """添加hasttree
         """
         if isinstance(_dict, HashTree):
             self.add_newtree(_dict)

@@ -5,10 +5,10 @@
 # @Author  : Kelvin.Ye
 import importlib
 import os
-from typing import List, Tuple, Iterable
+from typing import Iterable, List, Tuple
 
-from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.common.exceptions import ScriptParseException
+from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils import json_util
 from sendanywhere.utils.log_util import get_logger
@@ -56,40 +56,34 @@ class ScriptServer:
     }
 
     @classmethod
-    def __deserial_script(cls, content) -> List[dict]:
-        """反序列化脚本
-        """
-        script = []
-        if isinstance(content, list):
-            script = content
-        elif isinstance(content, str):
-            path_exists = os.path.exists(content)
-            if not path_exists:
-                script = json_util.from_json(content)
-            else:
-                with open(content, 'r', encoding='utf-8') as f:
-                    json = ''.join(f.readlines())
-                    script = json_util.from_json(json)
-        return script
-
-    @classmethod
-    def load_tree(cls, content: str) -> HashTree:
-        """脚本反序列化为对象
-
-        Args:
-            content:    脚本内容
-
-        Returns:        脚本的 HashTree对象
-
-        """
-        script = cls.__deserial_script(content)
+    def load_tree(cls, source: str) -> HashTree:
+        """读取脚本并返回脚本的HashTree对象"""
+        script = cls.__loads_script(source)
         nodes = cls.__parse(script)
         if not nodes:
             raise ScriptParseException('脚本为空或脚本已被禁用')
+
         root_tree = HashTree()
         for node, hash_tree in nodes:
             root_tree.put(node, hash_tree)
         return root_tree
+
+    @classmethod
+    def __loads_script(cls, source) -> List[dict]:
+        """反序列化脚本"""
+        script = []
+        if isinstance(source, list):
+            script = source
+        elif isinstance(source, str):
+            path_exists = os.path.exists(source)  # TODO: 待优化
+            if not path_exists:
+                script = json_util.from_json(source)
+            else:
+                with open(source, 'r', encoding='utf-8') as f:
+                    json = ''.join(f.readlines())
+                    script = json_util.from_json(json)
+        # TODO: else: raise e
+        return script
 
     @classmethod
     def __parse(cls, script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
@@ -97,7 +91,7 @@ class ScriptServer:
         cls.__check(script)
         nodes = []
         for item in script:
-            # 过滤 enabled=False的节点(已禁用的节点)
+            # 过滤enabled=False的节点(已禁用的节点)
             if not item.get('enabled'):
                 continue
 
@@ -119,19 +113,20 @@ class ScriptServer:
     def __check(cls, script: Iterable[dict]) -> None:
         if not script:
             raise ScriptParseException('脚本解析失败，当前节点为空')
+
         for item in script:
             if 'name' not in item:
-                raise ScriptParseException('脚本解析失败，当前节点缺少 name属性')
+                raise ScriptParseException('脚本解析失败，当前节点缺少 name 属性')
             if 'comments' not in item:
-                raise ScriptParseException('脚本解析失败，当前节点缺少 comments属性')
+                raise ScriptParseException('脚本解析失败，当前节点缺少 comments 属性')
             if 'class' not in item:
-                raise ScriptParseException('脚本解析失败，当前节点缺少 class属性')
+                raise ScriptParseException('脚本解析失败，当前节点缺少 class 属性')
             if 'enabled' not in item:
-                raise ScriptParseException('脚本解析失败，当前节点缺少 enabled属性')
+                raise ScriptParseException('脚本解析失败，当前节点缺少 enabled 属性')
             if 'property' not in item:
-                raise ScriptParseException('脚本解析失败，当前节点缺少 property属性')
+                raise ScriptParseException('脚本解析失败，当前节点缺少 property 属性')
             if 'child' not in item:
-                raise ScriptParseException('脚本解析失败，当前节点缺少 child属性')
+                raise ScriptParseException('脚本解析失败，当前节点缺少 child 属性')
 
     @classmethod
     def __get_node(cls, script: dict) -> TestElement:
@@ -162,6 +157,7 @@ class ScriptServer:
     def __set_node_property(cls, node, property):
         if not property:
             return
+
         for key, value in property.items():
             if isinstance(value, str):
                 node.set_property_by_replace(key, value)
@@ -196,7 +192,7 @@ class ScriptServer:
         """
         module_path = cls.module_path.get(name)
         if not module_path:
-            raise ScriptParseException(f'类名:[ {name} ] 找不到对应的节点类名称')
+            raise ScriptParseException(f'找不到对应节点的类类名称:[ {name} ] ')
 
         module = importlib.import_module(module_path)
         return getattr(module, name)
@@ -211,4 +207,4 @@ class ScriptServer:
         Returns:
 
         """
-        pass
+        ...
