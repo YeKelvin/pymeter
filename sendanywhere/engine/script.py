@@ -75,14 +75,15 @@ class ScriptServer:
         if isinstance(source, list):
             script = source
         elif isinstance(source, str):
-            path_exists = os.path.exists(source)  # TODO: 待优化
-            if not path_exists:
+            try:
                 script = json_util.from_json(source)
-            else:
-                with open(source, 'r', encoding='utf-8') as f:
-                    json = ''.join(f.readlines())
-                    script = json_util.from_json(json)
-        # TODO: else: raise e
+            except Exception:
+                if os.path.exists(source):
+                    with open(source, 'r', encoding='utf-8') as f:
+                        json = ''.join(f.readlines())
+                        script = json_util.from_json(json)
+                else:
+                    raise
         return script
 
     @classmethod
