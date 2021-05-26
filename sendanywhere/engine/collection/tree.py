@@ -15,10 +15,10 @@ log = get_logger(__name__)
 
 class HashTree(dict):
 
-    def __init__(self, _dict: Dict(object, 'HashTree') = None, key: object = None):
+    def __init__(self, _dict: Dict[object, 'HashTree'] = None, key: object = None):
         super().__init__()
-        # self.__data: Dict(object, 'HashTree') = hash_tree if hash_tree is not None else {}
-        self._data: Dict(object, 'HashTree') = _dict or {}
+        # self.__data: Dict[object, 'HashTree'] = hash_tree if hash_tree is not None else {}
+        self._data: Dict[object, 'HashTree'] = _dict or {}
 
         if key:
             self._data[key] = HashTree()
@@ -30,7 +30,7 @@ class HashTree(dict):
         self.add_key_and_subtree(key, value)
         return previous
 
-    def put_all(self, _dict: Dict(object, 'HashTree')):
+    def put_all(self, _dict: Dict[object, 'HashTree']):
         """添加hasttree
         """
         if isinstance(_dict, HashTree):
