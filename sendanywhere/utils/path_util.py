@@ -8,6 +8,7 @@ import sys
 
 from sendanywhere.common.exceptions import ProjectBaseDirectoryNotFoundException
 
+
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 RESOURCES_PATH = os.path.join(PROJECT_PATH, 'resources')
 SRC_PATH = os.path.join(PROJECT_PATH, 'sendanywhere')

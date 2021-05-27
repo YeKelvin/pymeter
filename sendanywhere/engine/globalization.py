@@ -3,6 +3,7 @@
 # @File    : globalization.py
 # @Time    : 2020/2/20 21:34
 # @Author  : Kelvin.Ye
+from typing import Dict
 from sendanywhere.coroutines.context import ContextService
 
 
@@ -12,7 +13,7 @@ class GlobalProperties(dict):
 
 
 class GlobalUtils:
-    __all_global_properties: {str, GlobalProperties} = {}
+    __all_global_properties: Dict[str, GlobalProperties] = {}
 
     @classmethod
     def set_property(cls, key: str, value: any, engine_id=None) -> None:

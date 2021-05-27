@@ -6,6 +6,7 @@
 from sendanywhere.common.exceptions import InvalidVariableException
 from sendanywhere.utils.log_util import get_logger
 
+
 log = get_logger(__name__)
 
 

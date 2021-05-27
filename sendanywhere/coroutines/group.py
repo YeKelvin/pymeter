@@ -4,24 +4,37 @@
 # @Time    : 2020/2/13 12:58
 # @Author  : Kelvin.Ye
 import traceback
-from enum import Enum, unique
-from typing import Final, Union
+from enum import Enum
+from enum import unique
+from typing import Final
+from typing import List
+from typing import Union
 
 from gevent import Greenlet
 
 from sendanywhere.assertions.assertion import AssertionResult
-from sendanywhere.controls.controller import Controller, IteratingController
+from sendanywhere.common.exceptions import StopCoroutineGroupException
+from sendanywhere.common.exceptions import StopTestException
+from sendanywhere.common.exceptions import StopTestNowException
+from sendanywhere.controls.controller import Controller
+from sendanywhere.controls.controller import IteratingController
 from sendanywhere.controls.loop_controller import LoopController
-from sendanywhere.coroutines.context import CoroutineContext, ContextService
+from sendanywhere.coroutines.context import ContextService
+from sendanywhere.coroutines.context import CoroutineContext
 from sendanywhere.coroutines.variables import Variables
-from sendanywhere.engine.collection.traverser import TestCompiler, FindTestElementsUpToRoot, SearchByClass, TreeCloner
+from sendanywhere.engine.collection.traverser import FindTestElementsUpToRoot
+from sendanywhere.engine.collection.traverser import SearchByClass
+from sendanywhere.engine.collection.traverser import TestCompiler
+from sendanywhere.engine.collection.traverser import TreeCloner
 from sendanywhere.engine.collection.tree import HashTree
-from sendanywhere.common.exceptions import StopTestException, StopTestNowException, StopCoroutineGroupException
-from sendanywhere.engine.interface import TestIterationListener, CoroutineGroupListener, LoopIterationListener
+from sendanywhere.engine.interface import CoroutineGroupListener
+from sendanywhere.engine.interface import LoopIterationListener
+from sendanywhere.engine.interface import TestIterationListener
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 
@@ -118,7 +131,7 @@ class CoroutineGroup(LoopController):
         self.running = False
         self.group_number = None
         self.group_tree = None
-        self.all_coroutines: [Coroutine] = []
+        self.all_coroutines: List[Coroutine] = []
 
     def start(self, group_number, group_tree, engine) -> None:
         """启动CoroutineGroup

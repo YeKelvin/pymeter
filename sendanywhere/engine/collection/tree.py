@@ -10,6 +10,7 @@ from sendanywhere.engine.collection.traverser import ConvertToString
 from sendanywhere.engine.collection.traverser import TreeSearcher
 from sendanywhere.utils.log_util import get_logger
 
+
 log = get_logger(__name__)
 
 

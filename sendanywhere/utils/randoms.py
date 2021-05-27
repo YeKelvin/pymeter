@@ -5,11 +5,18 @@
 # @Author  : Kelvin.Ye
 import random
 import time
-from datetime import date, timedelta
-from random import randint, choice
+from datetime import date
+from datetime import timedelta
+from random import choice
+from random import randint
 
-from sendanywhere.utils.constants.idcard import AREA_CODE, WEIGHT, CHECK_CODE
-from sendanywhere.utils.constants.phone_number_prefix import MOBILENO_PREFIX, CMCC_CODE, CUCC_CODE, TELECOM_CODE
+from sendanywhere.utils.constants.idcard import AREA_CODE
+from sendanywhere.utils.constants.idcard import CHECK_CODE
+from sendanywhere.utils.constants.idcard import WEIGHT
+from sendanywhere.utils.constants.phone_number_prefix import CMCC_CODE
+from sendanywhere.utils.constants.phone_number_prefix import CUCC_CODE
+from sendanywhere.utils.constants.phone_number_prefix import MOBILENO_PREFIX
+from sendanywhere.utils.constants.phone_number_prefix import TELECOM_CODE
 
 
 def get_number(length: int, prefix: str = '', suffix: str = '') -> str:
@@ -61,21 +68,59 @@ def get_phone_number(operators='ALL'):
     :return:            手机号
     """
     return {
-               'ALL': choice(MOBILENO_PREFIX),
-               'CMCC': choice(CMCC_CODE),
-               'CUCC': choice(CUCC_CODE),
-               'TELECOM': choice(TELECOM_CODE)
-           }.get(operators, choice(MOBILENO_PREFIX)) + get_number(8)
+        'ALL': choice(MOBILENO_PREFIX),
+        'CMCC': choice(CMCC_CODE),
+        'CUCC': choice(CUCC_CODE),
+        'TELECOM': choice(TELECOM_CODE)
+    }.get(operators,
+          choice(MOBILENO_PREFIX)) + get_number(8)
 
 
 def get_phone_number_cambodia():
     """随机生成855可用运营商号段注册号码
     """
-    phone_list = ['11', '12', '14', '17', '61', '76', '77', '78', '79', '85', '89', '92',
-                  '95', '99', '10', '15', '16', '69', '70', '81', '86', '87', '93',
-                  '96', '98', '31', '60', '66', '67', '68', '71', '88', '90', '97',
-                  '13', '80', '83', '84', '38', '18'
-                  ]  # 柬埔寨可正常使用手机号号段
+    phone_list = [
+        '11',
+        '12',
+        '14',
+        '17',
+        '61',
+        '76',
+        '77',
+        '78',
+        '79',
+        '85',
+        '89',
+        '92',
+        '95',
+        '99',
+        '10',
+        '15',
+        '16',
+        '69',
+        '70',
+        '81',
+        '86',
+        '87',
+        '93',
+        '96',
+        '98',
+        '31',
+        '60',
+        '66',
+        '67',
+        '68',
+        '71',
+        '88',
+        '90',
+        '97',
+        '13',
+        '80',
+        '83',
+        '84',
+        '38',
+        '18'
+    ]  # 柬埔寨可正常使用手机号号段
     phone_seven_long = ['76', '96', '31', '71', '88', '97', '38', '18']
     phone_segment = random.choice(phone_list)
     if phone_segment == '12':

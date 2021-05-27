@@ -4,8 +4,8 @@
 # @Time    : 2020/2/16 14:16
 # @Author  : Kelvin.Ye
 from sendanywhere.engine.util import CompoundVariable
-from sendanywhere.utils.json_util import to_json
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 

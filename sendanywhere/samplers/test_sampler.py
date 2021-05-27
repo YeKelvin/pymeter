@@ -4,12 +4,14 @@
 # @Time    : 2020/3/3 17:58
 # @Author  : Kelvin.Ye
 from typing import Final
+
 import gevent
 
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 

@@ -3,7 +3,8 @@
 # @File    : http_headers.py
 # @Time    : 2020/2/17 15:41
 # @Author  : Kelvin.Ye
-from sendanywhere.testelement.test_element import ConfigTestElement, TestElement
+from sendanywhere.testelement.test_element import ConfigTestElement
+from sendanywhere.testelement.test_element import TestElement
 
 
 class HttpHeader(TestElement):

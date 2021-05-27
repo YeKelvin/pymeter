@@ -3,10 +3,6 @@
 # @File    : design_patterns.py
 # @Time    : 2019/10/16 11:55
 # @Author  : Kelvin.Ye
-
-# ===============================
-# 设计模式
-# ===============================
 import threading
 
 

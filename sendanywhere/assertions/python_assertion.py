@@ -3,10 +3,12 @@
 # @File    : python_assertion.py.py
 # @Time    : 2020/2/17 16:39
 # @Author  : Kelvin.Ye
-from sendanywhere.assertions.assertion import Assertion, AssertionResult
+from sendanywhere.assertions.assertion import Assertion
+from sendanywhere.assertions.assertion import AssertionResult
 from sendanywhere.samplers.sample_result import SampleResult
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 

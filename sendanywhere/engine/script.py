@@ -5,13 +5,16 @@
 # @Author  : Kelvin.Ye
 import importlib
 import os
-from typing import Iterable, List, Tuple
+from typing import Iterable
+from typing import List
+from typing import Tuple
 
 from sendanywhere.common.exceptions import ScriptParseException
 from sendanywhere.engine.collection.tree import HashTree
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils import json_util
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 

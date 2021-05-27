@@ -32,6 +32,7 @@ flask_socketio = "^5.0.3"
 [tool.poetry.dev-dependencies]
 pytest = "*"
 pytest-html = "*"
+flake8 = "*"
 yapf = "*"
 isort = "*"
 

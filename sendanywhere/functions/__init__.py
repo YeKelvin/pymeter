@@ -4,7 +4,7 @@
 # @Time    : 2019/3/14 10:06
 # @Author  : Kelvin.Ye
 
-from .function import Function
-from .eval import Eval
-from .random import Random
-from .time import Time
+from .function import Function  # noqa
+from .eval import Eval  # noqa
+from .random import Random  # noqa
+from .time import Time  # noqa

@@ -11,6 +11,7 @@ from sendanywhere.functions import Function
 from sendanywhere.utils.log_util import get_logger
 from sendanywhere.utils.str_reader import StringReader
 
+
 log = get_logger(__name__)
 
 

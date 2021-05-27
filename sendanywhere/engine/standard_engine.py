@@ -8,16 +8,18 @@ import traceback
 
 from gevent import Greenlet
 
-from sendanywhere.testelement.collection import TestCollection
+from sendanywhere.common.exceptions import EngineException
+from sendanywhere.common.exceptions import StopTestException
 from sendanywhere.coroutines.context import ContextService
 from sendanywhere.coroutines.group import CoroutineGroup
 from sendanywhere.engine.collection.traverser import SearchByClass
 from sendanywhere.engine.collection.tree import HashTree
-from sendanywhere.common.exceptions import EngineException, StopTestException
 from sendanywhere.engine.interface import TestStateListener
 from sendanywhere.listeners.result_collector import ResultCollector
+from sendanywhere.testelement.collection import TestCollection
 from sendanywhere.testelement.test_element import TestElement
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 

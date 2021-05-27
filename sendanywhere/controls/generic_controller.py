@@ -5,12 +5,13 @@
 # @Author  : Kelvin.Ye
 from typing import Union
 
+from sendanywhere.common.exceptions import NextIsNullException
 from sendanywhere.controls.controller import Controller
 from sendanywhere.coroutines.context import ContextService
-from sendanywhere.common.exceptions import NextIsNullException
 from sendanywhere.engine.interface import LoopIterationListener
 from sendanywhere.samplers.sampler import Sampler
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 

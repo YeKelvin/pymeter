@@ -8,6 +8,7 @@ from sendanywhere.functions import Function
 from sendanywhere.utils.class_finder import ClassFinder
 from sendanywhere.utils.log_util import get_logger
 
+
 log = get_logger(__name__)
 
 

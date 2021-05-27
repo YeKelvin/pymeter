@@ -4,8 +4,10 @@
 # @Time    : 2019/3/15 9:47
 # @Author  : Kelvin.Ye
 from sendanywhere.engine.util.compound_variable import CompoundVariable
-from sendanywhere.testelement.property import FunctionProperty, BaseProperty
+from sendanywhere.testelement.property import BaseProperty
+from sendanywhere.testelement.property import FunctionProperty
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 

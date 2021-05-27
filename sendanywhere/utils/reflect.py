@@ -3,9 +3,9 @@
 # @File    : reflect
 # @Time    : 2020/1/20 16:48
 # @Author  : Kelvin.Ye
-import inspect
 import pkgutil
 import sys
+
 from sendanywhere.utils.path_util import SRC_PATH
 
 
@@ -34,7 +34,7 @@ class Reflect:
 clazz = globals()['classname']
 instance= clazz()
 
- ------如果在其它module，先import导入该module
+------如果在其它module，先import导入该module
 import module
 clazz= getattr(module, 'classname')
 instance = clazz()

@@ -11,6 +11,7 @@ from sendanywhere.engine.util import ValueReplacer
 from sendanywhere.testelement.property import BaseProperty
 from sendanywhere.utils.log_util import get_logger
 
+
 log = get_logger(__name__)
 
 

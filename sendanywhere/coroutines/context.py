@@ -3,13 +3,14 @@
 # @File    : context
 # @Time    : 2019/3/15 9:39
 # @Author  : Kelvin.Ye
-import time
+from typing import Dict
 
 from gevent.local import local
 
 from sendanywhere.coroutines.variables import Variables
 from sendanywhere.utils import time_util
 from sendanywhere.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 
@@ -57,7 +58,7 @@ class EngineContext:
 class ContextService:
     # 协程本地变量
     coroutine_local = local()
-    engines: {str, EngineContext} = {}
+    engines: Dict[str, EngineContext] = {}
 
     @classmethod
     def get_context(cls) -> CoroutineContext:
