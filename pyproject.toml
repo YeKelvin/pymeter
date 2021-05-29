@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "send-anywhere"
+name = "TaskMeter"
 version = "0.1.0"
 description = ""
 authors = ["Kelvin.Ye <testmankelvin@163.com>"]
 readme = 'README.md'
 
 packages = [
-    { include = "sendanywhere" },
-    { include = "sendanywhere/**/*.py" }
+    { include = "taskmeter" },
+    { include = "taskmeter/**/*.py" }
 ]
 
 [[tool.poetry.source]]

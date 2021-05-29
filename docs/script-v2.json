@@ -5,7 +5,8 @@
     "class": "TaskCollection",
     "enabled": true,
     "property": {
-      "TaskCollection__serialized": "True"
+      "TaskCollection__serialized": "True",
+      "TaskCollection__task_group_type": "continue"
     },
     "children": [
       {

@@ -6,7 +6,7 @@
 
 ```text
 send-anywhere/
-    |-sendanywhere/
+    |-taskmeter/
         |-assertions
         |-common
         |-configs

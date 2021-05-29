@@ -5,10 +5,10 @@
 # @Author  : Kelvin.Ye
 import os
 
-from sendanywhere.testelement.collection import TestCollection
-from sendanywhere.engine.collection.traverser import SearchByClass
-from sendanywhere.engine.script import ScriptServer
-from sendanywhere.utils.path_util import PROJECT_PATH
+from taskmeter.elements.collection import TaskCollection
+from taskmeter.engine.collection.traverser import SearchByClass
+from taskmeter.engine.script import ScriptServer
+from taskmeter.utils.path_util import PROJECT_PATH
 
 
 class TestSearchByClass:
@@ -16,7 +16,7 @@ class TestSearchByClass:
         with open(os.path.join(PROJECT_PATH, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
             tree = ScriptServer.load_tree(script)
-            searcher = SearchByClass(TestCollection)
+            searcher = SearchByClass(TaskCollection)
             tree.traverse(searcher)
             result = searcher.get_search_result()
             print(result)

@@ -5,8 +5,8 @@
 # @Author  : Kelvin.Ye
 import os
 
-from sendanywhere.runner import Runner
-from sendanywhere.utils.path_util import PROJECT_PATH
+from taskmeter.runner import Runner
+from taskmeter.utils.path_util import PROJECT_PATH
 
 
 class TestRunner:

@@ -28,7 +28,7 @@ if __name__ == '__main__':
     sio.connect('http://127.0.0.1:5000')
     sio.sleep(2.0)
 
-    sio.emit('execution_result', {'to': '-1IB6-NAOtyKQdeiAAAB', 'data': 'i am sendanywhere'})
+    sio.emit('execution_result', {'to': '-1IB6-NAOtyKQdeiAAAB', 'data': 'i am taskmeter'})
 
     sio.sleep(5.0)
     # sio.disconnect()

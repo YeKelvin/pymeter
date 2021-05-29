@@ -3,8 +3,8 @@
 # @File    : tree_test
 # @Time    : 2020/3/11 11:29
 # @Author  : Kelvin.Ye
-from sendanywhere.engine.collection.traverser import HashTreeTraverser
-from sendanywhere.engine.collection.tree import HashTree
+from taskmeter.engine.collection.traverser import HashTreeTraverser
+from taskmeter.engine.collection.tree import HashTree
 
 
 class TestTraverser(HashTreeTraverser):

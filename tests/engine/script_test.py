@@ -5,9 +5,9 @@
 # @Author  : Kelvin.Ye
 import os
 
-from sendanywhere.engine.collection.traverser import TreeCloner
-from sendanywhere.engine.script import ScriptServer
-from sendanywhere.utils.path_util import PROJECT_PATH
+from taskmeter.engine.collection.traverser import TreeCloner
+from taskmeter.engine.script import ScriptServer
+from taskmeter.utils.path_util import PROJECT_PATH
 
 
 class TestScriptServer:
