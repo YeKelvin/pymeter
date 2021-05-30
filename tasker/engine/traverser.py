@@ -119,8 +119,7 @@ class SearchByClass(HashTreeTraverser):
 
 
 class TreeCloner(HashTreeTraverser):
-    """克隆 HashTree，默认情况下跳过实现 NoCoroutineClone的节点
-    """
+    """克隆HashTree，默认情况下跳过实现NoCoroutineClone的节点"""
 
     def __init__(self, enable_no_clone: bool = True):
         from tasker.engine.tree import HashTree
@@ -133,10 +132,8 @@ class TreeCloner(HashTreeTraverser):
 
     def add_node(self, node, subtree) -> None:
         from tasker.engine.interface import NoCoroutineClone
-        if (
-                isinstance(node, TaskElement) and
-                not (self.enable_no_clone and isinstance(node, NoCoroutineClone))
-        ):
+        clone = not (self.enable_no_clone and isinstance(node, NoCoroutineClone))
+        if isinstance(node, TaskElement) and clone:
             cloned_node = node.clone()
         else:
             cloned_node = node
