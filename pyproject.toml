@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "TaskMeter"
+name = "tasker"
 version = "0.1.0"
 description = ""
 authors = ["Kelvin.Ye <testmankelvin@163.com>"]
 readme = 'README.md'
 
 packages = [
-    { include = "taskmeter" },
-    { include = "taskmeter/**/*.py" }
+    { include = "tasker" },
+    { include = "tasker/**/*.py" }
 ]
 
 [[tool.poetry.source]]

@@ -3,7 +3,7 @@
 # @File    : str_util_test
 # @Time    : 2020/1/19 10:55
 # @Author  : Kelvin.Ye
-from taskmeter.utils.str_util import substitute
+from tasker.utils.str_util import substitute
 
 
 def test_substitute():

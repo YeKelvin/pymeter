@@ -5,13 +5,14 @@
 # @Author  : Kelvin.Ye
 import os
 
-from taskmeter.elements.collection import TaskCollection
-from taskmeter.engine.collection.traverser import SearchByClass
-from taskmeter.engine.script import ScriptServer
-from taskmeter.utils.path_util import PROJECT_PATH
+from tasker.elements.collection import TaskCollection
+from tasker.engine.collection.traverser import SearchByClass
+from tasker.engine.script import ScriptServer
+from tasker.utils.path_util import PROJECT_PATH
 
 
-class TestSearchByClass:
+class SearchByClassTest:
+
     def test_search_by_class(self):
         with open(os.path.join(PROJECT_PATH, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())

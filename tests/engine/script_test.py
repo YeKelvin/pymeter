@@ -5,12 +5,13 @@
 # @Author  : Kelvin.Ye
 import os
 
-from taskmeter.engine.collection.traverser import TreeCloner
-from taskmeter.engine.script import ScriptServer
-from taskmeter.utils.path_util import PROJECT_PATH
+from tasker.engine.collection.traverser import TreeCloner
+from tasker.engine.script import ScriptServer
+from tasker.utils.path_util import PROJECT_PATH
 
 
-class TestScriptServer:
+class ScriptServerTest:
+
     def test_load_tree(self):
         with open(os.path.join(PROJECT_PATH, 'docs', 'test-sampler.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
@@ -19,3 +20,10 @@ class TestScriptServer:
             cloner = TreeCloner(True)
             tree.traverse(cloner)
             print(f'cloned_tree=\n{cloner.get_cloned_tree()}')
+
+
+if __name__ == '__main__':
+    with open(os.path.join(PROJECT_PATH, 'docs', 'script-v2.json'), 'r', encoding='utf-8') as f:
+        script = ''.join(f.readlines())
+        tree = ScriptServer.load_tree(script)
+        print(f'tree=\n{tree}')

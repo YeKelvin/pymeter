@@ -5,8 +5,8 @@
 # @Author  : Kelvin.Ye
 import os
 
-from taskmeter.runner import Runner
-from taskmeter.utils.path_util import PROJECT_PATH
+from tasker.runner import Runner
+from tasker.utils.path_util import PROJECT_PATH
 
 
 class TestRunner:
