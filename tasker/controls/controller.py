@@ -7,9 +7,11 @@ from tasker.samplers.sampler import Sampler
 
 
 class Controller:
-    def __init__(self):
-        # 控制器是否已完成所有Sampler的交付，当返回true时，协程完成
-        self.done = False
+
+    @property
+    def done(self):
+        """是否已完成"""
+        raise NotImplementedError
 
     def next(self) -> Sampler:
         """返回下一个Sampler，末尾返回None"""
@@ -23,17 +25,20 @@ class Controller:
         """在控制器上触发循环结束条件"""
         raise NotImplementedError
 
+    def add_iteration_listener(self):
+        raise NotImplementedError
+
+    def remove_iteration_listener(self):
+        raise NotImplementedError
+
 
 class IteratingController:
-    """迭代控制器
-    """
+    """迭代控制器"""
 
     def start_next_loop(self) -> None:
-        """开始下一个迭代
-        """
+        """开始下一个迭代"""
         raise NotImplementedError
 
     def break_loop(self) -> None:
-        """中断循环
-        """
+        """中断循环"""
         raise NotImplementedError

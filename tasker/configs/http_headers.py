@@ -23,8 +23,8 @@ class HttpHeader(TaskElement):
 class HttpHeaderManager(ConfigTaskElement):
     HEADERS = 'HeaderManager__headers'
 
-    def __init__(self, name: str = None, comments: str = None):
-        super().__init__(name, comments)
+    def __init__(self):
+        ConfigTaskElement().__init__(self)
 
     @property
     def headers(self):

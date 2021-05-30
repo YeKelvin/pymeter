@@ -106,7 +106,7 @@ class SearchByClass(HashTreeTraverser):
     def add_node(self, node, subtree) -> None:
         if isinstance(node, self.search_class):
             self.objects_of_class.append(node)
-            from tasker.engine.collection.tree import HashTree
+            from tasker.engine.tree import HashTree
             tree = HashTree()
             tree.put(node, subtree)
             self.subtrees[node] = tree
@@ -123,7 +123,7 @@ class TreeCloner(HashTreeTraverser):
     """
 
     def __init__(self, enable_no_clone: bool = True):
-        from tasker.engine.collection.tree import HashTree
+        from tasker.engine.tree import HashTree
         self.new_tree = HashTree()
         self.tree_path = []
         self.enable_no_clone = enable_no_clone

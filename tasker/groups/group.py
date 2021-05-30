@@ -18,22 +18,22 @@ from tasker.common.exceptions import StopTestException
 from tasker.common.exceptions import StopTestNowException
 from tasker.controls.controller import Controller
 from tasker.controls.controller import IteratingController
-from tasker.controls.loop_controller import LoopController
 from tasker.elements.element import TaskElement
-from tasker.engine.collection.traverser import FindTaskElementsUpToRoot
-from tasker.engine.collection.traverser import SearchByClass
-from tasker.engine.collection.traverser import TestCompiler
-from tasker.engine.collection.traverser import TreeCloner
-from tasker.engine.collection.tree import HashTree
 from tasker.engine.interface import LoopIterationListener
 from tasker.engine.interface import TaskGroupListener
-from tasker.engine.interface import TestIterationListener
+from tasker.engine.interface import TaskIterationListener
+from tasker.engine.traverser import FindTaskElementsUpToRoot
+from tasker.engine.traverser import SearchByClass
+from tasker.engine.traverser import TestCompiler
+from tasker.engine.traverser import TreeCloner
+from tasker.engine.tree import HashTree
 from tasker.groups.context import ContextService
 from tasker.groups.context import CoroutineContext
 from tasker.groups.variables import Variables
 from tasker.samplers.sample_result import SampleResult
 from tasker.samplers.sampler import Sampler
 from tasker.utils.log_util import get_logger
+
 
 log = get_logger(__name__)
 
@@ -93,8 +93,8 @@ class TaskGroup(TaskElement, Controller):
         return self.get_property_as_int(self.STARTUPS_PER_SECOND)
 
     @property
-    def main_controller(self) -> LoopController:
-        return self.get_property(self.MAIN_CONTROLLER)
+    def main_controller(self) -> Controller:
+        return self.get_property(self.MAIN_CONTROLLER).get_obj_value()
 
     @property
     def on_error_continue(self) -> bool:
@@ -124,9 +124,8 @@ class TaskGroup(TaskElement, Controller):
     def on_error_stop_test_now(self) -> bool:
         return self.on_sample_error == LogicalAction.STOPTEST_NOW.value
 
-    def __init__(self, name: str = None, remark: str = None):
-        super(TaskElement, self).__init__()
-        super(Controller, self).__init__()
+    def __init__(self):
+        super().__init__()
 
         self.running = False
         self.group_number = None
@@ -158,20 +157,32 @@ class TaskGroup(TaskElement, Controller):
         log.info(f'开始第 {self.group_number} 个任务组')
 
     @property
-    def done(self) -> bool:
+    def done(self):
         return self.main_controller.done
 
+    @done.setter
+    def done(self, value):
+        self.main_controller.done = value
+
     def next(self) -> Sampler:
-        """@Override"""
+        """Override Controller"""
         return self.main_controller.next()
 
     def initialize(self):
-        """@Override"""
+        """Override Controller"""
         self.main_controller.initialize()
 
     def trigger_end_of_loop(self):
-        """@Override"""
+        """Override Controller"""
         self.main_controller.trigger_end_of_loop()
+
+    def add_iteration_listener(self, listener):
+        """Override Controller"""
+        self.main_controller.add_iteration_listener(listener)
+
+    def remove_iteration_listener(self, listener):
+        """Override Controller"""
+        self.main_controller.remove_iteration_listener(listener)
 
     def wait_groups_stopped(self) -> None:
         """等待所有协程停止"""
@@ -249,7 +260,7 @@ class Coroutine(Greenlet):
         super().__init__(*args, **kwargs)
         self.running = True
         self.group_tree = group_tree
-        self.task_group_main_controller: LoopController = group_tree.list()[0]  # TODO: gai
+        self.task_group_main_controller: Controller = group_tree.list()[0]
         self.task_group: TaskGroup = None
         self.coroutine_number = None
         self.coroutine_name = None
@@ -271,8 +282,8 @@ class Coroutine(Greenlet):
         self.group_tree.traverse(group_listener_searcher)
         self.coroutine_group_listeners = group_listener_searcher.get_search_result()
 
-        # 搜索 TestIterationListener节点
-        test_iteration_listener_searcher = SearchByClass(TestIterationListener)
+        # 搜索 TaskIterationListener节点
+        test_iteration_listener_searcher = SearchByClass(TaskIterationListener)
         self.group_tree.traverse(test_iteration_listener_searcher)
         self.test_iteration_listeners = test_iteration_listener_searcher.get_search_result()
 
@@ -283,8 +294,8 @@ class Coroutine(Greenlet):
     def init_run(self, context: CoroutineContext) -> None:
         """
         协程执行前的初始化动作，包括以下动作：
-            1、给 CoroutineContext赋值
-            2、将 group层的非 Sampler节点和非 Controller节点传递给子代
+            1、给CoroutineContext赋值
+            2、将Group层的非Sampler节点和非Controller节点传递给子代
             3、编译子代节点
         """
         context.engine = self.engine
@@ -295,22 +306,22 @@ class Coroutine(Greenlet):
         context.variables = self.local_vars
         context.variables.put(self.LAST_SAMPLE_OK, True)
 
-        # 储存 group层的非 Sampler节点和非 Controller节点
+        # 储存Group层的非Sampler节点和非Controller节点
         group_level_elements = self.group_tree.index(0).list()
         self.__remove_samplers_and_controllers(group_level_elements)
 
-        # 编译 Group层下的所有子代节点
+        # 编译Group层下的所有子代节点
         self.test_compiler = TestCompiler(group_level_elements)
         self.group_tree.traverse(self.test_compiler)
 
         # 初始化任务组控制器
         self.task_group_main_controller.initialize()
 
-        # 添加 Group层循环迭代监听器
+        # 添加Group层循环迭代监听器
         group_level_iteration_listener = self.GroupLevelIterationListener(self)
         self.task_group_main_controller.add_iteration_listener(group_level_iteration_listener)
 
-        # 遍历执行 TaskGroupListener
+        # 遍历执行TaskGroupListener
         self.__coroutine_started()
 
     def _run(self):
@@ -364,7 +375,7 @@ class Coroutine(Greenlet):
             2、遍历执行TaskGroupListener
         """
         ContextService.incr_number_of_coroutines()
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TaskGroupListener to start')
+        log.debug(f'协程:[ {self.coroutine_name} ] notify all TaskGroupListener to start')
         for listener in self.coroutine_group_listeners:
             listener.group_started()
 
@@ -374,7 +385,7 @@ class Coroutine(Greenlet):
             1、ContextService统计协程数
             2、遍历执行 TaskGroupListener
         """
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TaskGroupListener to finish')
+        log.debug(f'notify all TaskGroupListener to finish, coroutine:[ {self.coroutine_name} ]')
         for listener in self.coroutine_group_listeners:
             listener.group_finished()
         ContextService.decr_number_of_coroutines()
@@ -556,11 +567,11 @@ class Coroutine(Greenlet):
         return find_test_elements_up_to_root.get_controllers_to_root()
 
     def _notify_test_iteration_listeners(self) -> None:
-        """遍历执行TestIterationListener"""
+        """遍历执行TaskIterationListener"""
         self.local_vars.inc_iteration()
-        log.debug(f'notify all TestIterationListener to start, coroutine:[ {self.coroutine_name} ]')
+        log.debug(f'notify all TaskIterationListener to start, coroutine:[ {self.coroutine_name} ]')
         for listener in self.test_iteration_listeners:
-            listener.test_iteration_start(self.task_group)
+            listener.task_iteration_start(self.task_group)
 
     def stop_coroutine(self) -> None:
         self.running = False

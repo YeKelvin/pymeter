@@ -5,8 +5,8 @@
 # @Author  : Kelvin.Ye
 import os
 
-from tasker.engine.collection.traverser import TreeCloner
-from tasker.engine.script import ScriptServer
+from tasker.engine.script_server import ScriptServer
+from tasker.engine.traverser import TreeCloner
 from tasker.utils.path_util import PROJECT_PATH
 
 

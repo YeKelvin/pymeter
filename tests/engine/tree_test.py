@@ -3,8 +3,8 @@
 # @File    : tree_test
 # @Time    : 2020/3/11 11:29
 # @Author  : Kelvin.Ye
-from tasker.engine.collection.traverser import HashTreeTraverser
-from tasker.engine.collection.tree import HashTree
+from tasker.engine.traverser import HashTreeTraverser
+from tasker.engine.tree import HashTree
 
 
 class TestTraverser(HashTreeTraverser):

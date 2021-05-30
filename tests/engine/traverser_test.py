@@ -5,9 +5,9 @@
 # @Author  : Kelvin.Ye
 import os
 
-from tasker.elements.collection import TaskCollection
-from tasker.engine.collection.traverser import SearchByClass
-from tasker.engine.script import ScriptServer
+from tasker.engine.collection import TaskCollection
+from tasker.engine.traverser import SearchByClass
+from tasker.engine.script_server import ScriptServer
 from tasker.utils.path_util import PROJECT_PATH
 
 

@@ -12,8 +12,8 @@ from tasker.elements.element import TaskElement
 from tasker.engine.interface import TaskGroupListener
 from tasker.engine.interface import NoCoroutineClone
 from tasker.engine.interface import SampleListener
-from tasker.engine.interface import TestIterationListener
-from tasker.engine.interface import TestStateListener
+from tasker.engine.interface import TaskIterationListener
+from tasker.engine.interface import TaskCollectionListener
 from tasker.groups.context import ContextService
 from tasker.utils import time_util
 from tasker.utils.json_util import from_json
@@ -24,10 +24,10 @@ log = get_logger(__name__)
 
 class SocketResultCollector(
     TaskElement,
-    TestStateListener,
+    TaskCollectionListener,
     TaskGroupListener,
     SampleListener,
-    TestIterationListener,
+    TaskIterationListener,
     NoCoroutineClone
 ):
     # 连接地址
@@ -74,8 +74,9 @@ class SocketResultCollector(
     def __group_name(self):
         return ContextService.get_context().coroutine_group.name
 
-    def __init__(self, name: str = None, comments: str = None):
-        super().__init__(name, comments)
+    def __init__(self):
+        TaskElement.__init__(self)
+
         self.reportName = None
         self.startTime = 0
         self.endTime = 0
@@ -111,11 +112,11 @@ class SocketResultCollector(
         data['to'] = self.target_sid
         self.sio.emit(self.event_name, data)
 
-    def test_started(self) -> None:
+    def collection_started(self) -> None:
         self.startTime = time_util.timestamp_as_ms()
         self.__socket_connect()
 
-    def test_ended(self) -> None:
+    def collection_ended(self) -> None:
         self.endTime = time_util.timestamp_as_ms()
         self.__socket_disconnect()
 
@@ -166,5 +167,5 @@ class SocketResultCollector(
         if not sample_result.success:
             self.__emit_to_target({'group': {'id': group_id, 'success': False}})
 
-    def test_iteration_start(self, controller) -> None:
+    def task_iteration_start(self, controller) -> None:
         pass

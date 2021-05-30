@@ -1,82 +1,91 @@
 [
   {
     "name": "测试函数",
-    "comments": "描述",
-    "class": "TestCollection",
+    "remark": "描述",
+    "class": "TaskCollection",
     "enabled": true,
     "property": {
-      "TestCollection__serialized": "True"
+      "TaskCollection__serialize_groups": "True"
     },
-    "child": [
+    "children": [
       {
         "name": "结果收集器",
-        "comments": "描述",
+        "remark": "描述",
         "class": "ResultCollector",
         "enabled": true,
         "property": {},
-        "child": null
+        "children": null
       },
       {
         "name": "协程组A",
-        "comments": "描述",
-        "class": "CoroutineGroup",
+        "remark": "描述",
+        "class": "TaskGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup__on_sample_error": "continue",
-          "CoroutineGroup__number_coroutines": "2",
-          "CoroutineGroup__start_interval": "0",
-          "LoopController__loops": "1",
-          "LoopController__continue_forever": "false"
+          "TaskGroup__on_sample_error": "continue",
+          "TaskGroup__number_groups": "1",
+          "TaskGroup__start_interval": "0",
+          "TaskGroup__main_controller": {
+            "class": "LoopController",
+            "property": {
+              "LoopController__loops": "1",
+              "LoopController__continue_forever": "false"
+            }
+          }
         },
-        "child": [
-
+        "children": [
           {
             "name": "测试取样器 - 1",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
             "property": {
               "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           }
         ]
       },
       {
         "name": "协程组B",
-        "comments": "描述",
-        "class": "CoroutineGroup",
+        "remark": "描述",
+        "class": "TaskGroup",
         "enabled": true,
         "property": {
-          "CoroutineGroup__on_sample_error": "start_next_loop",
-          "CoroutineGroup__number_coroutines": "1",
-          "CoroutineGroup__start_interval": "0",
-          "LoopController__loops": "1",
-          "LoopController__continue_forever": "false"
+          "TaskGroup__on_sample_error": "continue",
+          "TaskGroup__number_groups": "1",
+          "TaskGroup__start_interval": "0",
+          "TaskGroup__main_controller": {
+            "class": "LoopController",
+            "property": {
+              "LoopController__loops": "1",
+              "LoopController__continue_forever": "false"
+            }
+          }
         },
-        "child": [
+        "children": [
           {
             "name": "测试取样器 - 1",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
             "property": {
               "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           },
           {
             "name": "测试取样器 - 2",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
             "property": {
               "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           }
         ]
       }

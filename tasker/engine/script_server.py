@@ -11,7 +11,7 @@ from typing import Tuple
 
 from tasker.common.exceptions import ScriptParseException
 from tasker.elements.element import TaskElement
-from tasker.engine.collection.tree import HashTree
+from tasker.engine.tree import HashTree
 from tasker.utils import json_util
 from tasker.utils.log_util import get_logger
 
@@ -20,7 +20,7 @@ log = get_logger(__name__)
 
 __MODULE_PATH__ = {
     # 测试集合
-    'TaskCollection': 'tasker.elements.collection',
+    'TaskCollection': 'tasker.engine.collection',
 
     # 任务组
     'TaskGroup': 'tasker.groups.group',
@@ -125,15 +125,15 @@ class ScriptServer:
             if 'name' not in item:
                 raise ScriptParseException(f'脚本解析失败，当前节点缺少 name 属性，item:[ {item} ]')
             if 'remark' not in item:
-                raise ScriptParseException(f'脚本解析失败，当前节点缺少 remark 属性，item:[ {item} ]')
+                raise ScriptParseException(f'脚本解析失败，当前节点缺少 remark 属性，节点名称:[ {item["name"]} ]')
             if 'class' not in item:
-                raise ScriptParseException(f'脚本解析失败，当前节点缺少 class 属性，item:[ {item} ]')
+                raise ScriptParseException(f'脚本解析失败，当前节点缺少 class 属性，节点名称:[ {item["name"]} ]')
             if 'enabled' not in item:
-                raise ScriptParseException(f'脚本解析失败，当前节点缺少 enabled 属性，item:[ {item} ]')
+                raise ScriptParseException(f'脚本解析失败，当前节点缺少 enabled 属性，节点名称:[ {item["name"]} ]')
             if 'property' not in item:
-                raise ScriptParseException(f'脚本解析失败，当前节点缺少 property 属性，item:[ {item} ]')
+                raise ScriptParseException(f'脚本解析失败，当前节点缺少 property 属性，节点名称:[ {item["name"]} ]')
             if 'children' not in item:
-                raise ScriptParseException(f'脚本解析失败，当前节点缺少 children 属性，item:[ {item} ]')
+                raise ScriptParseException(f'脚本解析失败，当前节点缺少 children 属性，节点名称:[ {item["name"]} ]')
 
     @classmethod
     def __get_node(cls, script: dict) -> TaskElement:

@@ -6,8 +6,8 @@
 from typing import Dict
 
 from tasker.common.exceptions import UnsupportedOperationException
-from tasker.engine.collection.traverser import ConvertToString
-from tasker.engine.collection.traverser import TreeSearcher
+from tasker.engine.traverser import ConvertToString
+from tasker.engine.traverser import TreeSearcher
 from tasker.utils.log_util import get_logger
 
 

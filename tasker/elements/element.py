@@ -96,5 +96,6 @@ class TaskElement:
 
 
 class ConfigTaskElement(TaskElement, ConfigElement):
-    def __init__(self, name: str = None, remark: str = None):
-        super().__init__(name, remark)
+    def __init__(self):
+        TaskElement.__init__(self)
+        ConfigElement.__init__(self)

@@ -5,19 +5,19 @@
 # @Author  : Kelvin.Ye
 
 
-class TestStateListener:
-    def test_started(self) -> None:
-        """测试执行在开始时调用
-        """
+class TaskCollectionListener:
+
+    def collection_started(self) -> None:
+        """测试执行在开始时调用"""
         raise NotImplementedError
 
-    def test_ended(self) -> None:
-        """测试执行在结束时调用
-        """
+    def collection_ended(self) -> None:
+        """测试执行在结束时调用"""
         raise NotImplementedError
 
 
 class TaskGroupListener:
+
     def group_started(self) -> None:
         """任务组在开始时调用
         """
@@ -30,6 +30,7 @@ class TaskGroupListener:
 
 
 class SampleListener:
+
     def sample_started(self, sample) -> None:
         """Sampler在开始时调用
         """
@@ -41,14 +42,16 @@ class SampleListener:
         raise NotImplementedError
 
 
-class TestIterationListener:
-    def test_iteration_start(self, controller) -> None:
+class TaskIterationListener:
+
+    def task_iteration_start(self, controller) -> None:
         """任务组在迭代开始时调用
         """
         raise NotImplementedError
 
 
 class LoopIterationListener:
+
     def iteration_start(self, source, iter_count) -> None:
         """控制器在循环迭代即将开始时调用
         """

@@ -6,7 +6,7 @@
 import time
 import traceback
 
-from tasker.engine.script import ScriptServer
+from tasker.engine.script_server import ScriptServer
 from tasker.engine.standard_engine import StandardEngine
 from tasker.utils.log_util import get_logger
 
@@ -32,7 +32,7 @@ class Runner:
         if not script:
             raise Exception('脚本不允许为空')
 
-        log.debug(f'script:[ {script} ]')
+        log.debug(f'script json:\n{script}')
         try:
             Runner.run(script)
         except Exception:

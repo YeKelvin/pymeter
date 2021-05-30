@@ -14,23 +14,23 @@ class BaseProperty:
         self.name = name
         self.value = value
 
-    def get_raw(self):
-        return self.value
-
-    def get_str_value(self):
+    def get_str_value(self) -> str:
         return str(self.value)
 
-    def get_int_value(self):
+    def get_int_value(self) -> int:
         value = self.get_str_value()
-        return int(value) if value else None
+        return int(value) if value else 0
 
-    def get_float_value(self):
+    def get_float_value(self) -> float:
         value = self.get_str_value()
-        return float(value) if value else None
+        return float(value) if value else 0.00
 
-    def get_bool_value(self):
+    def get_bool_value(self) -> bool:
         value = self.get_str_value()
         return True if value.lower() == 'true' else False
+
+    def get_obj_value(self) -> object:
+        return self.value
 
     def __str__(self):
         return str(self.__dict__)

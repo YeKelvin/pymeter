@@ -3,13 +3,14 @@
 # @File    : loop_controller
 # @Time    : 2020/2/28 17:16
 # @Author  : Kelvin.Ye
-from typing import Union
+from typing import Optional
 
 from tasker.controls.controller import IteratingController
 from tasker.controls.generic_controller import GenericController
 from tasker.elements.element import TaskElement
 from tasker.engine.interface import LoopIterationListener
 from tasker.groups.context import ContextService
+from tasker.groups.group import TaskGroup
 from tasker.samplers.sampler import Sampler
 from tasker.utils.log_util import get_logger
 
@@ -17,7 +18,7 @@ from tasker.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class LoopController(GenericController, IteratingController, LoopIterationListener, TaskElement):
+class LoopController(TaskElement, GenericController, IteratingController, LoopIterationListener):
     # 循环次数
     LOOPS = 'LoopController__loops'
 
@@ -27,11 +28,12 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
     # 无限循环数
     INFINITE_LOOP_COUNT = -1
 
-    def __init__(self, name: str = None, comments: str = None):
+    def __init__(self):
+        TaskElement.__init__(self)
         GenericController.__init__(self)
-        TaskElement.__init__(self, name, comments)
-        self.loop_count = 0
-        self.is_break_loop = False
+
+        self.loop_count: int = 0
+        self.break_loop: bool = False
 
     @property
     def loops(self) -> int:
@@ -39,21 +41,29 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
     @property
     def continue_forever(self) -> bool:
-        """循环控制器始终将continue_forever设置为true，以便下次父级调用它们时执行它们
-        """
-        from tasker.groups.group import TaskGroup
+        """循环控制器始终将continue_forever设置为true，以便下次父级调用它们时执行它们"""
         if isinstance(self, TaskGroup):
             return self.get_property_as_bool(self.CONTINUE_FOREVER)
         return True
 
-    def next(self) -> Union[Sampler, None]:
+    @property
+    def done(self):
+        return GenericController.done
+
+    @done.setter
+    def done(self, value: bool):
+        log.debug(f'协程:[ {ContextService.get_context().coroutine_name} ] 控制器:[ {self.name} ] done:[ {value} ]')
+        self.reset_break_loop()
+        GenericController.done = value
+
+    def next(self) -> Optional[Sampler]:
         if self.end_of_loop():
             if not self.continue_forever:
-                self.set_done(True)
+                self.done = True
             self.reset_break_loop()
             return None
 
-        if self.is_first:
+        if self.first:
             if not self.continue_forever:
                 log.info(
                     f'协程:[ {ContextService.get_context().coroutine_name} ] '
@@ -73,21 +83,13 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
     def end_of_loop(self) -> bool:
         """判断循环是否结束
         """
-        return self.is_break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
-
-    def set_done(self, done: bool):
-        log.debug(
-            f'coroutine:[ {ContextService.get_context().coroutine_name} ] '
-            f'controller:[ {self.name} ] isDone:[ {done} ]'
-        )
-        self.reset_break_loop()
-        super().set_done(done)
+        return self.break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
 
     def next_is_null(self):
         self.re_initialize()
         if self.end_of_loop():
             if not self.continue_forever:
-                self.set_done(True)
+                self.done = True
             else:
                 self.reset_loop_count()
             return None
@@ -100,20 +102,20 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         self.loop_count = 0
 
     def re_initialize(self):
-        self.set_first(True)
+        self.first = True
         self.reset_current()
         self.increment_loop_count()
 
     def reset_break_loop(self):
-        if self.is_break_loop:
-            self.is_break_loop = False
+        if self.break_loop:
+            self.break_loop = False
 
     def start_next_loop(self):
         self.re_initialize()
 
     def break_loop(self):
-        self.is_break_loop = True
-        self.set_first(True)
+        self.break_loop = True
+        self.first = True
         self.reset_current()
         self.reset_loop_count()
 

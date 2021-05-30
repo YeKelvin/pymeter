@@ -23,20 +23,31 @@ class GenericController(Controller):
     def __init__(self):
         super().__init__()
 
-        # 存储 sampler或 controller
+        # 存储Sampler或Controller
         self.sub_samplers_and_controllers = []
 
-        # 存储子代控制器的 LoopIterationListener
+        # 存储子代控制器的LoopIterationListener
         self.sub_iteration_listeners = []
 
-        # sampler或 controller的索引
+        # Sampler或Controller的索引
         self.current = 0
 
         # 当前迭代数
         self.iter_count = 0
 
-        # 第一个 sampler或 controller
-        self.is_first = True
+        # 第一个Sampler或Controller
+        self.first = True
+
+        # 当控制器完成所有Sampler的交付时，设置为True，表示协程已完成
+        self._done = False
+
+    @property
+    def done(self):
+        return self._done
+
+    @done.setter
+    def done(self, value: bool):
+        self._done = value
 
     def reset_current(self):
         self.current = 0
@@ -44,34 +55,25 @@ class GenericController(Controller):
     def reset_iter_count(self):
         self.iter_count = 0
 
-    def set_done(self, done: bool):
-        self.done = done
-
-    def set_first(self, is_first: bool):
-        self.is_first = is_first
-
     def initialize(self):
-        """初始化 controller
-        """
+        """初始化Controller"""
+        self.done = False
+        self.first = True
         self.reset_current()
         self.reset_iter_count()
-        self.set_done(False)
-        self.set_first(True)
         self.initialize_sub_controllers()
 
     def initialize_sub_controllers(self):
-        """初始化子 controller
-        """
+        """初始化子Controller"""
         for element in self.sub_samplers_and_controllers:
             if isinstance(element, GenericController):
                 element.initialize()
 
     def re_initialize(self):
-        """重置 controller（在 controller的最后一个子代之后调用）
-        """
+        """重置Controller（在Controller的最后一个子代之后调用）"""
         self.reset_current()
         self.increment_iter_count()
-        self.set_first(True)
+        self.first = True
 
     def increment_current(self):
         self.current += 1
@@ -101,13 +103,13 @@ class GenericController(Controller):
         return next_sampler
 
     def fire_iter_events(self):
-        if self.is_first:
+        if self.first:
             self.fire_iteration_start()
-            self.set_first(False)
+            self.first = False
 
     def fire_iteration_start(self):
         log.debug(
-            f'coroutine:[ {ContextService.get_context().coroutine_name} ] notify all LoopIterationListener to start'
+            f'notify all LoopIterationListener to start, coroutine:[ {ContextService.get_context().coroutine_name} ]'
         )
         for listener in self.sub_iteration_listeners[::-1]:
             listener.iteration_start(self, self.iter_count)
@@ -117,7 +119,7 @@ class GenericController(Controller):
             return self.sub_samplers_and_controllers[self.current]
 
         if not self.sub_samplers_and_controllers:
-            self.set_done(True)
+            self.done = True
             raise NextIsNullException()
 
         return None
