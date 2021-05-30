@@ -3,7 +3,8 @@
 # @File    : generic_controller
 # @Time    : 2020/2/28 17:25
 # @Author  : Kelvin.Ye
-from typing import Union
+import traceback
+from typing import Optional
 
 from tasker.common.exceptions import NextIsNullException
 from tasker.controls.controller import Controller
@@ -81,7 +82,8 @@ class GenericController(Controller):
     def increment_iter_count(self):
         self.iter_count += 1
 
-    def next(self) -> Union[Sampler, None]:
+    def next(self) -> Optional[Sampler]:
+        log.debug('获取下一个Sampler')
         self.fire_iter_events()
 
         if self.done:
@@ -98,8 +100,9 @@ class GenericController(Controller):
                 elif isinstance(current_element, Controller):
                     next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
-            pass
+            log.debug(traceback.format_exc())
 
+        log.debug(f'下一个Sampler:[ {next_sampler} ]')
         return next_sampler
 
     def fire_iter_events(self):

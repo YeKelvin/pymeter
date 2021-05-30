@@ -8,7 +8,7 @@ from enum import Enum
 from enum import unique
 from typing import Final
 from typing import List
-from typing import Union
+from typing import Optional
 
 from gevent import Greenlet
 
@@ -24,7 +24,7 @@ from tasker.engine.interface import TaskGroupListener
 from tasker.engine.interface import TaskIterationListener
 from tasker.engine.traverser import FindTaskElementsUpToRoot
 from tasker.engine.traverser import SearchByClass
-from tasker.engine.traverser import TestCompiler
+from tasker.engine.traverser import TaskCompiler
 from tasker.engine.traverser import TreeCloner
 from tasker.engine.tree import HashTree
 from tasker.groups.context import ContextService
@@ -273,7 +273,7 @@ class Coroutine(Greenlet):
         self.on_error_stop_test = False
         self.on_error_stop_test_now = False
         self.local_vars = Variables()
-        self.test_compiler: Union[TestCompiler, None] = None
+        self.task_compiler: Optional[TaskCompiler] = None
         self.start_time = 0
         self.end_time = 0
 
@@ -311,8 +311,8 @@ class Coroutine(Greenlet):
         self.__remove_samplers_and_controllers(group_level_elements)
 
         # 编译Group层下的所有子代节点
-        self.test_compiler = TestCompiler(group_level_elements)
-        self.group_tree.traverse(self.test_compiler)
+        self.task_compiler = TaskCompiler(group_level_elements)
+        self.group_tree.traverse(self.task_compiler)
 
         # 初始化任务组控制器
         self.task_group_main_controller.initialize()
@@ -437,7 +437,7 @@ class Coroutine(Greenlet):
         log.debug(f'current sampler:[ {sampler.name} ] object:[ {sampler} ]')
 
         # 将ConfigTaskElement合并至Sampler中
-        package = self.test_compiler.configure_sampler(sampler)
+        package = self.task_compiler.configure_sampler(sampler)
 
         # 执行前置处理器
         self.__run_pre_processors(package.pre_processors)
