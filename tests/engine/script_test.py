@@ -5,9 +5,9 @@
 # @Author  : Kelvin.Ye
 import os
 
-from tasker.engine.script_server import ScriptServer
-from tasker.engine.traverser import TreeCloner
-from tasker.utils.path_util import PROJECT_PATH
+from pymeter.engine.script_server import ScriptServer
+from pymeter.engine.traverser import TreeCloner
+from pymeter.utils.path_util import PROJECT_PATH
 
 
 class ScriptServerTest:

@@ -1,12 +1,12 @@
-# Tasker
+# Pymeter
 
 测试脚本执行引擎
 
 ## 项目结构
 
 ```text
-tasker/
-    |-tasker/
+pymeter/
+    |-pymeter/
         |-assertions
         |-common
         |-configs

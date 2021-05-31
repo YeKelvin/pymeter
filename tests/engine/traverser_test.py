@@ -5,10 +5,10 @@
 # @Author  : Kelvin.Ye
 import os
 
-from tasker.engine.collection import TaskCollection
-from tasker.engine.traverser import SearchByClass
-from tasker.engine.script_server import ScriptServer
-from tasker.utils.path_util import PROJECT_PATH
+from pymeter.engine.collection import TestCollection
+from pymeter.engine.traverser import SearchByClass
+from pymeter.engine.script_server import ScriptServer
+from pymeter.utils.path_util import PROJECT_PATH
 
 
 class SearchByClassTest:
@@ -17,7 +17,7 @@ class SearchByClassTest:
         with open(os.path.join(PROJECT_PATH, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
             tree = ScriptServer.load_tree(script)
-            searcher = SearchByClass(TaskCollection)
+            searcher = SearchByClass(TestCollection)
             tree.traverse(searcher)
             result = searcher.get_search_result()
             print(result)
