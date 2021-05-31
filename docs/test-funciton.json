@@ -2,10 +2,10 @@
   {
     "name": "测试函数",
     "remark": "描述",
-    "class": "TaskCollection",
+    "class": "TestCollection",
     "enabled": true,
     "property": {
-      "TaskCollection__serialize_groups": "True"
+      "TestCollection__serialize_groups": "True"
     },
     "children": [
       {
@@ -19,13 +19,13 @@
       {
         "name": "协程组A",
         "remark": "描述",
-        "class": "TaskGroup",
+        "class": "TestGroup",
         "enabled": true,
         "property": {
-          "TaskGroup__on_sample_error": "continue",
-          "TaskGroup__number_groups": "1",
-          "TaskGroup__start_interval": "0",
-          "TaskGroup__main_controller": {
+          "TestGroup__on_sample_error": "continue",
+          "TestGroup__number_groups": "1",
+          "TestGroup__start_interval": "0",
+          "TestGroup__main_controller": {
             "class": "LoopController",
             "property": {
               "LoopController__loops": "1",
@@ -50,13 +50,13 @@
       {
         "name": "协程组B",
         "remark": "描述",
-        "class": "TaskGroup",
+        "class": "TestGroup",
         "enabled": true,
         "property": {
-          "TaskGroup__on_sample_error": "continue",
-          "TaskGroup__number_groups": "1",
-          "TaskGroup__start_interval": "0",
-          "TaskGroup__main_controller": {
+          "TestGroup__on_sample_error": "continue",
+          "TestGroup__number_groups": "1",
+          "TestGroup__start_interval": "0",
+          "TestGroup__main_controller": {
             "class": "LoopController",
             "property": {
               "LoopController__loops": "1",

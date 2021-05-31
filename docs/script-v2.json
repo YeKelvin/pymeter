@@ -1,24 +1,24 @@
 [
   {
-    "name": "TaskCollection-v2",
+    "name": "TestCollection-v2",
     "remark": "任务集合",
-    "class": "TaskCollection",
+    "class": "TestCollection",
     "enabled": true,
     "property": {
-      "TaskCollection__serialized": "True",
-      "TaskCollection__task_group_type": "continue"
+      "TestCollection__serialized": "True",
+      "TestCollection__task_group_type": "continue"
     },
     "children": [
       {
-        "name": "TaskGroup-v2",
+        "name": "TestGroup-v2",
         "remark": "任务组",
-        "class": "TaskGroup",
+        "class": "TestGroup",
         "enabled": true,
         "property": {
-          "TaskGroup__on_sample_error": "continue",
-          "TaskGroup__number_groups": "1",
-          "TaskGroup__start_interval": "0",
-          "TaskGroup__main_controller": {
+          "TestGroup__on_sample_error": "continue",
+          "TestGroup__number_groups": "1",
+          "TestGroup__start_interval": "0",
+          "TestGroup__main_controller": {
             "class": "LoopController",
             "property": {
               "LoopController__loops": "1",
