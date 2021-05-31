@@ -25,7 +25,7 @@ class GenericController(Controller):
         super().__init__()
 
         # 存储Sampler或Controller
-        self.sub_samplers_and_controllers = []
+        self.sub_controllers_and_samplers = []
 
         # 存储子代控制器的LoopIterationListener
         self.sub_iteration_listeners = []
@@ -66,7 +66,7 @@ class GenericController(Controller):
 
     def initialize_sub_controllers(self):
         """初始化子Controller"""
-        for element in self.sub_samplers_and_controllers:
+        for element in self.sub_controllers_and_samplers:
             if isinstance(element, GenericController):
                 element.initialize()
 
@@ -114,14 +114,15 @@ class GenericController(Controller):
         log.debug(
             f'notify all LoopIterationListener to start, coroutine:[ {ContextService.get_context().coroutine_name} ]'
         )
+        log.debug(f'sub_iteration_listeners={self.sub_iteration_listeners}')
         for listener in self.sub_iteration_listeners[::-1]:
             listener.iteration_start(self, self.iter_count)
 
     def get_current_element(self):
-        if self.current < len(self.sub_samplers_and_controllers):
-            return self.sub_samplers_and_controllers[self.current]
+        if self.current < len(self.sub_controllers_and_samplers):
+            return self.sub_controllers_and_samplers[self.current]
 
-        if not self.sub_samplers_and_controllers:
+        if not self.sub_controllers_and_samplers:
             self.done = True
             raise NextIsNullException()
 
@@ -148,11 +149,15 @@ class GenericController(Controller):
         else:
             self.increment_current()
 
-    def add_element(self, element: Sampler or Controller):
-        self.sub_samplers_and_controllers.append(element)
+    def add_element(self, child):
+        self.sub_controllers_and_samplers.append(child)
+
+    def add_test_element(self, child):
+        if isinstance(child, Controller) or isinstance(child, Sampler):
+            self.add_element(child)
 
     def remove_current_element(self):
-        self.sub_samplers_and_controllers.remove(self.sub_samplers_and_controllers[self.current])
+        self.sub_controllers_and_samplers.remove(self.sub_controllers_and_samplers[self.current])
 
     def add_iteration_listener(self, listener: LoopIterationListener):
         self.sub_iteration_listeners.append(listener)

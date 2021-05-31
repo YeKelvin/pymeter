@@ -170,9 +170,10 @@ class TestCompiler(HashTreeTraverser):
         return package
 
     def add_node(self, node, subtree) -> None:
+        log.debug(f'开始编译节点:[ {node} ]')
         if isinstance(node, Sampler):
             self.__save_sampler_package(node, subtree)
-        if isinstance(node, GenericController):
+        if isinstance(node, Controller):
             self.__compile_controller(node, subtree)
 
     def subtract_node(self) -> None:
@@ -190,31 +191,34 @@ class TestCompiler(HashTreeTraverser):
         self.sampler_package_saver[node] = sample_package
 
     def __compile_controller(self, node, subtree):
-        if node not in self.compiled_node:
-            controller_level_elements = subtree.list()
+        if node in self.compiled_node:
+            log.debug(f'当前节点已完成编译，无需再次编译，当前节点:[ {node} ]')
+            return
 
-            # Controller节点储存Sampler节点和Controller节点
-            for element in controller_level_elements:
-                if isinstance(element, Sampler) or isinstance(element, GenericController):
-                    node.sub_samplers_and_controllers.append(element)
+        controller_level_elements = subtree.list()
+        # Controller节点储存Sampler节点和Controller节点
+        for element in controller_level_elements:
+            log.debug(f'当前节点的子代节点:[ {element} ]')
+            if isinstance(element, Sampler) or isinstance(element, Controller):
+                node.add_test_element(element)
 
-                if isinstance(element, LoopIterationListener):
-                    node.add_iteration_listener(element)
+            if isinstance(element, LoopIterationListener):
+                node.add_iteration_listener(element)
 
-            # 移除Controller层的非Sampler节点和非Controller节点，用于传递到子代
-            self.__remove_samplers_and_controllers(controller_level_elements)
+        # 移除Controller层的非Sampler节点和非Controller节点，用于传递到子代
+        self.__remove_samplers_and_controllers(controller_level_elements)
 
-            # 合并Group层和子代Controller层的非Sampler节点和非Controller节点
-            parent_level_elements = self.group_level_elements + controller_level_elements
+        # 合并Group层和子代Controller层的非Sampler节点和非Controller节点
+        parent_level_elements = self.group_level_elements + controller_level_elements
 
-            # 递归编译子代节点
-            compiler = TestCompiler(parent_level_elements)
-            subtree.traverse(compiler)
-            self.sampler_package_saver.update(compiler.sampler_package_saver)
+        # 递归编译子代节点
+        compiler = TestCompiler(parent_level_elements)
+        subtree.traverse(compiler)
+        self.sampler_package_saver.update(compiler.sampler_package_saver)
 
-            # 存储已编译过的Controller节点，避免递归遍历下有可能产生重复编译的问题
-            self.compiled_node.extend(compiler.compiled_node)
-            self.compiled_node.append(node)
+        # 存储已编译过的Controller节点，避免递归遍历下有可能产生重复编译的问题
+        self.compiled_node.extend(compiler.compiled_node)
+        self.compiled_node.append(node)
 
     @staticmethod
     def __remove_samplers_and_controllers(elements: list):

@@ -97,7 +97,7 @@ class StandardEngine(Greenlet):
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'开始下一个TestGroup之前等待上一个TestGroup完成，上一个Group名称:[ {group_name} ]')
+                    log.info(f'开始下一个TestGroup之前等待当前TestGroup完成，当前Group名称:[ {group_name} ]')
                     group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有TestGroup已启动')

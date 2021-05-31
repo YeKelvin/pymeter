@@ -19,11 +19,11 @@ class TestCollectionListener:
 class TestGroupListener:
 
     def group_started(self) -> None:
-        """任务组在开始时调用"""
+        """TestGroup在开始时调用"""
         raise NotImplementedError
 
     def group_finished(self) -> None:
-        """任务组在结束时调用"""
+        """TestGroup在结束时调用"""
         raise NotImplementedError
 
 
@@ -41,7 +41,7 @@ class SampleListener:
 class TestIterationListener:
 
     def test_iteration_start(self, controller) -> None:
-        """任务组在迭代开始时调用"""
+        """TestGroup在迭代开始时调用"""
         raise NotImplementedError
 
 

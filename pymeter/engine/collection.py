@@ -11,10 +11,10 @@ log = get_logger(__name__)
 
 
 class TestCollection(TestElement):
-    # 是否顺序执行任务组
+    # 是否顺序执行TestGroup
     SERIALIZE_GROUPS = 'TestCollection__serialize_groups'
 
-    # 延迟启动任务组，单位ms
+    # 延迟启动TestGroup，单位ms
     DELAY = 'TestCollection__delay'
 
     @property

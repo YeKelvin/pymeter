@@ -5,6 +5,7 @@
 # @Author  : Kelvin.Ye
 
 
-class Sampler:
+class Sampler:  # TODO: (TestElement)
+
     def sample(self):
         raise NotImplementedError

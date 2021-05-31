@@ -22,7 +22,7 @@ __MODULE_PATH__ = {
     # 测试集合
     'TestCollection': 'pymeter.engine.collection',
 
-    # 任务组
+    # TestGroup
     'TestGroup': 'pymeter.groups.group',
 
     # 断言器

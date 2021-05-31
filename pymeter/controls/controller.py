@@ -3,10 +3,11 @@
 # @File    : controller.py
 # @Time    : 2020/2/28 16:01
 # @Author  : Kelvin.Ye
+from pymeter.elements.element import TestElement
 from pymeter.samplers.sampler import Sampler
 
 
-class Controller:
+class Controller(TestElement):
 
     @property
     def done(self):

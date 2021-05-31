@@ -13,8 +13,8 @@ from typing import Optional
 from gevent import Greenlet
 
 from pymeter.assertions.assertion import AssertionResult
-from pymeter.common.exceptions import StopTestGroupException
 from pymeter.common.exceptions import StopTestException
+from pymeter.common.exceptions import StopTestGroupException
 from pymeter.common.exceptions import StopTestNowException
 from pymeter.controls.controller import Controller
 from pymeter.controls.controller import IteratingController
@@ -64,7 +64,7 @@ class LogicalAction(Enum):
     STOPTEST_NOW = 'stop_test_now'
 
 
-class TestGroup(TestElement, Controller):
+class TestGroup(Controller):
     # Sampler失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR: Final = 'TestGroup__on_sample_error'
 
@@ -154,35 +154,41 @@ class TestGroup(TestElement, Controller):
             else:
                 break
 
-        log.info(f'开始第 {self.group_number} 个任务组')
+        log.info(f'开始第 {self.group_number} 个TestGroup')
 
     @property
     def done(self):
+        """Controller API"""
         return self.main_controller.done
 
     @done.setter
     def done(self, value):
+        """Controller API"""
         self.main_controller.done = value
 
     def next(self) -> Sampler:
-        """Override Controller"""
+        """Controller API"""
         return self.main_controller.next()
 
     def initialize(self):
-        """Override Controller"""
+        """Controller API"""
         self.main_controller.initialize()
 
     def trigger_end_of_loop(self):
-        """Override Controller"""
+        """Controller API"""
         self.main_controller.trigger_end_of_loop()
 
     def add_iteration_listener(self, listener):
-        """Override Controller"""
+        """Controller API"""
         self.main_controller.add_iteration_listener(listener)
 
     def remove_iteration_listener(self, listener):
-        """Override Controller"""
+        """Controller API"""
         self.main_controller.remove_iteration_listener(listener)
+
+    def add_test_element(self, child):
+        """TestElement API"""
+        self.main_controller.add_test_element(child)
 
     def wait_groups_stopped(self) -> None:
         """等待所有协程停止"""
@@ -201,10 +207,10 @@ class TestGroup(TestElement, Controller):
         self.running = False
         for group in self.all_groups:
             group.stop_coroutine()
-            group.kill()  # todo 重写 kill方法，添加中断时的操作
+            group.kill()  # TODO: 重写 kill方法，添加中断时的操作
 
     def __start_new_group(self, coroutine_number, engine, context) -> 'Coroutine':
-        """创建一个协程去执行任务组
+        """创建一个协程去执行TestGroup
 
         Args:
             coroutine_number:   协程的序号
@@ -233,10 +239,10 @@ class TestGroup(TestElement, Controller):
         coroutine_name = f'{self.name} g{self.group_number}-c{coroutine_number + 1}'
         coroutine = Coroutine(self.__clone_group_tree())
         coroutine.initial_context(context)
+        coroutine.engine = engine
         coroutine.test_group = self
         coroutine.coroutine_number = coroutine_number
         coroutine.coroutine_name = coroutine_name
-        coroutine.engine = engine
         coroutine.on_error_continue = self.on_error_continue
         coroutine.on_error_start_next_coroutine_loop = self.on_error_start_next_coroutine_loop
         coroutine.on_error_start_next_current_loop = self.on_error_start_next_current_loop
@@ -247,7 +253,7 @@ class TestGroup(TestElement, Controller):
         return coroutine
 
     def __clone_group_tree(self) -> HashTree:
-        """深拷贝 hashtree，目的是让每个协程持有不同的节点实例，在高并发下避免相互影响的问题"""
+        """深拷贝HashTree，目的是让每个协程持有不同的节点实例，在高并发下避免相互影响的问题"""
         cloner = TreeCloner(True)
         self.group_tree.traverse(cloner)
         return cloner.get_cloned_tree()
@@ -311,10 +317,12 @@ class Coroutine(Greenlet):
         self.__remove_samplers_and_controllers(group_level_elements)
 
         # 编译Group层下的所有子代节点
+        log.info('开始编译TestGroup的子代节点')
         self.test_compiler = TestCompiler(group_level_elements)
         self.group_tree.traverse(self.test_compiler)
+        log.debug(f'编译完成，sampler_package:[ {self.test_compiler.sampler_package_saver} ]')
 
-        # 初始化任务组控制器
+        # 初始化TestGroup控制器
         self.test_group_controller.initialize()
 
         # 添加Group层循环迭代监听器
@@ -325,7 +333,7 @@ class Coroutine(Greenlet):
         self.__coroutine_started()
 
     def _run(self):
-        """任务组执行主体"""
+        """TestGroup执行主体"""
         context = ContextService.get_context()
         try:
             self.init_run(context)
@@ -391,12 +399,12 @@ class Coroutine(Greenlet):
         ContextService.decr_number_of_coroutines()
 
     def __control_loop_by_logical_action(self, sampler: Sampler, context: CoroutineContext) -> None:
-        """Sampler失败时，根据任务组的 on_sample_error选项，控制循环的动作"""
+        """Sampler失败时，根据TestGroup的 on_sample_error选项，控制循环的动作"""
         last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
 
         # Sampler失败且非继续执行时，根据 on_sample_error选项控制循环迭代
         if not last_sample_ok and not self.on_error_continue:
-            # 错误时开始下一个任务组循环
+            # 错误时开始下一个TestGroup循环
             if self.on_error_start_next_coroutine_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next continue loop')
                 self.__continue_on_coroutine_loop()
@@ -461,7 +469,7 @@ class Coroutine(Greenlet):
 
             # 检查是否需要停止协程或测试
             if result.is_stop_coroutine or (not result.success and self.on_error_stop_coroutine_group):
-                log.info(f'用户主动设置停止任务组，协程名称:[ {self.coroutine_name} ]')
+                log.info(f'用户主动设置停止TestGroup，协程名称:[ {self.coroutine_name} ]')
                 self.stop_coroutine()
             if result.is_stop_test or (not result.success and self.on_error_stop_test):
                 log.info(f'用户主动设置停止测试，协程名称:[ {self.coroutine_name} ]')
@@ -531,7 +539,7 @@ class Coroutine(Greenlet):
         result.assertion_result = assertion_result
 
     def __continue_on_coroutine_loop(self) -> None:
-        """Sampler失败时，继续任务组控制器的循环"""
+        """Sampler失败时，继续TestGroup控制器的循环"""
         self.test_group_controller.start_next_loop()
 
     def __continue_on_current_loop(self, sampler: Sampler) -> None:
@@ -616,7 +624,7 @@ class Coroutine(Greenlet):
                 elements.remove(element)
 
     class GroupLevelIterationListener(LoopIterationListener):
-        """Coroutine内部类，用于在任务组循环迭代开始时触发所有实现类的开始动作"""
+        """Coroutine内部类，用于在TestGroup循环迭代开始时触发所有实现类的开始动作"""
 
         def __init__(self, parent: 'Coroutine'):
             self.parent = parent

@@ -18,7 +18,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class LoopController(TestElement, GenericController, IteratingController, LoopIterationListener):
+class LoopController(GenericController, IteratingController, LoopIterationListener):
     # 循环次数
     LOOPS = 'LoopController__loops'
 
@@ -70,7 +70,7 @@ class LoopController(TestElement, GenericController, IteratingController, LoopIt
                     f'控制器:[ {self.name} ] 开始第 {self.loop_count + 1} 次迭代'
                 )
             else:
-                log.info(f'协程:[ {ContextService.get_context().coroutine_name} ] 控制器:[ {self.name} ] 开始新的迭代')
+                log.info(f'协程:[ {ContextService.get_context().coroutine_name} ] 控制器:[ {self.name} ] 开始下一个迭代')
 
         return super().next()
 
