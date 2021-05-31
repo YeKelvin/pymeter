@@ -7,7 +7,6 @@ from typing import Final
 
 import gevent
 
-from pymeter.elements.element import TestElement
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
@@ -16,7 +15,8 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class TestSampler(Sampler, TestElement):
+class TestSampler(Sampler):
+
     SAMPLER_DATA: Final = 'TestSampler__sampler_data'
     EXPECTED_SUCCESS: Final = 'TestSampler__expected_success'
 

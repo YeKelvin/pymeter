@@ -6,7 +6,6 @@
 import traceback
 from typing import Final
 
-from pymeter.elements.element import TestElement
 from pymeter.engine.globalization import GlobalUtils
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -16,7 +15,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class PythonSampler(Sampler, TestElement):
+class PythonSampler(Sampler):
     SOURCE: Final = 'PythonSampler__source'
 
     @property

@@ -61,19 +61,19 @@ class TestElement:
 
     def get_property_as_str(self, key: str, default: str = None) -> str:
         prop = self.get_property(key)
-        return prop.get_str_value() if prop else default
+        return prop.get_str_value() if prop is not None else default
 
     def get_property_as_int(self, key: str, default: int = None) -> int:
         prop = self.get_property(key)
-        return prop.get_int_value() if prop else default
+        return prop.get_int_value() if prop is not None else default
 
     def get_property_as_float(self, key: str, default: float = None) -> float:
         prop = self.get_property(key)
-        return prop.get_float_value() if prop else default
+        return prop.get_float_value() if prop is not None else default
 
     def get_property_as_bool(self, key: str, default: bool = None) -> bool:
         prop = self.get_property(key)
-        return prop.get_bool_value() if prop else default
+        return prop.get_bool_value() if prop is not None else default
 
     def add_test_element(self, element: 'TestElement') -> None:
         """mergeIn"""

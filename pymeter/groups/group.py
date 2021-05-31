@@ -365,13 +365,13 @@ class Coroutine(Greenlet):
             log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestException Exception, stoping test')
             self.stop_test()
         except StopTestNowException:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestNowException Exception, stoping test now')
+            log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestNowException Exception, stop test now')
             self.stop_test_now()
         except Exception:
             log.error(traceback.format_exc())
         finally:
             log.info(f'协程:[ {self.coroutine_name} ] 已执行完成')
-            # 遍历执行 TestGroupListener
+            # 遍历执行TestGroupListener
             self.__coroutine_finished()
             context.clear()
             ContextService.remove_context()

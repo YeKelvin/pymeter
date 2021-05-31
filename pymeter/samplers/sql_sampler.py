@@ -5,7 +5,6 @@
 # @Author  : Kelvin.Ye
 from typing import Final
 
-from pymeter.elements.element import TestElement
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
@@ -14,7 +13,8 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class SQLSampler(Sampler, TestElement):
+class SQLSampler(Sampler):
+
     expression: Final = 'SQLSampler__expression'
 
     def sample(self) -> SampleResult:

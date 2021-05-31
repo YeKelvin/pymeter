@@ -27,3 +27,9 @@ if __name__ == '__main__':
         script = ''.join(f.readlines())
         tree = ScriptServer.load_tree(script)
         print(f'tree=\n{tree}')
+        collection = tree.list()[0]
+        print(f'collection={collection}')
+        group = tree.get_subtree(collection).list()[0]
+        print(f'group={group}')
+        print(f'main_controller={group.main_controller}')
+        print(f'main_controller={group.main_controller.__dict__}')

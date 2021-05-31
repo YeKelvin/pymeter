@@ -83,7 +83,7 @@ class GenericController(Controller):
         self.iter_count += 1
 
     def next(self) -> Optional[Sampler]:
-        log.debug('获取下一个Sampler')
+        log.debug('开始获取下一个Sampler')
         self.fire_iter_events()
 
         if self.done:

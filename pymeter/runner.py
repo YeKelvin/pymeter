@@ -18,8 +18,7 @@ class Runner:
 
     @staticmethod
     def start(script: str) -> None:
-        """脚本执行主入口
-        """
+        """脚本执行主入口"""
         now = time.time()
         ymd = time.strftime('%Y-%m-%d', time.localtime(now))
         hms = time.strftime('%H:%M:%S', time.localtime(now))
@@ -40,8 +39,7 @@ class Runner:
 
     @staticmethod
     def run(script: str) -> None:
-        """加载并解析脚本，将脚本反序列化为 HashTree对象
-        """
+        """加载并解析脚本，将脚本反序列化为 HashTree对象"""
         log.info('开始加载脚本')
         # 加载脚本
         hashtree = ScriptServer.load_tree(script)

@@ -1,57 +1,57 @@
 [
   {
-    "name": "TestCollection-v2",
-    "remark": "任务集合",
-    "class": "TestCollection",
-    "enabled": true,
-    "property": {
-      "TestCollection__serialized": "True",
-      "TestCollection__task_group_type": "continue"
-    },
-    "children": [
-      {
-        "name": "TestGroup-v2",
-        "remark": "任务组",
-        "class": "TestGroup",
-        "enabled": true,
-        "property": {
-          "TestGroup__on_sample_error": "continue",
-          "TestGroup__number_groups": "1",
-          "TestGroup__start_interval": "0",
-          "TestGroup__main_controller": {
-            "class": "LoopController",
-            "property": {
-              "LoopController__loops": "1",
-              "LoopController__continue_forever": "false"
-            }
-          }
-        },
-        "children": [
+      "name": "TestCollection-v2",
+      "remark": "任务集合",
+      "class": "TestCollection",
+      "enabled": true,
+      "property": {
+          "TestCollection__serialize_groups": "True",
+          "TestCollection__task_group_type": "continue"
+      },
+      "children": [
           {
-            "name": "HTTPSampler-v2",
-            "remark": "HTTP请求取样器",
-            "class": "HTTPSampler",
-            "enabled": true,
-            "property": {
-              "HTTPSampler__domain": "www.baidu.com",
-              "HTTPSampler__port": "443",
-              "HTTPSampler__protocol": "HTTPS",
-              "HTTPSampler__encoding": "UTF-8",
-              "HTTPSampler__path": "/s",
-              "HTTPSampler__method": "GET",
-              "HTTPSampler__params": "wd=test",
-              "HTTPSampler__data": "",
-              "HTTPSampler__files": "",
-              "HTTPSampler__follow_redirects": "",
-              "HTTPSampler__auto_redirects": "",
-              "HTTPSampler__keep_alive": "",
-              "HTTPSampler__connect_timeout": "",
-              "HTTPSampler__response_timeout": ""
-            },
-            "children": null
+              "name": "TestGroup-v2",
+              "remark": "任务组",
+              "class": "TestGroup",
+              "enabled": true,
+              "property": {
+                  "TestGroup__on_sample_error": "continue",
+                  "TestGroup__number_groups": "1",
+                  "TestGroup__start_interval": "0",
+                  "TestGroup__main_controller": {
+                      "class": "LoopController",
+                      "property": {
+                          "LoopController__loops": "1",
+                          "LoopController__continue_forever": "false"
+                      }
+                  }
+              },
+              "children": [
+                  {
+                      "name": "HTTPSampler-v2",
+                      "remark": "HTTP请求取样器",
+                      "class": "HTTPSampler",
+                      "enabled": true,
+                      "property": {
+                          "HTTPSampler__domain": "www.baidu.com",
+                          "HTTPSampler__port": "443",
+                          "HTTPSampler__protocol": "HTTPS",
+                          "HTTPSampler__encoding": "UTF-8",
+                          "HTTPSampler__path": "/s",
+                          "HTTPSampler__method": "GET",
+                          "HTTPSampler__params": "wd=test",
+                          "HTTPSampler__data": "",
+                          "HTTPSampler__files": "",
+                          "HTTPSampler__follow_redirects": "",
+                          "HTTPSampler__auto_redirects": "",
+                          "HTTPSampler__keep_alive": "",
+                          "HTTPSampler__connect_timeout": "",
+                          "HTTPSampler__response_timeout": ""
+                      },
+                      "children": null
+                  }
+              ]
           }
-        ]
-      }
-    ]
+      ]
   }
 ]

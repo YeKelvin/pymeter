@@ -8,7 +8,6 @@ from typing import Final
 
 import requests
 
-from pymeter.elements.element import TestElement
 from pymeter.samplers.http_cons import STATUS_CODES
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -18,7 +17,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class HTTPSampler(Sampler, TestElement):
+class HTTPSampler(Sampler):
     URL: Final = 'HTTPSampler__url'
     METHOD: Final = 'HTTPSampler__method'
     PARAMS: Final = 'HTTPSampler__params'

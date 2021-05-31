@@ -10,7 +10,6 @@ from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.groups.context import ContextService
-from pymeter.groups.group import TestGroup
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
 
@@ -41,10 +40,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
     @property
     def continue_forever(self) -> bool:
-        """循环控制器始终将continue_forever设置为true，以便下次父级调用它们时执行它们"""
-        if isinstance(self, TestGroup):
-            return self.get_property_as_bool(self.CONTINUE_FOREVER)
-        return True
+        return self.get_property_as_bool(self.CONTINUE_FOREVER)
 
     @property
     def done(self):
