@@ -130,8 +130,8 @@ class ScriptServer:
                 raise ScriptParseException(f'脚本解析失败，当前节点缺少 class 属性，节点名称:[ {item["name"]} ]')
             if 'enabled' not in item:
                 raise ScriptParseException(f'脚本解析失败，当前节点缺少 enabled 属性，节点名称:[ {item["name"]} ]')
-            if 'property' not in item:
-                raise ScriptParseException(f'脚本解析失败，当前节点缺少 property 属性，节点名称:[ {item["name"]} ]')
+            if 'propertys' not in item:
+                raise ScriptParseException(f'脚本解析失败，当前节点缺少 propertys 属性，节点名称:[ {item["name"]} ]')
             if 'children' not in item:
                 raise ScriptParseException(f'脚本解析失败，当前节点缺少 children 属性，节点名称:[ {item["name"]} ]')
 
@@ -150,16 +150,16 @@ class ScriptServer:
         node.set_property_by_replace(TestElement.REMARK, script.get('remark'))
 
         # 设置节点的属性
-        cls.__set_node_property(node, script.get('property'))
+        cls.__set_propertys(node, script.get('propertys'))
 
         return node
 
     @classmethod
-    def __set_node_property(cls, node, property):
-        if not property:
+    def __set_propertys(cls, node, propertys):
+        if not propertys:
             return
 
-        for key, value in property.items():
+        for key, value in propertys.items():
             if isinstance(value, str):
                 node.set_property_by_replace(key, value)
             elif isinstance(value, dict):

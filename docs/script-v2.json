@@ -4,7 +4,7 @@
       "remark": "任务集合",
       "class": "TestCollection",
       "enabled": true,
-      "property": {
+      "propertys": {
           "TestCollection__serialize_groups": "True",
           "TestCollection__task_group_type": "continue"
       },
@@ -14,13 +14,13 @@
               "remark": "任务组",
               "class": "TestGroup",
               "enabled": true,
-              "property": {
+              "propertys": {
                   "TestGroup__on_sample_error": "continue",
                   "TestGroup__number_groups": "1",
                   "TestGroup__start_interval": "0",
                   "TestGroup__main_controller": {
                       "class": "LoopController",
-                      "property": {
+                      "propertys": {
                           "LoopController__loops": "1",
                           "LoopController__continue_forever": "false"
                       }
@@ -32,7 +32,7 @@
                       "remark": "HTTP请求取样器",
                       "class": "HTTPSampler",
                       "enabled": true,
-                      "property": {
+                      "propertys": {
                           "HTTPSampler__domain": "www.baidu.com",
                           "HTTPSampler__port": "443",
                           "HTTPSampler__protocol": "HTTPS",

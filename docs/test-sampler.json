@@ -1,127 +1,127 @@
 [
   {
     "name": "测试流程",
-    "comments": "描述",
+    "remark": "描述",
     "class": "TestCollection",
     "enabled": true,
-    "property": {
+    "propertys": {
       "TestCollection__serialized": "True"
     },
-    "child": [
+    "children": [
       {
         "name": "配置元素-Collection层",
-        "comments": "描述",
+        "remark": "描述",
         "class": "TestConfig",
         "enabled": true,
-        "property": {
+        "propertys": {
           "HeaderManager__headers": [
             {
               "class": "HttpHeader",
-              "property": {
+              "propertys": {
                 "Header__name": "Cookies",
                 "Header__value": "ccc"
               }
             }
           ]
         },
-        "child": null
+        "children": null
       },
       {
         "name": "结果收集器",
-        "comments": "描述",
+        "remark": "描述",
         "class": "ResultCollector",
         "enabled": true,
-        "property": {},
-        "child": null
+        "propertys": {},
+        "children": null
       },
       {
         "name": "协程组A",
-        "comments": "描述",
+        "remark": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
-        "property": {
+        "propertys": {
           "CoroutineGroup__on_sample_error": "continue",
           "CoroutineGroup__number_coroutines": "1",
           "CoroutineGroup__start_interval": "0",
           "LoopController__loops": "1",
           "LoopController__continue_forever": "false"
         },
-        "child": [
+        "children": [
           {
             "name": "配置元素-Group层",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestConfig",
             "enabled": true,
-            "property": {},
-            "child": null
+            "propertys": {},
+            "children": null
           },
           {
             "name": "测试取样器 - 1",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "false"
             },
-            "child": [
+            "children": [
               {
                 "name": "配置元素-Sampler层",
-                "comments": "描述",
+                "remark": "描述",
                 "class": "TestConfig",
                 "enabled": true,
-                "property": {},
-                "child": null
+                "propertys": {},
+                "children": null
               }
             ]
           },
           {
             "name": "循环控制器",
-            "comments": "描述",
+            "remark": "描述",
             "class": "LoopController",
             "enabled": true,
-            "property": {
+            "propertys": {
               "LoopController__loops": "1",
               "LoopController__continue_forever": "false"
             },
-            "child": [
+            "children": [
               {
                 "name": "循环控制器 -> 测试取样器 - 11",
-                "comments": "描述",
+                "remark": "描述",
                 "class": "TestSampler",
                 "enabled": true,
-                "property": {
+                "propertys": {
                   "TestSampler__sampler_data": "request-data",
                   "TestSampler__expected_success": "false"
                 },
-                "child": [
+                "children": [
                   {
                     "name": "配置元素-Sampler层",
-                    "comments": "描述",
+                    "remark": "描述",
                     "class": "TestConfig",
                     "enabled": true,
-                    "property": {},
-                    "child": null
+                    "propertys": {},
+                    "children": null
                   }
                 ]
               },
               {
                 "name": "循环控制器 -> 测试取样器 - 22",
-                "comments": "描述",
+                "remark": "描述",
                 "class": "TestSampler",
                 "enabled": true,
-                "property": {
+                "propertys": {
                   "TestSampler__sampler_data": "request-data",
                   "TestSampler__expected_success": "true"
                 },
-                "child": [
+                "children": [
                   {
                     "name": "配置元素-Sampler层",
-                    "comments": "描述",
+                    "remark": "描述",
                     "class": "TestConfig",
                     "enabled": true,
-                    "property": {},
-                    "child": null
+                    "propertys": {},
+                    "children": null
                   }
                 ]
               }
@@ -129,51 +129,51 @@
           },
           {
             "name": "测试取样器 - 2",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           }
         ]
       },
       {
         "name": "协程组B",
-        "comments": "描述",
+        "remark": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
-        "property": {
+        "propertys": {
           "CoroutineGroup__on_sample_error": "start_next_loop",
           "CoroutineGroup__number_coroutines": "1",
           "CoroutineGroup__start_interval": "0",
           "LoopController__loops": "1",
           "LoopController__continue_forever": "false"
         },
-        "child": [
+        "children": [
           {
             "name": "测试取样器 - 1",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           },
           {
             "name": "测试取样器 - 2",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           }
         ]
       }

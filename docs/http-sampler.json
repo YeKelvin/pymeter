@@ -4,7 +4,7 @@
     "comments": "描述",
     "class": "TestCollection",
     "enabled": true,
-    "property": {
+    "propertys": {
       "TestCollection__serialized": "True"
     },
     "child": [
@@ -13,7 +13,7 @@
         "comments": "描述",
         "class": "ConfigTestElement",
         "enabled": true,
-        "property": {},
+        "propertys": {},
         "child": null
       },
       {
@@ -21,7 +21,7 @@
         "comments": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
-        "property": {
+        "propertys": {
           "CoroutineGroup__on_sample_error": "continue",
           "CoroutineGroup__number_coroutines": "1",
           "CoroutineGroup__start_interval": "0",
@@ -34,7 +34,7 @@
             "comments": "描述",
             "class": "ConfigTestElement",
             "enabled": true,
-            "property": {},
+            "propertys": {},
             "child": null
           },
           {
@@ -42,7 +42,7 @@
             "comments": "描述",
             "class": "HTTPSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "HTTPSampler__domain": "www.baidu.com",
               "HTTPSampler__port": "443",
               "HTTPSampler__protocol": "HTTPS",
@@ -64,7 +64,7 @@
                 "comments": "描述",
                 "class": "ConfigTestElement",
                 "enabled": true,
-                "property": {},
+                "propertys": {},
                 "child": null
               }
             ]
@@ -74,7 +74,7 @@
             "comments": "描述",
             "class": "LoopController",
             "enabled": true,
-            "property": {
+            "propertys": {
               "LoopController__loops": "1",
               "LoopController__continue_forever": "false"
             },
@@ -84,7 +84,7 @@
                 "comments": "描述",
                 "class": "HTTPSampler",
                 "enabled": true,
-                "property": {
+                "propertys": {
                   "HTTPSampler__domain": "www.baidu.com",
                   "HTTPSampler__port": "443",
                   "HTTPSampler__protocol": "HTTPS",
@@ -106,7 +106,7 @@
                     "comments": "描述",
                     "class": "ConfigTestElement",
                     "enabled": true,
-                    "property": {},
+                    "propertys": {},
                     "child": null
                   }
                 ]
@@ -116,7 +116,7 @@
                 "comments": "描述",
                 "class": "HTTPSampler",
                 "enabled": true,
-                "property": {
+                "propertys": {
                   "HTTPSampler__domain": "www.baidu.com",
                   "HTTPSampler__port": "443",
                   "HTTPSampler__protocol": "HTTPS",
@@ -138,7 +138,7 @@
                     "comments": "描述",
                     "class": "ConfigTestElement",
                     "enabled": true,
-                    "property": {},
+                    "propertys": {},
                     "child": null
                   }
                 ]
@@ -150,7 +150,7 @@
             "comments": "描述",
             "class": "HTTPSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "HTTPSampler__domain": "www.baidu.com",
               "HTTPSampler__port": "443",
               "HTTPSampler__protocol": "HTTPS",
@@ -175,7 +175,7 @@
         "comments": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
-        "property": {
+        "propertys": {
           "CoroutineGroup__on_sample_error": "start_next_loop",
           "CoroutineGroup__number_coroutines": "1",
           "CoroutineGroup__start_interval": "0",
@@ -188,7 +188,7 @@
             "comments": "描述",
             "class": "HTTPSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "HTTPSampler__domain": "www.baidu.com",
               "HTTPSampler__port": "443",
               "HTTPSampler__protocol": "HTTPS",
@@ -211,7 +211,7 @@
             "comments": "描述",
             "class": "HTTPSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "HTTPSampler__domain": "www.baidu.com",
               "HTTPSampler__port": "443",
               "HTTPSampler__protocol": "HTTPS",

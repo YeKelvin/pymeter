@@ -4,7 +4,7 @@
         "remark": "描述",
         "class": "TestCollection",
         "enabled": true,
-        "property": {
+        "propertys": {
             "TestCollection__serialize_groups": "true"
         },
         "children": [
@@ -13,7 +13,7 @@
                 "remark": "描述",
                 "class": "ResultCollector",
                 "enabled": true,
-                "property": {},
+                "propertys": {},
                 "children": null
             },
             {
@@ -21,13 +21,13 @@
                 "remark": "描述",
                 "class": "TestGroup",
                 "enabled": true,
-                "property": {
+                "propertys": {
                     "TestGroup__on_sample_error": "continue",
                     "TestGroup__number_groups": "1",
                     "TestGroup__start_interval": "0",
                     "TestGroup__main_controller": {
                         "class": "LoopController",
-                        "property": {
+                        "propertys": {
                             "LoopController__loops": "1",
                             "LoopController__continue_forever": "false"
                         }
@@ -39,7 +39,7 @@
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
-                        "property": {
+                        "propertys": {
                             "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
                             "TestSampler__expected_success": "true"
                         },
@@ -52,13 +52,13 @@
                 "remark": "描述",
                 "class": "TestGroup",
                 "enabled": true,
-                "property": {
+                "propertys": {
                     "TestGroup__on_sample_error": "continue",
                     "TestGroup__number_groups": "1",
                     "TestGroup__start_interval": "0",
                     "TestGroup__main_controller": {
                         "class": "LoopController",
-                        "property": {
+                        "propertys": {
                             "LoopController__loops": "1",
                             "LoopController__continue_forever": "false"
                         }
@@ -70,7 +70,7 @@
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
-                        "property": {
+                        "propertys": {
                             "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
                             "TestSampler__expected_success": "true"
                         },
@@ -81,7 +81,7 @@
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
-                        "property": {
+                        "propertys": {
                             "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
                             "TestSampler__expected_success": "true"
                         },

@@ -6,11 +6,11 @@
 
 3、脚本中所有节点均包含以下属性
     - name: str
-    - comments: str
+    - remark: str
     - class: str
     - enabled: bool
-    - property: dict
-    - child: list
+    - propertys: dict
+    - children: list
 
 4、脚本层级说明（可参照JMeter中的概念）
     - 一级节点为测试集合节点（TestCollection）
@@ -22,52 +22,52 @@
 [
   {
     "name": "测试集合",
-    "comments": "描述",
+    "remark": "描述",
     "class": "TestCollection",
     "enabled": true,
-    "property": {
+    "propertys": {
       "TestCollection.serialized": "True"
     },
-    "child": [
+    "children": [
       {
         "name": "配置器",
-        "comments": "描述",
+        "remark": "描述",
         "class": "TestConfig",
         "enabled": true,
-        "property": {},
-        "child": null
+        "propertys": {},
+        "children": null
       },
       {
         "name": "结果收集器",
-        "comments": "描述",
+        "remark": "描述",
         "class": "ResultCollector",
         "enabled": true,
-        "property": {},
-        "child": null
+        "propertys": {},
+        "children": null
       },
       {
         "name": "组节点",
-        "comments": "描述",
+        "remark": "描述",
         "class": "CoroutineGroup",
         "enabled": true,
-        "property": {
+        "propertys": {
           "CoroutineGroup.on_sample_error": "continue",
           "CoroutineGroup.number_coroutines": "1",
           "CoroutineGroup.start_interval": "0",
           "LoopController.loops": "1",
           "LoopController.continue_forever": "false"
         },
-        "child": [
+        "children": [
           {
             "name": "测试取样器",
-            "comments": "描述",
+            "remark": "描述",
             "class": "TestSampler",
             "enabled": true,
-            "property": {
+            "propertys": {
               "TestSampler.sampler_data": "request-data",
               "TestSampler.expected_success": "false"
             },
-            "child": []
+            "children": []
           }
         ]
       }
