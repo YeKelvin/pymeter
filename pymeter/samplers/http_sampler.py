@@ -77,21 +77,25 @@ class HTTPSampler(Sampler):
     def sample(self) -> SampleResult:
         result = SampleResult()
         result.sample_label = self.name
+        result.sample_remark = self.remark
+        result.sample_url = self.url
         result.request_headers = ''
         result.request_body = self.__get_request_body()
         result.sample_start()
         res = None
 
         try:
-            res = requests.request(method=self.method,
-                                   url=self.url,
-                                   headers=None,
-                                   params=self.params,
-                                   data=self.data,
-                                   files=self.files,
-                                   cookies=None,
-                                   timeout=self.__get_timeout(),
-                                   allow_redirects=True)
+            res = requests.request(
+                method=self.method,
+                url=self.url,
+                headers=None,
+                params=self.params,
+                data=self.data,
+                files=self.files,
+                cookies=None,
+                timeout=self.__get_timeout(),
+                allow_redirects=True
+            )
         except Exception:
             result.response_data = traceback.format_exc()
 
@@ -99,7 +103,7 @@ class HTTPSampler(Sampler):
         result.calculate_elapsed_time()
 
         if res:
-            result.response_headers = res.headers
+            result.response_headers = dict(res.headers)
             result.response_data = res.text
             result.response_code = res.status_code
             result.response_message = STATUS_CODES.get(res.status_code)
@@ -118,6 +122,7 @@ class HTTPSampler(Sampler):
             return self.data
         if self.files:
             return self.files
+
 
 # if __name__ == '__main__':
 #     url = 'http://127.0.0.1/5000/get'

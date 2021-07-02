@@ -43,14 +43,14 @@ class ResultCollector(
         return ContextService.get_context().coroutine_group.name
 
     def collection_started(self) -> None:
-        self.startTime = time_util.timestamp_as_ms()
+        self.startTime = time_util.timestamp_now()
 
     def collection_ended(self) -> None:
-        self.endTime = time_util.timestamp_as_ms()
+        self.endTime = time_util.timestamp_now()
 
     def group_started(self) -> None:
         self.groups[self.__group_id] = {
-            'startTime': time_util.timestamp_as_ms(),
+            'startTime': time_util.timestamp_now(),
             'endTime': 0,
             'success': True,
             'groupName': self.__group_name,
@@ -58,7 +58,7 @@ class ResultCollector(
         }
 
     def group_finished(self) -> None:
-        self.groups[self.__group_id]['endTime'] = time_util.timestamp_as_ms()
+        self.groups[self.__group_id]['endTime'] = time_util.timestamp_now()
 
     def sample_started(self, sample) -> None:
         pass

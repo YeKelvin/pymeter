@@ -81,7 +81,7 @@ class ContextService:
         engine_ctx = cls.__get_engine_context(engine_id)
         if engine_ctx.test_start == 0:
             engine_ctx.number_of_active_coroutine = 0
-            engine_ctx.test_start = time_util.timestamp_as_ms()
+            engine_ctx.test_start = time_util.timestamp_now()
             from pymeter.engine.globalization import GlobalUtils
             GlobalUtils.set_property('TESTSTART.MS', engine_ctx.test_start)
 

@@ -3,7 +3,7 @@
 # @File    : sample_result.py
 # @Time    : 2020/1/24 23:35
 # @Author  : Kelvin.Ye
-import time
+from pymeter.utils import time_util
 
 
 class SampleResult:
@@ -12,7 +12,9 @@ class SampleResult:
     def __init__(self):
         self.parent = None
         self.sample_label = None
+        self.sample_remark = None
 
+        self.request_url = None
         self.request_headers = None
         self.request_body = None
 
@@ -44,12 +46,11 @@ class SampleResult:
         return self.start_time != 0
 
     def sample_start(self):
-        self.start_time = int(time.time() * 1000)
+        self.start_time = time_util.timestamp_now()
 
     def sample_end(self):
-        self.end_time = int(time.time() * 1000)
+        self.end_time = time_util.timestamp_now()
 
     def calculate_elapsed_time(self):
-        """计算耗时
-        """
-        self.elapsed_time = f'{self.end_time - self.start_time} ms'
+        """计算耗时"""
+        self.elapsed_time = f'{int(self.end_time * 1000) - int(self.start_time * 1000)}ms'

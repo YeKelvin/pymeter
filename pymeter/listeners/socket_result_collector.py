@@ -114,16 +114,16 @@ class SocketResultCollector(
         self.sio.emit(self.event_name, data)
 
     def collection_started(self) -> None:
-        self.startTime = time_util.timestamp_as_ms()
+        self.startTime = time_util.timestamp_now()
         self.__socket_connect()
 
     def collection_ended(self) -> None:
-        self.endTime = time_util.timestamp_as_ms()
+        self.endTime = time_util.timestamp_now()
         self.__socket_disconnect()
 
     def group_started(self) -> None:
         group_id = self.__group_id
-        start_time = time_util.timestamp_as_ms()
+        start_time = time_util.timestamp_now()
         group_name = self.__group_name
 
         self.__emit_to_target({
@@ -139,7 +139,7 @@ class SocketResultCollector(
 
     def group_finished(self) -> None:
         group_id = self.__group_id
-        end_time = time_util.timestamp_as_ms()
+        end_time = time_util.timestamp_now()
 
         self.__emit_to_target({'group': {'id': group_id, 'endTime': end_time}})
 
