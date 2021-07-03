@@ -90,7 +90,7 @@ class FlaskSocketIOResultCollector(
     def collection_ended(self) -> None:
         """@override"""
         self.endTime = time_util.timestamp_now()
-        self.flask_sio.emit('disconnect', namespace=self.namespace, to=self.target_sid)
+        self.flask_sio.emit('pymeter_completed', namespace=self.namespace, to=self.target_sid)
 
     def group_started(self) -> None:
         """@override"""
@@ -139,15 +139,19 @@ class FlaskSocketIOResultCollector(
                 'samplerId': id(sample_result),
                 'samplerName': sample_result.sample_label,
                 'samplerRemark': sample_result.sample_remark,
-                'startTime': time_util.timestamp_to_strftime(sample_result.start_time),
-                'endTime': time_util.timestamp_to_strftime(sample_result.end_time),
-                'elapsedTime': sample_result.elapsed_time,
                 'url': sample_result.request_url,
-                'request': sample_result.request_body,
+                'request': sample_result.request_data,
                 'requestHeaders': sample_result.request_headers,
                 'response': sample_result.response_data,
                 'responseHeaders': sample_result.response_headers,
+                'responseCode': sample_result.response_code,
+                'responseMessage': sample_result.response_message,
+                'requestSize': sample_result.request_size,
+                'responseSize': sample_result.response_size,
                 'success': sample_result.success,
+                'startTime': time_util.timestamp_to_strftime(sample_result.start_time),
+                'endTime': time_util.timestamp_to_strftime(sample_result.end_time),
+                'elapsedTime': sample_result.elapsed_time,
             }
         })
 

@@ -16,7 +16,7 @@ class SampleResult:
 
         self.request_url = None
         self.request_headers = None
-        self.request_body = None
+        self.request_data = None
 
         self.response_headers = None
         self.response_data = None
@@ -33,9 +33,13 @@ class SampleResult:
         self.success = True
         self.assertion_results = []
 
-        self.bytes = None
-        self.headers_size = None
-        self.body_size = None
+        self.request_headers_size = None
+        self.request_data_size = None
+        self.request_size = None
+
+        self.response_headers_size = None
+        self.response_data_size = None
+        self.response_size = None
 
         self.is_stop_coroutine = False
         self.is_stop_test = False

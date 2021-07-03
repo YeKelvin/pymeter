@@ -78,9 +78,9 @@ class HTTPSampler(Sampler):
         result = SampleResult()
         result.sample_label = self.name
         result.sample_remark = self.remark
-        result.sample_url = self.url
+        result.request_url = self.url
         result.request_headers = ''
-        result.request_body = self.__get_request_body()
+        result.request_data = self.get_request_data()
         result.sample_start()
         res = None
 
@@ -93,7 +93,7 @@ class HTTPSampler(Sampler):
                 data=self.data,
                 files=self.files,
                 cookies=None,
-                timeout=self.__get_timeout(),
+                timeout=self.get_timeout(),
                 allow_redirects=True
             )
         except Exception:
@@ -110,12 +110,12 @@ class HTTPSampler(Sampler):
 
         return result
 
-    def __get_timeout(self) -> tuple or None:
+    def get_timeout(self) -> tuple or None:
         if not (self.connect_timeout and self.response_timeout):
             return None
         return self.connect_timeout or 0, self.response_timeout or 0
 
-    def __get_request_body(self):
+    def get_request_data(self):
         if self.params:
             return self.params
         if self.data:
