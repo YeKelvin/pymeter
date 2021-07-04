@@ -5,10 +5,11 @@
 # @Author  : Kelvin.Ye
 import traceback
 from typing import Final
+from typing import Optional
 
 import requests
 
-from pymeter.samplers.http_cons import STATUS_CODES
+from pymeter.samplers.http_cons import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
@@ -80,7 +81,7 @@ class HTTPSampler(Sampler):
         result.sample_remark = self.remark
         result.request_url = self.url
         result.request_headers = ''
-        result.request_data = self.get_request_data()
+        result.request_data = self.get_payload()
         result.sample_start()
         res = None
 
@@ -106,16 +107,16 @@ class HTTPSampler(Sampler):
             result.response_headers = dict(res.headers)
             result.response_data = res.text
             result.response_code = res.status_code
-            result.response_message = STATUS_CODES.get(res.status_code)
+            result.response_message = HTTP_STATUS_CODE.get(res.status_code)
 
         return result
 
-    def get_timeout(self) -> tuple or None:
+    def get_timeout(self) -> Optional[tuple]:
         if not (self.connect_timeout and self.response_timeout):
             return None
         return self.connect_timeout or 0, self.response_timeout or 0
 
-    def get_request_data(self):
+    def get_payload(self):
         if self.params:
             return self.params
         if self.data:

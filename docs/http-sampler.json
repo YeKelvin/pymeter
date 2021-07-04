@@ -1,233 +1,75 @@
 [
   {
-    "name": "测试计划一",
-    "comments": "描述",
+    "name": "http-debug-collection",
+    "remark": "",
     "class": "TestCollection",
     "enabled": true,
     "propertys": {
-      "TestCollection__serialized": "True"
+      "TestCollection__serialize_groups": "true"
     },
-    "child": [
+    "children": [
       {
-        "name": "配置元素-Collection层",
-        "comments": "描述",
-        "class": "ConfigTestElement",
+        "name": "结果收集器",
+        "remark": "",
+        "class": "ResultCollector",
         "enabled": true,
         "propertys": {},
-        "child": null
+        "children": null
       },
       {
-        "name": "协程组A",
-        "comments": "描述",
-        "class": "CoroutineGroup",
+        "name": "http-debug-group",
+        "remark": "",
+        "class": "TestGroup",
         "enabled": true,
         "propertys": {
-          "CoroutineGroup__on_sample_error": "continue",
-          "CoroutineGroup__number_coroutines": "1",
-          "CoroutineGroup__start_interval": "0",
-          "LoopController__loops": "1",
-          "LoopController__continue_forever": "false"
-        },
-        "child": [
-          {
-            "name": "配置元素-Group层",
-            "comments": "描述",
-            "class": "ConfigTestElement",
-            "enabled": true,
-            "propertys": {},
-            "child": null
-          },
-          {
-            "name": "取样器1",
-            "comments": "描述",
-            "class": "HTTPSampler",
-            "enabled": true,
-            "propertys": {
-              "HTTPSampler__domain": "www.baidu.com",
-              "HTTPSampler__port": "443",
-              "HTTPSampler__protocol": "HTTPS",
-              "HTTPSampler__encoding": "UTF-8",
-              "HTTPSampler__path": "/s",
-              "HTTPSampler__method": "GET",
-              "HTTPSampler__params": "wd=test",
-              "HTTPSampler__data": "",
-              "HTTPSampler__files": "",
-              "HTTPSampler__follow_redirects": "",
-              "HTTPSampler__auto_redirects": "",
-              "HTTPSampler__keep_alive": "",
-              "HTTPSampler__connect_timeout": "",
-              "HTTPSampler__response_timeout": ""
-            },
-            "child": [
-              {
-                "name": "配置元素-Sampler层",
-                "comments": "描述",
-                "class": "ConfigTestElement",
-                "enabled": true,
-                "propertys": {},
-                "child": null
-              }
-            ]
-          },
-          {
-            "name": "循环控制器",
-            "comments": "描述",
+          "TestGroup__on_sample_error": "continue",
+          "TestGroup__number_groups": "1",
+          "TestGroup__start_interval": "0",
+          "TestGroup__main_controller": {
             "class": "LoopController",
-            "enabled": true,
             "propertys": {
               "LoopController__loops": "1",
               "LoopController__continue_forever": "false"
-            },
-            "child": [
-              {
-                "name": "循环控制器下的取样器11",
-                "comments": "描述",
-                "class": "HTTPSampler",
-                "enabled": true,
-                "propertys": {
-                  "HTTPSampler__domain": "www.baidu.com",
-                  "HTTPSampler__port": "443",
-                  "HTTPSampler__protocol": "HTTPS",
-                  "HTTPSampler__encoding": "UTF-8",
-                  "HTTPSampler__path": "/s",
-                  "HTTPSampler__method": "GET",
-                  "HTTPSampler__params": "wd=test",
-                  "HTTPSampler__data": "",
-                  "HTTPSampler__files": "",
-                  "HTTPSampler__follow_redirects": "",
-                  "HTTPSampler__auto_redirects": "",
-                  "HTTPSampler__keep_alive": "",
-                  "HTTPSampler__connect_timeout": "",
-                  "HTTPSampler__response_timeout": ""
-                },
-                "child": [
-                  {
-                    "name": "配置元素-Sampler层",
-                    "comments": "描述",
-                    "class": "ConfigTestElement",
-                    "enabled": true,
-                    "propertys": {},
-                    "child": null
-                  }
-                ]
-              },
-              {
-                "name": "循环控制器下的取样器22",
-                "comments": "描述",
-                "class": "HTTPSampler",
-                "enabled": true,
-                "propertys": {
-                  "HTTPSampler__domain": "www.baidu.com",
-                  "HTTPSampler__port": "443",
-                  "HTTPSampler__protocol": "HTTPS",
-                  "HTTPSampler__encoding": "UTF-8",
-                  "HTTPSampler__path": "/s",
-                  "HTTPSampler__method": "GET",
-                  "HTTPSampler__params": "wd=test",
-                  "HTTPSampler__data": "",
-                  "HTTPSampler__files": "",
-                  "HTTPSampler__follow_redirects": "",
-                  "HTTPSampler__auto_redirects": "",
-                  "HTTPSampler__keep_alive": "",
-                  "HTTPSampler__connect_timeout": "",
-                  "HTTPSampler__response_timeout": ""
-                },
-                "child": [
-                  {
-                    "name": "配置元素-Sampler层",
-                    "comments": "描述",
-                    "class": "ConfigTestElement",
-                    "enabled": true,
-                    "propertys": {},
-                    "child": null
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "name": "取样器2",
-            "comments": "描述",
-            "class": "HTTPSampler",
-            "enabled": true,
-            "propertys": {
-              "HTTPSampler__domain": "www.baidu.com",
-              "HTTPSampler__port": "443",
-              "HTTPSampler__protocol": "HTTPS",
-              "HTTPSampler__encoding": "UTF-8",
-              "HTTPSampler__path": "/s",
-              "HTTPSampler__method": "GET",
-              "HTTPSampler__params": "wd=test",
-              "HTTPSampler__data": "",
-              "HTTPSampler__files": "",
-              "HTTPSampler__follow_redirects": "",
-              "HTTPSampler__auto_redirects": "",
-              "HTTPSampler__keep_alive": "",
-              "HTTPSampler__connect_timeout": "",
-              "HTTPSampler__response_timeout": ""
-            },
-            "child": null
+            }
           }
-        ]
-      },
-      {
-        "name": "协程组B",
-        "comments": "描述",
-        "class": "CoroutineGroup",
-        "enabled": true,
-        "propertys": {
-          "CoroutineGroup__on_sample_error": "start_next_loop",
-          "CoroutineGroup__number_coroutines": "1",
-          "CoroutineGroup__start_interval": "0",
-          "LoopController__loops": "1",
-          "LoopController__continue_forever": "false"
         },
-        "child": [
+        "children": [
           {
-            "name": "取样器1",
-            "comments": "描述",
-            "class": "HTTPSampler",
+            "name": "http-headers-debug-configuration",
+            "remark": "",
+            "class": "HttpHeaderManager",
             "enabled": true,
             "propertys": {
-              "HTTPSampler__domain": "www.baidu.com",
-              "HTTPSampler__port": "443",
-              "HTTPSampler__protocol": "HTTPS",
-              "HTTPSampler__encoding": "UTF-8",
-              "HTTPSampler__path": "/s",
-              "HTTPSampler__method": "GET",
-              "HTTPSampler__params": "wd=test",
-              "HTTPSampler__data": "",
-              "HTTPSampler__files": "",
-              "HTTPSampler__follow_redirects": "",
-              "HTTPSampler__auto_redirects": "",
-              "HTTPSampler__keep_alive": "",
-              "HTTPSampler__connect_timeout": "",
-              "HTTPSampler__response_timeout": ""
-            },
-            "child": null
+              "HeaderManager__headers": [
+                {
+                  "class": "HttpHeader",
+                  "propertys": {
+                    "Header__name": "1",
+                    "Header__value": "false"
+                  }
+                }
+              ]
+            }
           },
           {
-            "name": "取样器2",
-            "comments": "描述",
+            "name": "http-debug-sampler",
+            "remark": "描述",
             "class": "HTTPSampler",
             "enabled": true,
             "propertys": {
-              "HTTPSampler__domain": "www.baidu.com",
-              "HTTPSampler__port": "443",
-              "HTTPSampler__protocol": "HTTPS",
-              "HTTPSampler__encoding": "UTF-8",
-              "HTTPSampler__path": "/s",
+              "HTTPSampler__url": "https://httpbin.org/get",
               "HTTPSampler__method": "GET",
-              "HTTPSampler__params": "wd=test",
+              "HTTPSampler__params": "name=kelvin.ye",
               "HTTPSampler__data": "",
               "HTTPSampler__files": "",
+              "HTTPSampler__encoding": "UTF-8",
               "HTTPSampler__follow_redirects": "",
               "HTTPSampler__auto_redirects": "",
               "HTTPSampler__keep_alive": "",
               "HTTPSampler__connect_timeout": "",
               "HTTPSampler__response_timeout": ""
             },
-            "child": null
+            "children": null
           }
         ]
       }

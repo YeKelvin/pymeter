@@ -73,7 +73,7 @@ class ResultCollector(
             'elapsedTime': sample_result.elapsed_time,
             'success': sample_result.success,
             'samplerName': sample_result.sample_label,
-            'request': sample_result.request_body,
+            'request': sample_result.request_data,
             'response': sample_result.response_data
         })
 

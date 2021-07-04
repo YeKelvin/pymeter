@@ -54,27 +54,7 @@ __content_type__ = {
 }
 
 
-class HTTP:
-    DEFAULT_PORT = 80
-    PROTOCOL = 'http'
-
-    METHOD = __method__
-    HEADER = __header__
-    ENCODING = __encoding__
-    CONTENT_TYPE = __content_type__
-
-
-class HTTPS:
-    DEFAULT_PORT = 443
-    PROTOCOL = 'https'
-
-    METHOD = __method__
-    HEADER = __header__
-    ENCODING = __encoding__
-    CONTENT_TYPE = __content_type__
-
-
-STATUS_CODES = {
+HTTP_STATUS_CODE = {
     # 1xx
     100: 'Continue',  # 继续
     101: 'Switching Protocols',  # 切换协议

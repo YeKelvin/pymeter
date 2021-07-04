@@ -6,7 +6,7 @@
 import time
 import traceback
 
-from pymeter.engine.script_server import ScriptServer
+from pymeter.engine import script_server
 from pymeter.engine.standard_engine import StandardEngine
 from pymeter.utils.log_util import get_logger
 
@@ -42,7 +42,7 @@ class Runner:
         """加载并解析脚本，将脚本反序列化为 HashTree对象"""
         log.info('开始加载脚本')
         # 加载脚本
-        hashtree = ScriptServer.load_tree(script)
+        hashtree = script_server.load_tree(script)
         log.debug(f'script hashtree:\n{hashtree}')
 
         # 将脚本配置到执行引擎中
@@ -59,6 +59,9 @@ if __name__ == '__main__':
 
     from pymeter.utils.path_util import PROJECT_PATH
 
-    with open(os.path.join(PROJECT_PATH, 'docs', 'test-funciton.json'), 'r', encoding='utf-8') as f:
+    # script = 'test-funciton.json'
+    script = 'http-sampler.json'
+
+    with open(os.path.join(PROJECT_PATH, 'docs', script), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())
         Runner.start(script)
