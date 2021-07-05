@@ -20,16 +20,35 @@ log = get_logger(__name__)
 
 
 class HTTPSampler(Sampler):
+
+    # 请求URL
     URL: Final = 'HTTPSampler__url'
+
+    # 请求方法
     METHOD: Final = 'HTTPSampler__method'
+
+    # 请求参数
     PARAMS: Final = 'HTTPSampler__params'
+
+    # 请求主体
     DATA: Final = 'HTTPSampler__data'
+
+    # 请求上传文件
     FILES: Final = 'HTTPSampler__files'
+
+    # 请求内容编码
     ENCODING: Final = 'HTTPSampler__encoding'
+
     FOLLOW_REDIRECTS: Final = 'HTTPSampler__follow_redirects'
     AUTO_REDIRECTS: Final = 'HTTPSampler__auto_redirects'
+
+    # keep_alive
     KEEP_ALIVE: Final = 'HTTPSampler__keep_alive'
+
+    # 请求连接超时时间
     CONNECT_TIMEOUT: Final = 'HTTPSampler__connect_timeout'
+
+    # 等待响应超时时间
     RESPONSE_TIMEOUT: Final = 'HTTPSampler__response_timeout'
 
     @property
@@ -109,6 +128,7 @@ class HTTPSampler(Sampler):
             result.response_code = res.status_code
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
         except Exception:
+            result.success = False
             result.response_data = traceback.format_exc()
         finally:
             result.sample_end()
