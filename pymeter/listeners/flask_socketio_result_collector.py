@@ -94,13 +94,11 @@ class FlaskSocketIOResultCollector(
 
     def group_started(self) -> None:
         """@override"""
-        start_timestamp = time_util.timestamp_now()
-
         self.emit_to_target({
             'group': {
                 'groupId': self.group_id,
                 'groupName': self.group_name,
-                'startTime': time_util.timestamp_to_strftime(start_timestamp),
+                'startTime': time_util.strftime_now(),
                 'endTime': 0,
                 'elapsedTime': 0,
                 'running': True,
@@ -111,12 +109,10 @@ class FlaskSocketIOResultCollector(
 
     def group_finished(self) -> None:
         """@override"""
-        end_timestamp = time_util.timestamp_now()
-
         self.emit_to_target({
             'groupId': self.group_id,
             'group': {
-                'endTime': time_util.timestamp_to_strftime(end_timestamp),
+                'endTime': time_util.strftime_now(),
                 'elapsedTime': 0,
                 'running': False
             }

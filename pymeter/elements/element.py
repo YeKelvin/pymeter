@@ -7,6 +7,7 @@ from copy import deepcopy
 from typing import Dict
 
 from pymeter.elements.property import BaseProperty
+from pymeter.elements.property import NoneProperty
 from pymeter.engine.value_parser import ValueReplacer
 from pymeter.utils.log_util import get_logger
 
@@ -15,6 +16,7 @@ log = get_logger(__name__)
 
 
 class ConfigElement:
+    """Interface"""
     ...
 
 
@@ -28,6 +30,7 @@ class TestElement:
     def __init__(self):
         self.propertys: Dict[str, BaseProperty] = {}
         self.context = None
+        self.running = False
 
     @property
     def name(self):
@@ -57,32 +60,47 @@ class TestElement:
         self.propertys[key] = prop
 
     def get_property(self, key: str, default: any = None) -> BaseProperty:
-        return self.propertys.get(key, default)
+        if default:
+            return self.propertys.get(key, default)
+
+        return self.propertys.get(key, NoneProperty(key))
 
     def get_property_as_str(self, key: str, default: str = None) -> str:
         prop = self.get_property(key)
-        return prop.get_str_value() if prop is not None else default
+        if default:
+            return prop.get_str() if prop is not None else default
+
+        return prop.get_str()
 
     def get_property_as_int(self, key: str, default: int = None) -> int:
         prop = self.get_property(key)
-        return prop.get_int_value() if prop is not None else default
+        if default:
+            return prop.get_int() if prop is not None else default
+
+        return prop.get_int()
 
     def get_property_as_float(self, key: str, default: float = None) -> float:
         prop = self.get_property(key)
-        return prop.get_float_value() if prop is not None else default
+        if default:
+            return prop.get_float() if prop is not None else default
+
+        return prop.get_float()
 
     def get_property_as_bool(self, key: str, default: bool = None) -> bool:
         prop = self.get_property(key)
-        return prop.get_bool_value() if prop is not None else default
+        if default:
+            return prop.get_bool() if prop is not None else default
+
+        return prop.get_bool()
 
     def add_test_element(self, element: 'TestElement') -> None:
-        """mergeIn"""
+        """merge in"""
         for key, value in element.items():
             self.add_property(key, value)
 
     def clear_test_element_children(self) -> None:
         """此方法应清除所有通过 {@link #add_test_element(TestElement)} 方法合并的测试元素属性"""
-        pass
+        ...
 
     def list(self):
         return list(self.propertys.keys())

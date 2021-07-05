@@ -10,26 +10,27 @@ log = get_logger(__name__)
 
 
 class BaseProperty:
-    def __init__(self, name: str, value: any):
+    def __init__(self, name: str, value: any = None):
         self.name = name
         self.value = value
+        self.running = False
 
-    def get_str_value(self) -> str:
+    def get_str(self) -> str:
         return str(self.value)
 
-    def get_int_value(self) -> int:
-        value = self.get_str_value()
+    def get_int(self) -> int:
+        value = self.get_str()
         return int(value) if value else 0
 
-    def get_float_value(self) -> float:
-        value = self.get_str_value()
+    def get_float(self) -> float:
+        value = self.get_str()
         return float(value) if value else 0.00
 
-    def get_bool_value(self) -> bool:
-        value = self.get_str_value()
+    def get_bool(self) -> bool:
+        value = self.get_str()
         return True if value.lower() == 'true' else False
 
-    def get_obj_value(self) -> object:
+    def get_obj(self) -> object:
         return self.value
 
     def __str__(self):
@@ -37,6 +38,26 @@ class BaseProperty:
 
     def __repr__(self):
         return self.__str__()
+
+
+class NoneProperty(BaseProperty):
+    def __init__(self, name: str):
+        super().__init__(name, None)
+
+    def get_str(self) -> str:
+        return 'null'
+
+    def get_int(self) -> int:
+        return 0
+
+    def get_float(self) -> float:
+        return 0.00
+
+    def get_bool(self) -> bool:
+        return False
+
+    def get_obj(self) -> None:
+        return None
 
 
 class FunctionProperty(BaseProperty):
@@ -48,7 +69,7 @@ class FunctionProperty(BaseProperty):
     def get_raw(self):
         return self.function.raw_parameters
 
-    def get_str_value(self):
+    def get_str(self):
         if not self.cache_value:
             self.cache_value = self.function.execute()
         return self.cache_value

@@ -13,6 +13,7 @@
     ],
 
     // "python.pythonPath": "${workspaceFolder}/path/to/your/python",
+    "python.pythonPath": "${workspaceFolder}\\.cache\\virtualenvs\\pymeter-Tyguvvek-py3.8\\Scripts\\python.exe",
 
     /* Python Lint */
     "python.linting.flake8Enabled": true,

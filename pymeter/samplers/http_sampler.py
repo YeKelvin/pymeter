@@ -9,6 +9,7 @@ from typing import Optional
 
 import requests
 
+from pymeter.configs.argument_config import Arguments
 from pymeter.samplers.http_cons import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -40,8 +41,8 @@ class HTTPSampler(Sampler):
         return self.get_property_as_str(self.METHOD)
 
     @property
-    def params(self):
-        return self.get_property_as_str(self.PARAMS)
+    def params(self) -> Optional[Arguments]:
+        return self.get_property(self.PARAMS).get_obj()
 
     @property
     def data(self):
@@ -81,48 +82,75 @@ class HTTPSampler(Sampler):
         result.sample_remark = self.remark
         result.request_url = self.url
         result.request_headers = ''
-        result.request_data = self.get_payload()
         result.sample_start()
         res = None
 
         try:
+            self.pre_loads()
             res = requests.request(
                 method=self.method,
                 url=self.url,
                 headers=None,
-                params=self.params,
+                params=self.parameter,
                 data=self.data,
                 files=self.files,
                 cookies=None,
                 timeout=self.get_timeout(),
                 allow_redirects=True
             )
-        except Exception:
-            result.response_data = traceback.format_exc()
 
-        result.sample_end()
-        result.calculate_elapsed_time()
-
-        if res:
+            result.request_data = self.get_payload(res.request.url)
             result.response_headers = dict(res.headers)
             result.response_data = res.text
             result.response_code = res.status_code
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
+        except Exception:
+            result.response_data = traceback.format_exc()
+        finally:
+            result.sample_end()
+            result.calculate_elapsed_time()
 
         return result
+
+    def pre_loads(self):
+        parameter = self.params
+        self.parameter = parameter.to_dict() if parameter else {}
 
     def get_timeout(self) -> Optional[tuple]:
         if not (self.connect_timeout and self.response_timeout):
             return None
         return self.connect_timeout or 0, self.response_timeout or 0
 
-    def get_payload(self):
+    def get_payload(self, full_url):
+        url = f'[URL]:\n{full_url}\n\n'
+        payload = ''
+
         if self.params:
-            return self.params
+            payload = '[PARAMETER]:\n'
+            for name, value in self.parameter.items():
+                payload = payload + f'{name}={value}\n'
+
         if self.data:
-            return self.data
-        if self.files:
-            return self.files
+            payload = f'[BODY]:\n{self.data}'
+
+        return url + payload
+
+    def add_test_element(self, element):
+        """@override"""
+        # if (el instanceof CookieManager) {
+        #     setCookieManager((CookieManager) el);
+        # } else if (el instanceof CacheManager) {
+        #     setCacheManager((CacheManager) el);
+        # } else if (el instanceof HeaderManager) {
+        #     setHeaderManager((HeaderManager) el);
+        # } else if (el instanceof AuthManager) {
+        #     setAuthManager((AuthManager) el);
+        # } else if (el instanceof DNSCacheManager) {
+        #     setDNSResolver((DNSCacheManager) el);
+        # } else {
+        #     super.addTestElement(el);
+        # }
+        ...
 
 
 # if __name__ == '__main__':

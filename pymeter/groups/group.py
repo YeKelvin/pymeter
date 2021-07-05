@@ -94,7 +94,7 @@ class TestGroup(Controller):
 
     @property
     def main_controller(self) -> Controller:
-        return self.get_property(self.MAIN_CONTROLLER).get_obj_value()
+        return self.get_property(self.MAIN_CONTROLLER).get_obj()
 
     @property
     def on_error_continue(self) -> bool:
