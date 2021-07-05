@@ -33,11 +33,11 @@ class HTTPSampler(Sampler):
     RESPONSE_TIMEOUT: Final = 'HTTPSampler__response_timeout'
 
     @property
-    def url(self):
+    def url(self) -> str:
         return self.get_property_as_str(self.URL)
 
     @property
-    def method(self):
+    def method(self) -> str:
         return self.get_property_as_str(self.METHOD)
 
     @property
@@ -45,15 +45,20 @@ class HTTPSampler(Sampler):
         return self.get_property(self.PARAMS).get_obj()
 
     @property
-    def data(self):
+    def parameter(self) -> dict:
+        parameter = self.params
+        return parameter.to_dict() if parameter else {}
+
+    @property
+    def data(self) -> str:
         return self.get_property_as_str(self.DATA)
 
     @property
-    def files(self):
+    def files(self) -> str:
         return self.get_property_as_str(self.FILES)
 
     @property
-    def encoding(self):
+    def encoding(self) -> str:
         return self.get_property_as_str(self.ENCODING)
 
     @property
@@ -86,7 +91,6 @@ class HTTPSampler(Sampler):
         res = None
 
         try:
-            self.pre_loads()
             res = requests.request(
                 method=self.method,
                 url=self.url,
@@ -111,10 +115,6 @@ class HTTPSampler(Sampler):
             result.calculate_elapsed_time()
 
         return result
-
-    def pre_loads(self):
-        parameter = self.params
-        self.parameter = parameter.to_dict() if parameter else {}
 
     def get_timeout(self) -> Optional[tuple]:
         if not (self.connect_timeout and self.response_timeout):
@@ -151,26 +151,3 @@ class HTTPSampler(Sampler):
         #     super.addTestElement(el);
         # }
         ...
-
-
-# if __name__ == '__main__':
-#     url = 'http://127.0.0.1/5000/get'
-#     encoding = ''
-#     method = 'GET'
-#     params = '{"aa":"bb","func":"${__Time()}"}'
-#     data = '{"cc":"dd","func":"${__Time()}"}'
-#     follow_redirects = ''
-#     auto_redirects = ''
-#     keep_alive = ''
-#     connect_timeout = ''
-#     response_timeout = ''
-#     sample = HTTPSampler()
-#     sample.set_property(sample.LABEL, '测试')
-#     sample.set_property(sample.DOMAIN, domain)
-#     sample.set_property(sample.PORT, port)
-#     sample.set_property(sample.PROTOCOL, protocol)
-#     sample.set_property(sample.PATH, path)
-#     sample.set_property(sample.METHOD, method)
-#     sample.set_property(sample.PARAMS, params)
-#     result = sample.sample()
-#     print(result.__dict__)

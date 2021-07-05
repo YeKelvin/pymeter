@@ -19,14 +19,6 @@ class Runner:
     @staticmethod
     def start(script: str, throw_ex: bool = False) -> None:
         """脚本执行主入口"""
-        now = time.time()
-        ymd = time.strftime('%Y-%m-%d', time.localtime(now))
-        hms = time.strftime('%H:%M:%S', time.localtime(now))
-
-        log.info(f'START.MS={int(now * 1000)}')
-        log.info(f'START.YMD={ymd}')
-        log.info(f'START.HMS={hms}')
-
         # 校验 script脚本不能为空
         if not script:
             raise Exception('脚本不允许为空')
@@ -42,7 +34,15 @@ class Runner:
     @staticmethod
     def run(script: str) -> None:
         """加载并解析脚本，将脚本反序列化为 HashTree对象"""
+        now = time.time()
+        ymd = time.strftime('%Y-%m-%d', time.localtime(now))
+        hms = time.strftime('%H:%M:%S', time.localtime(now))
+
+        log.info(f'START.MS={int(now * 1000)}')
+        log.info(f'START.YMD={ymd}')
+        log.info(f'START.HMS={hms}')
         log.info('开始加载脚本')
+
         # 加载脚本
         hashtree = script_server.load_tree(script)
         log.debug(f'script hashtree:\n{hashtree}')
