@@ -186,6 +186,10 @@ class TestGroup(Controller):
         """Controller API"""
         self.main_controller.remove_iteration_listener(listener)
 
+    def start_next_loop(self):
+        """Controller API"""
+        self.main_controller.start_next_loop()
+
     def add_test_element(self, child):
         """TestElement API"""
         self.main_controller.add_test_element(child)
