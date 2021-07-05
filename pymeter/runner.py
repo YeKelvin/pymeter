@@ -17,7 +17,7 @@ log = get_logger(__name__)
 class Runner:
 
     @staticmethod
-    def start(script: str) -> None:
+    def start(script: str, throw_ex: bool = False) -> None:
         """脚本执行主入口"""
         now = time.time()
         ymd = time.strftime('%Y-%m-%d', time.localtime(now))
@@ -36,6 +36,8 @@ class Runner:
             Runner.run(script)
         except Exception:
             log.error(traceback.format_exc())
+            if throw_ex:
+                raise
 
     @staticmethod
     def run(script: str) -> None:
@@ -62,6 +64,6 @@ if __name__ == '__main__':
     # script = 'test-funciton.json'
     script = 'http-sampler.json'
 
-    with open(os.path.join(PROJECT_PATH, 'docs', script), 'r', encoding='utf-8') as f:
+    with open(os.path.join(PROJECT_PATH, 'scripts', script), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())
         Runner.start(script)
