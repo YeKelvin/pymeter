@@ -7,7 +7,7 @@
     "property": {
       "TestCollection__serialized": "True"
     },
-    "child": [
+    "children": [
       {
         "name": "配置元素-Collection层",
         "remark": "描述",
@@ -24,7 +24,7 @@
             }
           ]
         },
-        "child": null
+        "children": null
       },
       {
         "name": "结果收集器",
@@ -32,7 +32,7 @@
         "class": "ResultCollector",
         "enabled": true,
         "property": {},
-        "child": null
+        "children": null
       },
       {
         "name": "协程组A",
@@ -46,14 +46,14 @@
           "LoopController__loops": "1",
           "LoopController__continue_forever": "false"
         },
-        "child": [
+        "children": [
           {
             "name": "配置元素-Group层",
             "remark": "描述",
             "class": "TestConfig",
             "enabled": true,
             "property": {},
-            "child": null
+            "children": null
           },
           {
             "name": "测试取样器 - 1",
@@ -64,14 +64,14 @@
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "false"
             },
-            "child": [
+            "children": [
               {
                 "name": "配置元素-Sampler层",
                 "remark": "描述",
                 "class": "TestConfig",
                 "enabled": true,
                 "property": {},
-                "child": null
+                "children": null
               }
             ]
           },
@@ -84,7 +84,7 @@
               "LoopController__loops": "1",
               "LoopController__continue_forever": "false"
             },
-            "child": [
+            "children": [
               {
                 "name": "循环控制器 -> 测试取样器 - 11",
                 "remark": "描述",
@@ -94,14 +94,14 @@
                   "TestSampler__sampler_data": "request-data",
                   "TestSampler__expected_success": "false"
                 },
-                "child": [
+                "children": [
                   {
                     "name": "配置元素-Sampler层",
                     "remark": "描述",
                     "class": "TestConfig",
                     "enabled": true,
                     "property": {},
-                    "child": null
+                    "children": null
                   }
                 ]
               },
@@ -114,14 +114,14 @@
                   "TestSampler__sampler_data": "request-data",
                   "TestSampler__expected_success": "true"
                 },
-                "child": [
+                "children": [
                   {
                     "name": "配置元素-Sampler层",
                     "remark": "描述",
                     "class": "TestConfig",
                     "enabled": true,
                     "property": {},
-                    "child": null
+                    "children": null
                   }
                 ]
               }
@@ -136,7 +136,7 @@
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           }
         ]
       },
@@ -152,7 +152,7 @@
           "LoopController__loops": "1",
           "LoopController__continue_forever": "false"
         },
-        "child": [
+        "children": [
           {
             "name": "测试取样器 - 1",
             "remark": "描述",
@@ -162,7 +162,7 @@
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           },
           {
             "name": "测试取样器 - 2",
@@ -173,7 +173,7 @@
               "TestSampler__sampler_data": "request-data",
               "TestSampler__expected_success": "true"
             },
-            "child": null
+            "children": null
           }
         ]
       }

@@ -7,14 +7,14 @@
     "property": {
       "TestCollection__serialize_groups": "true"
     },
-    "child": [
+    "children": [
       {
         "name": "结果收集器",
         "remark": "",
         "class": "ResultCollector",
         "enabled": true,
         "property": {},
-        "child": null
+        "children": null
       },
       {
         "name": "http-debug-group",
@@ -33,7 +33,7 @@
             }
           }
         },
-        "child": [
+        "children": [
           {
             "name": "http-headers-debug-configuration",
             "remark": "",
@@ -50,7 +50,7 @@
                 }
               ]
             },
-            "child": null
+            "children": null
           },
           {
             "name": "http-debug-sampler",
@@ -85,7 +85,7 @@
               "HTTPSampler__connect_timeout": "",
               "HTTPSampler__response_timeout": ""
             },
-            "child": null
+            "children": null
           }
         ]
       }

@@ -10,7 +10,7 @@
     - class: str
     - enabled: bool
     - property: dict
-    - child: list
+    - children: list
 
 4、脚本层级说明（可参照JMeter中的概念）
     - 一级节点为测试集合节点（TestCollection）

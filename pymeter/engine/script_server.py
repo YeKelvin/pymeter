@@ -104,10 +104,10 @@ def __parse(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
             continue
 
         node = __get_node(item)
-        child = item.get('child')
+        children = item.get('children')
 
-        if child:  # 存在子节点时递归解析
-            child_node_list = __parse(child)
+        if children:  # 存在子节点时递归解析
+            child_node_list = __parse(children)
             if child_node_list:
                 hash_tree = HashTree()
 
@@ -135,8 +135,8 @@ def __check(script: Iterable[dict]) -> None:
             raise ScriptParseException(f'脚本解析失败，当前节点缺少 enabled 属性，节点名称:[ {item["name"]} ]')
         if 'property' not in item:
             raise ScriptParseException(f'脚本解析失败，当前节点缺少 property 属性，节点名称:[ {item["name"]} ]')
-        if 'child' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 child 属性，节点名称:[ {item["name"]} ]')
+        if 'children' not in item:
+            raise ScriptParseException(f'脚本解析失败，当前节点缺少 children 属性，节点名称:[ {item["name"]} ]')
 
 
 def __set_replaced_property(element: TestElement, key: str, value: any) -> None:
