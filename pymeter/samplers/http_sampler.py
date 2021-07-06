@@ -146,12 +146,12 @@ class HTTPSampler(Sampler):
         payload = ''
 
         if self.params:
-            payload = '[PARAMETER]:\n'
+            payload = '[Parameter]:\n'
             for name, value in self.parameter.items():
                 payload = payload + f'{name}={value}\n'
 
         if self.data:
-            payload = f'[BODY]:\n{self.data}'
+            payload = f'[Body]:\n{self.data}'
 
         return url + payload
 
