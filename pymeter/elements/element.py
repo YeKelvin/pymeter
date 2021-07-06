@@ -29,7 +29,6 @@ class TestElement:
     def __init__(self):
         self.properties: Dict[str, BasicProperty] = {}
         self.context = None
-        self.running = False
 
     @property
     def name(self):

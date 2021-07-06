@@ -13,7 +13,6 @@ class PyMeterProperty:
     def __init__(self, name: str, value: any = None):
         self.name = name
         self.value = value
-        self.running = False
 
     def get_str(self) -> str:
         raise NotImplementedError
