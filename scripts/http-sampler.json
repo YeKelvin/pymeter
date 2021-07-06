@@ -4,70 +4,70 @@
     "remark": "",
     "class": "TestCollection",
     "enabled": true,
-    "propertys": {
+    "property": {
       "TestCollection__serialize_groups": "true"
     },
-    "children": [
+    "child": [
       {
         "name": "结果收集器",
         "remark": "",
         "class": "ResultCollector",
         "enabled": true,
-        "propertys": {},
-        "children": null
+        "property": {},
+        "child": null
       },
       {
         "name": "http-debug-group",
         "remark": "",
         "class": "TestGroup",
         "enabled": true,
-        "propertys": {
+        "property": {
           "TestGroup__on_sample_error": "continue",
           "TestGroup__number_groups": "1",
           "TestGroup__start_interval": "0",
           "TestGroup__main_controller": {
             "class": "LoopController",
-            "propertys": {
+            "property": {
               "LoopController__loops": "1",
               "LoopController__continue_forever": "false"
             }
           }
         },
-        "children": [
+        "child": [
           {
             "name": "http-headers-debug-configuration",
             "remark": "",
             "class": "HTTPHeaderManager",
             "enabled": true,
-            "propertys": {
+            "property": {
               "HeaderManager__headers": [
                 {
                   "class": "HTTPHeader",
-                  "propertys": {
+                  "property": {
                     "Header__name": "1",
                     "Header__value": "false"
                   }
                 }
               ]
             },
-            "children": null
+            "child": null
           },
           {
             "name": "http-debug-sampler",
             "remark": "描述",
             "class": "HTTPSampler",
             "enabled": true,
-            "propertys": {
+            "property": {
               "HTTPSampler__url": "https://httpbin.org/get",
               "HTTPSampler__method": "GET",
               "HTTPSampler__params": {
                 "class": "Arguments",
-                "propertys": {
+                "property": {
                   "Arguments__arguments": [
                     {
                       "class": "Argument",
                       "enable": true,
-                      "propertys": {
+                      "property": {
                         "Argument__name": "debugName",
                         "Argument__value": "debugValue",
                         "Argument__desc": "debugDesc"
@@ -85,7 +85,7 @@
               "HTTPSampler__connect_timeout": "",
               "HTTPSampler__response_timeout": ""
             },
-            "children": null
+            "child": null
           }
         ]
       }

@@ -9,11 +9,29 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class BaseProperty:
+class PyMeterProperty:
     def __init__(self, name: str, value: any = None):
         self.name = name
         self.value = value
         self.running = False
+
+    def get_str(self) -> str:
+        raise NotImplementedError
+
+    def get_int(self) -> int:
+        raise NotImplementedError
+
+    def get_float(self) -> float:
+        raise NotImplementedError
+
+    def get_bool(self) -> bool:
+        raise NotImplementedError
+
+    def get_obj(self) -> object:
+        raise NotImplementedError
+
+
+class BasicProperty(PyMeterProperty):
 
     def get_str(self) -> str:
         return str(self.value)
@@ -40,7 +58,7 @@ class BaseProperty:
         return self.__str__()
 
 
-class NoneProperty(BaseProperty):
+class NoneProperty(PyMeterProperty):
     def __init__(self, name: str):
         super().__init__(name, None)
 
@@ -60,7 +78,7 @@ class NoneProperty(BaseProperty):
         return None
 
 
-class FunctionProperty(BaseProperty):
+class FunctionProperty(PyMeterProperty):
     def __init__(self, name: str, function):
         super().__init__(name, None)
         self.function = function  # type pymeter.engine.value_parser.CompoundVariable

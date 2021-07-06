@@ -104,14 +104,14 @@ def __parse(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
             continue
 
         node = __get_node(item)
-        children = item.get('children')
+        child = item.get('child')
 
-        if children:  # 存在子节点时递归解析
-            children_node = __parse(children)
-            if children_node:
+        if child:  # 存在子节点时递归解析
+            child_node_list = __parse(child)
+            if child_node_list:
                 hash_tree = HashTree()
 
-                for child_node, child_hash_tree in children_node:
+                for child_node, child_hash_tree in child_node_list:
                     hash_tree.put(child_node, child_hash_tree)
 
                 nodes.append((node, hash_tree))
@@ -133,10 +133,10 @@ def __check(script: Iterable[dict]) -> None:
             raise ScriptParseException(f'脚本解析失败，当前节点缺少 class 属性，节点名称:[ {item["name"]} ]')
         if 'enabled' not in item:
             raise ScriptParseException(f'脚本解析失败，当前节点缺少 enabled 属性，节点名称:[ {item["name"]} ]')
-        if 'propertys' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 propertys 属性，节点名称:[ {item["name"]} ]')
-        if 'children' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 children 属性，节点名称:[ {item["name"]} ]')
+        if 'property' not in item:
+            raise ScriptParseException(f'脚本解析失败，当前节点缺少 property 属性，节点名称:[ {item["name"]} ]')
+        if 'child' not in item:
+            raise ScriptParseException(f'脚本解析失败，当前节点缺少 child 属性，节点名称:[ {item["name"]} ]')
 
 
 def __set_replaced_property(element: TestElement, key: str, value: any) -> None:
@@ -159,16 +159,16 @@ def __get_node(script: dict) -> TestElement:
     __set_replaced_property(node, TestElement.REMARK, script.get('remark', None))
 
     # 设置节点的属性
-    __set_propertys(node, script.get('propertys'))
+    __set_properties(node, script.get('property'))
 
     return node
 
 
-def __set_propertys(node, propertys):
-    if not propertys:
+def __set_properties(node, property):
+    if not property:
         return
 
-    for key, value in propertys.items():
+    for key, value in property.items():
         if isinstance(value, str):
             __set_replaced_property(node, key, value)
         elif isinstance(value, dict):

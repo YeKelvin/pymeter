@@ -4,46 +4,46 @@
         "remark": "",
         "class": "TestCollection",
         "enabled": true,
-        "propertys": {
+        "property": {
             "TestCollection__serialize_groups": "true"
         },
-        "children": [
+        "child": [
             {
                 "name": "结果收集器",
                 "remark": "",
                 "class": "ResultCollector",
                 "enabled": true,
-                "propertys": {},
-                "children": null
+                "property": {},
+                "child": null
             },
             {
                 "name": "测试组-AAA",
                 "remark": "",
                 "class": "TestGroup",
                 "enabled": true,
-                "propertys": {
+                "property": {
                     "TestGroup__on_sample_error": "continue",
                     "TestGroup__number_groups": "1",
                     "TestGroup__start_interval": "0",
                     "TestGroup__main_controller": {
                         "class": "LoopController",
-                        "propertys": {
+                        "property": {
                             "LoopController__loops": "1",
                             "LoopController__continue_forever": "false"
                         }
                     }
                 },
-                "children": [
+                "child": [
                     {
                         "name": "【组AAA】测试取样器-111",
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
-                        "propertys": {
+                        "property": {
                             "TestSampler__data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
                             "TestSampler__success": "true"
                         },
-                        "children": null
+                        "child": null
                     }
                 ]
             },
@@ -52,40 +52,40 @@
                 "remark": "描述",
                 "class": "TestGroup",
                 "enabled": true,
-                "propertys": {
+                "property": {
                     "TestGroup__on_sample_error": "continue",
                     "TestGroup__number_groups": "1",
                     "TestGroup__start_interval": "0",
                     "TestGroup__main_controller": {
                         "class": "LoopController",
-                        "propertys": {
+                        "property": {
                             "LoopController__loops": "1",
                             "LoopController__continue_forever": "false"
                         }
                     }
                 },
-                "children": [
+                "child": [
                     {
                         "name": "【组BBB】测试取样器-111",
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
-                        "propertys": {
+                        "property": {
                             "TestSampler__data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
                             "TestSampler__success": "true"
                         },
-                        "children": null
+                        "child": null
                     },
                     {
                         "name": "【组BBB】测试取样器-222",
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
-                        "propertys": {
+                        "property": {
                             "TestSampler__data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
                             "TestSampler__success": "true"
                         },
-                        "children": null
+                        "child": null
                     }
                 ]
             }

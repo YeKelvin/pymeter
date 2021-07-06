@@ -6,7 +6,7 @@
 from typing import List
 
 from pymeter.common.exceptions import InvalidVariableException
-from pymeter.elements.property import BaseProperty
+from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import FunctionProperty
 from pymeter.functions import Function
 from pymeter.groups.context import ContextService
@@ -280,9 +280,9 @@ class FunctionParser:
 class ValueReplacer:
 
     @staticmethod
-    def replace_values(key: str, source: str) -> BaseProperty:
+    def replace_values(key: str, source: str) -> BasicProperty:
         master_function = CompoundVariable()
         master_function.set_parameters(source)
         if master_function.has_function:
             return FunctionProperty(key, master_function)
-        return BaseProperty(key, source)
+        return BasicProperty(key, source)

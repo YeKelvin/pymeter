@@ -6,7 +6,7 @@
 from copy import deepcopy
 from typing import Dict
 
-from pymeter.elements.property import BaseProperty
+from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import NoneProperty
 from pymeter.utils.log_util import get_logger
 
@@ -27,7 +27,7 @@ class TestElement:
     REMARK = 'TestElement__remark'
 
     def __init__(self):
-        self.properties: Dict[str, BaseProperty] = {}
+        self.properties: Dict[str, BasicProperty] = {}
         self.context = None
         self.running = False
 
@@ -49,12 +49,12 @@ class TestElement:
 
     def set_property(self, key: str, value: any) -> None:
         if key and value:
-            self.add_property(key, BaseProperty(key, value))
+            self.add_property(key, BasicProperty(key, value))
 
-    def add_property(self, key: str, prop: BaseProperty) -> None:
+    def add_property(self, key: str, prop: BasicProperty) -> None:
         self.properties[key] = prop
 
-    def get_property(self, key: str, default: any = None) -> BaseProperty:
+    def get_property(self, key: str, default: any = None) -> BasicProperty:
         if default:
             return self.properties.get(key, default)
 
