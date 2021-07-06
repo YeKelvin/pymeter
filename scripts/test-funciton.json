@@ -1,7 +1,7 @@
 [
     {
         "name": "测试集合",
-        "remark": "描述",
+        "remark": "",
         "class": "TestCollection",
         "enabled": true,
         "propertys": {
@@ -10,15 +10,15 @@
         "children": [
             {
                 "name": "结果收集器",
-                "remark": "描述",
+                "remark": "",
                 "class": "ResultCollector",
                 "enabled": true,
                 "propertys": {},
                 "children": null
             },
             {
-                "name": "测试组AAA",
-                "remark": "描述",
+                "name": "测试组-AAA",
+                "remark": "",
                 "class": "TestGroup",
                 "enabled": true,
                 "propertys": {
@@ -35,20 +35,20 @@
                 },
                 "children": [
                     {
-                        "name": "测试取样器AAA-111",
+                        "name": "【组AAA】测试取样器-111",
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
                         "propertys": {
-                            "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
-                            "TestSampler__expected_success": "true"
+                            "TestSampler__data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+                            "TestSampler__success": "true"
                         },
                         "children": null
                     }
                 ]
             },
             {
-                "name": "测试组BBB",
+                "name": "测试组-BBB",
                 "remark": "描述",
                 "class": "TestGroup",
                 "enabled": true,
@@ -66,24 +66,24 @@
                 },
                 "children": [
                     {
-                        "name": "测试取样器BBB-111",
+                        "name": "【组BBB】测试取样器-111",
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
                         "propertys": {
-                            "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
-                            "TestSampler__expected_success": "true"
+                            "TestSampler__data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+                            "TestSampler__success": "true"
                         },
                         "children": null
                     },
                     {
-                        "name": "测试取样器BBB-222",
+                        "name": "【组BBB】测试取样器-222",
                         "remark": "描述",
                         "class": "TestSampler",
                         "enabled": true,
                         "propertys": {
-                            "TestSampler__sampler_data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
-                            "TestSampler__expected_success": "true"
+                            "TestSampler__data": "{\"替换值\":\"valueAA\",\"随机数\":\"${__Random(1, 10)}\",\"时间\":\"${__Time()}\",\"格式化时间\":\"${__Time(%Y-%m-%d %H:%M:%S)}\"}",
+                            "TestSampler__success": "true"
                         },
                         "children": null
                     }

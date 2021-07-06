@@ -16,11 +16,13 @@ log = get_logger(__name__)
 
 
 class PythonSampler(Sampler):
-    SOURCE: Final = 'PythonSampler__source'
+
+    # 脚本内容
+    SCRIPT: Final = 'PythonSampler__script'
 
     @property
-    def source(self):
-        return self.get_property_as_str(self.SOURCE)
+    def script(self) -> str:
+        return self.get_property_as_str(self.SCRIPT)
 
     def sample(self) -> SampleResult:
         result = SampleResult()
@@ -37,13 +39,14 @@ class PythonSampler(Sampler):
                 'prev': self.context.previous_result,
                 'result': result,
                 'success': result.success,
-                'response_data': result.response_data
+                'res_data': result.response_data
             }
-            exec(self.source, {}, local_vars)
+            exec(self.script, {}, local_vars)
         except Exception:
+            result.success = False
             result.response_data = traceback.format_exc()
-
-        result.sample_end()
-        result.calculate_elapsed_time()
+        finally:
+            result.sample_end()
+            result.calculate_elapsed_time()
 
         return result

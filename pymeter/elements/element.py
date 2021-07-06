@@ -8,7 +8,6 @@ from typing import Dict
 
 from pymeter.elements.property import BaseProperty
 from pymeter.elements.property import NoneProperty
-from pymeter.engine.value_parser import ValueReplacer
 from pymeter.utils.log_util import get_logger
 
 
@@ -28,7 +27,7 @@ class TestElement:
     REMARK = 'TestElement__remark'
 
     def __init__(self):
-        self.propertys: Dict[str, BaseProperty] = {}
+        self.properties: Dict[str, BaseProperty] = {}
         self.context = None
         self.running = False
 
@@ -52,18 +51,14 @@ class TestElement:
         if key and value:
             self.add_property(key, BaseProperty(key, value))
 
-    def set_property_by_replace(self, key: str, value: any) -> None:
-        if key and value:
-            self.add_property(key, ValueReplacer.replace_values(key, value))
-
     def add_property(self, key: str, prop: BaseProperty) -> None:
-        self.propertys[key] = prop
+        self.properties[key] = prop
 
     def get_property(self, key: str, default: any = None) -> BaseProperty:
         if default:
-            return self.propertys.get(key, default)
+            return self.properties.get(key, default)
 
-        return self.propertys.get(key, NoneProperty(key))
+        return self.properties.get(key, NoneProperty(key))
 
     def get_property_as_str(self, key: str, default: str = None) -> str:
         prop = self.get_property(key)
@@ -87,24 +82,29 @@ class TestElement:
             self.add_property(key, value)
 
     def clear_test_element_children(self) -> None:
-        """此方法应清除所有通过 {@link #add_test_element(TestElement)} 方法合并的测试元素属性"""
+        """清除所有使用 #add_test_element(TestElement) 方法合并的元素的属性"""
         ...
 
     def list(self):
-        return list(self.propertys.keys())
+        return list(self.properties.keys())
 
     def items(self):
-        return self.propertys.items()
+        return self.properties.items()
 
     def clone(self) -> 'TestElement':
         """克隆副本，如果子类有 property以外的属性，请在子类重写该方法
         """
         cloned_element = self.__class__()
-        cloned_element.propertys = deepcopy(self.propertys)
+        cloned_element.properties = deepcopy(self.properties)
         return cloned_element
+
+    def clear(self):
+        """清空属性"""
+        self.properties.clear()
 
 
 class ConfigTestElement(TestElement, ConfigElement):
+
     def __init__(self):
         TestElement.__init__(self)
         ConfigElement.__init__(self)

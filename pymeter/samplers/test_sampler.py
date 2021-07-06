@@ -17,26 +17,27 @@ log = get_logger(__name__)
 
 class TestSampler(Sampler):
 
-    SAMPLER_DATA: Final = 'TestSampler__sampler_data'
-    EXPECTED_SUCCESS: Final = 'TestSampler__expected_success'
+    DATA: Final = 'TestSampler__data'
+
+    SUCCESS: Final = 'TestSampler__success'
 
     @property
-    def sampler_data(self):
-        return self.get_property_as_str(self.SAMPLER_DATA)
+    def data(self):
+        return self.get_property_as_str(self.DATA)
 
     @property
-    def expected_success(self):
-        return self.get_property_as_bool(self.EXPECTED_SUCCESS)
+    def success(self):
+        return self.get_property_as_bool(self.SUCCESS)
 
     def sample(self) -> SampleResult:
         result = SampleResult()
-        result.sample_label = self.get_property_as_str(self.LABEL)
-        result.request_body = self.sampler_data
+        result.sample_label = self.name
+        result.request_data = self.data
         result.sample_start()
         gevent.sleep(0.5)
         result.sample_end()
-        result.success = self.expected_success
-        result.response_data = self.sampler_data
+        result.success = self.success
+        result.response_data = self.data
         result.calculate_elapsed_time()
 
         return result

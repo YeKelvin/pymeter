@@ -102,7 +102,25 @@ class CompoundVariable:
                 cls.functions[reference_key] = clazz
 
 
+class SimpleVariable:
+
+    def __init__(self, name: str = None):
+        self.name = name
+
+    @property
+    def variables(self):
+        return ContextService.get_context().variables
+
+    @property
+    def value(self):
+        if self.name in self.variables:
+            return self.variables.get(self.name)
+        else:
+            return '${' + self.name + '}'
+
+
 class FunctionParser:
+
     @staticmethod
     def compile_str(source: str) -> List:
         reader = StringReader(source)
@@ -259,23 +277,8 @@ class FunctionParser:
         return result
 
 
-class SimpleVariable:
-    def __init__(self, name: str = None):
-        self.name = name
-
-    @property
-    def variables(self):
-        return ContextService.get_context().variables
-
-    @property
-    def value(self):
-        if self.name in self.variables:
-            return self.variables.get(self.name)
-        else:
-            return '${' + self.name + '}'
-
-
 class ValueReplacer:
+
     @staticmethod
     def replace_values(key: str, source: str) -> BaseProperty:
         master_function = CompoundVariable()

@@ -12,6 +12,7 @@ from typing import Tuple
 from pymeter.common.exceptions import ScriptParseException
 from pymeter.elements.element import TestElement
 from pymeter.engine.tree import HashTree
+from pymeter.engine.value_parser import ValueReplacer
 from pymeter.utils import json_util
 from pymeter.utils.log_util import get_logger
 
@@ -138,6 +139,11 @@ def __check(script: Iterable[dict]) -> None:
             raise ScriptParseException(f'脚本解析失败，当前节点缺少 children 属性，节点名称:[ {item["name"]} ]')
 
 
+def __set_replaced_property(element: TestElement, key: str, value: any) -> None:
+    if key and value:
+        element.add_property(key, ValueReplacer.replace_values(key, value))
+
+
 def __get_node(script: dict) -> TestElement:
     """根据元素的class属性实例化为对象"""
     # 获取节点的类型
@@ -149,8 +155,8 @@ def __get_node(script: dict) -> TestElement:
 
     # 实例化节点
     node = class_type()
-    node.set_property_by_replace(TestElement.LABEL, script.get('name', None))
-    node.set_property_by_replace(TestElement.REMARK, script.get('remark', None))
+    __set_replaced_property(node, TestElement.LABEL, script.get('name', None))
+    __set_replaced_property(node, TestElement.REMARK, script.get('remark', None))
 
     # 设置节点的属性
     __set_propertys(node, script.get('propertys'))
@@ -164,7 +170,7 @@ def __set_propertys(node, propertys):
 
     for key, value in propertys.items():
         if isinstance(value, str):
-            node.set_property_by_replace(key, value)
+            __set_replaced_property(node, key, value)
         elif isinstance(value, dict):
             __set_object_property(node, key, value)
         elif isinstance(value, list):
