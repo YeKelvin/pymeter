@@ -53,7 +53,7 @@ class HTTPSampler(Sampler):
     RESPONSE_TIMEOUT: Final = 'HTTPSampler__response_timeout'
 
     # 请求头管理器
-    HEADER_MANAGER: Final = 'HTTPSampler.header_manager'
+    HEADER_MANAGER: Final = 'HTTPSampler__header_manager'
 
     @property
     def url(self) -> str:

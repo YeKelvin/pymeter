@@ -64,7 +64,6 @@
                   "Arguments__arguments": [
                     {
                       "class": "Argument",
-                      "enable": true,
                       "property": {
                         "Argument__name": "debugName",
                         "Argument__value": "debugValue",
@@ -81,34 +80,30 @@
               "HTTPSampler__auto_redirects": "",
               "HTTPSampler__keep_alive": "",
               "HTTPSampler__connect_timeout": "",
-              "HTTPSampler__response_timeout": ""
-            },
-            "children": [
-              {
-                "name": "http-headers-debug-configuration",
-                "remark": "",
+              "HTTPSampler__response_timeout": "",
+              "HTTPSampler__header_manager": {
                 "class": "HTTPHeaderManager",
-                "enabled": true,
                 "property": {
                   "HeaderManager__headers": [
                     {
                       "class": "HTTPHeader",
                       "property": {
-                        "Header__name": "sampler-chil-header-name",
-                        "Header__value": "sampler-chil-header-value"
+                        "Header__name": "sampler-header-name",
+                        "Header__value": "sampler-header-value"
                       }
                     },
                     {
                       "class": "HTTPHeader",
                       "property": {
-                        "Header__name": "sampler-chil-header-name-222",
+                        "Header__name": "sampler-header-name-222",
                         "Header__value": "${__Random(1, 10)}"
                       }
                     }
                   ]
                 }
               }
-            ]
+            },
+            "children": null
           }
         ]
       }
