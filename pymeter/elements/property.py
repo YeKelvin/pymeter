@@ -77,6 +77,14 @@ class NoneProperty(PyMeterProperty):
         return None
 
 
+class CollectionProperty(PyMeterProperty):
+    ...
+
+
+class ElementProperty(PyMeterProperty):
+    ...
+
+
 class FunctionProperty(PyMeterProperty):
     def __init__(self, name: str, function):
         super().__init__(name, None)
