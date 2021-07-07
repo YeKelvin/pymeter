@@ -34,6 +34,23 @@
         },
         "children": [
           {
+            "name": "http-headers-debug-configuration",
+            "remark": "",
+            "class": "HTTPHeaderManager",
+            "enabled": true,
+            "property": {
+              "HeaderManager__headers": [
+                {
+                  "class": "HTTPHeader",
+                  "property": {
+                    "Header__name": "group-level-header-name",
+                    "Header__value": "group-level-header-value"
+                  }
+                }
+              ]
+            }
+          },
+          {
             "name": "http-debug-sampler",
             "remark": "描述",
             "class": "HTTPSampler",
@@ -77,15 +94,15 @@
                     {
                       "class": "HTTPHeader",
                       "property": {
-                        "Header__name": "debug-header-name",
-                        "Header__value": "debug-header-value"
+                        "Header__name": "sampler-chil-header-name",
+                        "Header__value": "sampler-chil-header-value"
                       }
                     },
                     {
                       "class": "HTTPHeader",
                       "property": {
-                        "Header__name": "debug-header-name-222",
-                        "Header__value": "debug-header-value-222"
+                        "Header__name": "sampler-chil-header-name-222",
+                        "Header__value": "${__Random(1, 10)}"
                       }
                     }
                   ]
