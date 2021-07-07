@@ -104,7 +104,7 @@ def __parse(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
             continue
 
         node = __get_node(item)
-        children = item.get('children')
+        children = item.get('children', None)
 
         if children:  # 存在子节点时递归解析
             child_node_list = __parse(children)
@@ -135,8 +135,6 @@ def __check(script: Iterable[dict]) -> None:
             raise ScriptParseException(f'脚本解析失败，当前节点缺少 enabled 属性，节点名称:[ {item["name"]} ]')
         if 'property' not in item:
             raise ScriptParseException(f'脚本解析失败，当前节点缺少 property 属性，节点名称:[ {item["name"]} ]')
-        if 'children' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 children 属性，节点名称:[ {item["name"]} ]')
 
 
 def __set_replaced_property(element: TestElement, key: str, value: any) -> None:
@@ -155,7 +153,7 @@ def __get_node(script: dict) -> TestElement:
 
     # 实例化节点
     node = class_type()
-    __set_replaced_property(node, TestElement.LABEL, script.get('name', None))
+    __set_replaced_property(node, TestElement.NAME, script.get('name', None))
     __set_replaced_property(node, TestElement.REMARK, script.get('remark', None))
 
     # 设置节点的属性

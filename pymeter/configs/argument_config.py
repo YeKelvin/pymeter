@@ -3,6 +3,8 @@
 # @File    : argument_config.py
 # @Time    : 2021-07-05 13:44:20
 # @Author  : Kelvin.Ye
+from typing import List
+
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
 
@@ -82,7 +84,7 @@ class Arguments(ConfigTestElement):
         self.add_property(self.ARGUMENTS, [])
 
     @property
-    def arguments(self) -> list:
+    def arguments(self) -> List[Argument]:
         return self.get_property(self.ARGUMENTS).get_obj()
 
     def add(self, arg: Argument):

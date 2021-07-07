@@ -65,7 +65,7 @@ class ResultCollector(
 
         self.groups[self.group_id]['samplers'].append({
             'samplerId': id(sample_result),
-            'samplerName': sample_result.sample_label,
+            'samplerName': sample_result.sample_name,
             'samplerRemark': sample_result.sample_remark,
             'url': sample_result.request_url,
             'request': sample_result.request_data,

@@ -62,7 +62,7 @@ class NoneProperty(PyMeterProperty):
         super().__init__(name, None)
 
     def get_str(self) -> str:
-        return 'null'
+        return ''
 
     def get_int(self) -> int:
         return 0

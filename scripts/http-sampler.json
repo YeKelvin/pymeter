@@ -13,8 +13,7 @@
         "remark": "",
         "class": "ResultCollector",
         "enabled": true,
-        "property": {},
-        "children": null
+        "property": {}
       },
       {
         "name": "http-debug-group",
@@ -34,24 +33,6 @@
           }
         },
         "children": [
-          {
-            "name": "http-headers-debug-configuration",
-            "remark": "",
-            "class": "HTTPHeaderManager",
-            "enabled": true,
-            "property": {
-              "HeaderManager__headers": [
-                {
-                  "class": "HTTPHeader",
-                  "property": {
-                    "Header__name": "1",
-                    "Header__value": "false"
-                  }
-                }
-              ]
-            },
-            "children": null
-          },
           {
             "name": "http-debug-sampler",
             "remark": "描述",
@@ -85,7 +66,32 @@
               "HTTPSampler__connect_timeout": "",
               "HTTPSampler__response_timeout": ""
             },
-            "children": null
+            "children": [
+              {
+                "name": "http-headers-debug-configuration",
+                "remark": "",
+                "class": "HTTPHeaderManager",
+                "enabled": true,
+                "property": {
+                  "HeaderManager__headers": [
+                    {
+                      "class": "HTTPHeader",
+                      "property": {
+                        "Header__name": "debug-header-name",
+                        "Header__value": "debug-header-value"
+                      }
+                    },
+                    {
+                      "class": "HTTPHeader",
+                      "property": {
+                        "Header__name": "debug-header-name-222",
+                        "Header__value": "debug-header-value-222"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         ]
       }

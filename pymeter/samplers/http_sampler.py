@@ -10,6 +10,7 @@ from typing import Optional
 import requests
 
 from pymeter.configs.argument_config import Arguments
+from pymeter.configs.http_config import HTTPHeaderManager
 from pymeter.samplers.http_cons import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -50,6 +51,9 @@ class HTTPSampler(Sampler):
 
     # 等待响应超时时间
     RESPONSE_TIMEOUT: Final = 'HTTPSampler__response_timeout'
+
+    # 请求头管理器
+    HEADER_MANAGER: Final = 'HTTPSampler.header_manager'
 
     @property
     def url(self) -> str:
@@ -100,12 +104,20 @@ class HTTPSampler(Sampler):
     def response_timeout(self) -> float:
         return self.get_property_as_float(self.RESPONSE_TIMEOUT)
 
+    @property
+    def header_manager(self) -> HTTPHeaderManager:
+        return self.get_property(self.HEADER_MANAGER).get_obj()
+
+    @property
+    def headers(self) -> dict:
+        hm = self.header_manager
+        return hm.headers_as_dict if hm else None
+
     def sample(self) -> SampleResult:
         result = SampleResult()
-        result.sample_label = self.name
+        result.sample_name = self.name
         result.sample_remark = self.remark
         result.request_url = self.url
-        result.request_headers = ''
         result.sample_start()
         res = None
 
@@ -113,7 +125,7 @@ class HTTPSampler(Sampler):
             res = requests.request(
                 method=self.method,
                 url=self.url,
-                headers=None,
+                headers=self.headers,
                 params=self.parameter,
                 data=self.data,
                 files=self.files,
@@ -123,6 +135,7 @@ class HTTPSampler(Sampler):
             )
 
             result.request_data = self.get_payload(res.request.url)
+            result.request_headers = dict(res.request.headers)
             result.response_headers = dict(res.headers)
             result.response_data = res.text
             result.response_code = res.status_code
@@ -155,8 +168,13 @@ class HTTPSampler(Sampler):
 
         return url + payload
 
-    def add_test_element(self, element):
+    def add_test_element(self, el) -> None:
         """@override"""
+        if isinstance(el, HTTPHeaderManager):
+            self.set_header_manager(el)
+        else:
+            super().add_test_element(el)
+
         # if (el instanceof CookieManager) {
         #     setCookieManager((CookieManager) el);
         # } else if (el instanceof CacheManager) {
@@ -170,4 +188,11 @@ class HTTPSampler(Sampler):
         # } else {
         #     super.addTestElement(el);
         # }
-        ...
+
+    def set_header_manager(self, new_manager: HTTPHeaderManager):
+        header_manager = self.header_manager
+
+        if header_manager:
+            new_manager = header_manager.merge(new_manager)
+
+        self.set_property(self.HEADER_MANAGER, new_manager)

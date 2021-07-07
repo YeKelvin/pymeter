@@ -21,7 +21,7 @@ class ConfigElement:
 
 class TestElement:
     # 组件名称
-    LABEL = 'TestElement__label'
+    NAME = 'TestElement__name'
 
     # 组件备注
     REMARK = 'TestElement__remark'
@@ -32,7 +32,7 @@ class TestElement:
 
     @property
     def name(self):
-        return self.get_property_as_str(self.LABEL)
+        return self.get_property_as_str(self.NAME)
 
     @property
     def remark(self):
@@ -40,7 +40,7 @@ class TestElement:
 
     @name.setter
     def name(self, name: str) -> None:
-        self.set_property(self.LABEL, name)
+        self.set_property(self.NAME, name)
 
     @remark.setter
     def remark(self, remark: str) -> None:

@@ -31,7 +31,7 @@ class TestSampler(Sampler):
 
     def sample(self) -> SampleResult:
         result = SampleResult()
-        result.sample_label = self.name
+        result.sample_name = self.name
         result.request_data = self.data
         result.sample_start()
         gevent.sleep(0.5)

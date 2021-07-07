@@ -11,7 +11,7 @@ class SampleResult:
 
     def __init__(self):
         self.parent = None
-        self.sample_label = None
+        self.sample_name = None
         self.sample_remark = None
 
         self.request_url = None

@@ -24,27 +24,22 @@ log = get_logger(__name__)
 
 
 class SocketResultCollector(
-    TestElement,
-    TestCollectionListener,
-    TestGroupListener,
-    SampleListener,
-    TestIterationListener,
-    NoCoroutineClone
+    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoCoroutineClone
 ):
     # 连接地址
-    URL = 'SocketResultCollector__url'  # type: Final
+    URL: Final = 'SocketResultCollector__url'
 
     # 头部dict
-    HEADERS = 'SocketResultCollector__headers'  # type: Final
+    HEADERS: Final = 'SocketResultCollector__headers'
 
     # 命名空间
-    NAMESPACE = 'SocketResultCollector__namespace'  # type: Final
+    NAMESPACE: Final = 'SocketResultCollector__namespace'
 
     # 事件名称
-    EVENT_NAME = 'SocketResultCollector__event_name'  # type: Final
+    EVENT_NAME: Final = 'SocketResultCollector__event_name'
 
     # 发送消息目标的sid
-    TARGET_SID = 'SocketResultCollector__target_sid'  # type: Final
+    TARGET_SID: Final = 'SocketResultCollector__target_sid'
 
     @property
     def url(self):
@@ -67,12 +62,11 @@ class SocketResultCollector(
         return self.get_property_as_str(self.TARGET_SID)
 
     @property
-    def __group_id(self) -> str:
-        coroutine_group = ContextService.get_context().coroutine_group
-        return f'{coroutine_group.name}-{coroutine_group.group_number}'
+    def group_id(self) -> str:
+        return id(ContextService.get_context().coroutine_group)
 
     @property
-    def __group_name(self):
+    def group_name(self):
         return ContextService.get_context().coroutine_group.name
 
     def __init__(self):
@@ -122,26 +116,28 @@ class SocketResultCollector(
         self.__socket_disconnect()
 
     def group_started(self) -> None:
-        group_id = self.__group_id
-        start_time = time_util.timestamp_now()
-        group_name = self.__group_name
-
         self.__emit_to_target({
             'group': {
-                'id': group_id,
-                'startTime': start_time,
+                'groupId': self.group_id,
+                'groupName': self.group_name,
+                'startTime': time_util.strftime_now(),
                 'endTime': 0,
+                'elapsedTime': 0,
+                'running': True,
                 'success': True,
-                'groupName': group_name,
                 'samplers': []
             }
         })
 
     def group_finished(self) -> None:
-        group_id = self.__group_id
-        end_time = time_util.timestamp_now()
-
-        self.__emit_to_target({'group': {'id': group_id, 'endTime': end_time}})
+        self.__emit_to_target({
+            'groupId': self.group_id,
+            'group': {
+                'endTime': time_util.strftime_now(),
+                'elapsedTime': 0,
+                'running': False
+            }
+        })
 
     def sample_started(self, sample) -> None:
         pass
@@ -152,21 +148,32 @@ class SocketResultCollector(
 
         group_id = self.__group_id
 
+        group_id = self.group_id
+
         self.__emit_to_target({
+            'groupId': group_id,
             'sampler': {
-                'groupId': group_id,
-                'startTime': sample_result.start_time,
-                'endTime': sample_result.end_time,
-                'elapsedTime': sample_result.elapsed_time,
+                'samplerId': id(sample_result),
+                'samplerName': sample_result.sample_name,
+                'samplerRemark': sample_result.sample_remark,
+                'url': sample_result.request_url,
+                'request': sample_result.request_data,
+                'requestHeaders': sample_result.request_headers,
+                'response': sample_result.response_data,
+                'responseHeaders': sample_result.response_headers,
+                'responseCode': sample_result.response_code,
+                'responseMessage': sample_result.response_message,
+                'requestSize': sample_result.request_size,
+                'responseSize': sample_result.response_size,
                 'success': sample_result.success,
-                'samplerName': sample_result.sample_label,
-                'request': sample_result.request_body,
-                'response': sample_result.response_data
+                'startTime': time_util.timestamp_to_strftime(sample_result.start_time),
+                'endTime': time_util.timestamp_to_strftime(sample_result.end_time),
+                'elapsedTime': sample_result.elapsed_time,
             }
         })
 
         if not sample_result.success:
-            self.__emit_to_target({'group': {'id': group_id, 'success': False}})
+            self.__emit_to_target({'groupId': group_id, 'group': {'success': False}})
 
     def test_iteration_start(self, controller) -> None:
         pass

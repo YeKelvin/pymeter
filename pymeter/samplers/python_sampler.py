@@ -26,7 +26,7 @@ class PythonSampler(Sampler):
 
     def sample(self) -> SampleResult:
         result = SampleResult()
-        result.sample_label = self.name
+        result.sample_name = self.name
         result.request_body = self.source
         result.sample_start()
 

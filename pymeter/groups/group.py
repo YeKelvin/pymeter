@@ -513,7 +513,7 @@ class Coroutine(Greenlet):
 
         log.debug(
             f'coroutine:[ {self.coroutine_name} ] '
-            f'last sampler:[ {result.sample_label} ] isSuccess {result.success}'
+            f'last sampler:[ {result.sample_name} ] isSuccess {result.success}'
         )
         context.variables.put(self.LAST_SAMPLE_OK, result.success)
 
