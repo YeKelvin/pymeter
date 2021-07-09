@@ -7,7 +7,11 @@ from copy import deepcopy
 from typing import Dict
 
 from pymeter.elements.property import BasicProperty
+from pymeter.elements.property import CollectionProperty
+from pymeter.elements.property import DictProperty
+from pymeter.elements.property import ElementProperty
 from pymeter.elements.property import NoneProperty
+from pymeter.elements.property import PyMeterProperty
 from pymeter.utils.log_util import get_logger
 
 
@@ -27,15 +31,15 @@ class TestElement:
     REMARK = 'TestElement__remark'
 
     def __init__(self):
-        self.properties: Dict[str, BasicProperty] = {}
+        self.properties: Dict[str, PyMeterProperty] = {}
         self.context = None
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.get_property_as_str(self.NAME)
 
     @property
-    def remark(self):
+    def remark(self) -> str:
         return self.get_property_as_str(self.REMARK)
 
     @name.setter
@@ -47,13 +51,22 @@ class TestElement:
         self.set_property(self.REMARK, remark)
 
     def set_property(self, key: str, value: any) -> None:
-        if key and value:
-            self.add_property(key, BasicProperty(key, value))
+        if key:
+            if isinstance(value, TestElement):
+                self.add_property(key, ElementProperty(key, value))
+            elif isinstance(value, list):
+                self.add_property(key, CollectionProperty(key, value))
+            elif isinstance(value, dict):
+                self.add_property(key, DictProperty(key, value))
+            elif value is None:
+                self.add_property(key, NoneProperty(key))
+            else:
+                self.add_property(key, BasicProperty(key, value))
 
-    def add_property(self, key: str, prop: BasicProperty) -> None:
+    def add_property(self, key: str, prop: PyMeterProperty) -> None:
         self.properties[key] = prop
 
-    def get_property(self, key: str, default: any = None) -> BasicProperty:
+    def get_property(self, key: str, default: any = None) -> PyMeterProperty:
         if default:
             return self.properties.get(key, default)
 
@@ -97,7 +110,7 @@ class TestElement:
         cloned_element.properties = deepcopy(self.properties)
         return cloned_element
 
-    def clear(self):
+    def clear(self) -> None:
         """清空属性"""
         self.properties.clear()
 

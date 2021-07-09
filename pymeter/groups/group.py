@@ -40,8 +40,8 @@ log = get_logger(__name__)
 
 @unique
 class LogicalAction(Enum):
-    """Sampler失败时，下一步动作的逻辑枚举
-    """
+    """Sampler失败时，下一步动作的逻辑枚举"""
+
     # 错误时继续
     CONTINUE = 'continue'
 
@@ -65,6 +65,7 @@ class LogicalAction(Enum):
 
 
 class TestGroup(Controller):
+
     # Sampler失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR: Final = 'TestGroup__on_sample_error'
 
@@ -264,6 +265,7 @@ class TestGroup(Controller):
 
 
 class Coroutine(Greenlet):
+
     LAST_SAMPLE_OK = 'Gourp__last_sample_ok'
 
     def __init__(self, group_tree: HashTree, *args, **kwargs):

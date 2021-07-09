@@ -77,7 +77,10 @@ def save_tree(tree):
 
 
 def __loads_script(source) -> List[dict]:
-    """反序列化脚本"""
+    """
+    反序列化脚本
+    TODO: 待优化，增加sourceType，支持object，json，yaml
+    """
     script = []
     if isinstance(source, list):
         script = source
@@ -175,7 +178,7 @@ def __set_properties(node, property):
             __set_collection_property(node, key, value)
 
 
-def __set_object_property(node, key, value):
+def __set_object_property(node, key, value: dict):
     if 'class' in value:
         propnode = __get_node(value)
         node.set_property(key, propnode)
@@ -183,7 +186,7 @@ def __set_object_property(node, key, value):
         node.set_property(key, value)
 
 
-def __set_collection_property(node, key, value):
+def __set_collection_property(node, key, value: list):
     collection = []
     for item in value:
         if isinstance(item, dict):

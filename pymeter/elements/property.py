@@ -3,6 +3,9 @@
 # @File    : property.py
 # @Time    : 2020/2/16 14:16
 # @Author  : Kelvin.Ye
+from typing import Dict
+from typing import List
+
 from pymeter.utils.log_util import get_logger
 
 
@@ -78,11 +81,53 @@ class NoneProperty(PyMeterProperty):
 
 
 class CollectionProperty(PyMeterProperty):
-    ...
+    def __init__(self, name: str, value: list = []):
+        self.name = name
+        self.value = value
+
+    def get_str(self) -> str:
+        return str(self.value)
+
+    def get_bool(self) -> bool:
+        return bool(self.value)
+
+    def get_obj(self) -> List:
+        return self.value
+
+    def remove(self, index, prop):
+        ...
+
+    def set(self, index, prop):
+        ...
+
+    def get(self, index):
+        ...
 
 
 class ElementProperty(PyMeterProperty):
-    ...
+    def get_str(self) -> str:
+        return str(self.value)
+
+    def get_bool(self) -> bool:
+        return bool(self.value)
+
+    def get_obj(self):
+        return self.value
+
+
+class DictProperty(PyMeterProperty):
+    def __init__(self, name: str, value: dict = {}):
+        self.name = name
+        self.value = value
+
+    def get_str(self) -> str:
+        return str(self.value)
+
+    def get_bool(self) -> bool:
+        return bool(self.value)
+
+    def get_obj(self) -> Dict:
+        return self.value
 
 
 class FunctionProperty(PyMeterProperty):

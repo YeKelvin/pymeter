@@ -18,6 +18,7 @@ log = get_logger(__name__)
 
 
 class LoopController(GenericController, IteratingController, LoopIterationListener):
+
     # 循环次数
     LOOPS = 'LoopController__loops'
 
