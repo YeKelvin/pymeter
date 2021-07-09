@@ -39,6 +39,9 @@ class Random(Function):
 
     def set_parameters(self, parameters: list):
         log.debug(f'{self.REF_KEY} start to set parameters')
+
+        # TODO: 添加参数个数校验
+
         self.minimum = parameters[0]
         self.maximum = parameters[1]
         if len(parameters) > 2:
