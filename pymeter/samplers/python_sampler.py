@@ -27,7 +27,7 @@ class PythonSampler(Sampler):
     def sample(self) -> SampleResult:
         result = SampleResult()
         result.sample_name = self.name
-        result.request_body = self.source
+        result.request_data = self.script
         result.sample_start()
 
         try:
@@ -38,8 +38,7 @@ class PythonSampler(Sampler):
                 'props': GlobalUtils.get_properties(),
                 'prev': self.context.previous_result,
                 'result': result,
-                'success': result.success,
-                'res_data': result.response_data
+                'success': result.success
             }
             exec(self.script, {}, local_vars)
         except Exception:
