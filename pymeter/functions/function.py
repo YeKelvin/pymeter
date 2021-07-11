@@ -4,6 +4,7 @@
 # @Time    : 2020/1/19 17:05
 # @Author  : Kelvin.Ye
 from pymeter.common.exceptions import InvalidVariableException
+from pymeter.groups.context import ContextService
 from pymeter.utils.log_util import get_logger
 
 
@@ -12,6 +13,10 @@ log = get_logger(__name__)
 
 class Function:
     REF_KEY = '__referenceKey'
+
+    @property
+    def variables(self):
+        return ContextService.get_context().variables
 
     def execute(self):
         raise NotImplementedError

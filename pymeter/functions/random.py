@@ -7,7 +7,6 @@ import random
 from typing import Final
 
 from pymeter.functions.function import Function
-from pymeter.groups.context import ContextService
 from pymeter.utils.log_util import get_logger
 
 
@@ -33,7 +32,7 @@ class Random(Function):
         if self.var_name:
             # 存在 var_name时放入本地变量中
             var_name = self.var_name.execute().strip()
-            ContextService.get_context().variables.put(var_name, result)
+            self.variables.put(var_name, result)
 
         return str(result)
 

@@ -7,7 +7,6 @@ import time
 from typing import Final
 
 from pymeter.functions.function import Function
-from pymeter.groups.context import ContextService
 from pymeter.utils.log_util import get_logger
 
 
@@ -15,6 +14,7 @@ log = get_logger(__name__)
 
 
 class Time(Function):
+
     REF_KEY: Final = '__Time'
 
     def __init__(self):
@@ -35,7 +35,7 @@ class Time(Function):
         if self.var_name:
             # 存在 var_name时放入本地变量中
             var_name = self.var_name.execute().strip()
-            ContextService.get_context().variables.put(var_name, result)
+            self.variables.put(var_name, result)
 
         return result
 

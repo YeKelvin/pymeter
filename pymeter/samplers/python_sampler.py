@@ -38,7 +38,8 @@ class PythonSampler(Sampler):
                 'props': GlobalUtils.get_properties(),
                 'prev': self.context.previous_result,
                 'result': result,
-                'success': result.success
+                'success': result.success,
+                'res': result.request_data,
             }
             exec(self.script, {}, local_vars)
         except Exception:

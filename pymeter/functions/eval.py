@@ -14,6 +14,7 @@ log = get_logger(__name__)
 
 
 class Eval(Function):
+
     REF_KEY: Final = '__Eval'
 
     def __init__(self):
@@ -22,6 +23,7 @@ class Eval(Function):
     def execute(self):
         log.debug(f'{self.REF_KEY} start execute')
         parameter = self.parameter.execute().strip()
+        # TODO: 待优化，解决循环引用
         return value_parser.CompoundVariable(parameter).execute().strip()
 
     def set_parameters(self, parameters: list):
