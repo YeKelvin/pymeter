@@ -24,6 +24,15 @@ class PythonSampler(Sampler):
     def script(self) -> str:
         return self.get_property_as_str(self.SCRIPT)
 
+    @property
+    def script_wrapper(self):
+        func = ['def func(log, ctx, vars, props, prev, result):\n']
+        lines = self.script.split('\n')
+        for line in lines:
+            func.append(f'\t{line}\n')
+        func.append('self.wrapper = func')
+        return ''.join(func)
+
     def sample(self) -> SampleResult:
         result = SampleResult()
         result.sample_name = self.name
@@ -31,17 +40,17 @@ class PythonSampler(Sampler):
         result.sample_start()
 
         try:
-            local_vars = {
-                'log': log,
-                'ctx': self.context,
-                'vars': self.context.variables,
-                'props': GlobalUtils.get_properties(),
-                'prev': self.context.previous_result,
-                'result': result,
-                'success': result.success,
-                'res': result.request_data,
-            }
-            exec(self.script, {}, local_vars)
+            exec(self.script_wrapper, {}, {'self': self})
+            res = self.wrapper(
+                log=log,
+                ctx=self.context,
+                vars=self.context.variables,
+                props=GlobalUtils.get_properties(),
+                prev=self.context.previous_result,
+                result=result
+            )
+            if res:
+                result.response_data = res
         except Exception:
             result.success = False
             result.response_data = traceback.format_exc()

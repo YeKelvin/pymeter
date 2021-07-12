@@ -18,7 +18,7 @@ log = get_logger(__name__)
 class PythonPostProcessor(PostProcessor, TestElement):
 
     # 脚本内容
-    SCRIPT: Final = 'PythonPostProcessor__source'
+    SCRIPT: Final = 'PythonPostProcessor__script'
 
     def process(self) -> None:
         try:

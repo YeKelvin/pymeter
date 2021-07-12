@@ -24,8 +24,8 @@ class SamplePackage:
         self.assertions = []
         self.timers = []
 
-    def add(self, node_list: list):
-        for node in node_list:
+    def add(self, nodes: list):
+        for node in nodes:
             if isinstance(node, ConfigElement):
                 self.configs.append(node)
             if isinstance(node, PreProcessor):
