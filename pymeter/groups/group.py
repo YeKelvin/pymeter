@@ -527,21 +527,21 @@ class Coroutine(Greenlet):
         except AssertionError as e:
             log.debug(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
             assertion_result = AssertionResult()
-            assertion_result.is_failure = True
-            assertion_result.failure_message = str(e)
+            assertion_result.failure = True
+            assertion_result.failure_msg = str(e)
         except RuntimeError as e:
             log.error(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
             assertion_result = AssertionResult()
-            assertion_result.is_error = True
-            assertion_result.failure_message = str(e)
+            assertion_result.error = True
+            assertion_result.failure_msg = str(e)
         except Exception as e:
             log.error(f'coroutine:[ {self.coroutine_name} ] exception processing Assertion: {e}')
             log.error(traceback.format_exc())
             assertion_result = AssertionResult()
-            assertion_result.is_error = True
-            assertion_result.failure_message = str(e)
+            assertion_result.error = True
+            assertion_result.failure_msg = str(e)
 
-        result.success(result.success and not (assertion_result.is_Error or assertion_result.is_failure))
+        result.success(result.success and not (assertion_result.error or assertion_result.failure))
         result.assertion_result = assertion_result
 
     def __continue_on_coroutine_loop(self) -> None:

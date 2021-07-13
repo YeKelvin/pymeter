@@ -11,11 +11,11 @@ class AssertionResult:
         # Name of the assertion.
         self.name = name
         # True if the assertion failed.
-        self.is_failure = False
+        self.failure = False
         # True if there was an error checking the assertion.
-        self.is_error = False
+        self.error = False
         # A message describing the failure.
-        self.failure_message = None
+        self.failure_msg = None
 
 
 class Assertion:
