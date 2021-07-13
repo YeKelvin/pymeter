@@ -7,6 +7,7 @@ import traceback
 from typing import Final
 
 from pymeter.engine.globalization import GlobalUtils
+from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
@@ -41,12 +42,14 @@ class PythonSampler(Sampler):
 
         try:
             exec(self.script_wrapper, {}, {'self': self})
+            ctx = ContextService.get_context()
+            props = GlobalUtils.get_properties()
             res = self.wrapper(
                 log=log,
-                ctx=self.context,
-                vars=self.context.variables,
-                props=GlobalUtils.get_properties(),
-                prev=self.context.previous_result,
+                ctx=ctx,
+                vars=ctx.variables,
+                props=props,
+                prev=ctx.previous_result,
                 result=result
             )
             if res:

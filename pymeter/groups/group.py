@@ -486,6 +486,7 @@ class Coroutine(Greenlet):
 
     def __do_sampling(self, sampler: Sampler, context: CoroutineContext, listeners: list) -> SampleResult:
         """执行Sampler"""
+        # TODO: 给sampler设置context好像没啥用，可以ContextService获取
         sampler.context = context
         sampler.coroutine_name = self.coroutine_name
 

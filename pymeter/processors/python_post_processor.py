@@ -6,8 +6,8 @@
 import traceback
 from typing import Final
 
-from pymeter.elements.element import TestElement
 from pymeter.engine.globalization import GlobalUtils
+from pymeter.groups.context import ContextService
 from pymeter.processors.post import PostProcessor
 from pymeter.utils.log_util import get_logger
 
@@ -15,19 +15,21 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class PythonPostProcessor(PostProcessor, TestElement):
+class PythonPostProcessor(PostProcessor):
 
     # 脚本内容
     SCRIPT: Final = 'PythonPostProcessor__script'
 
     def process(self) -> None:
         try:
+            ctx = ContextService.get_context()
+            props = GlobalUtils.get_properties()
             local_vars = {
                 'log': log,
-                'ctx': self.context,
-                'vars': self.context.variables,
-                'props': GlobalUtils.get_properties(),
-                'prev': self.context.previous_result
+                'ctx': ctx,
+                'vars': ctx.variables,
+                'props': props,
+                'prev': ctx.previous_result
             }
             exec(self.script, {}, local_vars)
         except Exception:

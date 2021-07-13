@@ -4,12 +4,12 @@
 # @Time    : 2020/2/17 16:39
 # @Author  : Kelvin.Ye
 import traceback
-from pymeter.engine.globalization import GlobalUtils
 from typing import Final
 
 from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
-from pymeter.elements.element import TestElement
+from pymeter.engine.globalization import GlobalUtils
+from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.log_util import get_logger
 
@@ -17,7 +17,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class PythonAssertion(Assertion, TestElement):
+class PythonAssertion(Assertion):
 
     # 脚本内容
     SCRIPT: Final = 'PythonAssertion__script'
@@ -28,12 +28,14 @@ class PythonAssertion(Assertion, TestElement):
 
     def get_result(self, result: SampleResult) -> AssertionResult:
         try:
+            ctx = ContextService.get_context()
+            props = GlobalUtils.get_properties()
             local_vars = {
                 'log': log,
-                'ctx': self.context,
-                'vars': self.context.variables,
-                'props': GlobalUtils.get_properties(),
-                'prev': self.context.previous_result,
+                'ctx': ctx,
+                'vars': ctx.variables,
+                'props': props,
+                'prev': ctx.previous_result,
                 'result': result,
                 'failure': False,
                 'failure_msg': ''

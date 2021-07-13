@@ -6,8 +6,8 @@
 import traceback
 from typing import Final
 
-from pymeter.elements.element import TestElement
 from pymeter.engine.globalization import GlobalUtils
+from pymeter.groups.context import ContextService
 from pymeter.processors.pre import PreProcessor
 from pymeter.utils.log_util import get_logger
 
@@ -15,7 +15,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class PythonPreProcessor(PreProcessor, TestElement):
+class PythonPreProcessor(PreProcessor):
 
     # 脚本内容
     SCRIPT: Final = 'PythonPreProcessor__script'
@@ -26,13 +26,15 @@ class PythonPreProcessor(PreProcessor, TestElement):
 
     def process(self) -> None:
         try:
+            ctx = ContextService.get_context()
+            props = GlobalUtils.get_properties()
             local_vars = {
                 'log': log,
-                'ctx': self.context,
-                'vars': self.context.variables,
-                'props': GlobalUtils.get_properties(),
-                'prev': self.context.previous_result,
-                'sampler': self.context.current_sampler
+                'ctx': ctx,
+                'vars': ctx.variables,
+                'props': props,
+                'prev': ctx.previous_result,
+                'sampler': ctx.current_sampler
             }
             exec(self.script, {}, local_vars)
         except Exception:

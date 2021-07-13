@@ -3,6 +3,7 @@
 # @File    : assertion.py
 # @Time    : 2020/2/17 16:38
 # @Author  : Kelvin.Ye
+from pymeter.elements.element import TestElement
 from pymeter.samplers.sample_result import SampleResult
 
 
@@ -18,6 +19,6 @@ class AssertionResult:
         self.failure_msg = None
 
 
-class Assertion:
+class Assertion(TestElement):
     def get_result(self, result: SampleResult) -> AssertionResult:
         raise NotImplementedError
