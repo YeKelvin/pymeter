@@ -18,14 +18,14 @@ default = true
 [tool.poetry.dependencies]
 python = "^3.8"
 jsonpath = "0.82"
-orjson = "3.5.4"
+orjson = "3.6.0"
 sqlalchemy = "1.4.20"
 cx-Oracle = "8.2.0"
 sshtunnel = "0.4.0"
 pycryptodome = "3.10.1"
 gevent = "21.1.2"
 python-socketio = "5.3.0"
-requests="2.25.1"
+requests="2.26.0"
 flask = "2.0.1"
 flask-socketio = "5.1.0"
 
