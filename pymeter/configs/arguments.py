@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : argument_config.py
+# @File    : arguments.py
 # @Time    : 2021-07-05 13:44:20
 # @Author  : Kelvin.Ye
 from typing import List

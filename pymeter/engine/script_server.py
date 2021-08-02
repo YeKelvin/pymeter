@@ -31,10 +31,11 @@ __MODULE_PATH__ = {
     'PythonAssertion': 'pymeter.assertions.python_assertion',
 
     # 配置器
-    'Arguments': 'pymeter.configs.argument_config',
-    'Argument': 'pymeter.configs.argument_config',
+    'Argument': 'pymeter.configs.arguments',
+    'Arguments': 'pymeter.configs.arguments',
     'HTTPHeader': 'pymeter.configs.http_config',
     'HTTPHeaderManager': 'pymeter.configs.http_config',
+    'VariableDataSet': 'pymeter.configs.variable_data_set',
 
     # 逻辑控制器
     'LoopController': 'pymeter.controls.loop_controller',

@@ -9,7 +9,7 @@ from typing import Optional
 
 import requests
 
-from pymeter.configs.argument_config import Arguments
+from pymeter.configs.arguments import Arguments
 from pymeter.configs.http_config import HTTPHeaderManager
 from pymeter.samplers.http_cons import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult

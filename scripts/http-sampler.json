@@ -9,6 +9,23 @@
     },
     "children": [
       {
+        "name": "变量配置器",
+        "remark": "",
+        "class": "VariableDataSet",
+        "enabled": true,
+        "property": {
+          "Arguments__arguments": [
+            {
+              "class": "Argument",
+              "property": {
+                "Argument__name": "key111",
+                "Argument__value": "val111"
+              }
+            }
+          ]
+        }
+      },
+      {
         "name": "结果收集器",
         "remark": "",
         "class": "ResultCollector",
@@ -66,7 +83,7 @@
                       "class": "Argument",
                       "property": {
                         "Argument__name": "debugName",
-                        "Argument__value": "debugValue",
+                        "Argument__value": "${key111}",
                         "Argument__desc": "debugDesc"
                       }
                     }
