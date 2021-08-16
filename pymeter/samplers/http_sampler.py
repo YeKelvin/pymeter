@@ -28,11 +28,17 @@ class HTTPSampler(Sampler):
     # 请求方法
     METHOD: Final = 'HTTPSampler__method'
 
+    # 请求头管理器
+    HEADERS: Final = 'HTTPSampler__headers'
+
     # 请求参数
     PARAMS: Final = 'HTTPSampler__params'
 
     # 请求主体
     DATA: Final = 'HTTPSampler__data'
+
+    # 请求表单
+    FORM: Final = 'HTTPSampler__form'
 
     # 请求上传文件
     FILES: Final = 'HTTPSampler__files'
@@ -40,20 +46,14 @@ class HTTPSampler(Sampler):
     # 请求内容编码
     ENCODING: Final = 'HTTPSampler__encoding'
 
-    FOLLOW_REDIRECTS: Final = 'HTTPSampler__follow_redirects'
-    AUTO_REDIRECTS: Final = 'HTTPSampler__auto_redirects'
-
-    # keep_alive
-    KEEP_ALIVE: Final = 'HTTPSampler__keep_alive'
+    # 允许重定向
+    ALLOW_REDIRECTS: Final = 'HTTPSampler__allow_redirects'
 
     # 请求连接超时时间
     CONNECT_TIMEOUT: Final = 'HTTPSampler__connect_timeout'
 
     # 等待响应超时时间
     RESPONSE_TIMEOUT: Final = 'HTTPSampler__response_timeout'
-
-    # 请求头管理器
-    HEADER_MANAGER: Final = 'HTTPSampler__header_manager'
 
     @property
     def url(self) -> str:
@@ -64,17 +64,35 @@ class HTTPSampler(Sampler):
         return self.get_property_as_str(self.METHOD)
 
     @property
-    def params(self) -> Optional[Arguments]:
+    def header_manager(self) -> HTTPHeaderManager:
+        return self.get_property(self.HEADERS).get_obj()
+
+    @property
+    def headers(self) -> dict:
+        hm = self.header_manager
+        return hm.headers_as_dict if hm else None
+
+    @property
+    def params_manager(self) -> Optional[Arguments]:
         return self.get_property(self.PARAMS).get_obj()
 
     @property
-    def parameter(self) -> dict:
-        parameter = self.params
-        return parameter.to_dict() if parameter else {}
+    def params(self) -> dict:
+        pm = self.params_manager
+        return pm.to_dict() if pm else {}
 
     @property
     def data(self) -> str:
         return self.get_property_as_str(self.DATA)
+
+    @property
+    def form_manager(self) -> Optional[Arguments]:
+        return self.get_property(self.FORM).get_obj()
+
+    @property
+    def form(self) -> dict:
+        fm = self.form_manager
+        return fm.to_dict() if fm else {}
 
     @property
     def files(self) -> str:
@@ -85,16 +103,8 @@ class HTTPSampler(Sampler):
         return self.get_property_as_str(self.ENCODING)
 
     @property
-    def follow_redirects(self) -> bool:
-        return self.get_property_as_bool(self.FOLLOW_REDIRECTS)
-
-    @property
-    def auto_redirects(self) -> bool:
-        return self.get_property_as_bool(self.AUTO_REDIRECTS)
-
-    @property
-    def keep_alive(self) -> bool:
-        return self.get_property_as_bool(self.KEEP_ALIVE)
+    def allow_redirects(self) -> bool:
+        return self.get_property_as_bool(self.ALLOW_REDIRECTS)
 
     @property
     def connect_timeout(self) -> float:
@@ -103,15 +113,6 @@ class HTTPSampler(Sampler):
     @property
     def response_timeout(self) -> float:
         return self.get_property_as_float(self.RESPONSE_TIMEOUT)
-
-    @property
-    def header_manager(self) -> HTTPHeaderManager:
-        return self.get_property(self.HEADER_MANAGER).get_obj()
-
-    @property
-    def headers(self) -> dict:
-        hm = self.header_manager
-        return hm.headers_as_dict if hm else None
 
     def sample(self) -> SampleResult:
         result = SampleResult()
@@ -126,12 +127,12 @@ class HTTPSampler(Sampler):
                 method=self.method,
                 url=self.url,
                 headers=self.headers,
-                params=self.parameter,
-                data=self.data,
+                params=self.params,
+                data=self.get_data(),
                 files=self.files,
                 cookies=None,
                 timeout=self.get_timeout(),
-                allow_redirects=True
+                allow_redirects=self.allow_redirects
             )
 
             result.request_data = self.get_payload(res.request.url)
@@ -149,6 +150,12 @@ class HTTPSampler(Sampler):
 
         return result
 
+    def get_data(self):
+        if ('content-type' in self.headers) and (self.headers['content-type'].lower() == 'application/x-www-form-urlencoded'):
+            return self.form
+        else:
+            return self.data
+
     def get_timeout(self) -> Optional[tuple]:
         if not (self.connect_timeout and self.response_timeout):
             return None
@@ -160,7 +167,7 @@ class HTTPSampler(Sampler):
 
         if self.params:
             payload = '[Parameter]:\n'
-            for name, value in self.parameter.items():
+            for name, value in self.params.items():
                 payload = payload + f'{name}={value}\n'
 
         if self.data:
@@ -195,4 +202,4 @@ class HTTPSampler(Sampler):
         if header_manager:
             new_manager = header_manager.merge(new_manager)
 
-        self.set_property(self.HEADER_MANAGER, new_manager)
+        self.set_property(self.HEADERS, new_manager)

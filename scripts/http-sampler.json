@@ -98,7 +98,7 @@
               "HTTPSampler__keep_alive": "",
               "HTTPSampler__connect_timeout": "",
               "HTTPSampler__response_timeout": "",
-              "HTTPSampler__header_manager": {
+              "HTTPSampler__headers": {
                 "class": "HTTPHeaderManager",
                 "property": {
                   "HeaderManager__headers": [
