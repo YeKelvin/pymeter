@@ -7,10 +7,12 @@ from pymeter.utils import time_util
 
 
 class SampleResult:
+
     default_encoding = 'UTF-8'
 
     def __init__(self):
         self.parent = None
+
         self.sample_name = None
         self.sample_remark = None
 
@@ -31,7 +33,8 @@ class SampleResult:
         self.connect_time = 0
 
         self.success = True
-        self.assertion_results = []
+        self.assertions = []
+        self.sub_results = []
 
         self.request_headers_size = None
         self.request_data_size = None
@@ -41,9 +44,9 @@ class SampleResult:
         self.response_data_size = None
         self.response_size = None
 
-        self.is_stop_coroutine = False
-        self.is_stop_test = False
-        self.is_stop_test_now = False
+        self.stop_group = False
+        self.stop_test = False
+        self.stop_test_now = False
 
     @property
     def started(self):

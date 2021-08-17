@@ -6,6 +6,7 @@
 
 
 class Variables(dict):
+
     def __init__(self):
         super().__init__()
         self.iteration = 0

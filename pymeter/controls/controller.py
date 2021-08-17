@@ -15,7 +15,7 @@ class Controller(TestElement):
         raise NotImplementedError
 
     def next(self) -> Sampler:
-        """返回下一个Sampler，末尾返回None"""
+        """返回下一个 Sampler，没有下一个时返回 None"""
         raise NotImplementedError
 
     def initialize(self):

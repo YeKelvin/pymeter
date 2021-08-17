@@ -29,7 +29,7 @@ class SocketResultCollector(
     # 连接地址
     URL: Final = 'SocketResultCollector__url'
 
-    # 头部dict
+    # 请求头
     HEADERS: Final = 'SocketResultCollector__headers'
 
     # 命名空间
@@ -38,7 +38,7 @@ class SocketResultCollector(
     # 事件名称
     EVENT_NAME: Final = 'SocketResultCollector__event_name'
 
-    # 发送消息目标的sid
+    # 发送消息目标的 sid
     TARGET_SID: Final = 'SocketResultCollector__target_sid'
 
     @property
@@ -79,7 +79,7 @@ class SocketResultCollector(
         self.sio = socketio.Client(logger=debug, engineio_logger=debug)
 
     def __socket_connect(self):
-        """连接socket.io"""
+        """连接 socket.io"""
         namespace = '/'
         headers = {}
 
@@ -93,7 +93,7 @@ class SocketResultCollector(
         log.info(f'socket state:[ {self.sio.eio.state} ] sid:[ {self.sio.sid} ]')
 
     def __socket_disconnect(self):
-        """关闭socket.io"""
+        """关闭 socket.io"""
         log.info('sid:[ {self.sio.sid} ] socket start to disconnect')
         if self.sio.connected:
             # 通知前端已执行完成
@@ -103,7 +103,7 @@ class SocketResultCollector(
         self.sio.disconnect()
 
     def __emit_to_target(self, data: dict):
-        """发送消息，data自动添加转发目标的sid"""
+        """发送消息，data 自动添加转发目标的 sid"""
         data['to'] = self.target_sid
         self.sio.emit(self.event_name, data)
 
@@ -139,11 +139,8 @@ class SocketResultCollector(
             }
         })
 
-    def sample_started(self, sample) -> None:
-        pass
-
-    def sample_ended(self, sample_result) -> None:
-        if not sample_result:
+    def sample_occurred(self, result) -> None:
+        if not result:
             return
 
         group_id = self.__group_id
@@ -153,27 +150,33 @@ class SocketResultCollector(
         self.__emit_to_target({
             'groupId': group_id,
             'sampler': {
-                'samplerId': id(sample_result),
-                'samplerName': sample_result.sample_name,
-                'samplerRemark': sample_result.sample_remark,
-                'url': sample_result.request_url,
-                'request': sample_result.request_data,
-                'requestHeaders': sample_result.request_headers,
-                'response': sample_result.response_data,
-                'responseHeaders': sample_result.response_headers,
-                'responseCode': sample_result.response_code,
-                'responseMessage': sample_result.response_message,
-                'requestSize': sample_result.request_size,
-                'responseSize': sample_result.response_size,
-                'success': sample_result.success,
-                'startTime': time_util.timestamp_to_strftime(sample_result.start_time),
-                'endTime': time_util.timestamp_to_strftime(sample_result.end_time),
-                'elapsedTime': sample_result.elapsed_time,
+                'samplerId': id(result),
+                'samplerName': result.sample_name,
+                'samplerRemark': result.sample_remark,
+                'url': result.request_url,
+                'request': result.request_data,
+                'requestHeaders': result.request_headers,
+                'response': result.response_data,
+                'responseHeaders': result.response_headers,
+                'responseCode': result.response_code,
+                'responseMessage': result.response_message,
+                'requestSize': result.request_size,
+                'responseSize': result.response_size,
+                'success': result.success,
+                'startTime': time_util.timestamp_to_strftime(result.start_time),
+                'endTime': time_util.timestamp_to_strftime(result.end_time),
+                'elapsedTime': result.elapsed_time,
             }
         })
 
-        if not sample_result.success:
+        if not result.success:
             self.__emit_to_target({'groupId': group_id, 'group': {'success': False}})
 
+    def sample_started(self, sample) -> None:
+        ...
+
+    def sample_ended(self, result) -> None:
+        ...
+
     def test_iteration_start(self, controller) -> None:
-        pass
+        ...

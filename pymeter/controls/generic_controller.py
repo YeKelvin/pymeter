@@ -102,7 +102,7 @@ class GenericController(Controller):
         except NextIsNullException:
             log.debug(traceback.format_exc())
 
-        log.debug(f'下一个Sampler:[ {next_sampler} ]')
+        log.debug(f'next-sampler:[ {next_sampler} ]')
         return next_sampler
 
     def fire_iter_events(self):
@@ -114,7 +114,7 @@ class GenericController(Controller):
         log.debug(
             f'notify all LoopIterationListener to start, coroutine:[ {ContextService.get_context().coroutine_name} ]'
         )
-        log.debug(f'sub_iteration_listeners={self.sub_iteration_listeners}')
+        log.debug(f'SubIterationListeners={self.sub_iteration_listeners}')
         for listener in self.sub_iteration_listeners[::-1]:
             listener.iteration_start(self, self.iter_count)
 

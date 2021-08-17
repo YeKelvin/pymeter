@@ -12,6 +12,7 @@ log = get_logger(__name__)
 
 
 class Function:
+
     REF_KEY = '__referenceKey'
 
     @property

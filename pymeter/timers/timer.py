@@ -6,5 +6,6 @@
 
 
 class Timer:
+
     def delay(self):
         raise NotImplementedError

@@ -7,5 +7,6 @@ from pymeter.elements.element import TestElement
 
 
 class PreProcessor(TestElement):
+
     def process(self) -> None:
         raise NotImplementedError

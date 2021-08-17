@@ -22,18 +22,15 @@ log = get_logger(__name__)
 class HashTreeTraverser:
 
     def add_node(self, node, subtree) -> None:
-        """加节点时的处理
-        """
+        """加节点时的处理"""
         raise NotImplementedError
 
     def subtract_node(self) -> None:
-        """减节点时的处理（递归回溯）
-        """
+        """减节点时的处理（递归回溯）"""
         raise NotImplementedError
 
     def process_path(self) -> None:
-        """到达子叶末尾时的处理
-        """
+        """到达子叶末尾时的处理"""
         raise NotImplementedError
 
 
@@ -124,7 +121,7 @@ class SearchByClass(HashTreeTraverser):
 
 
 class TreeCloner(HashTreeTraverser):
-    """克隆HashTree，默认情况下跳过实现NoCoroutineClone的节点"""
+    """克隆 HashTree，默认情况下跳过实现 NoCoroutineClone 的节点"""
 
     def __init__(self, enable_no_clone: bool = True):
         from pymeter.engine.tree import HashTree
@@ -161,7 +158,7 @@ class TestCompiler(HashTreeTraverser):
         self.compiled_node = []
 
     def configure_sampler(self, sampler) -> SamplePackage:
-        """将ConfigTestElement合并至Sampler中"""
+        """将 ConfigTestElement 合并至 Sampler 中"""
         package = self.sampler_package_saver.get(sampler)
         sampler.clear_test_element_children()
         for config in package.configs:
@@ -196,7 +193,7 @@ class TestCompiler(HashTreeTraverser):
             return
 
         controller_level_elements = subtree.list()
-        # Controller节点储存Sampler节点和Controller节点
+        # Controller 节点储存S ampler 节点和 Controller 节点
         for element in controller_level_elements:
             log.debug(f'当前节点的子代节点:[ {element} ]')
             if isinstance(element, Sampler) or isinstance(element, Controller):
@@ -205,10 +202,10 @@ class TestCompiler(HashTreeTraverser):
             if isinstance(element, LoopIterationListener):
                 node.add_iteration_listener(element)
 
-        # 移除Controller层的非Sampler节点和非Controller节点，用于传递到子代
+        # 移除 Controller 层的非Sampler节点和非 Controller 节点，用于传递到子代
         self.__remove_samplers_and_controllers(controller_level_elements)
 
-        # 合并Group层和子代Controller层的非Sampler节点和非Controller节点
+        # 合并 Group 层和子代 Controller 层的非 Sampler 节点和非 Controller 节点
         parent_level_elements = self.group_level_elements + controller_level_elements
 
         # 递归编译子代节点
@@ -216,7 +213,7 @@ class TestCompiler(HashTreeTraverser):
         subtree.traverse(compiler)
         self.sampler_package_saver.update(compiler.sampler_package_saver)
 
-        # 存储已编译过的Controller节点，避免递归遍历下有可能产生重复编译的问题
+        # 存储已编译过的 Controller 节点，避免递归遍历下有可能产生重复编译的问题
         self.compiled_node.extend(compiler.compiled_node)
         self.compiled_node.append(node)
 

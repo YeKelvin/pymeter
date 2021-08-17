@@ -49,7 +49,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
     @done.setter
     def done(self, value: bool):
-        log.debug(f'协程:[ {ContextService.get_context().coroutine_name} ] 控制器:[ {self.name} ] done:[ {value} ]')
+        log.debug(f'协程:[ {ContextService.get_context().coroutine_name} ] 控制器:[ {self.name} ] 已完成:[ {value} ]')
         self.reset_break_loop()
         GenericController.done = value
 
@@ -72,14 +72,12 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         return super().next()
 
     def trigger_end_of_loop(self):
-        """触发循环结束
-        """
+        """触发循环结束"""
         self.reset_loop_count()
         super().trigger_end_of_loop()
 
     def end_of_loop(self) -> bool:
-        """判断循环是否结束
-        """
+        """判断循环是否结束"""
         return self.break_loop or (self.loops > self.INFINITE_LOOP_COUNT) and (self.loop_count >= self.loops)
 
     def next_is_null(self):

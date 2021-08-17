@@ -47,10 +47,10 @@ class CompoundVariable:
         results = []
         for item in self.compiled_components:
             if isinstance(item, Function):
-                log.debug(f'appending function:[ {item.REF_KEY} ] execution result')
+                log.debug(f'appending execution result from function:[ {item.REF_KEY} ]')
                 results.append(item.execute())
             elif isinstance(item, SimpleVariable):
-                log.debug(f'appending variable:[ {item.name} ] actual value')
+                log.debug(f'appending actual value from variable:[ {item.name} ]')
                 results.append(item.value)
             else:
                 results.append(item)

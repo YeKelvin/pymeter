@@ -22,7 +22,7 @@ class Time(Function):
         self.format = None
 
     def execute(self):
-        log.debug(f'{self.REF_KEY} start execute')
+        log.debug(f'start execute function:[ {self.REF_KEY} ]')
         timestamp = time.time()
         result = str(int(timestamp * 1000))
 
@@ -33,7 +33,7 @@ class Time(Function):
             result = time.strftime(time_format, struct_time)
 
         if self.var_name:
-            # 存在 var_name时放入本地变量中
+            # 存在 var_name 时放入本地变量中
             var_name = self.var_name.execute().strip()
             self.variables.put(var_name, result)
 

@@ -14,6 +14,7 @@ log = get_logger(__name__)
 
 
 class Random(Function):
+
     REF_KEY: Final = '__Random'
 
     def __init__(self):
@@ -23,14 +24,14 @@ class Random(Function):
         self.maximum = None
 
     def execute(self):
-        log.debug(f'{self.REF_KEY} start execute')
+        log.debug(f'start execute function:[ {self.REF_KEY} ]')
         minimum = int(self.minimum.execute().strip())
         maximum = int(self.maximum.execute().strip())
 
         result = random.randint(minimum, maximum)
 
         if self.var_name:
-            # 存在 var_name时放入本地变量中
+            # 存在 var_name 时放入本地变量中
             var_name = self.var_name.execute().strip()
             self.variables.put(var_name, result)
 

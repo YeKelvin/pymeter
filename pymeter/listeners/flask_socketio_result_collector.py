@@ -30,13 +30,13 @@ class FlaskSocketIOResultCollector(
     # 事件名称
     EVENT_NAME: Final = 'FlaskSocketIOResultCollector__event_name'
 
-    # 发送消息目标的sid
+    # 发送消息目标的 sid
     TARGET_SID: Final = 'FlaskSocketIOResultCollector__target_sid'
 
-    # Flask-SocketIO实例所在的模块路径
+    # Flask-SocketIO 实例所在的模块路径
     FLASK_SIO_INSTANCE_MODULE: Final = 'FlaskSocketIOResultCollector__flask_sio_instance_module'
 
-    # Flask-SocketIO实例的名称
+    # Flask-SocketIO 实例的名称
     FLASK_SIO_INSTANCE_NAME: Final = 'FlaskSocketIOResultCollector__flask_sio_instance_name'
 
     @property
@@ -118,13 +118,9 @@ class FlaskSocketIOResultCollector(
             }
         })
 
-    def sample_started(self, sample) -> None:
+    def sample_occurred(self, result) -> None:
         """@override"""
-        pass
-
-    def sample_ended(self, sample_result) -> None:
-        """@override"""
-        if not sample_result:
+        if not result:
             return
 
         group_id = self.group_id
@@ -132,27 +128,35 @@ class FlaskSocketIOResultCollector(
         self.emit_to_target({
             'groupId': group_id,
             'sampler': {
-                'samplerId': id(sample_result),
-                'samplerName': sample_result.sample_name,
-                'samplerRemark': sample_result.sample_remark,
-                'url': sample_result.request_url,
-                'request': sample_result.request_data,
-                'requestHeaders': sample_result.request_headers,
-                'response': sample_result.response_data,
-                'responseHeaders': sample_result.response_headers,
-                'responseCode': sample_result.response_code,
-                'responseMessage': sample_result.response_message,
-                'requestSize': sample_result.request_size,
-                'responseSize': sample_result.response_size,
-                'success': sample_result.success,
-                'startTime': time_util.timestamp_to_strftime(sample_result.start_time),
-                'endTime': time_util.timestamp_to_strftime(sample_result.end_time),
-                'elapsedTime': sample_result.elapsed_time,
+                'samplerId': id(result),
+                'samplerName': result.sample_name,
+                'samplerRemark': result.sample_remark,
+                'url': result.request_url,
+                'request': result.request_data,
+                'requestHeaders': result.request_headers,
+                'response': result.response_data,
+                'responseHeaders': result.response_headers,
+                'responseCode': result.response_code,
+                'responseMessage': result.response_message,
+                'requestSize': result.request_size,
+                'responseSize': result.response_size,
+                'success': result.success,
+                'startTime': time_util.timestamp_to_strftime(result.start_time),
+                'endTime': time_util.timestamp_to_strftime(result.end_time),
+                'elapsedTime': result.elapsed_time,
             }
         })
 
-        if not sample_result.success:
+        if not result.success:
             self.emit_to_target({'groupId': group_id, 'group': {'success': False}})
 
+    def sample_started(self, sample) -> None:
+        """@override"""
+        ...
+
+    def sample_ended(self, result) -> None:
+        """@override"""
+        ...
+
     def test_iteration_start(self, controller) -> None:
-        pass
+        ...

@@ -169,7 +169,7 @@ class StandardEngine(Greenlet):
             # 把collection层一级子代的节点（非TestGroup节点）添加至 group层
             group_tree = group_searcher.get_subtree(group)
             group_tree.add_key_and_subkeys(group, collection_level_elements)
-            log.info(f'TestGroup {group_name} 启动 {number_groups} 个协程')
+            log.info(f'TestGroup:[ {group_name} ] 启动 {number_groups} 个协程')
 
             # 存储当前TestGroup，用于后续管理协程（启动、停止或循环）
             self.groups.append(group)

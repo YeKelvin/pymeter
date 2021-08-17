@@ -16,6 +16,7 @@ log = get_logger(__name__)
 
 
 class CoroutineContext:
+
     def __init__(self):
         self.variables = Variables()
         self.coroutine = None
@@ -47,6 +48,7 @@ class CoroutineContext:
 
 
 class EngineContext:
+
     def __init__(self):
         self.test_start = 0
         self.number_of_active_coroutine = 0
@@ -92,16 +94,14 @@ class ContextService:
 
     @classmethod
     def incr_number_of_coroutines(cls, engine_id=None):
-        """增加活动线程的数量
-        """
+        """增加活动线程的数量"""
         engine_ctx = cls.__get_engine_context(engine_id)
         engine_ctx.number_of_active_coroutine += 1
         engine_ctx.number_of_coroutines_started += 1
 
     @classmethod
     def decr_number_of_coroutines(cls, engine_id=None):
-        """减少活动线程的数量
-        """
+        """减少活动线程的数量"""
         engine_ctx = cls.__get_engine_context(engine_id)
         engine_ctx.number_of_active_coroutine -= 1
         engine_ctx.number_of_coroutines_finished += 1

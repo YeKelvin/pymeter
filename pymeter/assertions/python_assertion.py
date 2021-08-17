@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : python_assertion.py.py
+# @File    : python_assertion.py
 # @Time    : 2020/2/17 16:39
 # @Author  : Kelvin.Ye
-import traceback
 from typing import Final
 
 from pymeter.assertions.assertion import Assertion
@@ -26,22 +25,37 @@ class PythonAssertion(Assertion):
     def script(self) -> str:
         return self.get_property_as_str(self.SCRIPT)
 
-    def get_result(self, result: SampleResult) -> AssertionResult:
-        try:
-            ctx = ContextService.get_context()
-            props = GlobalUtils.get_properties()
-            local_vars = {
-                'log': log,
-                'ctx': ctx,
-                'vars': ctx.variables,
-                'props': props,
-                'prev': ctx.previous_result,
-                'result': result,
-                'failure': False,
-                'failure_msg': ''
-            }
-            # setStopThread(boolean)
-            # setStopTest(boolean)
-            exec(self.script, {}, local_vars)
-        except Exception:
-            log.error(traceback.format_exc())
+    def get_result(self, response: SampleResult) -> AssertionResult:
+        result = AssertionResult(self.name)
+
+        ctx = ContextService.get_context()
+        props = GlobalUtils.get_properties()
+
+        # 定义局部变量
+        local_vars = {
+            'log': log,
+            'ctx': ctx,
+            'vars': ctx.variables,
+            'props': props,
+            'prev': ctx.previous_result,
+            'result': response,
+            'failure': not response.success,
+            'message': None,
+            'stop_group': response.stop_group,
+            'stop_test': response.stop_test,
+            'stop_test_now': response.stop_test_now
+        }
+
+        # 执行脚本
+        exec(self.script, {}, local_vars)
+
+        # 更新断言结果
+        result.failure = local_vars['failure']
+        result.message = local_vars['message']
+
+        # 更新 SamplerResult
+        response.stop_group = local_vars['stop_group']
+        response.stop_test = local_vars['stop_test']
+        response.stop_test_now = local_vars['stop_test_now']
+
+        return result

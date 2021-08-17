@@ -16,6 +16,7 @@ log = get_logger(__name__)
 
 
 class SamplePackage:
+
     def __init__(self):
         self.configs = []
         self.pre_processors = []

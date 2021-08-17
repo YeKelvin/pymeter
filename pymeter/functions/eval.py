@@ -21,7 +21,7 @@ class Eval(Function):
         self.parameter = None
 
     def execute(self):
-        log.debug(f'{self.REF_KEY} start execute')
+        log.debug(f'start execute function:[ {self.REF_KEY} ]')
         parameter = self.parameter.execute().strip()
         # TODO: 待优化，解决循环引用
         return value_parser.CompoundVariable(parameter).execute().strip()
