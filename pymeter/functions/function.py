@@ -22,25 +22,25 @@ class Function:
     def execute(self):
         raise NotImplementedError
 
-    def set_parameters(self, parameters: list):
+    def set_parameters(self, params: list):
         raise NotImplementedError
 
-    def check_parameter_count(self, parameters: list, count: int) -> None:
-        num = len(parameters)
+    def check_parameter_count(self, params: list, count: int) -> None:
+        num = len(params)
         if num != count:
             raise InvalidVariableException(
                 f'{self.REF_KEY} called with wrong number of parameters. Actual: {num}. Expected: {count}.'
             )
 
-    def check_parameter_min(self, parameters: list, minimum: int) -> None:
-        num = len(parameters)
+    def check_parameter_min(self, params: list, minimum: int) -> None:
+        num = len(params)
         if num < minimum:
             raise InvalidVariableException(
                 f'{self.REF_KEY} called with wrong number of parameters. Actual: {num}. Expected at least: {minimum}.'
             )
 
-    def check_parameter_max(self, parameters: list, maximum: int = None) -> None:
-        num = len(parameters)
+    def check_parameter_max(self, params: list, maximum: int = None) -> None:
+        num = len(params)
         if num > maximum:
             raise InvalidVariableException(
                 f'{self.REF_KEY} called with wrong number of parameters. Actual: {num}. Expected at most: {maximum}.'

@@ -26,6 +26,6 @@ class Eval(Function):
         # TODO: 待优化，解决循环引用
         return value_parser.CompoundVariable(parameter).execute().strip()
 
-    def set_parameters(self, parameters: list):
+    def set_parameters(self, params: list):
         log.debug(f'{self.REF_KEY} start to set parameters')
-        self.parameter = parameters[0]
+        self.parameter = params[0]

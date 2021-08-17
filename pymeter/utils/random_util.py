@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : randoms.py
-# @Time    : 2020/2/21 11:18
+# @File    : random_util.py
+# @Time    : 2021-08-17 19:21:59
 # @Author  : Kelvin.Ye
 import random
 import time

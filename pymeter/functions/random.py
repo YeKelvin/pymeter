@@ -7,6 +7,7 @@ import random
 from typing import Final
 
 from pymeter.functions.function import Function
+from pymeter.utils import random_util
 from pymeter.utils.log_util import get_logger
 
 
@@ -18,31 +19,38 @@ class Random(Function):
     REF_KEY: Final = '__Random'
 
     def __init__(self):
-        self.var_name = None
         self.length = None
         self.minimum = None
         self.maximum = None
+        self.params_count = 0
 
     def execute(self):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
-        minimum = int(self.minimum.execute().strip())
-        maximum = int(self.maximum.execute().strip())
 
-        result = random.randint(minimum, maximum)
+        if self.params_count == 1:
+            length = int(self.length.execute().strip())
+            result = random_util.get_number(length)
+            log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
+            return result
 
-        if self.var_name:
-            # 存在 var_name 时放入本地变量中
-            var_name = self.var_name.execute().strip()
-            self.variables.put(var_name, result)
+        if self.params_count == 2:
+            minimum = int(self.minimum.execute().strip())
+            maximum = int(self.maximum.execute().strip())
+            result = str(random.randint(minimum, maximum))
+            log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
+            return result
 
-        return str(result)
+    def set_parameters(self, params: list):
+        log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
-    def set_parameters(self, parameters: list):
-        log.debug(f'{self.REF_KEY} start to set parameters')
+        self.check_parameter_min(params, 1)
+        self.check_parameter_max(params, 2)
 
-        # TODO: 添加参数个数校验
+        self.params_count = len(params)
 
-        self.minimum = parameters[0]
-        self.maximum = parameters[1]
-        if len(parameters) > 2:
-            self.var_name = parameters[2]
+        if self.params_count == 1:
+            self.length = params[0]
+
+        if self.params_count == 2:
+            self.minimum = params[0]
+            self.maximum = params[1]
