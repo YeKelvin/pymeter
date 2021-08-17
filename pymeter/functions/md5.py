@@ -13,7 +13,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class Random(Function):
+class MD5(Function):
 
     REF_KEY: Final = '__MD5'
 

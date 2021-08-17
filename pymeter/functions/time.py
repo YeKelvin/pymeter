@@ -34,10 +34,14 @@ class Time(Function):
 
         result = str(int(timestamp * 1000))
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
+
         return result
 
     def set_parameters(self, params: list):
         log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
+
+        self.check_parameter_min(params, 0)
+        self.check_parameter_max(params, 1)
 
         if len(params) > 0:
             self.format = params[0]
