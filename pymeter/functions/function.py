@@ -19,6 +19,14 @@ class Function:
     def variables(self):
         return ContextService.get_context().variables
 
+    @property
+    def previous_result(self):
+        return ContextService.get_context().previous_result
+
+    @property
+    def current_sampler(self):
+        return ContextService.get_context().current_sampler
+
     def execute(self):
         raise NotImplementedError
 
