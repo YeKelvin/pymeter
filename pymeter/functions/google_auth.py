@@ -24,6 +24,7 @@ class GoogleAuth(Function):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         secret_key = self.secret_key.execute().strip()
+
         result = str(GoogleAuthenticate.get_code(secret_key))
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
@@ -35,4 +36,4 @@ class GoogleAuth(Function):
         # 校验函数参数个数
         self.check_parameter_count(params, 1)
 
-        self.secretkey = params[0]
+        self.secret_key = params[0]
