@@ -3,7 +3,9 @@
 # @File    : http_config.py
 # @Time    : 2020/2/17 15:41
 # @Author  : Kelvin.Ye
+from pymeter.common.exceptions import HttpHeaderDuplicateException
 from typing import List
+from typing import Optional
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
@@ -53,13 +55,13 @@ class HTTPHeaderManager(ConfigTestElement):
         self.add_property(self.HEADERS, [])
 
     @property
-    def headers(self) -> List[HTTPHeader]:
+    def headers_as_list(self) -> List[HTTPHeader]:
         return self.get_property(self.HEADERS).get_obj()
 
     @property
     def headers_as_dict(self) -> dict:
         headers = {}
-        for header in self.headers:
+        for header in self.headers_as_list:
             headers[header.name] = header.value
         return headers
 
@@ -70,15 +72,36 @@ class HTTPHeaderManager(ConfigTestElement):
         merged_manager = self.clone()  # type: HTTPHeaderManager
         new_manager = el  # type: HTTPHeaderManager
 
-        for new_header in new_manager.headers:
+        for new_header in new_manager.headers_as_list:
             found = False
-            for merged_header in merged_manager.headers:
+            for merged_header in merged_manager.headers_as_list:
                 if merged_header.name.lower() == new_header.name.lower():
                     found = True
 
             if found:
                 merged_header.update(new_header)
             else:
-                merged_manager.headers.append(new_header)
+                merged_manager.headers_as_list.append(new_header)
 
         return merged_manager
+
+    def get_header(self, name: str) -> Optional[HTTPHeader]:
+        for header in self.headers_as_list:
+            if header.name.lower() == name.lower():
+                return header
+        return None
+
+    def has_header(self, name: str) -> bool:
+        for header in self.headers_as_list:
+            if header.name.lower() == name.lower():
+                return True
+        return False
+
+    def add_header(self, name: str, value: str) -> None:
+        if self.has_header(name):
+            raise HttpHeaderDuplicateException(f'header:[ {name} ] 已存在同名')
+
+        header = HTTPHeader()
+        header.name = name
+        header.value = value
+        self.headers_as_list.append(header)

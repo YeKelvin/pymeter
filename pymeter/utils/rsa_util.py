@@ -20,7 +20,7 @@ def encrypt_by_public_key(plaintext, public_key):
     """
     rsakey = RSA.importKey(public_key)
     cipher = PKCS1_v1_5.new(rsakey)
-    ciphertext = base64.b64encode(cipher.encrypt(plaintext))
+    ciphertext = base64.b64encode(cipher.encrypt(plaintext.encode(encoding='UTF-8')))
     return ciphertext
 
 

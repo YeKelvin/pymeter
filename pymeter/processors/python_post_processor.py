@@ -20,6 +20,10 @@ class PythonPostProcessor(PostProcessor):
     # 脚本内容
     SCRIPT: Final = 'PythonPostProcessor__script'
 
+    @property
+    def script(self) -> str:
+        return self.get_property_as_str(self.SCRIPT)
+
     def process(self) -> None:
         try:
             ctx = ContextService.get_context()
@@ -29,7 +33,7 @@ class PythonPostProcessor(PostProcessor):
                 'ctx': ctx,
                 'vars': ctx.variables,
                 'props': props,
-                'prev': ctx.previous_result
+                'result': ctx.previous_result
             }
             exec(self.script, {}, local_vars)
         except Exception:

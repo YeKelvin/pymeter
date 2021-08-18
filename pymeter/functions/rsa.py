@@ -16,6 +16,8 @@ log = get_logger(__name__)
 class RSA(Function):
 
     REF_KEY: Final = '__RSA'
+    PUBLIC_KEY_PREFIX = '-----BEGIN RSA PUBLIC KEY-----\n'
+    PUBLIC_KEY_SUFFIX = '\n-----END RSA PUBLIC KEY-----'
 
     def __init__(self):
         self.plaintext = None
@@ -25,9 +27,16 @@ class RSA(Function):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
-        public_key = self.plaintext.execute().strip()
+        public_key = self.public_key.execute().strip()
 
-        result = rsa_util.encrypt_by_public_key(plaintext, public_key)
+        if not public_key.startswith(RSA.PUBLIC_KEY_PREFIX):
+            public_key = RSA.PUBLIC_KEY_PREFIX + public_key
+
+        if not public_key.endswith(RSA.PUBLIC_KEY_SUFFIX):
+            public_key = public_key + RSA.PUBLIC_KEY_SUFFIX
+
+        log.debug(f'public_key={public_key}')
+        result = rsa_util.encrypt_by_public_key(plaintext, public_key).decode(encoding='UTF-8')
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
         return result

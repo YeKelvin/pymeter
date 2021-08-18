@@ -43,3 +43,7 @@ class ProjectBaseDirectoryNotFoundException(Exception):
 
 class UnsupportedOperationException(Exception):
     ...
+
+
+class HttpHeaderDuplicateException(Exception):
+    ...

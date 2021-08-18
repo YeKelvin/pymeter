@@ -3,7 +3,14 @@
 # @File    : sample_result.py
 # @Time    : 2020/1/24 23:35
 # @Author  : Kelvin.Ye
+import traceback
+
 from pymeter.utils import time_util
+from pymeter.utils.json_util import from_json
+from pymeter.utils.log_util import get_logger
+
+
+log = get_logger(__name__)
 
 
 class SampleResult:
@@ -47,6 +54,15 @@ class SampleResult:
         self.stop_group = False
         self.stop_test = False
         self.stop_test_now = False
+
+    @property
+    def json(self):
+        try:
+            obj = from_json(self.response_data)
+            return obj
+        except Exception:
+            log.error(traceback.format_exc())
+            return None
 
     @property
     def started(self):

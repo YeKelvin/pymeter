@@ -11,6 +11,6 @@ def to_json(obj: dict or list) -> str:
     return orjson.dumps(obj)
 
 
-def from_json(content: str) -> any:
+def from_json(json: str) -> any:
     """反序列化"""
-    return orjson.loads(content)
+    return orjson.loads(json)
