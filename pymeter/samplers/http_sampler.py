@@ -162,15 +162,18 @@ class HTTPSampler(Sampler):
         return self.connect_timeout or 0, self.response_timeout or 0
 
     def get_payload(self, full_url):
-        url = f'{self.method} {full_url}\n\n'
+        url = f'{self.method} {full_url}'
         payload = ''
 
         if self.params:
-            for name, value in self.params.items():
-                payload = payload + f'{name}={value}\n'
+            if self.params:
+                payload = '\n\n'
+                for name, value in self.params.items():
+                    payload = payload + f'{name}={value}\n'
+                payload = payload[:-1]
 
         if self.data:
-            payload = f'{self.data}\n'
+            payload = f'\n\n{self.data}'
 
         return url + payload
 
