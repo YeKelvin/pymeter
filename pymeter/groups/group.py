@@ -640,3 +640,11 @@ class Coroutine(Greenlet):
 
         def iteration_start(self, source, iter_count) -> None:
             self.parent._notify_test_iteration_listeners()
+
+
+class SetupThreadGroup(TestGroup):
+    ...
+
+
+class TearDownThreadGroup(TestGroup):
+    ...

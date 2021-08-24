@@ -23,8 +23,10 @@ __MODULE_PATH__ = {
     # 测试集合
     'TestCollection': 'pymeter.engine.collection',
 
-    # TestGroup
+    # 测试分组
+    'SetupThreadGroup': 'pymeter.groups.group',
     'TestGroup': 'pymeter.groups.group',
+    'TearDownThreadGroup': 'pymeter.groups.group',
 
     # 断言器
     'JsonPathAssertion': 'pymeter.assertions.json_path_assertion',
