@@ -42,6 +42,7 @@ __MODULE_PATH__ = {
     # 逻辑控制器
     'LoopController': 'pymeter.controls.loop_controller',
     'IfController': 'pymeter.controls.if_controller',
+    'TransactionController': 'pymeter.controls.transaction_controller',
 
     # 前置处理器
     'PythonPreProcessor': 'pymeter.processors.python_pre_processor',

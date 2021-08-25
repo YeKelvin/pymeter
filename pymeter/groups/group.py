@@ -418,17 +418,26 @@ class Coroutine(Greenlet):
             # 错误时开始下一个 TestGroup 循环
             if self.on_error_start_next_coroutine_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next continue loop')
-                self.__continue_on_coroutine_loop()
+                # self.__continue_on_coroutine_loop()
+                self.trigger_loop_logical_action_on_parent_controllers(
+                    sampler, context, self.__continue_on_coroutine_loop
+                )
 
             # 错误时开始下一个当前控制器循环
             elif self.on_error_start_next_current_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next current loop')
-                self.__continue_on_current_loop(sampler)
+                # self.__continue_on_current_loop(sampler)
+                self.trigger_loop_logical_action_on_parent_controllers(
+                    sampler, context, self.__continue_on_current_loop
+                )
 
             # 错误时中断当前控制器循环
             elif self.on_error_break_current_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, breaking current loop')
-                self.__break_on_current_loop(sampler)
+                # self.__break_on_current_loop(sampler)
+                self.trigger_loop_logical_action_on_parent_controllers(
+                    sampler, context, self.__break_on_current_loop
+                )
 
             # 错误时停止协程
             elif self.on_error_stop_coroutine_group:
@@ -461,6 +470,8 @@ class Coroutine(Greenlet):
         # Find parent controllers of current sampler
         path_to_root_traverser = FindTestElementsUpToRootTraverser(real_sampler)
         self.group_tree.traverse(path_to_root_traverser)
+
+        action(path_to_root_traverser)
 
         # When using Start Next Loop option combined to TransactionController.
         # if an error occurs in a Sample (child of TransactionController)
@@ -520,10 +531,7 @@ class Coroutine(Greenlet):
         return transaction_result
 
     def __execute_sample_package(
-        self,
-        sampler: Sampler,
-        transaction_sampler: TransactionSampler,
-        transaction_package: SamplePackage,
+        self, sampler: Sampler, transaction_sampler: TransactionSampler, transaction_package: SamplePackage,
         context: CoroutineContext
     ) -> None:
         """根据Sampler的子代执行Sampler"""
@@ -617,10 +625,7 @@ class Coroutine(Greenlet):
         return result
 
     def get_sample_listeners(
-        self,
-        sample_package: SamplePackage,
-        transaction_package: SamplePackage,
-        transaction_sampler: TransactionSampler
+        self, sample_package: SamplePackage, transaction_package: SamplePackage, transaction_sampler: TransactionSampler
     ) -> List[SampleListener]:
         sampler_listeners = sample_package.listeners
         # Do not send subsamples to listeners which receive the transaction sample
@@ -676,15 +681,29 @@ class Coroutine(Greenlet):
             result.success = result.success and not (assertion_result.error or assertion_result.failure)
             result.assertions.append(assertion_result)
 
-    def __continue_on_coroutine_loop(self) -> None:
-        """Sampler 失败时，继续 TestGroup 控制器的循环"""
-        self.test_group_controller.start_next_loop()
+    def __continue_on_coroutine_loop(self, path_to_root_traverser) -> None:
+        """Sampler 失败时，继续 TestGroup 控制器的循环
 
-    def __continue_on_current_loop(self, sampler: Sampler) -> None:
+        Executes a restart of Thread loop, equivalent of "continue" in algorithm but on Thread Loop.
+        As a consequence it ends all loop on the path to root
+        """
+        # 改造前
+        # self.test_group_controller.start_next_loop()
+        # 改造后
+        controllers_to_reinit = path_to_root_traverser.get_controllers_to_root()
+        for parent_controller in controllers_to_reinit:
+            if isinstance(parent_controller, TestGroup):
+                parent_controller.start_next_loop()
+            else:
+                parent_controller.trigger_end_of_loop()
+
+    def __continue_on_current_loop(self, path_to_root_traverser) -> None:
         """Sampler 失败时，继续 Sampler 的父控制器循环"""
-        parent_controllers = self.__get_parent_controllers(sampler)
-
-        for parent_controller in parent_controllers:
+        # 改造前
+        # parent_controllers = self.__get_parent_controllers(sampler)
+        # 改造后
+        controllers_to_reinit = path_to_root_traverser.get_controllers_to_root()
+        for parent_controller in controllers_to_reinit:
             if isinstance(parent_controller, TestGroup):
                 parent_controller.start_next_loop()
             elif isinstance(parent_controller, IteratingController):
@@ -693,11 +712,13 @@ class Coroutine(Greenlet):
             else:
                 parent_controller.trigger_end_of_loop()
 
-    def __break_on_current_loop(self, sampler: Sampler) -> None:
+    def __break_on_current_loop(self, path_to_root_traverser) -> None:
         """Sampler 失败时，中断 Sampler 的父控制器循环"""
-        parent_controllers = self.__get_parent_controllers(sampler)
-
-        for parent_controller in parent_controllers:
+        # 改造前
+        # parent_controllers = self.__get_parent_controllers(sampler)
+        # 改造后
+        controllers_to_reinit = path_to_root_traverser.get_controllers_to_root()
+        for parent_controller in controllers_to_reinit:
             if isinstance(parent_controller, TestGroup):
                 parent_controller.break_loop()
             elif isinstance(parent_controller, IteratingController):

@@ -44,7 +44,7 @@
           "TestGroup__main_controller": {
             "class": "LoopController",
             "property": {
-              "LoopController__loops": "1",
+              "LoopController__loops": "2",
               "LoopController__continue_forever": "false"
             }
           }
@@ -113,6 +113,62 @@
               }
             },
             "children": null
+          },
+          {
+            "name": "transaction",
+            "remark": "",
+            "class": "TransactionController",
+            "enabled": true,
+            "property": {},
+            "children": [
+              {
+                "name": "http/get",
+                "remark": "描述",
+                "class": "HTTPSampler",
+                "enabled": true,
+                "property": {
+                  "HTTPSampler__url": "https://httpbin.org/get",
+                  "HTTPSampler__method": "GET",
+                  "HTTPSampler__params": {
+                    "class": "Arguments",
+                    "property": {
+                      "Arguments__arguments": [
+                        {
+                          "class": "Argument",
+                          "property": {
+                            "Argument__name": "aurthor",
+                            "Argument__value": "${aurthor}",
+                            "Argument__desc": "desc"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "HTTPSampler__data": "",
+                  "HTTPSampler__form": "",
+                  "HTTPSampler__files": "",
+                  "HTTPSampler__encoding": "UTF-8",
+                  "HTTPSampler__allow_redirects": "",
+                  "HTTPSampler__connect_timeout": "",
+                  "HTTPSampler__response_timeout": "",
+                  "HTTPSampler__headers": {
+                    "class": "HTTPHeaderManager",
+                    "property": {
+                      "HeaderManager__headers": [
+                        {
+                          "class": "HTTPHeader",
+                          "property": {
+                            "Header__name": "header-name-from-sampler",
+                            "Header__value": "header-value-from-sampler"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "children": null
+              }
+            ]
           }
         ]
       }
