@@ -3,16 +3,20 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
+import collections
 from typing import Dict
+from typing import List
 
 from pymeter.controls.controller import Controller
 from pymeter.controls.generic_controller import GenericController
+from pymeter.controls.transaction_controller import TransactionController
 from pymeter.elements.element import TestElement
 from pymeter.elements.interface import NoConfigMerge
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.groups.interface import NoCoroutineClone
 from pymeter.groups.package import SamplePackage
 from pymeter.samplers.sampler import Sampler
+from pymeter.samplers.transaction_sampler import TransactionSampler
 from pymeter.utils.log_util import get_logger
 
 
@@ -154,23 +158,29 @@ class TestCompiler(HashTreeTraverser):
 
     def __init__(self, group_level_elements: list):
         self.group_level_elements = group_level_elements
-        self.sampler_package_saver: Dict[Sampler, SamplePackage] = {}
+        self.sampler_package_saver: Dict[Sampler, SamplePackage] = {}  # samplerConfigMap
+        self.transaction_sampler_package_saver: Dict[TransactionController, SamplePackage] = {}  # transactionControllerConfigMap
         self.compiled_node = []
 
     def configure_sampler(self, sampler) -> SamplePackage:
-        """将 ConfigTestElement 合并至 Sampler 中"""
         package = self.sampler_package_saver.get(sampler)
-        sampler.clear_test_element_children()
-        for config in package.configs:
-            if not isinstance(config, NoConfigMerge):
-                sampler.add_test_element(config)
+        package.sampler = sampler
+        self.__configure_with_config_elements(sampler, package.configs)
+        return package
+
+    def configure_transaction_sampler(self, transaction_sampler: TransactionSampler) -> SamplePackage:
+        controller = transaction_sampler.transaction_controller
+        package = self.transaction_sampler_package_saver.get(controller)
+        package.sampler = transaction_sampler
         return package
 
     def add_node(self, node, subtree) -> None:
         log.debug(f'开始编译节点:[ {node} ]')
         if isinstance(node, Sampler):
             self.__save_sampler_package(node, subtree)
-        if isinstance(node, Controller):
+        elif isinstance(node, TransactionController):
+            self.__save_transaction_controller_package(node, subtree)
+        elif isinstance(node, Controller):
             self.__compile_controller(node, subtree)
 
     def subtract_node(self) -> None:
@@ -179,30 +189,42 @@ class TestCompiler(HashTreeTraverser):
     def process_path(self) -> None:
         pass
 
-    def __save_sampler_package(self, node, subtree):
-        sample_package = SamplePackage()
-        # 存储Sampler的子节点
-        sample_package.add(subtree.list())
-        # 存储Group层的非Group节点添加至Sampler节点下
-        sample_package.add(self.group_level_elements)
+    def __configure_with_config_elements(self, sampler: Sampler, configs: list):
+        sampler.clear_test_element_children()
+        for config in configs:
+            if not isinstance(config, NoConfigMerge):
+                sampler.add_test_element(config)
+
+    def __save_sampler_package(self, node: Sampler, subtree):
+        sample_package = SamplePackage(node)
+        # 存储 Sampler 的子节点
+        sample_package.save_sampler(subtree.list())
+        # 存储 Group 层的非 Group 节点添加至 Sampler 节点下
+        sample_package.save_sampler(self.group_level_elements)
         self.sampler_package_saver[node] = sample_package
+
+    def __save_transaction_controller_package(self, node: TransactionController, subtree):
+        sample_package = SamplePackage(TransactionController(node, node.name))
+        # 存储 TransactionControlle 的子节点
+        sample_package.save_transaction_controller(subtree.list())
+        self.transaction_sampler_package_saver[node] = sample_package
 
     def __compile_controller(self, node, subtree):
         if node in self.compiled_node:
-            log.debug(f'当前节点已完成编译，无需再次编译，当前节点:[ {node} ]')
+            log.debug(f'节点:[ {node} ]已完成编译，无需再次编译')
             return
 
         controller_level_elements = subtree.list()
-        # Controller 节点储存S ampler 节点和 Controller 节点
+        # Controller 节点储存 Sampler 节点和 Controller 节点
         for element in controller_level_elements:
-            log.debug(f'当前节点的子代节点:[ {element} ]')
+            log.debug(f'节点:[ {node} ]的子代节点:[ {element} ]')
             if isinstance(element, Sampler) or isinstance(element, Controller):
                 node.add_test_element(element)
 
             if isinstance(element, LoopIterationListener):
                 node.add_iteration_listener(element)
 
-        # 移除 Controller 层的非Sampler节点和非 Controller 节点，用于传递到子代
+        # 移除 Controller 层的非 Sampler 节点和非 Controller 节点，用于传递到子代
         self.__remove_samplers_and_controllers(controller_level_elements)
 
         # 合并 Group 层和子代 Controller 层的非 Sampler 节点和非 Controller 节点
@@ -212,6 +234,7 @@ class TestCompiler(HashTreeTraverser):
         compiler = TestCompiler(parent_level_elements)
         subtree.traverse(compiler)
         self.sampler_package_saver.update(compiler.sampler_package_saver)
+        self.transaction_sampler_package_saver.update(compiler.transaction_sampler_package_saver)
 
         # 存储已编译过的 Controller 节点，避免递归遍历下有可能产生重复编译的问题
         self.compiled_node.extend(compiler.compiled_node)
@@ -260,3 +283,40 @@ class FindTestElementsUpToRoot(HashTreeTraverser):
 
     def process_path(self) -> None:
         pass
+
+
+class FindTestElementsUpToRootTraverser(HashTreeTraverser):
+
+    def __init__(self, node_to_find: object):
+        self.stack = collections.deque()
+        self.node_to_find = node_to_find
+        self.stop_recording = False
+
+    def add_node(self, node, subtree):
+        if self.stop_recording:
+            return
+
+        if node is self.node_to_find:
+            self.stop_recording = True
+
+        self.stack.append(node)
+
+    def subtract_node(self):
+        if self.stop_recording:
+            return
+
+        log.debug(f'Subtracting node, stack size = {len(self.stack)}')
+
+        self.stack.pop()
+
+    def get_controllers_to_root() -> List[Controller]:
+        result = []
+        stack_copy = collections.deque()
+        while len(stack_copy) > 0:
+            element = stack_copy[-1]
+            if isinstance(element, Controller):
+                result.add(element)
+
+            stack_copy.pop()
+
+        return result

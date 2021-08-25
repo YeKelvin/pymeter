@@ -20,18 +20,22 @@ from pymeter.controls.controller import Controller
 from pymeter.controls.controller import IteratingController
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
+from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.engine.traverser import FindTestElementsUpToRoot
+from pymeter.engine.traverser import FindTestElementsUpToRootTraverser
 from pymeter.engine.traverser import SearchByClass
 from pymeter.engine.traverser import TestCompiler
 from pymeter.engine.traverser import TreeCloner
 from pymeter.engine.tree import HashTree
 from pymeter.groups.context import ContextService
 from pymeter.groups.context import CoroutineContext
+from pymeter.groups.package import SamplePackage
 from pymeter.groups.variables import Variables
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
+from pymeter.samplers.transaction_sampler import TransactionSampler
 from pymeter.utils.log_util import get_logger
 
 
@@ -46,22 +50,22 @@ class LogicalAction(Enum):
     CONTINUE = 'continue'
 
     # 错误时开始下一个协程控制器的循环
-    START_NEXT_COROUTINE_LOOP = 'start_next_coroutine_loop'
+    START_NEXT_ITERATION_OF_COROUTINE = 'start_next_coroutine'
 
     # 错误时开始下一个当前控制器（协程控制器或子代控制器）的循环
-    START_NEXT_CURRENT_LOOP = 'start_next_current_loop'
+    START_NEXT_ITERATION_OF_CURRENT_LOOP = 'start_next_current_loop'
 
     # 错误时中断当前控制器的循环
     BREAK_CURRENT_LOOP = 'break_current_loop'
 
     # 错误时停止协程
-    STOP_COROUTINE_GROUP = 'stop_coroutine_group'
+    STOP_TEST_GROUP = 'stop_test_group'
 
     # 错误时停止测试执行
     STOP_TEST = 'stop_test'
 
     # 错误时立即停止测试执行（中断协程）
-    STOPTEST_NOW = 'stop_test_now'
+    STOP_TEST_NOW = 'stop_test_now'
 
 
 class TestGroup(Controller):
@@ -102,12 +106,12 @@ class TestGroup(Controller):
         return self.on_sample_error == LogicalAction.CONTINUE.value
 
     @property
-    def on_error_start_next_coroutine_loop(self) -> bool:
-        return self.on_sample_error == LogicalAction.START_NEXT_COROUTINE_LOOP.value
+    def on_error_start_next_coroutine(self) -> bool:
+        return self.on_sample_error == LogicalAction.START_NEXT_ITERATION_OF_COROUTINE.value
 
     @property
     def on_error_start_next_current_loop(self) -> bool:
-        return self.on_sample_error == LogicalAction.START_NEXT_CURRENT_LOOP.value
+        return self.on_sample_error == LogicalAction.START_NEXT_ITERATION_OF_CURRENT_LOOP.value
 
     @property
     def on_error_break_current_loop(self) -> bool:
@@ -115,7 +119,7 @@ class TestGroup(Controller):
 
     @property
     def on_error_stop_coroutine_group(self) -> bool:
-        return self.on_sample_error == LogicalAction.STOP_COROUTINE_GROUP.value
+        return self.on_sample_error == LogicalAction.STOP_TEST_GROUP.value
 
     @property
     def on_error_stop_test(self) -> bool:
@@ -123,7 +127,7 @@ class TestGroup(Controller):
 
     @property
     def on_error_stop_test_now(self) -> bool:
-        return self.on_sample_error == LogicalAction.STOPTEST_NOW.value
+        return self.on_sample_error == LogicalAction.STOP_TEST_NOW.value
 
     def __init__(self):
         super().__init__()
@@ -249,7 +253,7 @@ class TestGroup(Controller):
         coroutine.coroutine_number = coroutine_number
         coroutine.coroutine_name = coroutine_name
         coroutine.on_error_continue = self.on_error_continue
-        coroutine.on_error_start_next_coroutine_loop = self.on_error_start_next_coroutine_loop
+        coroutine.on_error_start_next_coroutine_loop = self.on_error_start_next_coroutine
         coroutine.on_error_start_next_current_loop = self.on_error_start_next_current_loop
         coroutine.on_error_break_current_loop = self.on_error_break_current_loop
         coroutine.on_error_stop_coroutine_group = self.on_error_stop_coroutine_group
@@ -345,18 +349,19 @@ class Coroutine(Greenlet):
             self.init_run(context)
 
             while self.running:
+                # 获取下一个 Sampler
                 sampler = self.test_group_controller.next()
 
-                while self.running and sampler is not None:
+                while self.running and sampler:
                     log.debug(
                         f'coroutine:[ {self.coroutine_name} ] '
                         f'next-sampler:[ {sampler.name if isinstance(sampler, TestElement) else None} ]'
                     )
-                    # 处理Sampler
-                    self.__process_sampler(sampler, context)
-                    # 根据Sampler结果控制循环
+                    # 处理 Sampler
+                    self.__process_sampler(sampler, None, context)
+                    # 根据 Sampler 结果控制循环
                     self.__control_loop_by_logical_action(sampler, context)
-                    # 继续获取下一个Sampler
+                    # 获取下一个 Sampler
                     if self.running:
                         sampler = self.test_group_controller.next()
 
@@ -408,7 +413,7 @@ class Coroutine(Greenlet):
         """Sampler 失败时，根据 TestGroup 的 on_sample_error 选项，控制循环的动作"""
         last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
 
-        # Sampler 失败且非继续执行时，根据 on-sample-error 选项控制循环迭代
+        # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
         if not last_sample_ok and not self.on_error_continue:
             # 错误时开始下一个 TestGroup 循环
             if self.on_error_start_next_coroutine_loop:
@@ -440,17 +445,91 @@ class Coroutine(Greenlet):
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
                 self.stop_test_now()
 
-    def __process_sampler(self, sampler: Sampler, context: CoroutineContext) -> None:
+    def trigger_loop_logical_action_on_parent_controllers(self, sampler: Sampler, context: CoroutineContext, action):
+        transaction_sampler = None
+
+        if isinstance(sampler, TransactionSampler):
+            transaction_sampler = sampler
+
+        real_sampler = self.find_real_sampler(sampler)
+
+        if not real_sampler:
+            raise RuntimeError(
+                f'Got null subSampler calling findRealSampler for:[ {sampler.name if sampler else "None"} ], sampler:[ {sampler} ]'
+            )
+
+        # Find parent controllers of current sampler
+        path_to_root_traverser = FindTestElementsUpToRootTraverser(real_sampler)
+        self.group_tree.traverse(path_to_root_traverser)
+
+        # When using Start Next Loop option combined to TransactionController.
+        # if an error occurs in a Sample (child of TransactionController)
+        # then we still need to report the Transaction in error (and create the sample result)
+        if transaction_sampler:
+            transaction_package = self.test_compiler.configure_transaction_sampler(transaction_sampler)
+            self.do_end_transaction_sampler(transaction_sampler, None, transaction_package, context)
+
+    def find_real_sampler(self, sampler: Sampler):
+        real_sampler = sampler
+        while isinstance(real_sampler, TransactionSampler):
+            real_sampler = real_sampler.sub_sampler
+
+        return real_sampler
+
+    def __process_sampler(self, current: Sampler, parent: Sampler, context: CoroutineContext) -> None:
         """执行Sampler"""
-        if sampler:
-            self.__execute_sample_package(sampler, context)
+        transaction_result = None
+        transaction_sampler = None
+        transaction_package = None
 
-    def __execute_sample_package(self, sampler: Sampler, context: CoroutineContext) -> None:
+        if isinstance(current, TransactionSampler):
+            transaction_sampler = current
+            transaction_package = self.test_compiler.configure_transaction_sampler(transaction_sampler)
+
+            # Check if the transaction is done
+            if current.transaction_done:
+                transaction_result = self.do_end_transaction_sampler(
+                    transaction_sampler, parent, transaction_package, context
+                )
+                # Transaction is done, we do not have a sampler to sample
+                current = None
+            else:
+                prev = current
+                # It is the sub sampler of the transaction that will be sampled
+                current = transaction_sampler.sub_sampler
+                if isinstance(current, TransactionSampler):
+                    result = self.__process_sampler(current, prev, context)  # recursive call
+                    context.setCurrentSampler(prev)
+                    current = None
+                    if result is not None:
+                        transaction_sampler.add_sub_sampler_result(result)
+
+        if current:
+            self.__execute_sample_package(current, transaction_sampler, transaction_package, context)
+
+        if (
+            not self.running  # noqa
+            and transaction_result is None  # noqa
+            and transaction_sampler is not None  # noqa
+            and transaction_package is not None  # noqa
+        ):
+            transaction_result = self.do_end_transaction_sampler(
+                transaction_sampler, parent, transaction_package, context
+            )
+
+        return transaction_result
+
+    def __execute_sample_package(
+        self,
+        sampler: Sampler,
+        transaction_sampler: TransactionSampler,
+        transaction_package: SamplePackage,
+        context: CoroutineContext
+    ) -> None:
         """根据Sampler的子代执行Sampler"""
+        log.debug(f'current-sampler-name:[ {sampler.name} ] sampler-object:[ {sampler} ]')
         context.set_current_sampler(sampler)
-        log.debug(f'current-sampler:[ {sampler.name} ] sampler:[ {sampler} ]')
 
-        # 将 ConfigTestElement 合并至 Sampler 中
         package = self.test_compiler.configure_sampler(sampler)
 
         # 执行前置处理器
@@ -465,6 +544,7 @@ class Coroutine(Greenlet):
             result = self.__do_sampling(sampler, context, package.listeners)
 
         if result:
+            # 设置为上一个结果
             context.set_previous_result(result)
 
             # 执行后置处理器
@@ -475,8 +555,13 @@ class Coroutine(Greenlet):
 
             # 遍历执行 SampleListener
             log.debug(f'notify all SampleListener to occurred, coroutine:[ {self.coroutine_name} ]')
-            for listener in package.listeners:
+            sample_listeners = self.get_sample_listeners(package, transaction_package, transaction_sampler)
+            for listener in sample_listeners:
                 listener.sample_occurred(result)
+
+            # Add the result as subsample of transaction if we are in a transaction
+            if transaction_sampler:
+                transaction_sampler.add_sub_sampler_result(result)
 
             # 检查是否需要停止协程或测试
             if result.stop_group or (not result.success and self.on_error_stop_coroutine_group):
@@ -512,6 +597,50 @@ class Coroutine(Greenlet):
                 listener.sample_ended(result)
 
             return result
+
+    def do_end_transaction_sampler(
+        self, sampler: TransactionSampler, parent: Sampler, package: SamplePackage, context: CoroutineContext
+    ) -> SampleResult:
+        # Get the transaction sample result
+        result = sampler.transaction_sample_result
+
+        # Check assertions for the transaction sample
+        self.__check_assertions(package.assertions, result, context)
+
+        #  Notify listeners with the transaction sample result
+        if not isinstance(parent, TransactionSampler):
+            # 遍历执行 SampleListener
+            log.debug(f'notify all SampleListener to occurred, coroutine:[ {self.coroutine_name} ]')
+            for listener in package.listeners:
+                listener.sample_occurred(result)
+
+        return result
+
+    def get_sample_listeners(
+        self,
+        sample_package: SamplePackage,
+        transaction_package: SamplePackage,
+        transaction_sampler: TransactionSampler
+    ) -> List[SampleListener]:
+        sampler_listeners = sample_package.listeners
+        # Do not send subsamples to listeners which receive the transaction sample
+        if transaction_sampler:
+            only_subsampler_listeners = []
+            for listener in sample_package.listeners:
+                # Check if this instance is present in transaction listener list
+                found = False
+                for trans in transaction_package.listeners:
+                    # Check for the same instance
+                    if trans is listener:
+                        found = True
+                        break
+
+                if not found:
+                    only_subsampler_listeners.append(listener)
+
+            sampler_listeners = only_subsampler_listeners
+
+        return sampler_listeners
 
     def __check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext) -> None:
         """断言 Sampler 结果"""

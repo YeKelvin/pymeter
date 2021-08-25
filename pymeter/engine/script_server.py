@@ -50,7 +50,6 @@ __MODULE_PATH__ = {
     'PythonPostProcessor': 'pymeter.processors.python_post_processor',
 
     # Sampler
-    'TestSampler': 'pymeter.samplers.test_sampler',
     'HTTPSampler': 'pymeter.samplers.http_sampler',
     'PythonSampler': 'pymeter.samplers.python_sampler',
     'SQLSampler': 'pymeter.samplers.sql_sampler',

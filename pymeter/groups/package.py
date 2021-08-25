@@ -17,7 +17,8 @@ log = get_logger(__name__)
 
 class SamplePackage:
 
-    def __init__(self):
+    def __init__(self, sampler=None):
+        self.sampler = sampler
         self.configs = []
         self.pre_processors = []
         self.listeners = []
@@ -25,17 +26,24 @@ class SamplePackage:
         self.assertions = []
         self.timers = []
 
-    def add(self, nodes: list):
+    def save_sampler(self, nodes: list):
         for node in nodes:
             if isinstance(node, ConfigElement):
                 self.configs.append(node)
-            if isinstance(node, PreProcessor):
+            elif isinstance(node, PreProcessor):
                 self.pre_processors.append(node)
+            elif isinstance(node, SampleListener):
+                self.listeners.append(node)
+            elif isinstance(node, PostProcessor):
+                self.post_processors.append(node)
+            elif isinstance(node, Assertion):
+                self.assertions.append(node)
+            elif isinstance(node, Timer):
+                self.timers.append(node)
+
+    def save_transaction_controller(self, nodes: list):
+        for node in nodes:
             if isinstance(node, SampleListener):
                 self.listeners.append(node)
-            if isinstance(node, PostProcessor):
-                self.post_processors.append(node)
-            if isinstance(node, Assertion):
+            elif isinstance(node, Assertion):
                 self.assertions.append(node)
-            if isinstance(node, Timer):
-                self.timers.append(node)

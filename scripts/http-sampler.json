@@ -1,6 +1,6 @@
 [
   {
-    "name": "http-debug-collection",
+    "name": "http-collection",
     "remark": "",
     "class": "TestCollection",
     "enabled": true,
@@ -18,8 +18,8 @@
             {
               "class": "Argument",
               "property": {
-                "Argument__name": "key111",
-                "Argument__value": "val111"
+                "Argument__name": "aurthor",
+                "Argument__value": "kelvin.ye"
               }
             }
           ]
@@ -33,7 +33,7 @@
         "property": {}
       },
       {
-        "name": "http-debug-group",
+        "name": "http-group",
         "remark": "",
         "class": "TestGroup",
         "enabled": true,
@@ -51,7 +51,7 @@
         },
         "children": [
           {
-            "name": "http-headers-debug-configuration",
+            "name": "http-headers-manager",
             "remark": "",
             "class": "HTTPHeaderManager",
             "enabled": true,
@@ -60,15 +60,15 @@
                 {
                   "class": "HTTPHeader",
                   "property": {
-                    "Header__name": "group-level-header-name",
-                    "Header__value": "group-level-header-value"
+                    "Header__name": "header-name-from-group",
+                    "Header__value": "header-value-from-group"
                   }
                 }
               ]
             }
           },
           {
-            "name": "http-debug-sampler",
+            "name": "http/get",
             "remark": "描述",
             "class": "HTTPSampler",
             "enabled": true,
@@ -82,20 +82,19 @@
                     {
                       "class": "Argument",
                       "property": {
-                        "Argument__name": "debugName",
-                        "Argument__value": "${key111}",
-                        "Argument__desc": "debugDesc"
+                        "Argument__name": "aurthor",
+                        "Argument__value": "${aurthor}",
+                        "Argument__desc": "desc"
                       }
                     }
                   ]
                 }
               },
               "HTTPSampler__data": "",
+              "HTTPSampler__form": "",
               "HTTPSampler__files": "",
               "HTTPSampler__encoding": "UTF-8",
-              "HTTPSampler__follow_redirects": "",
-              "HTTPSampler__auto_redirects": "",
-              "HTTPSampler__keep_alive": "",
+              "HTTPSampler__allow_redirects": "",
               "HTTPSampler__connect_timeout": "",
               "HTTPSampler__response_timeout": "",
               "HTTPSampler__headers": {
@@ -105,15 +104,8 @@
                     {
                       "class": "HTTPHeader",
                       "property": {
-                        "Header__name": "sampler-header-name",
-                        "Header__value": "sampler-header-value"
-                      }
-                    },
-                    {
-                      "class": "HTTPHeader",
-                      "property": {
-                        "Header__name": "sampler-header-name-222",
-                        "Header__value": "${__Random(1, 10)}"
+                        "Header__name": "header-name-from-sampler",
+                        "Header__value": "header-value-from-sampler"
                       }
                     }
                   ]

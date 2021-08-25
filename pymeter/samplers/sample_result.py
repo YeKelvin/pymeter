@@ -34,7 +34,7 @@ class SampleResult:
 
         self.start_time = 0
         self.end_time = 0
-        self.elapsed_time = None
+        self.elapsed_time = 0
         self.idle_time = 0
         self.pause_time = 0
         self.connect_time = 0
@@ -43,13 +43,13 @@ class SampleResult:
         self.assertions = []
         self.sub_results = []
 
-        self.request_headers_size = None
-        self.request_data_size = None
-        self.request_size = None
+        self.request_headers_size = 0
+        self.request_data_size = 0
+        self.request_size = 0
 
-        self.response_headers_size = None
-        self.response_data_size = None
-        self.response_size = None
+        self.response_headers_size = 0
+        self.response_data_size = 0
+        self.response_size = 0
 
         self.stop_group = False
         self.stop_test = False
@@ -77,3 +77,22 @@ class SampleResult:
     def calculate_elapsed_time(self):
         """计算耗时"""
         self.elapsed_time = f'{int(self.end_time * 1000) - int(self.start_time * 1000)}ms'
+
+    def add_sub_result(self, sub_result: 'SampleResult'):
+        if not sub_result:
+            return
+
+        # Extend the time to the end of the added sample
+        self.end_time = max(self.end_time, sub_result.end_time)
+
+        # Include the byte count for the added sample
+        self.request_headers_size = self.request_headers_size + sub_result.request_headers_size
+        self.request_data_size = self.request_data_size + sub_result.request_data_size
+        self.request_size = self.request_size + sub_result.request_size
+
+        self.response_headers_size = self.response_headers_size + sub_result.response_headers_size
+        self.response_data_size = self.response_data_size + sub_result.response_data_size
+        self.response_size = self.response_size + sub_result.response_size
+
+        self.sub_results.append(sub_result)
+        sub_result.parent = self
