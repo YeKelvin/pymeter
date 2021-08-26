@@ -261,7 +261,7 @@ class TestGroup(Controller):
 
 class Coroutine(Greenlet):
 
-    LAST_SAMPLE_OK: Final = 'Gourp__last_sample_ok'
+    LAST_SAMPLE_OK: Final = 'Coroutine__last_sample_ok'
 
     def __init__(self, group_tree: HashTree, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -766,9 +766,9 @@ class Coroutine(Greenlet):
             self.parent._notify_test_iteration_listeners()
 
 
-class SetupThreadGroup(TestGroup):
+class SetupGroup(TestGroup):
     ...
 
 
-class TearDownThreadGroup(TestGroup):
+class TearDownGroup(TestGroup):
     ...

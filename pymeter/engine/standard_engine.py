@@ -16,6 +16,8 @@ from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.traverser import SearchByClass
 from pymeter.engine.tree import HashTree
 from pymeter.groups.context import ContextService
+from pymeter.groups.group import SetupGroup
+from pymeter.groups.group import TearDownGroup
 from pymeter.groups.group import TestGroup
 from pymeter.listeners.result_collector import ResultCollector
 from pymeter.utils.log_util import get_logger
@@ -78,10 +80,18 @@ class StandardEngine(Greenlet):
         collection_level_elements = self.tree.index(0).list()
         self.__remove_groups(collection_level_elements)  # 删除 TestGroup 节点
 
-        # 查找 TestGroup 对象
+        # 查找 SetupGroup / TestGroup / TearDownGroup 对象
+        setup_group_searcher = SearchByClass(SetupGroup)
         group_searcher = SearchByClass(TestGroup)
+        teardown_group_searcher = SearchByClass(TearDownGroup)
+
+        self.tree.traverse(setup_group_searcher)
         self.tree.traverse(group_searcher)
+        self.tree.traverse(teardown_group_searcher)
+
+        setup_group_iter = iter(setup_group_searcher.get_search_result())
         group_iter = iter(group_searcher.get_search_result())
+        teardown_group_iter = iter(teardown_group_searcher.get_search_result())
 
         group_count = 0
         ContextService.clear_total_coroutines(self.id)  # TODO: 还要修改

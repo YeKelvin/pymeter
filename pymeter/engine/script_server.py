@@ -24,9 +24,9 @@ __MODULE_PATH__ = {
     'TestCollection': 'pymeter.engine.collection',
 
     # 测试分组
-    'SetupThreadGroup': 'pymeter.groups.group',
+    'SetupGroup': 'pymeter.groups.group',
     'TestGroup': 'pymeter.groups.group',
-    'TearDownThreadGroup': 'pymeter.groups.group',
+    'TearDownGroup': 'pymeter.groups.group',
 
     # 断言器
     'JsonPathAssertion': 'pymeter.assertions.json_path_assertion',
@@ -50,7 +50,7 @@ __MODULE_PATH__ = {
     # 后置处理器
     'PythonPostProcessor': 'pymeter.processors.python_post_processor',
 
-    # Sampler
+    # 取样器
     'HTTPSampler': 'pymeter.samplers.http_sampler',
     'PythonSampler': 'pymeter.samplers.python_sampler',
     'SQLSampler': 'pymeter.samplers.sql_sampler',
