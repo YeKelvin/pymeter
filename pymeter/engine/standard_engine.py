@@ -124,7 +124,7 @@ class StandardEngine(Greenlet):
             self.tree.traverse(result_collector_searcher)
             result_collectors = result_collector_searcher.get_search_result()
             for result_collector in result_collectors:
-                log.debug(f'result-collector:\n{result_collector.__dict__}')
+                log.debug(f'resultCollector:\n{result_collector.__dict__}')
 
         # 测试结束
         self.active = False

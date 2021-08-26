@@ -23,7 +23,7 @@ class TransactionController(GenericController):
         """@Override"""
         log.debug('start to get next sampler')
         next_sampler = self.next_with_transaction_sampler()
-        log.debug(f'next-sampler:[ {next_sampler} ]')
+        log.debug(f'nextSampler:[ {next_sampler} ]')
         return next_sampler
 
     def next_with_transaction_sampler(self):
@@ -112,6 +112,7 @@ class TransactionSampler(Sampler):
 
         # Add the sub result to the transaction result
         self.transaction_sample_result.add_sub_result(result)
+
         # Add current time to total for later use (exclude pause time)
         self.total_time += (result.end_time - result.start_time - result.idle_time)
 

@@ -19,21 +19,19 @@ class CoroutineContext:
 
     def __init__(self):
         self.variables = Variables()
+        self.engine = None
+        self.group = None
         self.coroutine = None
-        self.coroutine_group = None
         self.coroutine_number = None
         self.coroutine_name = None
-        # self.sampler_context = None  # todo 有啥用
-        # self.sampling_started = False  # todo 有啥用
         self.current_sampler = None
         self.previous_sampler = None
         self.previous_result = None
-        self.engine = None
 
     def clear(self):
         self.variables = None
+        self.group = None
         self.coroutine = None
-        self.coroutine_group = None
         self.coroutine_number = None
         self.current_sampler = None
         self.previous_sampler = None

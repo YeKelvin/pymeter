@@ -30,11 +30,11 @@ class ResultCollector(
 
     @property
     def group_id(self) -> str:
-        return id(ContextService.get_context().coroutine_group)
+        return id(ContextService.get_context().group)
 
     @property
     def group_name(self):
-        return ContextService.get_context().coroutine_group.name
+        return ContextService.get_context().group.name
 
     def collection_started(self) -> None:
         self.startTime = time_util.timestamp_now()
@@ -57,7 +57,6 @@ class ResultCollector(
         self.groups[self.group_id]['endTime'] = time_util.strftime_now()
 
     def sample_occurred(self, result) -> None:
-        log.debug(f'sampler occurred:[ {result.sample_name} ]')
         if not result:
             return
 
@@ -78,6 +77,7 @@ class ResultCollector(
             'startTime': time_util.timestamp_to_strftime(result.start_time),
             'endTime': time_util.timestamp_to_strftime(result.end_time),
             'elapsedTime': result.elapsed_time,
+            'subResults': '[' + ''.join([str(sub.__dict__) + ',' for sub in result.sub_results])[:-1] + ']'
         })
 
         if not result.success:

@@ -61,11 +61,11 @@ class FlaskSocketIOResultCollector(
 
     @property
     def group_id(self) -> str:
-        return id(ContextService.get_context().coroutine_group)
+        return id(ContextService.get_context().group)
 
     @property
     def group_name(self):
-        return ContextService.get_context().coroutine_group.name
+        return ContextService.get_context().group.name
 
     def __init__(self):
         TestElement.__init__(self)

@@ -167,6 +167,62 @@
                   }
                 },
                 "children": null
+              },
+              {
+                "name": "transaction 222",
+                "remark": "",
+                "class": "TransactionController",
+                "enabled": true,
+                "property": {},
+                "children": [
+                  {
+                    "name": "transaction http/get 222",
+                    "remark": "描述",
+                    "class": "HTTPSampler",
+                    "enabled": true,
+                    "property": {
+                      "HTTPSampler__url": "https://httpbin.org/get",
+                      "HTTPSampler__method": "GET",
+                      "HTTPSampler__params": {
+                        "class": "Arguments",
+                        "property": {
+                          "Arguments__arguments": [
+                            {
+                              "class": "Argument",
+                              "property": {
+                                "Argument__name": "aurthor",
+                                "Argument__value": "${aurthor}",
+                                "Argument__desc": "desc"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      "HTTPSampler__data": "",
+                      "HTTPSampler__form": "",
+                      "HTTPSampler__files": "",
+                      "HTTPSampler__encoding": "UTF-8",
+                      "HTTPSampler__allow_redirects": "",
+                      "HTTPSampler__connect_timeout": "",
+                      "HTTPSampler__response_timeout": "",
+                      "HTTPSampler__headers": {
+                        "class": "HTTPHeaderManager",
+                        "property": {
+                          "HeaderManager__headers": [
+                            {
+                              "class": "HTTPHeader",
+                              "property": {
+                                "Header__name": "header-name-from-sampler",
+                                "Header__value": "header-value-from-sampler"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "children": null
+                  }
+                ]
               }
             ]
           }

@@ -162,12 +162,14 @@ class TestCompiler(HashTreeTraverser):
         self.compiled_node = []
 
     def configure_sampler(self, sampler) -> SamplePackage:
+        log.debug(f'configure sampler:[ {sampler} ]')
         package = self.sampler_package_saver.get(sampler)
         package.sampler = sampler
         self.__configure_with_config_elements(sampler, package.configs)
         return package
 
     def configure_transaction_sampler(self, transaction_sampler: TransactionSampler) -> SamplePackage:
+        log.debug(f'configure transaction sampler:[ {transaction_sampler} ]')
         controller = transaction_sampler.transaction_controller
         package = self.transaction_sampler_package_saver.get(controller)
         package.sampler = transaction_sampler
@@ -198,22 +200,24 @@ class TestCompiler(HashTreeTraverser):
     def __save_sampler_package(self, node: Sampler, subtree):
         """saveSamplerConfigs"""
         log.debug(f'save sampler package, sampler:[ {node} ]')
-        sample_package = SamplePackage(node)
-        # 存储 Sampler 的子节点
-        sample_package.save_sampler(subtree.list())
-        # 存储 Group 层的非 Group 节点添加至 Sampler 节点下
-        sample_package.save_sampler(self.group_level_elements)
-        log.debug(f'saved-package:[ {sample_package} ]')
-        self.sampler_package_saver[node] = sample_package
+        package = SamplePackage(node)
+        # 存储 Sampler 的子代节点
+        package.save_sampler(subtree.list())
+        # 存储 TestGroup 的非 Group/Sampler 子代节点
+        package.save_sampler(self.group_level_elements)
+        log.debug(f'savedPackage:[ {package} ]')
+        self.sampler_package_saver[node] = package
 
     def __save_transaction_controller_package(self, node: TransactionController, subtree):
         """saveTransactionControllerConfigs"""
         log.debug(f'save transaction controller package, controller:[ {node} ]')
-        sample_package = SamplePackage(TransactionSampler(node, node.name))
+        package = SamplePackage(TransactionSampler(node, node.name))
         # 存储 TransactionControlle 的子节点
-        sample_package.save_transaction_controller(subtree.list())
-        log.debug(f'saved-package:[ {sample_package} ]')
-        self.transaction_sampler_package_saver[node] = sample_package
+        package.save_transaction_controller(subtree.list())
+        # 存储 TestGroup 的非 Group/Sampler 子代节点
+        package.save_transaction_controller(self.group_level_elements)
+        log.debug(f'savedPackage:[ {package} ]')
+        self.transaction_sampler_package_saver[node] = package
 
     def __compile_controller(self, node, subtree):
         if node in self.compiled_node:
