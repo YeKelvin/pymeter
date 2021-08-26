@@ -25,7 +25,6 @@ from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.engine.traverser import FindTestElementsUpToRoot
-from pymeter.engine.traverser import FindTestElementsUpToRootTraverser
 from pymeter.engine.traverser import SearchByClass
 from pymeter.engine.traverser import TestCompiler
 from pymeter.engine.traverser import TreeCloner
@@ -135,7 +134,7 @@ class TestGroup(Controller):
         self.running = False
         self.group_number = None
         self.group_tree = None
-        self.all_groups: List[Coroutine] = []
+        self.groups: List[Coroutine] = []
 
     def start(self, group_number, group_tree, engine) -> None:
         """启动TestGroup
@@ -201,20 +200,20 @@ class TestGroup(Controller):
 
     def wait_groups_stopped(self) -> None:
         """等待所有协程停止"""
-        for group in self.all_groups:
+        for group in self.groups:
             if not group.dead:
                 group.join(self.WAIT_TO_DIE)
 
     def stop_coroutines(self) -> None:
         """停止所有协程"""
         self.running = False
-        for group in self.all_groups:
+        for group in self.groups:
             group.stop_coroutine()
 
     def kill_groups(self) -> None:
         """杀死所有协程"""
         self.running = False
-        for group in self.all_groups:
+        for group in self.groups:
             group.stop_coroutine()
             group.kill()  # TODO: 重写 kill方法，添加中断时的操作
 
@@ -230,7 +229,7 @@ class TestGroup(Controller):
 
         """
         coroutine = self.__make_coroutine(coroutine_number, engine, context)
-        self.all_groups.append(coroutine)
+        self.groups.append(coroutine)
         coroutine.start()
         return coroutine
 
@@ -249,16 +248,9 @@ class TestGroup(Controller):
         coroutine = Coroutine(self.__clone_group_tree())
         coroutine.initial_context(context)
         coroutine.engine = engine
-        coroutine.test_group = self
+        coroutine.group = self
         coroutine.coroutine_number = coroutine_number
         coroutine.coroutine_name = coroutine_name
-        coroutine.on_error_continue = self.on_error_continue
-        coroutine.on_error_start_next_coroutine_loop = self.on_error_start_next_coroutine
-        coroutine.on_error_start_next_current_loop = self.on_error_start_next_current_loop
-        coroutine.on_error_break_current_loop = self.on_error_break_current_loop
-        coroutine.on_error_stop_coroutine_group = self.on_error_stop_coroutine_group
-        coroutine.on_error_stop_test = self.on_error_stop_test
-        coroutine.on_error_stop_test_now = self.on_error_stop_test_now
         return coroutine
 
     def __clone_group_tree(self) -> HashTree:
@@ -275,21 +267,14 @@ class Coroutine(Greenlet):
     def __init__(self, group_tree: HashTree, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.running = True
+        self.group: TestGroup = None
+        self.group_main_controller: Controller = group_tree.list()[0]
         self.group_tree = group_tree
-        self.test_group_controller: Controller = group_tree.list()[0]
-        self.test_group: TestGroup = None
-        self.coroutine_number = None
         self.coroutine_name = None
+        self.coroutine_number = None
         self.engine = None
-        self.on_error_continue = False
-        self.on_error_start_next_coroutine_loop = False
-        self.on_error_start_next_current_loop = False
-        self.on_error_break_current_loop = False
-        self.on_error_stop_coroutine_group = False
-        self.on_error_stop_test = False
-        self.on_error_stop_test_now = False
+        self.compiler: TestCompiler = None
         self.local_vars = Variables()
-        self.test_compiler: Optional[TestCompiler] = None
         self.start_time = 0
         self.end_time = 0
 
@@ -316,7 +301,7 @@ class Coroutine(Greenlet):
         """
         context.engine = self.engine
         context.coroutine = self
-        context.coroutine_group = self.test_group
+        context.coroutine_group = self.group
         context.coroutine_number = self.coroutine_number
         context.coroutine_name = self.coroutine_name
         context.variables = self.local_vars
@@ -328,16 +313,16 @@ class Coroutine(Greenlet):
 
         # 编译 Group 层下的所有子代节点
         log.info('开始编译TestGroup的子代节点')
-        self.test_compiler = TestCompiler(group_level_elements)
-        self.group_tree.traverse(self.test_compiler)
-        log.debug(f'编译完成，sampler-package:[ {self.test_compiler.sampler_package_saver} ]')
+        self.compiler = TestCompiler(group_level_elements)
+        self.group_tree.traverse(self.compiler)
+        log.debug(f'编译完成，sampler-package:[ {self.compiler.sampler_package_saver} ]')
 
         # 初始化 TestGroup 控制器
-        self.test_group_controller.initialize()
+        self.group_main_controller.initialize()
 
         # 添加 Group 层循环迭代监听器
         group_level_iteration_listener = self.GroupLevelIterationListener(self)
-        self.test_group_controller.add_iteration_listener(group_level_iteration_listener)
+        self.group_main_controller.add_iteration_listener(group_level_iteration_listener)
 
         # 遍历执行 TestGroupListener
         self.__coroutine_started()
@@ -350,7 +335,7 @@ class Coroutine(Greenlet):
 
             while self.running:
                 # 获取下一个 Sampler
-                sampler = self.test_group_controller.next()
+                sampler = self.group_main_controller.next()
 
                 while self.running and sampler:
                     log.debug(
@@ -363,9 +348,9 @@ class Coroutine(Greenlet):
                     self.__control_loop_by_logical_action(sampler, context)
                     # 获取下一个 Sampler
                     if self.running:
-                        sampler = self.test_group_controller.next()
+                        sampler = self.group_main_controller.next()
 
-                if self.test_group_controller.done:
+                if self.group_main_controller.done:
                     self.running = False
                     log.info(f'协程:[ {self.coroutine_name} ] 循环迭代已结束')
 
@@ -414,43 +399,40 @@ class Coroutine(Greenlet):
         last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
 
         # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
-        if not last_sample_ok and not self.on_error_continue:
+        if not last_sample_ok and not self.group.on_error_continue:
             # 错误时开始下一个 TestGroup 循环
-            if self.on_error_start_next_coroutine_loop:
+            if self.group.on_error_start_next_coroutine:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next continue loop')
-                # self.__continue_on_coroutine_loop()
                 self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__continue_on_coroutine_loop
                 )
 
             # 错误时开始下一个当前控制器循环
-            elif self.on_error_start_next_current_loop:
+            elif self.group.on_error_start_next_current_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next current loop')
-                # self.__continue_on_current_loop(sampler)
                 self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__continue_on_current_loop
                 )
 
             # 错误时中断当前控制器循环
-            elif self.on_error_break_current_loop:
+            elif self.group.on_error_break_current_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, breaking current loop')
-                # self.__break_on_current_loop(sampler)
                 self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__break_on_current_loop
                 )
 
             # 错误时停止协程
-            elif self.on_error_stop_coroutine_group:
+            elif self.group.on_error_stop_coroutine_group:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping coroutine group')
                 self.stop_group()
 
             # 错误时停止测试
-            elif self.on_error_stop_test:
+            elif self.group.on_error_stop_test:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test')
                 self.stop_test()
 
             # 错误时立即停止测试（中断所有协程）
-            elif self.on_error_stop_test_now:
+            elif self.group.on_error_stop_test_now:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
                 self.stop_test_now()
 
@@ -460,7 +442,7 @@ class Coroutine(Greenlet):
         if isinstance(sampler, TransactionSampler):
             transaction_sampler = sampler
 
-        real_sampler = self.find_real_sampler(sampler)
+        real_sampler = self.__find_real_sampler(sampler)
 
         if not real_sampler:
             raise RuntimeError(
@@ -468,7 +450,7 @@ class Coroutine(Greenlet):
             )
 
         # Find parent controllers of current sampler
-        path_to_root_traverser = FindTestElementsUpToRootTraverser(real_sampler)
+        path_to_root_traverser = FindTestElementsUpToRoot(real_sampler)
         self.group_tree.traverse(path_to_root_traverser)
 
         loop_action(path_to_root_traverser)
@@ -477,10 +459,10 @@ class Coroutine(Greenlet):
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
         if transaction_sampler:
-            transaction_package = self.test_compiler.configure_transaction_sampler(transaction_sampler)
+            transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
             self.__do_end_transaction_sampler(transaction_sampler, None, transaction_package, context)
 
-    def find_real_sampler(self, sampler: Sampler):
+    def __find_real_sampler(self, sampler: Sampler):
         real_sampler = sampler
         while isinstance(real_sampler, TransactionSampler):
             real_sampler = real_sampler.sub_sampler
@@ -495,7 +477,7 @@ class Coroutine(Greenlet):
 
         if isinstance(current, TransactionSampler):
             transaction_sampler = current
-            transaction_package = self.test_compiler.configure_transaction_sampler(transaction_sampler)
+            transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
 
             # Check if the transaction is done
             if current.transaction_done:
@@ -538,7 +520,7 @@ class Coroutine(Greenlet):
         log.debug(f'current-sampler:[ {sampler.name} ] object:[ {sampler} ]')
         context.set_current_sampler(sampler)
 
-        package = self.test_compiler.configure_sampler(sampler)
+        package = self.compiler.configure_sampler(sampler)
 
         # 执行前置处理器
         self.__run_pre_processors(package.pre_processors)
@@ -572,13 +554,13 @@ class Coroutine(Greenlet):
                 transaction_sampler.add_sub_sampler_result(result)
 
             # 检查是否需要停止协程或测试
-            if result.stop_group or (not result.success and self.on_error_stop_coroutine_group):
+            if result.stop_group or (not result.success and self.group.on_error_stop_coroutine_group):
                 log.info(f'用户手动设置停止测试组，TestGroup:[ {self.coroutine_name} ]')
                 self.stop_coroutine()
-            if result.stop_test or (not result.success and self.on_error_stop_test):
+            if result.stop_test or (not result.success and self.group.on_error_stop_test):
                 log.info(f'用户手动设置停止测试，TestGroup:[ {self.coroutine_name} ]')
                 self.stop_test()
-            if result.stop_test_now or (not result.success and self.on_error_stop_test_now):
+            if result.stop_test_now or (not result.success and self.group.on_error_stop_test_now):
                 log.info(f'用户手动设置立即停止测试，TestGroup:[ {self.coroutine_name} ]')
                 self.stop_test_now()
 
@@ -727,25 +709,19 @@ class Coroutine(Greenlet):
             else:
                 parent_controller.trigger_end_of_loop()
 
-    def __get_parent_controllers(self, sampler: Sampler) -> list:
-        """获取 Sampler 的父控制器节点"""
-        find_test_elements_up_to_root = FindTestElementsUpToRoot(sampler)
-        self.group_tree.traverse(find_test_elements_up_to_root)
-        return find_test_elements_up_to_root.get_controllers_to_root()
-
     def _notify_test_iteration_listeners(self) -> None:
         """遍历执行 TestIterationListener"""
         self.local_vars.inc_iteration()
         log.debug(f'notify all TestIterationListener to start, coroutine:[ {self.coroutine_name} ]')
         for listener in self.test_iteration_listeners:
-            listener.test_iteration_start(self.test_group)
+            listener.test_iteration_start(self.group)
 
     def stop_coroutine(self) -> None:
         self.running = False
 
     def stop_group(self) -> None:
         log.info(f'协程发起 StopCoroutineGroup 请求，协程名称:[ {self.coroutine_name} ]')
-        self.test_group.stop_coroutines()
+        self.group.stop_coroutines()
 
     def stop_test(self) -> None:
         log.info(f'协程发起 StopTestCollection 请求，协程名称:[ {self.coroutine_name} ] ')
