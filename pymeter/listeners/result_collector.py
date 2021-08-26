@@ -57,12 +57,6 @@ class ResultCollector(
         self.groups[self.group_id]['endTime'] = time_util.strftime_now()
 
     def sample_occurred(self, result) -> None:
-        ...
-
-    def sample_started(self, sample) -> None:
-        ...
-
-    def sample_ended(self, result) -> None:
         if not result:
             return
 
@@ -87,6 +81,12 @@ class ResultCollector(
 
         if not result.success:
             self.groups[self.group_id]['success'] = False
+
+    def sample_started(self, sample) -> None:
+        ...
+
+    def sample_ended(self, result) -> None:
+        ...
 
     def test_iteration_start(self, controller) -> None:
         ...

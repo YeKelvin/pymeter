@@ -30,9 +30,11 @@ class TestElement:
     # 组件备注
     REMARK = 'TestElement__remark'
 
-    def __init__(self):
+    def __init__(self, name: str = None):
         self.properties: Dict[str, PyMeterProperty] = {}
         self.context = None
+        if name:
+            self.set_property(self.NAME, name)
 
     @property
     def name(self) -> str:
@@ -113,6 +115,16 @@ class TestElement:
     def clear(self) -> None:
         """清空属性"""
         self.properties.clear()
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return str({
+            'name': self.name,
+            'class': type(self).__name__,
+            'id': id(self)
+        })
 
 
 class ConfigTestElement(TestElement, ConfigElement):

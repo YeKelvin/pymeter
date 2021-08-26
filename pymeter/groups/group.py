@@ -18,6 +18,7 @@ from pymeter.common.exceptions import StopTestGroupException
 from pymeter.common.exceptions import StopTestNowException
 from pymeter.controls.controller import Controller
 from pymeter.controls.controller import IteratingController
+from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import SampleListener
@@ -35,7 +36,6 @@ from pymeter.groups.package import SamplePackage
 from pymeter.groups.variables import Variables
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
-from pymeter.samplers.transaction_sampler import TransactionSampler
 from pymeter.utils.log_util import get_logger
 
 
@@ -419,7 +419,7 @@ class Coroutine(Greenlet):
             if self.on_error_start_next_coroutine_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next continue loop')
                 # self.__continue_on_coroutine_loop()
-                self.trigger_loop_logical_action_on_parent_controllers(
+                self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__continue_on_coroutine_loop
                 )
 
@@ -427,7 +427,7 @@ class Coroutine(Greenlet):
             elif self.on_error_start_next_current_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next current loop')
                 # self.__continue_on_current_loop(sampler)
-                self.trigger_loop_logical_action_on_parent_controllers(
+                self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__continue_on_current_loop
                 )
 
@@ -435,7 +435,7 @@ class Coroutine(Greenlet):
             elif self.on_error_break_current_loop:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, breaking current loop')
                 # self.__break_on_current_loop(sampler)
-                self.trigger_loop_logical_action_on_parent_controllers(
+                self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__break_on_current_loop
                 )
 
@@ -454,7 +454,7 @@ class Coroutine(Greenlet):
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
                 self.stop_test_now()
 
-    def trigger_loop_logical_action_on_parent_controllers(self, sampler: Sampler, context: CoroutineContext, action):
+    def __trigger_loop_logical_action_on_parent_controllers(self, sampler: Sampler, context: CoroutineContext, loop_action):
         transaction_sampler = None
 
         if isinstance(sampler, TransactionSampler):
@@ -471,14 +471,14 @@ class Coroutine(Greenlet):
         path_to_root_traverser = FindTestElementsUpToRootTraverser(real_sampler)
         self.group_tree.traverse(path_to_root_traverser)
 
-        action(path_to_root_traverser)
+        loop_action(path_to_root_traverser)
 
         # When using Start Next Loop option combined to TransactionController.
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
         if transaction_sampler:
             transaction_package = self.test_compiler.configure_transaction_sampler(transaction_sampler)
-            self.do_end_transaction_sampler(transaction_sampler, None, transaction_package, context)
+            self.__do_end_transaction_sampler(transaction_sampler, None, transaction_package, context)
 
     def find_real_sampler(self, sampler: Sampler):
         real_sampler = sampler
@@ -499,7 +499,7 @@ class Coroutine(Greenlet):
 
             # Check if the transaction is done
             if current.transaction_done:
-                transaction_result = self.do_end_transaction_sampler(
+                transaction_result = self.__do_end_transaction_sampler(
                     transaction_sampler, parent, transaction_package, context
                 )
                 # Transaction is done, we do not have a sampler to sample
@@ -524,7 +524,7 @@ class Coroutine(Greenlet):
             and transaction_sampler is not None  # noqa
             and transaction_package is not None  # noqa
         ):
-            transaction_result = self.do_end_transaction_sampler(
+            transaction_result = self.__do_end_transaction_sampler(
                 transaction_sampler, parent, transaction_package, context
             )
 
@@ -535,7 +535,7 @@ class Coroutine(Greenlet):
         context: CoroutineContext
     ) -> None:
         """根据Sampler的子代执行Sampler"""
-        log.debug(f'current-sampler-name:[ {sampler.name} ] sampler-object:[ {sampler} ]')
+        log.debug(f'current-sampler:[ {sampler.name} ] object:[ {sampler} ]')
         context.set_current_sampler(sampler)
 
         package = self.test_compiler.configure_sampler(sampler)
@@ -563,7 +563,7 @@ class Coroutine(Greenlet):
 
             # 遍历执行 SampleListener
             log.debug(f'notify all SampleListener to occurred, coroutine:[ {self.coroutine_name} ]')
-            sample_listeners = self.get_sample_listeners(package, transaction_package, transaction_sampler)
+            sample_listeners = self.__get_sample_listeners(package, transaction_package, transaction_sampler)
             for listener in sample_listeners:
                 listener.sample_occurred(result)
 
@@ -606,7 +606,7 @@ class Coroutine(Greenlet):
 
             return result
 
-    def do_end_transaction_sampler(
+    def __do_end_transaction_sampler(
         self, sampler: TransactionSampler, parent: Sampler, package: SamplePackage, context: CoroutineContext
     ) -> SampleResult:
         # Get the transaction sample result
@@ -624,7 +624,7 @@ class Coroutine(Greenlet):
 
         return result
 
-    def get_sample_listeners(
+    def __get_sample_listeners(
         self, sample_package: SamplePackage, transaction_package: SamplePackage, transaction_sampler: TransactionSampler
     ) -> List[SampleListener]:
         sampler_listeners = sample_package.listeners

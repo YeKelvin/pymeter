@@ -3,7 +3,6 @@
 # @File    : generic_controller
 # @Time    : 2020/2/28 17:25
 # @Author  : Kelvin.Ye
-import traceback
 from typing import Optional
 
 from pymeter.common.exceptions import NextIsNullException
@@ -83,7 +82,7 @@ class GenericController(Controller):
         self.iter_count += 1
 
     def next(self) -> Optional[Sampler]:
-        log.debug('开始获取下一个Sampler')
+        log.debug('start to get next sampler')
         self.fire_iter_events()
 
         if self.done:
@@ -100,7 +99,7 @@ class GenericController(Controller):
                 elif isinstance(current_element, Controller):
                     next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
-            log.debug(traceback.format_exc())
+            log.debug('next sampler is null')
 
         log.debug(f'next-sampler:[ {next_sampler} ]')
         return next_sampler
@@ -119,6 +118,8 @@ class GenericController(Controller):
             listener.iteration_start(self, self.iter_count)
 
     def get_current_element(self):
+        log.debug(f'SubControllersAndSamplers:[ {self.sub_controllers_and_samplers} ]')
+
         if self.current < len(self.sub_controllers_and_samplers):
             return self.sub_controllers_and_samplers[self.current]
 

@@ -127,7 +127,7 @@ class FunctionParser:
         result = []
         buffer = []
         previous = ''
-        log.debug(f'start compiling string, source: {source}')
+        log.debug(f'start compiling str, source:[ {source} ]')
         while True:
             current = reader.next
             if current is None:  # end of reader
@@ -197,7 +197,7 @@ class FunctionParser:
                     buffer.append(current)
             elif current == '}':  # 变量 或者没有参数的函数
                 func_name = ''.join(buffer)
-                log.debug(f'function reference key: {func_name}')
+                log.debug(f'function reference key:[ {func_name} ]')
                 function = CompoundVariable.get_named_function(func_name)
                 if isinstance(function, Function):  # 确保调用 set_parameters()
                     function.set_parameters([])

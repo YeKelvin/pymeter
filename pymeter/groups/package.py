@@ -47,3 +47,17 @@ class SamplePackage:
                 self.listeners.append(node)
             elif isinstance(node, Assertion):
                 self.assertions.append(node)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return str({
+            'sampler': self.sampler,
+            'configs': '[' + ''.join([str(config) + ',' for config in self.configs])[:-1] + ']',
+            'pre-processors': '[' + ''.join([str(processor) + ',' for processor in self.pre_processors])[:-1] + ']',
+            'listeners': '[' + ''.join([str(listener) + ',' for listener in self.listeners])[:-1] + ']',
+            'post-processors': '[' + ''.join([str(processor) + ',' for processor in self.post_processors])[:-1] + ']',
+            'assertions': '[' + ''.join([str(assertion) + ',' for assertion in self.assertions])[:-1] + ']',
+            'timers': '[' + ''.join([str(time) + ',' for time in self.timers])[:-1] + ']',
+        })

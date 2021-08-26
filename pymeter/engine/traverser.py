@@ -9,14 +9,14 @@ from typing import List
 
 from pymeter.controls.controller import Controller
 from pymeter.controls.generic_controller import GenericController
-from pymeter.controls.transaction_controller import TransactionController
+from pymeter.controls.transaction import TransactionController
+from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
 from pymeter.elements.interface import NoConfigMerge
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.groups.interface import NoCoroutineClone
 from pymeter.groups.package import SamplePackage
 from pymeter.samplers.sampler import Sampler
-from pymeter.samplers.transaction_sampler import TransactionSampler
 from pymeter.utils.log_util import get_logger
 
 
@@ -175,12 +175,13 @@ class TestCompiler(HashTreeTraverser):
         return package
 
     def add_node(self, node, subtree) -> None:
-        log.debug(f'开始编译节点:[ {node} ]')
+        log.debug(f'started compiling node:[ {node} ]')
         if isinstance(node, Sampler):
             self.__save_sampler_package(node, subtree)
         elif isinstance(node, TransactionController):
             self.__save_transaction_controller_package(node, subtree)
-        elif isinstance(node, Controller):
+
+        if isinstance(node, Controller):
             self.__compile_controller(node, subtree)
 
     def subtract_node(self) -> None:
@@ -196,17 +197,23 @@ class TestCompiler(HashTreeTraverser):
                 sampler.add_test_element(config)
 
     def __save_sampler_package(self, node: Sampler, subtree):
+        """saveSamplerConfigs"""
+        log.debug(f'save sampler package, sampler:[ {node} ]')
         sample_package = SamplePackage(node)
         # 存储 Sampler 的子节点
         sample_package.save_sampler(subtree.list())
         # 存储 Group 层的非 Group 节点添加至 Sampler 节点下
         sample_package.save_sampler(self.group_level_elements)
+        log.debug(f'saved-package:[ {sample_package} ]')
         self.sampler_package_saver[node] = sample_package
 
     def __save_transaction_controller_package(self, node: TransactionController, subtree):
-        sample_package = SamplePackage(TransactionController(node, node.name))
+        """saveTransactionControllerConfigs"""
+        log.debug(f'save transaction controller package, controller:[ {node} ]')
+        sample_package = SamplePackage(TransactionSampler(node, node.name))
         # 存储 TransactionControlle 的子节点
         sample_package.save_transaction_controller(subtree.list())
+        log.debug(f'saved-package:[ {sample_package} ]')
         self.transaction_sampler_package_saver[node] = sample_package
 
     def __compile_controller(self, node, subtree):
@@ -217,7 +224,8 @@ class TestCompiler(HashTreeTraverser):
         controller_level_elements = subtree.list()
         # Controller 节点储存 Sampler 节点和 Controller 节点
         for element in controller_level_elements:
-            log.debug(f'节点:[ {node} ]的子代节点:[ {element} ]')
+            log.debug(f'controller:[ {node} ] sub-element:[ {element} ]')
+
             if isinstance(element, Sampler) or isinstance(element, Controller):
                 node.add_test_element(element)
 

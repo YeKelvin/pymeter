@@ -44,7 +44,7 @@
           "TestGroup__main_controller": {
             "class": "LoopController",
             "property": {
-              "LoopController__loops": "2",
+              "LoopController__loops": "1",
               "LoopController__continue_forever": "false"
             }
           }
@@ -122,7 +122,7 @@
             "property": {},
             "children": [
               {
-                "name": "http/get",
+                "name": "transaction http/get",
                 "remark": "描述",
                 "class": "HTTPSampler",
                 "enabled": true,
