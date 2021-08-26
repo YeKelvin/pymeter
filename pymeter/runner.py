@@ -61,7 +61,6 @@ if __name__ == '__main__':
 
     from pymeter.utils.path_util import PROJECT_PATH
 
-    # script = 'test-funciton.json'
     script = 'http-sampler.json'
 
     with open(os.path.join(PROJECT_PATH, 'scripts', script), 'r', encoding='utf-8') as f:

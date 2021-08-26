@@ -7,12 +7,12 @@ import importlib
 from typing import Final
 
 from pymeter.elements.element import TestElement
+from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.groups.context import ContextService
-from pymeter.groups.interface import NoCoroutineClone
 from pymeter.utils import time_util
 from pymeter.utils.log_util import get_logger
 

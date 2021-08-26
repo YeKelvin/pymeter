@@ -23,13 +23,13 @@ class TransactionController(GenericController):
         """@Override"""
         log.debug('start to get next sampler')
         next_sampler = self.next_with_transaction_sampler()
-        log.debug(f'next-sampler={next_sampler}')
+        log.debug(f'next-sampler:[ {next_sampler} ]')
         return next_sampler
 
     def next_with_transaction_sampler(self):
         # Check if transaction is done
         if self.transaction_sampler and self.transaction_sampler.transaction_done:
-            log.debug(f'End of transaction {self.name}')
+            log.debug(f'End of transaction:[ {self.name} ]')
 
             # This transaction is done
             self.transaction_sampler = None
@@ -37,7 +37,7 @@ class TransactionController(GenericController):
 
         # Check if it is the start of a new transaction
         if self.first:  # must be the start of the subtree
-            log.debug(f'Start of transaction {self.name}')
+            log.debug(f'Start of transaction:[ {self.name} ]')
             self.transaction_sampler = TransactionSampler(self, self.name)
 
         # Sample the children of the transaction
@@ -119,7 +119,7 @@ class TransactionSampler(Sampler):
         self.transaction_done = True
         # Set the overall status for the transaction sample
         self.transaction_sample_result.response_message = (
-            f'Number of samples in transaction : {self.calls}, number of failing samples : {self.no_failing_samples}')
+            f'Number of samples in transaction:[ {self.calls} ], number of failing samples:[ {self.no_failing_samples} ]')
 
         if self.transaction_sample_result.success:
             self.transaction_sample_result.response_code = 200

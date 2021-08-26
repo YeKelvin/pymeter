@@ -8,7 +8,6 @@ from enum import Enum
 from enum import unique
 from typing import Final
 from typing import List
-from typing import Optional
 
 from gevent import Greenlet
 

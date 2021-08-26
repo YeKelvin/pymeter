@@ -4,10 +4,10 @@
 # @Time    : 2021-08-02 17:28:54
 # @Author  : Kelvin.Ye
 from pymeter.configs.arguments import Arguments
-from pymeter.elements.interface import NoConfigMerge
+from pymeter.engine.interface import NoConfigMerge
+from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.groups.context import ContextService
-from pymeter.groups.interface import NoCoroutineClone
 
 
 class VariableDataSet(Arguments, TestCollectionListener, NoConfigMerge, NoCoroutineClone):

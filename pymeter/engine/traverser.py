@@ -3,7 +3,6 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
-import collections
 from typing import Dict
 from typing import List
 
@@ -12,9 +11,9 @@ from pymeter.controls.generic_controller import GenericController
 from pymeter.controls.transaction import TransactionController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
-from pymeter.elements.interface import NoConfigMerge
 from pymeter.engine.interface import LoopIterationListener
-from pymeter.groups.interface import NoCoroutineClone
+from pymeter.engine.interface import NoConfigMerge
+from pymeter.engine.interface import NoCoroutineClone
 from pymeter.groups.package import SamplePackage
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
@@ -26,15 +25,15 @@ log = get_logger(__name__)
 class HashTreeTraverser:
 
     def add_node(self, node, subtree) -> None:
-        """加节点时的处理"""
+        """添加节点时的处理"""
         raise NotImplementedError
 
     def subtract_node(self) -> None:
-        """减节点时的处理（递归回溯）"""
+        """移除节点时的处理（递归回溯）"""
         raise NotImplementedError
 
     def process_path(self) -> None:
-        """到达子叶末尾时的处理"""
+        """到达路径末端时的处理"""
         raise NotImplementedError
 
 
@@ -218,7 +217,7 @@ class TestCompiler(HashTreeTraverser):
 
     def __compile_controller(self, node, subtree):
         if node in self.compiled_node:
-            log.debug(f'节点:[ {node} ]已完成编译，无需再次编译')
+            log.debug(f'当前节点已完成编译，无需再次编译:[ {node} ]')
             return
 
         controller_level_elements = subtree.list()
@@ -261,15 +260,15 @@ class TestCompiler(HashTreeTraverser):
 
 class FindTestElementsUpToRoot(HashTreeTraverser):
 
-    def __init__(self, required_nodes: object):
-        self.node_list = []
-        self.required_nodes = required_nodes
+    def __init__(self, node_to_find: object):
+        self.nodes = []
+        self.node_to_find = node_to_find
         self.stop_recording = False
 
-    def get_controllers_to_root(self) -> list:
+    def get_controllers_to_root(self) -> List[Controller]:
         result = []
-        node_list = self.node_list[::-1]
-        for node in node_list:
+        nodes = self.nodes[::-1]  # 反向排序
+        for node in nodes:
             if isinstance(node, Controller):
                 result.append(node)
         return result
@@ -278,53 +277,17 @@ class FindTestElementsUpToRoot(HashTreeTraverser):
         if self.stop_recording:
             return
 
-        if node is self.required_nodes:
+        if node is self.node_to_find:
             self.stop_recording = True
 
-        self.node_list.append(node)
+        self.nodes.append(node)
 
     def subtract_node(self) -> None:
         if self.stop_recording:
             return
 
-        self.node_list.pop()  # 删除最后一个
+        log.debug(f'subtracting node, nodes size = {len(self.nodes)}')
+        self.nodes.pop()  # 删除最后一个
 
     def process_path(self) -> None:
         pass
-
-
-class FindTestElementsUpToRootTraverser(HashTreeTraverser):
-
-    def __init__(self, node_to_find: object):
-        self.stack = collections.deque()
-        self.node_to_find = node_to_find
-        self.stop_recording = False
-
-    def add_node(self, node, subtree):
-        if self.stop_recording:
-            return
-
-        if node is self.node_to_find:
-            self.stop_recording = True
-
-        self.stack.append(node)
-
-    def subtract_node(self):
-        if self.stop_recording:
-            return
-
-        log.debug(f'Subtracting node, stack size = {len(self.stack)}')
-
-        self.stack.pop()
-
-    def get_controllers_to_root(self) -> List[Controller]:
-        result = []
-        stack_copy = collections.deque()
-        while len(stack_copy) > 0:
-            element = stack_copy[-1]
-            if isinstance(element, Controller):
-                result.add(element)
-
-            stack_copy.pop()
-
-        return result
