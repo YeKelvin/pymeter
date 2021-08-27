@@ -96,10 +96,42 @@ class StandardEngine(Greenlet):
         group_count = 0
         ContextService.clear_total_coroutines(self.id)  # TODO: 还要修改
 
-        log.info(f'开始执行TestGroup，执行方式:[ {"顺序" if self.serialized else "并行"}执行 ]')
+        # ####################################################################################################
+        # SetUpGroup 运行主体
+        # ####################################################################################################
         while self.running:
+            log.info('Starting setUp groups')
+            try:
+                setup_group: SetupGroup = next(setup_group_iter)
+                group_count += 1
+                group_name = setup_group.name
+                log.info(f'开始第 {group_count} 个 SetUpGroup，group:[ {group_name} ]')
+                self.__start_task_group(setup_group, group_count, setup_group_searcher, collection_level_elements)
+
+                # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
+                if self.serialized:
+                    log.info(f'开始下一个 SetUpGroup 之前等待当前 SetUpGroup 完成，group:[ {group_name} ]')
+                    setup_group.wait_groups_stopped()
+            except StopIteration:
+                log.info('所有 SetUpGroup 已启动')
+                break
+
+        log.info('Waiting for all setup groups to exit')
+        setup_group.wait_groups_stopped()
+        log.info('All SetupGroups have ended')
+        group_count = 0
+        ContextService.clear_total_coroutines(self.id)
+        self.groups.clear()  # The groups have all completed now
+
+        # ####################################################################################################
+        # TestGroup 运行主体
+        # ####################################################################################################
+        while self.running:
+            log.info(f'开始执行TestGroup，执行方式:[ {"顺序" if self.serialized else "并行"}执行 ]')
             try:
                 group: TestGroup = next(group_iter)
+                if isinstance(group, SetupGroup) or isinstance(group, TearDownGroup):
+                    continue
                 group_count += 1
                 group_name = group.name
                 log.info(f'开始第 {group_count} 个TestGroup，group:[ {group_name} ]')
@@ -120,13 +152,43 @@ class StandardEngine(Greenlet):
                 log.info('测试已停止，不再启动剩余的TestGroup')
             if not self.serialized:
                 log.info('等待所有TestGroup执行完成')
-                self.__wait_groups_stopped()
 
-            log.info('所有 TestGroup 已执行完成')
-            self.groups.clear()
+        # log.info('所有 TestGroup 已执行完成')
+        self.__wait_groups_stopped()
+        log.info('All TestGroups have ended')
+        group_count = 0
+        ContextService.clear_total_coroutines(self.id)
+        self.groups.clear()  # The groups have all completed now
 
-            # 遍历执行 TestCollectionListener
-            self.__notify_test_listeners_of_end(test_listener_searcher)
+        # ####################################################################################################
+        # TeardownGroup 运行主体
+        # ####################################################################################################
+        while self.running:
+            log.info('Starting teardown groups')
+            try:
+                teardown_group: TearDownGroup = next(teardown_group_iter)
+                group_count += 1
+                group_name = teardown_group.name
+                log.info(f'开始第 {group_count} 个 TearDownGroup，group:[ {group_name} ]')
+                self.__start_task_group(teardown_group, group_count, teardown_group_iter, collection_level_elements)
+
+                # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
+                if self.serialized:
+                    log.info(f'开始下一个 TearDownGroup 之前等待当前 TearDownGroup 完成，group:[ {group_name} ]')
+                    setup_group.wait_groups_stopped()
+            except StopIteration:
+                log.info('所有 TearDownGroup 已启动')
+                break
+
+        log.info('Waiting for all teardown groups to exit')
+        teardown_group.wait_groups_stopped()
+        log.info('All TearDownGroups have ended')
+        group_count = 0
+        ContextService.clear_total_coroutines(self.id)
+        self.groups.clear()  # The groups have all completed now
+
+        # 遍历执行 TestCollectionListener
+        self.__notify_test_listeners_of_end(test_listener_searcher)
 
         # DEBUG时输出结果
         if log.level == logging.DEBUG:
