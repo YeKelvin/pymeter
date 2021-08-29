@@ -69,16 +69,16 @@ class LogicalAction(Enum):
 class TestGroup(Controller):
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
-    ON_SAMPLE_ERROR: Final = 'TestGroup__on_sample_error'
+    ON_SAMPLE_ERROR = 'TestGroup__on_sample_error'
 
     # 协程数
-    NUMBER_GROUPS: Final = 'TestGroup__number_groups'
+    NUMBER_GROUPS = 'TestGroup__number_groups'
 
     # TODO: 每秒启动的协程数
-    STARTUPS_PER_SECOND: Final = 'TestGroup__startups_per_second'
+    STARTUPS_PER_SECOND = 'TestGroup__startups_per_second'
 
     # 循环控制器
-    MAIN_CONTROLLER: Final = 'TestGroup__main_controller'
+    MAIN_CONTROLLER = 'TestGroup__main_controller'
 
     # 默认等待协程结束时间，单位 ms
     WAIT_TO_DIE = 5 * 1000
@@ -767,8 +767,30 @@ class Coroutine(Greenlet):
 
 
 class SetupGroup(TestGroup):
-    ...
+
+    # Sampler 失败时的处理动作，枚举 LogicalAction
+    ON_SAMPLE_ERROR: Final = 'SetupGroup__on_sample_error'
+
+    # 协程数
+    NUMBER_GROUPS: Final = 'SetupGroup__number_groups'
+
+    # 每秒启动的协程数
+    STARTUPS_PER_SECOND: Final = 'SetupGroup__startups_per_second'
+
+    # 循环控制器
+    MAIN_CONTROLLER: Final = 'SetupGroup__main_controller'
 
 
 class TearDownGroup(TestGroup):
-    ...
+
+    # Sampler 失败时的处理动作，枚举 LogicalAction
+    ON_SAMPLE_ERROR: Final = 'TearDownGroup__on_sample_error'
+
+    # 协程数
+    NUMBER_GROUPS: Final = 'TearDownGroup__number_groups'
+
+    # 每秒启动的协程数
+    STARTUPS_PER_SECOND: Final = 'TearDownGroup__startups_per_second'
+
+    # 循环控制器
+    MAIN_CONTROLLER: Final = 'TearDownGroup__main_controller'
