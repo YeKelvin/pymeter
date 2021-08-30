@@ -117,7 +117,7 @@ class StandardEngine(Greenlet):
                 break
 
         log.info('Waiting for all setup groups to exit')
-        setup_group.wait_groups_stopped()
+        self.__wait_groups_stopped()
         log.info('All SetupGroups have ended')
         group_count = 0
         ContextService.clear_total_coroutines(self.id)
@@ -153,7 +153,7 @@ class StandardEngine(Greenlet):
             if not self.serialized:
                 log.info('等待所有TestGroup执行完成')
 
-        # log.info('所有 TestGroup 已执行完成')
+        log.info('Waiting for all test groups to exit')
         self.__wait_groups_stopped()
         log.info('All TestGroups have ended')
         group_count = 0
@@ -181,7 +181,7 @@ class StandardEngine(Greenlet):
                 break
 
         log.info('Waiting for all teardown groups to exit')
-        teardown_group.wait_groups_stopped()
+        self.__wait_groups_stopped()
         log.info('All TearDownGroups have ended')
         group_count = 0
         ContextService.clear_total_coroutines(self.id)

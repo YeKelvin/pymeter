@@ -151,7 +151,11 @@ class HTTPSampler(Sampler):
         return result
 
     def get_data(self):
-        if ('content-type' in self.headers) and (self.headers['content-type'].lower() == 'application/x-www-form-urlencoded'):
+        if (
+            self.headers  # noqa
+            and 'content-type' in self.headers  # noqa
+            and self.headers['content-type'].lower() == 'application/x-www-form-urlencoded'  # noqa
+        ):
             return self.form
         else:
             return self.data
