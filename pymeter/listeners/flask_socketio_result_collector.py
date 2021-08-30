@@ -144,7 +144,7 @@ class FlaskSocketIOResultCollector(
                 'startTime': time_util.timestamp_to_strftime(result.start_time),
                 'endTime': time_util.timestamp_to_strftime(result.end_time),
                 'elapsedTime': result.elapsed_time,
-                'subResults': result.sub_results
+                'subResults': [result.serialization for result in result.sub_results]
             }
         })
 

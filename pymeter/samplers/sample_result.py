@@ -68,6 +68,27 @@ class SampleResult:
     def started(self):
         return self.start_time != 0
 
+    @property
+    def serialization(self):
+        return {
+            'samplerName': self.sample_name,
+            'samplerRemark': self.sample_remark,
+            'url': self.request_url,
+            'request': self.request_data,
+            'requestHeaders': self.request_headers,
+            'response': self.response_data,
+            'responseHeaders': self.response_headers,
+            'responseCode': self.response_code,
+            'responseMessage': self.response_message,
+            'requestSize': self.request_size,
+            'responseSize': self.response_size,
+            'success': self.success,
+            'startTime': time_util.timestamp_to_strftime(self.start_time),
+            'endTime': time_util.timestamp_to_strftime(self.end_time),
+            'elapsedTime': self.elapsed_time,
+            'subResults': [result.serialization for result in self.sub_results]
+        }
+
     def sample_start(self):
         self.start_time = time_util.timestamp_now()
 
