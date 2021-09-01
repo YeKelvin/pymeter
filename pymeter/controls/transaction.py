@@ -20,16 +20,19 @@ class TransactionController(GenericController):
         self.transaction_sampler = None  # type: TransactionSampler
 
     def next(self):
-        """@Override"""
-        log.debug('start to get next sampler')
+        """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next sampler')
         next_sampler = self.next_with_transaction_sampler()
-        log.debug(f'nextSampler:[ {next_sampler} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] nextSampler:[ {next_sampler} ]')
         return next_sampler
 
     def next_with_transaction_sampler(self):
         # Check if transaction is done
         if self.transaction_sampler and self.transaction_sampler.transaction_done:
-            log.debug(f'End of transaction:[ {self.name} ]')
+            log.debug(
+                f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] transaction:[ {self.name} ] '
+                f'end of transaction'
+            )
 
             # This transaction is done
             self.transaction_sampler = None
@@ -37,7 +40,10 @@ class TransactionController(GenericController):
 
         # Check if it is the start of a new transaction
         if self.first:  # must be the start of the subtree
-            log.debug(f'Start of transaction:[ {self.name} ]')
+            log.debug(
+                f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] transaction:[ {self.name} ] '
+                f'start of transaction'
+            )
             self.transaction_sampler = TransactionSampler(self, self.name)
 
         # Sample the children of the transaction
@@ -51,7 +57,7 @@ class TransactionController(GenericController):
         return self.transaction_sampler
 
     def next_is_controller(self, controller: Controller):
-        """@Override"""
+        """@override"""
         sampler = controller.next()
         if sampler is None:
             self.current_returned_none(controller)
@@ -63,7 +69,7 @@ class TransactionController(GenericController):
             return sampler
 
     def trigger_end_of_loop(self):
-        """@Override"""
+        """@override"""
         sub_sampler = self.transaction_sampler.sub_sampler
         # triggerEndOfLoop is called when error occurs to end Main Loop
         # in this case normal workflow doesn't happen, so we need

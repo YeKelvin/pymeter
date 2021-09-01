@@ -4,6 +4,7 @@
 # @Time    : 2020/2/28 16:01
 # @Author  : Kelvin.Ye
 from pymeter.elements.element import TestElement
+from pymeter.groups.context import ContextService
 from pymeter.samplers.sampler import Sampler
 
 
@@ -43,3 +44,8 @@ class IteratingController:
     def break_loop(self) -> None:
         """中断循环"""
         raise NotImplementedError
+
+    def update_iteration_index(self, name, iter_count) -> None:
+        variables = ContextService.get_context().variables
+        if variables:
+            variables.put(f'__pm__.{name}.__idx__', iter_count)

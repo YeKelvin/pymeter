@@ -9,6 +9,7 @@ from pymeter.common.exceptions import NextIsNullException
 from pymeter.controls.controller import Controller
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.groups.context import ContextService
+from pymeter.groups.context import CoroutineContext
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
 
@@ -17,8 +18,7 @@ log = get_logger(__name__)
 
 
 class GenericController(Controller):
-    """所有控制器的基类
-    """
+    """所有控制器的基类"""
 
     def __init__(self):
         super().__init__()
@@ -39,15 +39,19 @@ class GenericController(Controller):
         self.first = True
 
         # 当控制器完成所有Sampler的交付时，设置为True，表示协程已完成
-        self._done = False
+        self._done = False  # @override
 
     @property
-    def done(self):
+    def done(self) -> bool:
         return self._done
 
     @done.setter
-    def done(self, value: bool):
-        self._done = value
+    def done(self, val: bool):
+        self._done = val
+
+    @property
+    def ctx(self) -> CoroutineContext:
+        return ContextService.get_context()
 
     def reset_current(self):
         self.current = 0
@@ -82,7 +86,7 @@ class GenericController(Controller):
         self.iter_count += 1
 
     def next(self) -> Optional[Sampler]:
-        log.debug('start to get next sampler')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next sampler')
         self.fire_iter_events()
 
         if self.done:
@@ -99,9 +103,9 @@ class GenericController(Controller):
                 elif isinstance(current_element, Controller):
                     next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
-            log.debug('next sampler is null')
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next sampler is null')
 
-        log.debug(f'nextSampler:[ {next_sampler} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] nextSampler:[ {next_sampler} ]')
         return next_sampler
 
     def fire_iter_events(self):
@@ -110,9 +114,7 @@ class GenericController(Controller):
             self.first = False
 
     def fire_iteration_start(self):
-        log.debug(
-            f'coroutine:[ {ContextService.get_context().coroutine_name} ] notify all LoopIterationListener to start'
-        )
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
         log.debug(f'SubIterationListeners:[ {self.sub_iteration_listeners} ]')
         for listener in self.sub_iteration_listeners[::-1]:
             listener.iteration_start(self, self.iter_count)
@@ -129,22 +131,22 @@ class GenericController(Controller):
 
         return None
 
-    def next_is_sampler(self, sampler: Sampler):
+    def next_is_sampler(self, sampler: Sampler) -> Sampler:
         self.increment_current()
         return sampler
 
-    def next_is_controller(self, controller: Controller):
+    def next_is_controller(self, controller: Controller) -> Controller:
         sampler = controller.next()
         if sampler is None:
             self.current_returned_none(controller)
             sampler = self.next()
         return sampler
 
-    def next_is_null(self):
+    def next_is_null(self) -> None:
         self.re_initialize()
         return None
 
-    def current_returned_none(self, controller: Controller) -> None:
+    def current_returned_none(self, controller: Controller):
         if controller.done:
             self.remove_current_element()
         else:
