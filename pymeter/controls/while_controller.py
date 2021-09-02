@@ -18,9 +18,21 @@ class WhileController(GenericController, IteratingController):
 
     CONDITION: Final = 'WhileController__condition'
 
+    MAX_LOOP_COUNT: Final = 'WhileController__max_loop_count'
+
+    TIMEOUT: Final = 'WhileController__timeout'
+
     @property
     def condition(self) -> str:
         return self.get_property_as_str(self.CONDITION)
+
+    @property
+    def max_loop_count(self) -> int:
+        return self.get_property_as_int(self.MAX_LOOP_COUNT)
+
+    @property
+    def timeout(self) -> int:
+        return self.get_property_as_int(self.TIMEOUT)
 
     @property
     def last_sample_ok(self) -> str:
@@ -47,7 +59,7 @@ class WhileController(GenericController, IteratingController):
         if loop_end and cnd.isspace():
             result = self.last_sample_ok.lower() == 'false'
         else:
-            # cnd may be null if next() called us
+            # condition may be null if next() called us
             result = eval(cnd)
 
         log.debug(f'while condition result:[ {result} ]')
@@ -86,7 +98,7 @@ class WhileController(GenericController, IteratingController):
     def reset_loop_count(self):
         self.reset_iter_count()
 
-    def startNextLoop(self):
+    def start_next_loop(self):
         """@override"""
         self.re_initialize()
 
