@@ -199,35 +199,31 @@ class TestCompiler(HashTreeTraverser):
 
     def __save_sampler_package(self, node: Sampler, subtree):
         """saveSamplerConfigs"""
-        log.debug(f'save sampler package, sampler:[ {node} ]')
         package = SamplePackage(node)
         # 存储 Sampler 的子代节点
         package.save_sampler(subtree.list())
         # 存储 TestGroup 的非 Group/Sampler 子代节点
         package.save_sampler(self.group_level_elements)
-        log.debug(f'savedPackage:[ {package} ]')
         self.sampler_package_saver[node] = package
 
     def __save_transaction_controller_package(self, node: TransactionController, subtree):
         """saveTransactionControllerConfigs"""
-        log.debug(f'save transaction controller package, controller:[ {node} ]')
         package = SamplePackage(TransactionSampler(node, node.name))
         # 存储 TransactionControlle 的子节点
         package.save_transaction_controller(subtree.list())
         # 存储 TestGroup 的非 Group/Sampler 子代节点
         package.save_transaction_controller(self.group_level_elements)
-        log.debug(f'savedPackage:[ {package} ]')
         self.transaction_sampler_package_saver[node] = package
 
     def __compile_controller(self, node, subtree):
         if node in self.compiled_node:
-            log.debug(f'当前节点已完成编译，无需再次编译:[ {node} ]')
+            log.debug(f'current node:[ {node} ] has been compiled，does not need to be compiled again')
             return
 
         controller_level_elements = subtree.list()
         # Controller 节点储存 Sampler 节点和 Controller 节点
         for element in controller_level_elements:
-            log.debug(f'controller:[ {node} ] sub-element:[ {element} ]')
+            log.debug(f'compiling element:[ {element} ] from controller:[ {node} ]')
 
             if isinstance(element, Sampler) or isinstance(element, Controller):
                 node.add_test_element(element)

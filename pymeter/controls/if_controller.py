@@ -27,7 +27,7 @@ class IfController(GenericController):
 
     @done.setter
     def done(self, val: bool):
-        super().done = val
+        self._done = val
 
     def next(self):
         """@override"""
@@ -36,12 +36,13 @@ class IfController(GenericController):
         # For subsequent calls, we are inside the IfControllerGroup,
         # so then we just pass the control to the next item inside the if control
         cnd = self.condition.strip()
-        log.debug(f'while condition:[ {cnd} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition:[ {cnd} ]')
         result = True
         if self.first:
             result = eval(cnd)
 
-        log.debug(f'while condition result:[ {result} ]')
+        log.debug(
+            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition result:[ {result} ]')
         if result:
             return super().next()
 

@@ -51,7 +51,7 @@ class CompoundVariable:
                 results.append(item.execute())
             elif isinstance(item, SimpleVariable):
                 log.debug(f'appending actual value from variable:[ {item.name} ]')
-                results.append(item.value)
+                results.append(str(item.value))
             else:
                 results.append(item)
         results_str = ''.join(results)

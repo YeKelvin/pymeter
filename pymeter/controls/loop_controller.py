@@ -45,13 +45,13 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
     @property
     def done(self):
-        return super().done  # TODO: super().done???  self._done???
+        return self._done
 
     @done.setter
     def done(self, value: bool):
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] isDone:[ {value} ]')
         self.reset_break_loop()
-        super().done = value
+        self._done = value
 
     def next(self) -> Optional[Sampler]:
         if self.end_of_loop():

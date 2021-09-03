@@ -3,6 +3,7 @@
 # @File    : while_controller.py
 # @Time    : 2021-08-26 18:08:15
 # @Author  : Kelvin.Ye
+import traceback
 from typing import Final
 
 from pymeter.controls.controller import IteratingController
@@ -40,7 +41,7 @@ class WhileController(GenericController, IteratingController):
 
     def __init__(self):
         super().__init__()
-        self.break_loop = False
+        self._break_loop = False
 
     # Evaluate the condition, which can be:
     # blank or LAST = was the last sampler OK?
@@ -48,22 +49,23 @@ class WhileController(GenericController, IteratingController):
     # If blank, only evaluate at the end of the loop
     # Must only be called at start and end of loop
     def end_of_loop(self, loop_end: bool):
-        if self.break_loop:
+        if self._break_loop:
             return True
 
         cnd = self.condition.strip()
-        log.debug(f'while condition:[ {cnd} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while condition:[ {cnd} ]')
         result = False
 
-        # If blank, only check previous sample when at end of loop
+        # 如果条件为空，在循环结束时只检查上一个 Sampler 的结果
         if loop_end and cnd.isspace():
             result = self.last_sample_ok.lower() == 'false'
         else:
-            # condition may be null if next() called us
+            # 如果 next() 被调用，条件可能为空
             result = eval(cnd)
 
-        log.debug(f'while condition result:[ {result} ]')
-        return result
+        log.debug(
+            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while condition result:[ {result} ]')
+        return not result
 
     def next_is_null(self):
         """@override"""
@@ -83,15 +85,20 @@ class WhileController(GenericController, IteratingController):
 
     def next(self):
         """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.update_iteration_index(self.name, self.iter_count)
         try:
+            # 如果第一次进入时条件为假，则完全跳过控制器
             if self.first and self.end_of_loop(False):
                 self.reset_break_loop()
                 self.reset_loop_count()
+                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
                 return None
-            return super().next()
+            next = super().next()
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next} ]')
+            return next
         except Exception:
-            ...
+            log.debug(traceback.format_exc())
         finally:
             self.update_iteration_index(self.name, self.iter_count)
 

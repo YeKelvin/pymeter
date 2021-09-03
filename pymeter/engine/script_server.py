@@ -40,9 +40,10 @@ __MODULE_PATH__ = {
     'VariableDataSet': 'pymeter.configs.variable_data_set',
 
     # 逻辑控制器
-    'LoopController': 'pymeter.controls.loop_controller',
     'IfController': 'pymeter.controls.if_controller',
+    'LoopController': 'pymeter.controls.loop_controller',
     'TransactionController': 'pymeter.controls.transaction',
+    'WhileController': 'pymeter.controls.while_controller',
 
     # 前置处理器
     'PythonPreProcessor': 'pymeter.processors.python_pre_processor',
@@ -152,7 +153,7 @@ def __get_node(script: dict) -> TestElement:
     """根据元素的class属性实例化为对象"""
     # 获取节点的类型
     class_name = script.get('class')
-    log.debug(f'node-class:[ {class_name} ]')
+    log.debug(f'node class:[ {class_name} ]')
 
     # 根据类型名称获取type对象
     class_type = __get_class_type(class_name)

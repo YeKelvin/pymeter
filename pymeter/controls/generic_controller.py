@@ -86,27 +86,27 @@ class GenericController(Controller):
         self.iter_count += 1
 
     def next(self) -> Optional[Sampler]:
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next sampler')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.fire_iter_events()
 
         if self.done:
             return None
 
-        next_sampler = None
+        next = None
         try:
             current_element = self.get_current_element()
             if current_element is None:
-                next_sampler = self.next_is_null()
+                next = self.next_is_null()
             else:
                 if isinstance(current_element, Sampler):
-                    next_sampler = self.next_is_sampler(current_element)
-                elif isinstance(current_element, Controller):
-                    next_sampler = self.next_is_controller(current_element)
+                    next = self.next_is_sampler(current_element)
+                else:
+                    next = self.next_is_controller(current_element)
         except NextIsNullException:
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next sampler is null')
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is null')
 
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] nextSampler:[ {next_sampler} ]')
-        return next_sampler
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next} ]')
+        return next
 
     def fire_iter_events(self):
         if self.first:
@@ -115,13 +115,10 @@ class GenericController(Controller):
 
     def fire_iteration_start(self):
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
-        log.debug(f'SubIterationListeners:[ {self.sub_iteration_listeners} ]')
         for listener in self.sub_iteration_listeners[::-1]:
             listener.iteration_start(self, self.iter_count)
 
     def get_current_element(self):
-        log.debug(f'SubControllersAndSamplers:[ {self.sub_controllers_and_samplers} ]')
-
         if self.current < len(self.sub_controllers_and_samplers):
             return self.sub_controllers_and_samplers[self.current]
 
@@ -153,6 +150,7 @@ class GenericController(Controller):
             self.increment_current()
 
     def add_element(self, child):
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add element:[ {child} ]')
         self.sub_controllers_and_samplers.append(child)
 
     def add_test_element(self, child):
@@ -163,6 +161,9 @@ class GenericController(Controller):
         self.sub_controllers_and_samplers.remove(self.sub_controllers_and_samplers[self.current])
 
     def add_iteration_listener(self, listener: LoopIterationListener):
+        log.debug(
+            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ] '
+        )
         self.sub_iteration_listeners.append(listener)
 
     def remove_iteration_listener(self, listener: LoopIterationListener):

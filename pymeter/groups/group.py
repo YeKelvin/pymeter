@@ -314,7 +314,7 @@ class Coroutine(Greenlet):
         log.info('开始编译TestGroup的子代节点')
         self.compiler = TestCompiler(group_level_elements)
         self.group_tree.traverse(self.compiler)
-        log.debug(f'编译完成，sampler-package:[ {self.compiler.sampler_package_saver} ]')
+        log.debug(f'compile completed，samplerPackage:[ {self.compiler.sampler_package_saver} ]')
 
         # 初始化 TestGroup 控制器
         self.group_main_controller.initialize()
@@ -338,7 +338,7 @@ class Coroutine(Greenlet):
                 sampler = self.group_main_controller.next()
 
                 while self.running and sampler:
-                    log.debug(f'coroutine:[ {self.coroutine_name} ] currentSamplerOrTransaction:[ {sampler} ]')
+                    log.debug(f'coroutine:[ {self.coroutine_name} ] current sampler:[ {sampler} ]')
                     # 处理 Sampler
                     self.__process_sampler(sampler, None, context)
                     # 根据 Sampler 结果控制循环
@@ -646,7 +646,7 @@ class Coroutine(Greenlet):
             self.__process_assertion(assertion, result)
 
         log.debug(
-            f'coroutine:[ {self.coroutine_name} ] lastSampler:[ {result.sample_name} ] success:[ {result.success} ]'
+            f'coroutine:[ {self.coroutine_name} ] last sampler:[ {result.sample_name} ] success:[ {result.success} ]'
         )
         context.variables.put(self.LAST_SAMPLE_OK, result.success)
 

@@ -28,9 +28,14 @@ class PythonSampler(Sampler):
     @property
     def script_wrapper(self):
         func = ['def func(log, ctx, vars, props, prev, result):\n']
-        lines = self.script.split('\n')
-        for line in lines:
-            func.append(f'\t{line}\n')
+
+        if not self.script or self.script.isspace():
+            func.append('\t...\n')
+        else:
+            lines = self.script.split('\n')
+            for line in lines:
+                func.append(f'\t{line}\n')
+
         func.append('self.wrapper = func')
         return ''.join(func)
 
