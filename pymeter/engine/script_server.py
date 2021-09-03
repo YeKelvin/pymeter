@@ -12,7 +12,7 @@ from typing import Tuple
 from pymeter.common.exceptions import ScriptParseException
 from pymeter.elements.element import TestElement
 from pymeter.engine.tree import HashTree
-from pymeter.engine.value_parser import ValueReplacer
+from pymeter.engine.values import ValueReplacer
 from pymeter.utils import json_util
 from pymeter.utils.log_util import get_logger
 

@@ -3,7 +3,7 @@
 # @File    : value_replacer_test.py
 # @Time    : 2021/5/30 17:23
 # @Author  : Kelvin.Ye
-from pymeter.engine.value_parser import ValueReplacer
+from pymeter.engine.values import ValueReplacer
 
 
 class ValueReplacerTest:

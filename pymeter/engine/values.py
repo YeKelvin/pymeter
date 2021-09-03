@@ -26,17 +26,24 @@ class CompoundVariable:
         if not self.functions:
             self.__init_functions__()
 
+        # 原始参数
         self.raw_parameters = None
+        # 是否存在函数
         self.has_function = False
-        self.is_dynamic = False
+        # 动态函数
+        self.dynamic = False
+        # 已编译完成的组件
         self.compiled_components = []
-        self.permanent_results = None  # 缓存函数执行结果
+        # 结果缓存
+        self.permanent_results = None
+
         if parameters:
             self.set_parameters(parameters)
 
     def execute(self):
         """执行函数"""
-        if not self.is_dynamic and self.permanent_results:  # 优先返回函数执行结果缓存
+        # 非动态函数时，优先返回结果缓存
+        if not self.dynamic and self.permanent_results:
             log.debug('return cache results')
             return self.permanent_results
 
@@ -56,7 +63,8 @@ class CompoundVariable:
                 results.append(item)
         results_str = ''.join(results)
 
-        if not self.is_dynamic:
+        # 非动态函数时，缓存函数结果
+        if not self.dynamic:
             log.debug('non-dynamic functions, cache function execution results')
             self.permanent_results = results_str
 
@@ -68,18 +76,20 @@ class CompoundVariable:
         if not parameters:
             return
 
+        # 编译参数
         self.compiled_components = FunctionParser.compile_str(parameters)
 
         if len(self.compiled_components) > 1 or not isinstance(self.compiled_components[0], str):
             log.debug('function in compiled string')
             self.has_function = True
 
-        self.permanent_results = None  # 在首次执行时进行计算和缓存
+        # 在首次执行时进行计算和缓存
+        self.permanent_results = None
 
         for item in self.compiled_components:
             if isinstance(item, Function) or isinstance(item, SimpleVariable):
                 log.debug('set as dynamic function')
-                self.is_dynamic = True
+                self.dynamic = True
                 break
 
     @classmethod

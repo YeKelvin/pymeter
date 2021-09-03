@@ -133,7 +133,7 @@ class DictProperty(PyMeterProperty):
 class FunctionProperty(PyMeterProperty):
     def __init__(self, name: str, function):
         super().__init__(name, None)
-        self.function = function  # type pymeter.engine.value_parser.CompoundVariable
+        self.function = function  # type pymeter.engine.values.CompoundVariable
         self.cache_value = None
 
     def get_raw(self):
