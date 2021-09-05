@@ -135,9 +135,18 @@ class HashTree(dict):
             tree = tree.add_key(item)
         return tree
 
-    def get_subtree(self, node: object) -> 'HashTree':
+    def _get_treepath(self, treepath: list):
+        tree = self
+        for key in treepath:
+            tree = tree.get_subtree(key)
+            if tree is None:
+                return None
+
+        return tree
+
+    def get_subtree(self, key: object) -> 'HashTree':
         """返回key的hashtree，这个hashtree其实就是节点下的子节点"""
-        return self._data.get(node)
+        return self._data.get(key)
 
     def index(self, index) -> 'HashTree':
         """根据下标返回对应 node的 hashtree"""
@@ -158,6 +167,13 @@ class HashTree(dict):
     def list(self) -> list:
         """返回当前 hashtree下 node的列表"""
         return list(self._data.keys())
+
+    def list_by_treepath(self, treepath: list):
+        tree = self._get_treepath(treepath)
+        if tree is not None:
+            return tree.list()
+
+        return []
 
     def search(self, node: object) -> "HashTree":
         """在当前 hashtree下遍历搜索（深度优先） node"""

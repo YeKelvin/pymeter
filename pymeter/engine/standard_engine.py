@@ -14,6 +14,7 @@ from pymeter.elements.element import TestElement
 from pymeter.engine.collection import TestCollection
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.traverser import SearchByClass
+from pymeter.engine.traverser import TestCompiler
 from pymeter.engine.tree import HashTree
 from pymeter.groups.context import ContextService
 from pymeter.groups.group import SetupGroup
@@ -88,6 +89,8 @@ class StandardEngine(Greenlet):
         self.tree.traverse(setup_group_searcher)
         self.tree.traverse(group_searcher)
         self.tree.traverse(teardown_group_searcher)
+
+        TestCompiler.initialize()
 
         setup_group_iter = iter(setup_group_searcher.get_search_result())
         group_iter = iter(group_searcher.get_search_result())

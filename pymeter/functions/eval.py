@@ -5,7 +5,7 @@
 # @Author  : Kelvin.Ye
 from typing import Final
 
-from pymeter.engine import value_parser
+from pymeter.engine import values
 from pymeter.functions.function import Function
 from pymeter.utils.log_util import get_logger
 

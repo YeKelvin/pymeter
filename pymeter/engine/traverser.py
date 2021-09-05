@@ -3,19 +3,25 @@
 # @File    : traverser
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
+from collections import deque
 from typing import Dict
 from typing import List
 
+from pymeter.assertions.assertion import Assertion
 from pymeter.controls.controller import Controller
-from pymeter.controls.generic_controller import GenericController
 from pymeter.controls.transaction import TransactionController
 from pymeter.controls.transaction import TransactionSampler
+from pymeter.elements.element import ConfigElement
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import SampleListener
 from pymeter.groups.package import SamplePackage
+from pymeter.processors.post import PostProcessor
+from pymeter.processors.pre import PreProcessor
 from pymeter.samplers.sampler import Sampler
+from pymeter.timers.timer import Timer
 from pymeter.utils.log_util import get_logger
 
 
@@ -38,6 +44,7 @@ class HashTreeTraverser:
 
 
 class TreeSearcher(HashTreeTraverser):
+
     FOUND = 'found'
 
     def __init__(self, target: object):
@@ -155,15 +162,23 @@ class TreeCloner(HashTreeTraverser):
 
 class TestCompiler(HashTreeTraverser):
 
-    def __init__(self, group_level_elements: list):
-        self.group_level_elements = group_level_elements
-        self.sampler_package_saver: Dict[Sampler, SamplePackage] = {}  # samplerConfigMap
-        self.transaction_sampler_package_saver: Dict[TransactionController, SamplePackage] = {}  # transactionControllerConfigMap
-        self.compiled_node = []
+    PAIRING: list = []
+
+    @classmethod
+    def initialize(cls):
+        cls.PAIRING.clear()
+
+    def __init__(self, tree):
+        self.stack = deque()
+
+        self.sampler_config_dict: Dict[Sampler, SamplePackage] = {}
+        self.transaction_controller_config_dict: Dict[TransactionController, SamplePackage] = {}
+
+        self.test_tree = tree
 
     def configure_sampler(self, sampler) -> SamplePackage:
         log.debug(f'configure sampler:[ {sampler} ]')
-        package = self.sampler_package_saver.get(sampler)
+        package = self.sampler_config_dict.get(sampler)
         package.sampler = sampler
         self.__configure_with_config_elements(sampler, package.configs)
         return package
@@ -171,24 +186,47 @@ class TestCompiler(HashTreeTraverser):
     def configure_transaction_sampler(self, transaction_sampler: TransactionSampler) -> SamplePackage:
         log.debug(f'configure transaction sampler:[ {transaction_sampler} ]')
         controller = transaction_sampler.transaction_controller
-        package = self.transaction_sampler_package_saver.get(controller)
+        package = self.transaction_controller_config_dict.get(controller)
         package.sampler = transaction_sampler
         return package
 
-    def add_node(self, node, subtree) -> None:
-        log.debug(f'started compiling node:[ {node} ]')
-        if isinstance(node, Sampler):
-            self.__save_sampler_package(node, subtree)
-        elif isinstance(node, TransactionController):
-            self.__save_transaction_controller_package(node, subtree)
+    def done(self, package) -> None:
+        log.debug('SamplerPackage Done')
+        package.recover_running_version()
 
-        if isinstance(node, Controller):
-            self.__compile_controller(node, subtree)
+    def add_node(self, node, subtree):
+        """@override"""
+        self.stack.append(node)
 
-    def subtract_node(self) -> None:
-        pass
+    def subtract_node(self):
+        """@override"""
+        log.debug(f'subtracting node, stack size:[ {len(self.stack)} ]')
+        child = self.stack[-1]
+        log.debug(f'current child:[ {child} ]')
+        self.__track_iteration_listeners(self.stack)
+        if isinstance(child, Sampler):
+            self.__save_sampler_configs(child)
+        elif isinstance(child, TransactionController):
+            self.__save_transaction_controller_configs(child)
+
+        self.stack.pop()
+        if len(self.stack) > 0:
+            parent = self.stack[-1]
+            duplicate = False
+            if isinstance(parent, Controller) and (isinstance(child, Sampler) or isinstance(child, Controller)):
+                pair = self.ObjectPair(parent, child)
+                # TODO: 加锁
+                if pair not in self.PAIRING:
+                    parent.add_test_element(child)
+                    self.PAIRING.append(pair)
+                else:
+                    duplicate = True
+
+            if duplicate:
+                log.warn(f'Unexpected duplicate for {parent} and {child}')
 
     def process_path(self) -> None:
+        """@override"""
         pass
 
     def __configure_with_config_elements(self, sampler: Sampler, configs: list):
@@ -197,65 +235,94 @@ class TestCompiler(HashTreeTraverser):
             if not isinstance(config, NoConfigMerge):
                 sampler.add_test_element(config)
 
-    def __save_sampler_package(self, node: Sampler, subtree):
-        """saveSamplerConfigs"""
-        package = SamplePackage(node)
-        # 存储 Sampler 的子代节点
-        package.save_sampler(subtree.list())
-        # 存储 TestGroup 的非 Group/Sampler 子代节点
-        package.save_sampler(self.group_level_elements)
-        self.sampler_package_saver[node] = package
+    def __track_iteration_listeners(self, stack):
+        child = stack[-1]
+        if isinstance(child, LoopIterationListener):
+            for item in stack[::-1]:
+                if item == child:
+                    log.debug(f'tracking iteration listeners, current item:[ {item} ] is child:[ {child} ] skip')
+                    continue
+                if isinstance(item, Controller):
+                    log.debug(
+                        f'tracking iteration listeners, current item:[ {item} ] add iteration listener:[ {child} ]'
+                    )
+                    item.add_iteration_listener(child)
 
-    def __save_transaction_controller_package(self, node: TransactionController, subtree):
-        """saveTransactionControllerConfigs"""
-        package = SamplePackage(TransactionSampler(node, node.name))
-        # 存储 TransactionControlle 的子节点
-        package.save_transaction_controller(subtree.list())
-        # 存储 TestGroup 的非 Group/Sampler 子代节点
-        package.save_transaction_controller(self.group_level_elements)
-        self.transaction_sampler_package_saver[node] = package
+    def __save_sampler_configs(self, sampler):
+        configs = []
+        controllers = []
+        listeners = []
+        timers = []
+        assertions = []
+        pres = []
+        posts = []
+        for i in range(len(self.stack) - 1, -1, -1):
+            self.__add_direct_parent_controllers(controllers, self.stack[i - 1])
+            inner_pres = []
+            inner_posts = []
+            inner_assertions = []
+            # log.debug(f'i={i}')
+            # log.debug([x for x in range(0, i)])
+            # log.debug(f'[self.stack[x] for x in range(0, i)]={[self.stack[x] for x in range(0, i)]}')
+            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i)]):
+                if isinstance(item, ConfigElement):
+                    configs.append(item)
+                elif isinstance(item, SampleListener):
+                    listeners.append(item)
+                elif isinstance(item, Timer):
+                    timers.append(item)
+                elif isinstance(item, Assertion):
+                    inner_assertions.append(item)
+                elif isinstance(item, PostProcessor):
+                    inner_posts.append(item)
+                elif isinstance(item, PreProcessor):
+                    inner_pres.append(item)
 
-    def __compile_controller(self, node, subtree):
-        if node in self.compiled_node:
-            log.debug(f'current node:[ {node} ] has been compiled，does not need to be compiled again')
-            return
+                assertions.extend(inner_assertions)
+                pres.extend(inner_pres)
+                posts.extend(inner_posts)
 
-        controller_level_elements = subtree.list()
-        # Controller 节点储存 Sampler 节点和 Controller 节点
-        for element in controller_level_elements:
-            log.debug(f'compiling element:[ {element} ] from controller:[ {node} ]')
+        package = SamplePackage(configs, listeners, timers, assertions, posts, pres, controllers)
+        package.sampler = sampler
+        package.set_running_version(True)
+        self.sampler_config_dict[sampler] = package
 
-            if isinstance(element, Sampler) or isinstance(element, Controller):
-                node.add_test_element(element)
+    def __save_transaction_controller_configs(self, trans_controller: Controller):
+        configs = []
+        controllers = []
+        listeners = []
+        timers = []
+        assertions = []
+        pres = []
+        posts = []
+        for i in range(len(self.stack) - 1, -1, -1):
+            self.__add_direct_parent_controllers(controllers, self.stack[i - 1])
+            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i)]):
+                if isinstance(item, SampleListener):
+                    listeners.append(item)
+                elif isinstance(item, Assertion):
+                    assertions.append(item)
 
-            if isinstance(element, LoopIterationListener):
-                node.add_iteration_listener(element)
+        package = SamplePackage(configs, listeners, timers, assertions, posts, pres, controllers)
+        package.sampler = TransactionSampler(trans_controller, trans_controller.name)
+        package.set_running_version(True)
+        self.transaction_controller_config_dict[trans_controller] = package
 
-        # 移除 Controller 层的非 Sampler 节点和非 Controller 节点，用于传递到子代
-        self.__remove_samplers_and_controllers(controller_level_elements)
+    def __add_direct_parent_controllers(self, controllers: list, maybe_controller):
+        if isinstance(maybe_controller, Controller):
+            controllers.append(maybe_controller)
 
-        # 合并 Group 层和子代 Controller 层的非 Sampler 节点和非 Controller 节点
-        parent_level_elements = self.group_level_elements + controller_level_elements
+    class ObjectPair:
 
-        # 递归编译子代节点
-        compiler = TestCompiler(parent_level_elements)
-        subtree.traverse(compiler)
-        self.sampler_package_saver.update(compiler.sampler_package_saver)
-        self.transaction_sampler_package_saver.update(compiler.transaction_sampler_package_saver)
+        def __init__(self, parent, child) -> None:
+            self.parent = parent
+            self.child = child
 
-        # 存储已编译过的 Controller 节点，避免递归遍历下有可能产生重复编译的问题
-        self.compiled_node.extend(compiler.compiled_node)
-        self.compiled_node.append(node)
+        def __eq__(self, other):
+            return id(self) == id(other)
 
-    @staticmethod
-    def __remove_samplers_and_controllers(elements: list):
-        for element in elements[:]:
-            if isinstance(element, Sampler):
-                elements.remove(element)
-            if isinstance(element, GenericController):
-                elements.remove(element)
-            if not isinstance(element, TestElement):
-                elements.remove(element)
+        def __hash__(self):
+            return id(self.parent) + id(self.child)
 
 
 class FindTestElementsUpToRoot(HashTreeTraverser):

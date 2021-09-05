@@ -78,6 +78,7 @@ class GenericController(Controller):
         self.reset_current()
         self.increment_iter_count()
         self.first = True
+        self.recover_running_version()
 
     def increment_current(self):
         self.current += 1

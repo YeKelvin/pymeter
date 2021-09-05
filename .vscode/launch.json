@@ -8,7 +8,7 @@
             "program": "${file}",
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
-            "justMyCode": false,
+            "justMyCode": true,
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
@@ -20,7 +20,7 @@
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
             "module": "pytest",
-            "justMyCode": false,
+            "justMyCode": true,
             "args": [
                 "-sv",
                 "--disable-pytest-warnings",

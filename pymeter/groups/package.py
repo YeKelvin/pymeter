@@ -3,7 +3,10 @@
 # @File    : sample_package
 # @Time    : 2020/2/27 15:41
 # @Author  : Kelvin.Ye
+from typing import List
+
 from pymeter.assertions.assertion import Assertion
+from pymeter.controls.controller import Controller
 from pymeter.elements.element import ConfigElement
 from pymeter.engine.interface import SampleListener
 from pymeter.processors.post import PostProcessor
@@ -17,36 +20,61 @@ log = get_logger(__name__)
 
 class SamplePackage:
 
-    def __init__(self, sampler=None):
-        self.sampler = sampler
-        self.configs = []
-        self.pre_processors = []
-        self.listeners = []
-        self.post_processors = []
-        self.assertions = []
-        self.timers = []
+    def __init__(
+        self,
+        configs: List[ConfigElement] = [],
+        listeners: List[SampleListener] = [],
+        timers: List[Timer] = [],
+        assertions: List[Assertion] = [],
+        post_processors: List[PostProcessor] = [],
+        pre_processors: List[PreProcessor] = [],
+        controllers: List[Controller] = []
+    ):
+        self.configs = configs
+        self.listeners = listeners
+        self.timers = timers
+        self.assertions = assertions
+        self.post_processors = post_processors
+        self.pre_processors = pre_processors
+        self.controllers = controllers
 
-    def save_sampler(self, nodes: list):
-        for node in nodes:
-            if isinstance(node, ConfigElement):
-                self.configs.append(node)
-            elif isinstance(node, PreProcessor):
-                self.pre_processors.append(node)
-            elif isinstance(node, SampleListener):
-                self.listeners.append(node)
-            elif isinstance(node, PostProcessor):
-                self.post_processors.append(node)
-            elif isinstance(node, Assertion):
-                self.assertions.append(node)
-            elif isinstance(node, Timer):
-                self.timers.append(node)
+        self.sampler = None
 
-    def save_transaction_controller(self, nodes: list):
-        for node in nodes:
-            if isinstance(node, SampleListener):
-                self.listeners.append(node)
-            elif isinstance(node, Assertion):
-                self.assertions.append(node)
+    def set_running_version(self, running) -> None:
+        log.debug(f'set running version in package, running:[ {running} ]')
+        for el in self.configs:
+            el.running_version = running
+        for el in self.pre_processors:
+            el.running_version = running
+        for el in self.listeners:
+            el.running_version = running
+        for el in self.post_processors:
+            el.running_version = running
+        for el in self.assertions:
+            el.running_version = running
+        for el in self.timers:
+            el.running_version = running
+        for el in self.controllers:
+            el.running_version = running
+        self.sampler.running_version = running
+
+    def recover_running_version(self) -> None:
+        log.debug(f'recover running version in package')
+        for el in self.configs:
+            el.recover_running_version()
+        for el in self.pre_processors:
+            el.recover_running_version()
+        for el in self.listeners:
+            el.recover_running_version()
+        for el in self.post_processors:
+            el.recover_running_version()
+        for el in self.assertions:
+            el.recover_running_version()
+        for el in self.timers:
+            el.recover_running_version()
+        for el in self.controllers:
+            el.recover_running_version()
+        self.sampler.recover_running_version()
 
     def __repr__(self):
         return self.__str__()

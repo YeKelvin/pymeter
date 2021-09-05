@@ -4,6 +4,7 @@
 # @Time    : 2020/2/28 16:01
 # @Author  : Kelvin.Ye
 from pymeter.elements.element import TestElement
+from pymeter.engine.interface import LoopIterationListener
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sampler import Sampler
 
@@ -34,7 +35,7 @@ class Controller(TestElement):
         raise NotImplementedError
 
 
-class IteratingController:
+class IteratingController(LoopIterationListener):
     """迭代控制器"""
 
     def start_next_loop(self) -> None:

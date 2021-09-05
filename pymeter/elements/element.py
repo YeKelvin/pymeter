@@ -3,13 +3,17 @@
 # @File    : test_element.py
 # @Time    : 2020/1/24 23:48
 # @Author  : Kelvin.Ye
+from collections import deque
 from copy import deepcopy
+from typing import Deque
 from typing import Dict
+from typing import Iterable
 
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import CollectionProperty
 from pymeter.elements.property import DictProperty
 from pymeter.elements.property import ElementProperty
+from pymeter.elements.property import MultiProperty
 from pymeter.elements.property import NoneProperty
 from pymeter.elements.property import PyMeterProperty
 from pymeter.utils.log_util import get_logger
@@ -24,6 +28,7 @@ class ConfigElement:
 
 
 class TestElement:
+
     # 组件名称
     NAME = 'TestElement__name'
 
@@ -32,7 +37,9 @@ class TestElement:
 
     def __init__(self, name: str = None):
         self.properties: Dict[str, PyMeterProperty] = {}
+        self.temporary_properties: Deque = None
         self.context = None
+        self._running_version = False
         if name:
             self.set_property(self.NAME, name)
 
@@ -52,6 +59,26 @@ class TestElement:
     def remark(self, remark: str) -> None:
         self.set_property(self.REMARK, remark)
 
+    @property
+    def running_version(self):
+        return self._running_version
+
+    @running_version.setter
+    def running_version(self, running):
+        self._running_version = running
+        for prop in self.property_iterator():
+            prop.running_version = running
+
+    def recover_running_version(self) -> None:
+        for prop in list(self.properties.values()):
+            if self.is_temporary(prop):
+                self.remove_property(prop.name)
+                self.clear_temporary(prop)
+            else:
+                prop.recover_running_version(self)
+
+        self.empty_temporary()
+
     def set_property(self, key: str, value: any) -> None:
         if key:
             if isinstance(value, TestElement):
@@ -65,8 +92,13 @@ class TestElement:
             else:
                 self.add_property(key, BasicProperty(key, value))
 
-    def add_property(self, key: str, prop: PyMeterProperty) -> None:
-        self.properties[key] = prop
+    def add_property(self, key: str, property: PyMeterProperty) -> None:
+        if self.running_version:
+            self.set_temporary(property)
+        else:
+            self.clear_temporary(property)
+
+        self.properties[key] = property
 
     def get_property(self, key: str, default: any = None) -> PyMeterProperty:
         if default:
@@ -90,6 +122,9 @@ class TestElement:
         prop = self.get_property(key)
         return default if prop is None or isinstance(prop, NoneProperty) else prop.get_bool()
 
+    def remove_property(self, key) -> None:
+        self.properties.pop(key)
+
     def add_test_element(self, element: 'TestElement') -> None:
         """merge in"""
         for key, value in element.items():
@@ -105,16 +140,43 @@ class TestElement:
     def items(self):
         return self.properties.items()
 
+    def property_iterator(self) -> Iterable:
+        return self.properties.values()
+
     def clone(self) -> 'TestElement':
         """克隆副本，如果子类有 property以外的属性，请在子类重写该方法
         """
         cloned_element = self.__class__()
         cloned_element.properties = deepcopy(self.properties)
+        cloned_element.running_version = deepcopy(self.running_version)
         return cloned_element
 
     def clear(self) -> None:
         """清空属性"""
         self.properties.clear()
+
+    def is_temporary(self, property) -> bool:
+        if self.temporary_properties is None:
+            return False
+        else:
+            return property in self.temporary_properties
+
+    def set_temporary(self, property) -> None:
+        if self.temporary_properties is None:
+            self.temporary_properties = deque()
+
+        self.temporary_properties.append(property)
+        if isinstance(property, MultiProperty):
+            for prop in property.iterator():
+                self.set_temporary(prop)
+
+    def clear_temporary(self, property):
+        if self.temporary_properties is not None:
+            self.temporary_properties.remove(property)
+
+    def empty_temporary(self):
+        if self.temporary_properties is not None:
+            self.temporary_properties.clear()
 
     def __repr__(self):
         return self.__str__()

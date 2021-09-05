@@ -3,6 +3,7 @@
 # @File    : loop_controller
 # @Time    : 2020/2/28 17:16
 # @Author  : Kelvin.Ye
+import traceback
 from typing import Final
 from typing import Optional
 
@@ -54,22 +55,28 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         self._done = value
 
     def next(self) -> Optional[Sampler]:
-        if self.end_of_loop():
-            if not self.continue_forever:
-                self.done = True
-            self.reset_break_loop()
-            return None
+        self.update_iteration_index(self.name, self._loop_count)
+        try:
+            if self.end_of_loop():
+                if not self.continue_forever:
+                    self.done = True
+                self.reset_break_loop()
+                return None
 
-        if self.first:
-            if not self.continue_forever:
-                log.info(
-                    f'协程:[ {self.ctx.coroutine_name} ] '
-                    f'控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次迭代'
-                )
-            else:
-                log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个迭代')
+            if self.first:
+                if not self.continue_forever:
+                    log.info(
+                        f'协程:[ {self.ctx.coroutine_name} ] '
+                        f'控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次迭代'
+                    )
+                else:
+                    log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个迭代')
 
-        return super().next()
+            return super().next()
+        except Exception:
+            log.debug(traceback.format_exc())
+        finally:
+            self.update_iteration_index(self.name, self._loop_count)
 
     def trigger_end_of_loop(self):
         """触发循环结束"""
@@ -100,6 +107,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         self.first = True
         self.reset_current()
         self.increment_loop_count()
+        self.recover_running_version()
 
     def reset_break_loop(self):
         if self._break_loop:
@@ -113,6 +121,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
         self.first = True
         self.reset_current()
         self.reset_loop_count()
+        self.recover_running_version()
 
     def iteration_start(self, source, iter_count):
         self.re_initialize()

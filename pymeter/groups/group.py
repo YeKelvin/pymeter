@@ -272,7 +272,7 @@ class Coroutine(Greenlet):
         self.coroutine_name = None
         self.coroutine_number = None
         self.engine = None
-        self.compiler: TestCompiler = None
+        self.compiler: TestCompiler = TestCompiler(self.group_tree)
         self.variables = Variables()
         self.start_time = 0
         self.end_time = 0
@@ -306,21 +306,15 @@ class Coroutine(Greenlet):
         context.variables = self.variables
         context.variables.put(self.LAST_SAMPLE_OK, True)
 
-        # 储存 TestGroup 的非 Sampler/Controller 节点
-        group_level_elements = self.group_tree.index(0).list()
-        self.__remove_samplers_and_controllers(group_level_elements)
-
         # 编译 TestGroup 的子代节点
-        log.info('开始编译TestGroup的子代节点')
-        self.compiler = TestCompiler(group_level_elements)
+        log.info('开始编译 TestGroup 节点')
         self.group_tree.traverse(self.compiler)
-        log.debug(f'compile completed，samplerPackage:[ {self.compiler.sampler_package_saver} ]')
 
         # 初始化 TestGroup 控制器
         self.group_main_controller.initialize()
 
         # 添加 TestGroup 循环迭代监听器
-        group_level_iteration_listener = self.GroupLevelIterationListener(self)
+        group_level_iteration_listener = self.IterationListener(self)
         self.group_main_controller.add_iteration_listener(group_level_iteration_listener)
 
         # 遍历执行 TestGroupListener
@@ -550,6 +544,8 @@ class Coroutine(Greenlet):
             for listener in sample_listeners:
                 listener.sample_occurred(result)
 
+            self.compiler.done(package)
+
             # Add the result as subsample of transaction if we are in a transaction
             if transaction_sampler:
                 transaction_sampler.add_sub_sampler_result(result)
@@ -564,6 +560,8 @@ class Coroutine(Greenlet):
             if result.stop_test_now or (not result.success and self.group.on_error_stop_test_now):
                 log.info(f'用户手动设置立即停止测试，TestGroup:[ {self.coroutine_name} ]')
                 self.stop_test_now()
+        else:
+            self.compiler.done(package)
 
     def __do_sampling(self, sampler: Sampler, context: CoroutineContext, listeners: list) -> SampleResult:
         """执行Sampler"""
@@ -615,6 +613,7 @@ class Coroutine(Greenlet):
             for listener in transaction_package.listeners:
                 listener.sample_occurred(result)
 
+        self.compiler.done(transaction_package)
         return result
 
     def __get_sample_listeners(
@@ -712,7 +711,9 @@ class Coroutine(Greenlet):
         log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestIterationListener to start')
         self.variables.inc_iteration()
         for listener in self.test_iteration_listeners:
-            listener.test_iteration_start(self.group)
+            listener.test_iteration_start(self.group_main_controller, self.variables.iteration)
+            if isinstance(listener, TestElement):
+                listener.recover_running_version()
 
     def stop_coroutine(self) -> None:
         self.running = False
@@ -756,13 +757,13 @@ class Coroutine(Greenlet):
             if not isinstance(element, TestElement):
                 elements.remove(element)
 
-    class GroupLevelIterationListener(LoopIterationListener):
+    class IterationListener(LoopIterationListener):
         """Coroutine 内部类，用于在 TestGroup 循环迭代开始时触发所有实现类的开始动作"""
 
         def __init__(self, parent: 'Coroutine'):
             self.parent = parent
 
-        def iteration_start(self, source, iter_count) -> None:
+        def iteration_start(self, source, iter) -> None:
             self.parent._notify_test_iteration_listeners()
 
 

@@ -179,5 +179,5 @@ class SocketResultCollector(
     def sample_ended(self, result) -> None:
         ...
 
-    def test_iteration_start(self, controller) -> None:
+    def test_iteration_start(self, controller, iter) -> None:
         ...
