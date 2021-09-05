@@ -21,6 +21,7 @@ from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import SampleListener
+from pymeter.engine.interface import TestCompilerHelper
 from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.engine.traverser import FindTestElementsUpToRoot
@@ -66,7 +67,7 @@ class LogicalAction(Enum):
     STOP_TEST_NOW = 'stop_test_now'
 
 
-class TestGroup(Controller):
+class TestGroup(Controller, TestCompilerHelper):
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR = 'TestGroup__on_sample_error'
@@ -134,6 +135,7 @@ class TestGroup(Controller):
         self.group_number = None
         self.group_tree = None
         self.groups: List[Coroutine] = []
+        self.children: List[TestElement] = []
 
     def start(self, group_number, group_tree, engine) -> None:
         """启动TestGroup
@@ -196,6 +198,15 @@ class TestGroup(Controller):
     def add_test_element(self, child):
         """TestElement API"""
         self.main_controller.add_test_element(child)
+
+    def add_test_element_once(self, child) -> bool:
+        """@override from TestCompilerHelper"""
+        if child not in self.children:
+            self.children.append(child)
+            self.add_test_element(child)
+            return True
+        else:
+            return False
 
     def wait_groups_stopped(self) -> None:
         """等待所有协程停止"""

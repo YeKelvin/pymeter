@@ -8,6 +8,7 @@ from typing import Optional
 from pymeter.common.exceptions import NextIsNullException
 from pymeter.controls.controller import Controller
 from pymeter.engine.interface import LoopIterationListener
+from pymeter.engine.interface import TestCompilerHelper
 from pymeter.groups.context import ContextService
 from pymeter.groups.context import CoroutineContext
 from pymeter.samplers.sampler import Sampler
@@ -17,11 +18,12 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class GenericController(Controller):
+class GenericController(Controller, TestCompilerHelper):
     """所有控制器的基类"""
 
     def __init__(self):
         super().__init__()
+        self.children = []
 
         # 存储Sampler或Controller
         self.sub_controllers_and_samplers = []
@@ -157,6 +159,15 @@ class GenericController(Controller):
     def add_test_element(self, child):
         if isinstance(child, Controller) or isinstance(child, Sampler):
             self.add_element(child)
+
+    def add_test_element_once(self, child) -> bool:
+        """@override from TestCompilerHelper"""
+        if child not in self.children:
+            self.children.append(child)
+            self.add_test_element(child)
+            return True
+        else:
+            return False
 
     def remove_current_element(self):
         self.sub_controllers_and_samplers.remove(self.sub_controllers_and_samplers[self.current])

@@ -17,6 +17,7 @@ from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import SampleListener
+from pymeter.engine.interface import TestCompilerHelper
 from pymeter.groups.package import SamplePackage
 from pymeter.processors.post import PostProcessor
 from pymeter.processors.pre import PreProcessor
@@ -174,7 +175,6 @@ class TreeCloner(HashTreeTraverser):
 class TestCompiler(HashTreeTraverser):
 
     def __init__(self, tree):
-        self.pairing: list = []
         self.stack = deque()
 
         self.sampler_config_dict: Dict[Sampler, SamplePackage] = {}
@@ -222,13 +222,8 @@ class TestCompiler(HashTreeTraverser):
             parent = self.stack[-1]
             duplicate = False
             if isinstance(parent, Controller) and (isinstance(child, Sampler) or isinstance(child, Controller)):
-                pair = self.ObjectPair(parent, child)
-                # TODO: 加锁
-                if pair not in self.PAIRING:
-                    parent.add_test_element(child)
-                    self.PAIRING.append(pair)
-                else:
-                    duplicate = True
+                if isinstance(parent, TestCompilerHelper):
+                    duplicate = not parent.add_test_element_once(child)
 
             if duplicate:
                 log.warn(f'Unexpected duplicate for {parent} and {child}')
@@ -318,18 +313,6 @@ class TestCompiler(HashTreeTraverser):
         if isinstance(maybe_controller, Controller):
             log.debug(f'adding controller:[ {maybe_controller} ] to sampler config')
             controllers.append(maybe_controller)
-
-    class ObjectPair:
-
-        def __init__(self, parent, child) -> None:
-            self.parent = parent
-            self.child = child
-
-        def __eq__(self, other):
-            return id(self) == id(other)
-
-        def __hash__(self):
-            return id(self.parent) + id(self.child)
 
 
 class FindTestElementsUpToRoot(HashTreeTraverser):

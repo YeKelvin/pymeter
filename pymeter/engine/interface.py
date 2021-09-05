@@ -62,3 +62,9 @@ class NoConfigMerge:
 
 class NoCoroutineClone:
     ...
+
+
+class TestCompilerHelper:
+
+    def add_test_element_once(child) -> bool:
+        raise NotImplementedError
