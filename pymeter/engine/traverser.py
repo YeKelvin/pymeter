@@ -57,9 +57,11 @@ class TreeSearcher(HashTreeTraverser):
             raise RuntimeError(self.FOUND)
 
     def subtract_node(self) -> None:
+        """@override"""
         pass
 
     def process_path(self) -> None:
+        """@override"""
         pass
 
 
@@ -71,6 +73,7 @@ class ConvertToString(HashTreeTraverser):
         self.depth = 0
 
     def add_node(self, node, subtree) -> None:
+        """@override"""
         self.depth += 1
         self.string.append('\n')
         self.string.append(self.__get_spaces())
@@ -78,12 +81,14 @@ class ConvertToString(HashTreeTraverser):
         self.string.append(' {')
 
     def subtract_node(self) -> None:
+        """@override"""
         self.string.append('\n')
         self.string.append(self.__get_spaces())
         self.string.append('}')
         self.depth -= 1
 
     def process_path(self) -> None:
+        """@override"""
         pass
 
     def __get_spaces(self):
@@ -116,6 +121,7 @@ class SearchByClass(HashTreeTraverser):
         return self.subtrees.get(node)
 
     def add_node(self, node, subtree) -> None:
+        """@override"""
         if isinstance(node, self.search_class):
             self.objects_of_class.append(node)
             from pymeter.engine.tree import HashTree
@@ -124,9 +130,11 @@ class SearchByClass(HashTreeTraverser):
             self.subtrees[node] = tree
 
     def subtract_node(self) -> None:
+        """@override"""
         pass
 
     def process_path(self) -> None:
+        """@override"""
         pass
 
 
@@ -143,6 +151,7 @@ class TreeCloner(HashTreeTraverser):
         return self.new_tree
 
     def add_node(self, node, subtree) -> None:
+        """@override"""
         clone = not (self.enable_no_clone and isinstance(node, NoCoroutineClone))
         if isinstance(node, TestElement) and clone:
             cloned_node = node.clone()
@@ -153,22 +162,19 @@ class TreeCloner(HashTreeTraverser):
         self.tree_path.append(cloned_node)
 
     def subtract_node(self) -> None:
+        """@override"""
         if self.tree_path:
             del self.tree_path[-1]
 
     def process_path(self) -> None:
+        """@override"""
         pass
 
 
 class TestCompiler(HashTreeTraverser):
 
-    PAIRING: list = []
-
-    @classmethod
-    def initialize(cls):
-        cls.PAIRING.clear()
-
     def __init__(self, tree):
+        self.pairing: list = []
         self.stack = deque()
 
         self.sampler_config_dict: Dict[Sampler, SamplePackage] = {}
@@ -194,16 +200,18 @@ class TestCompiler(HashTreeTraverser):
         log.debug('SamplerPackage Done')
         package.recover_running_version()
 
-    def add_node(self, node, subtree):
+    def add_node(self, node, subtree) -> None:
         """@override"""
         self.stack.append(node)
 
-    def subtract_node(self):
+    def subtract_node(self) -> None:
         """@override"""
-        log.debug(f'subtracting node, stack size:[ {len(self.stack)} ]')
         child = self.stack[-1]
-        log.debug(f'current child:[ {child} ]')
+        # log.debug(f'subtracting node:[ {child} ]')
+        # log.debug(f'stack size:[ {len(self.stack)} ]')
+        # log.debug(f'stack:[ {self.stack} ]')
         self.__track_iteration_listeners(self.stack)
+
         if isinstance(child, Sampler):
             self.__save_sampler_configs(child)
         elif isinstance(child, TransactionController):
@@ -238,13 +246,14 @@ class TestCompiler(HashTreeTraverser):
     def __track_iteration_listeners(self, stack):
         child = stack[-1]
         if isinstance(child, LoopIterationListener):
-            for item in stack[::-1]:
+            for i in range(len(self.stack) - 1, -1, -1):
+                item = self.stack[i]
                 if item == child:
-                    log.debug(f'tracking iteration listeners, current item:[ {item} ] is child:[ {child} ] skip')
+                    log.debug('current item is child, continue')
                     continue
                 if isinstance(item, Controller):
                     log.debug(
-                        f'tracking iteration listeners, current item:[ {item} ] add iteration listener:[ {child} ]'
+                        f'current item:[ {item} ] add iteration listener:[ {child} ]'
                     )
                     item.add_iteration_listener(child)
 
@@ -257,14 +266,11 @@ class TestCompiler(HashTreeTraverser):
         pres = []
         posts = []
         for i in range(len(self.stack) - 1, -1, -1):
-            self.__add_direct_parent_controllers(controllers, self.stack[i - 1])
+            self.__add_direct_parent_controllers(controllers, self.stack[i])
             inner_pres = []
             inner_posts = []
             inner_assertions = []
-            # log.debug(f'i={i}')
-            # log.debug([x for x in range(0, i)])
-            # log.debug(f'[self.stack[x] for x in range(0, i)]={[self.stack[x] for x in range(0, i)]}')
-            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i)]):
+            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
                 if isinstance(item, ConfigElement):
                     configs.append(item)
                 elif isinstance(item, SampleListener):
@@ -296,8 +302,8 @@ class TestCompiler(HashTreeTraverser):
         pres = []
         posts = []
         for i in range(len(self.stack) - 1, -1, -1):
-            self.__add_direct_parent_controllers(controllers, self.stack[i - 1])
-            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i)]):
+            self.__add_direct_parent_controllers(controllers, self.stack[i])
+            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
                 if isinstance(item, SampleListener):
                     listeners.append(item)
                 elif isinstance(item, Assertion):
@@ -310,6 +316,7 @@ class TestCompiler(HashTreeTraverser):
 
     def __add_direct_parent_controllers(self, controllers: list, maybe_controller):
         if isinstance(maybe_controller, Controller):
+            log.debug(f'adding controller:[ {maybe_controller} ] to sampler config')
             controllers.append(maybe_controller)
 
     class ObjectPair:
@@ -328,33 +335,41 @@ class TestCompiler(HashTreeTraverser):
 class FindTestElementsUpToRoot(HashTreeTraverser):
 
     def __init__(self, node_to_find: object):
-        self.nodes = []
+        self.stack = deque()
         self.node_to_find = node_to_find
         self.stop_recording = False
 
-    def get_controllers_to_root(self) -> List[Controller]:
+    def get_controllers_to_root() -> List[Controller]:
         result = []
-        nodes = self.nodes[::-1]  # 反向排序
-        for node in nodes:
-            if isinstance(node, Controller):
-                result.append(node)
+        stack_copy = deque()
+        while len(stack_copy) > 0:
+            element = stack_copy[-1]
+            if isinstance(element, Controller):
+                result.add(element)
+
+            stack_copy.pop()
+
         return result
 
     def add_node(self, node, subtree) -> None:
+        """@override"""
         if self.stop_recording:
             return
 
         if node is self.node_to_find:
             self.stop_recording = True
 
-        self.nodes.append(node)
+        self.stack.append(node)
 
     def subtract_node(self) -> None:
+        """@override"""
         if self.stop_recording:
             return
 
-        log.debug(f'subtracting node, nodes size = {len(self.nodes)}')
-        self.nodes.pop()  # 删除最后一个
+        log.debug(f'Subtracting node, stack size = {len(self.stack)}')
+
+        self.stack.pop()
 
     def process_path(self) -> None:
+        """@override"""
         pass

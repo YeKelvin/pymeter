@@ -26,6 +26,7 @@ class PyMeterProperty:
 
     @running_version.setter
     def running_version(self, running):
+        log.debug(f'set running version:[ {running} ] in PyMeterProperty:[ {self.name} ]')
         self._running_version = running
 
     def get_str(self) -> str:
@@ -77,6 +78,7 @@ class BasicProperty(PyMeterProperty):
 
     @running_version.setter
     def running_version(self, running):
+        log.debug(f'set running version:[ {running} ] in BasicProperty:[ {self.name} ]')
         PyMeterProperty.running_version = running
         if running:
             self.saved_value = self.value
@@ -84,6 +86,7 @@ class BasicProperty(PyMeterProperty):
             self.saved_value = None
 
     def recover_running_version(self, owner) -> None:
+        log.debug(f'recover running version in BasicProperty:[ {self.name} ]')
         if self.saved_value is not None:
             self.value = self.saved_value
 
@@ -126,6 +129,7 @@ class MultiProperty(PyMeterProperty):
 
     @running_version.setter
     def running_version(self, running):
+        log.debug(f'set running version:[ {running} ] in MultiProperty:[ {self.name} ]')
         self._running_version = running
         for prop in self.iterator():
             prop.running_version = running
@@ -141,6 +145,7 @@ class MultiProperty(PyMeterProperty):
         Args:
             owner (TestElement):  TestElement
         """
+        log.debug(f'recover running version in MultiProperty:[ {self.name} ]')
         for prop in self.iterator()[:]:
             if owner.is_temporary(prop):
                 self.remove(prop)
@@ -184,6 +189,7 @@ class CollectionProperty(MultiProperty):
 
     @running_version.setter
     def running_version(self, running):
+        log.debug(f'set running version:[ {running} ] in CollectionProperty:[ {self.name} ]')
         MultiProperty.running_version = running
         if running:
             self.saved_value = self.value
@@ -191,6 +197,7 @@ class CollectionProperty(MultiProperty):
             self.saved_value = None
 
     def recover_running_version(self, owner) -> None:
+        log.debug(f'recover running version in CollectionProperty:[ {self.name} ]')
         if self.saved_value is not None:
             self.value = self.saved_value
         self.recover_running_version_of_subelements(owner)
@@ -223,6 +230,7 @@ class ElementProperty(MultiProperty):
 
     @running_version.setter
     def running_version(self, running):
+        log.debug(f'set running version:[ {running} ] in ElementProperty:[ {self.name} ]')
         MultiProperty.running_version = running
         self.value.running_version = running
         if running:
@@ -231,6 +239,7 @@ class ElementProperty(MultiProperty):
             self.saved_value = None
 
     def recover_running_version(self, owner) -> None:
+        log.debug(f'recover running version in ElementProperty:[ {self.name} ]')
         if self.saved_value is not None:
             self.value = self.saved_value
         self.value.recover_running_version()
@@ -263,6 +272,7 @@ class DictProperty(MultiProperty):
 
     @running_version.setter
     def running_version(self, running):
+        log.debug(f'set running version:[ {running} ] in DictProperty:[ {self.name} ]')
         MultiProperty.running_version = running
         if running:
             self.saved_value = self.value
@@ -270,6 +280,7 @@ class DictProperty(MultiProperty):
             self.saved_value = None
 
     def recover_running_version(self, owner) -> None:
+        log.debug(f'recover running version in DictProperty:[ {self.name} ]')
         if self.saved_value is not None:
             self.value = self.saved_value
         self.recover_running_version_of_subelements(owner)
@@ -291,6 +302,10 @@ class FunctionProperty(PyMeterProperty):
         return self.function.raw_parameters
 
     def get_str(self):
+        if not self.running_version:
+            log.debug('not running version, return raw function string')
+            return self.function.raw_parameters
+
         iter = self.ctx.variables.iteration if self.ctx.variables else -1
 
         if iter < self.test_iteration:
@@ -304,4 +319,5 @@ class FunctionProperty(PyMeterProperty):
         return self.cache_value
 
     def recover_running_version(self, owner) -> None:
+        log.debug(f'recover running version in FunctionProperty:[ {self.name} ]')
         self.cache_value = None
