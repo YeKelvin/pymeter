@@ -25,6 +25,10 @@ class PythonPostProcessor(PostProcessor):
         return self.get_property_as_str(self.SCRIPT)
 
     def process(self) -> None:
+        script = self.script
+        if not script:
+            return
+
         try:
             ctx = ContextService.get_context()
             props = GlobalUtils.get_properties()
@@ -35,6 +39,6 @@ class PythonPostProcessor(PostProcessor):
                 'props': props,
                 'result': ctx.previous_result
             }
-            exec(self.script, {}, local_vars)
+            exec(script, {}, local_vars)
         except Exception:
             log.error(traceback.format_exc())

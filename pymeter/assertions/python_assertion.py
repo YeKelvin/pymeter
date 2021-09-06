@@ -28,6 +28,10 @@ class PythonAssertion(Assertion):
     def get_result(self, response: SampleResult) -> AssertionResult:
         result = AssertionResult(self.name)
 
+        script = self.script
+        if not script:
+            return result
+
         ctx = ContextService.get_context()
         props = GlobalUtils.get_properties()
 
@@ -47,7 +51,7 @@ class PythonAssertion(Assertion):
         }
 
         # 执行脚本
-        exec(self.script, {}, local_vars)
+        exec(script, {}, local_vars)
 
         # 更新断言结果
         result.failure = local_vars['failure']
