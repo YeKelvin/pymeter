@@ -18,8 +18,8 @@ default = true
 [tool.poetry.dependencies]
 python = "^3.8"
 jsonpath = "0.82"
-orjson = "3.6.1"
-sqlalchemy = "1.4.22"
+orjson = "3.6.3"
+sqlalchemy = "1.4.23"
 cx-Oracle = "8.2.1"
 sshtunnel = "0.4.0"
 pycryptodome = "3.10.1"
