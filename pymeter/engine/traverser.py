@@ -322,7 +322,7 @@ class FindTestElementsUpToRoot(HashTreeTraverser):
         self.node_to_find = node_to_find
         self.stop_recording = False
 
-    def get_controllers_to_root() -> List[Controller]:
+    def get_controllers_to_root(self) -> List[Controller]:
         result = []
         stack_copy = deque()
         while len(stack_copy) > 0:
