@@ -5,6 +5,7 @@
 # @Author  : Kelvin.Ye
 import traceback
 
+from pymeter.common.advanced_object import transform
 from pymeter.utils import time_util
 from pymeter.utils.json_util import from_json
 from pymeter.utils.log_util import get_logger
@@ -59,9 +60,9 @@ class SampleResult:
     def json(self):
         try:
             obj = from_json(self.response_data)
-            return obj
+            return transform(obj)
         except Exception:
-            log.error(traceback.format_exc())
+            log.debug(traceback.format_exc())
             return None
 
     @property
@@ -86,6 +87,7 @@ class SampleResult:
             'startTime': time_util.timestamp_to_strftime(self.start_time),
             'endTime': time_util.timestamp_to_strftime(self.end_time),
             'elapsedTime': self.elapsed_time,
+            'assertions': [str(assertion) for assertion in self.assertions],
             'subResults': [result.serialization for result in self.sub_results]
         }
 
