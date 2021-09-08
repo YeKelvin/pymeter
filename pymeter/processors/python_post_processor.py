@@ -32,13 +32,13 @@ class PythonPostProcessor(PostProcessor):
         try:
             ctx = ContextService.get_context()
             props = GlobalUtils.get_properties()
-            local_vars = {
+            locals = {
                 'log': log,
                 'ctx': ctx,
                 'vars': ctx.variables,
                 'props': props,
                 'result': ctx.previous_result
             }
-            exec(script, {}, local_vars)
+            exec(script, {}, locals)
         except Exception:
             log.error(traceback.format_exc())

@@ -32,7 +32,7 @@ class PythonPreProcessor(PreProcessor):
         try:
             ctx = ContextService.get_context()
             props = GlobalUtils.get_properties()
-            local_vars = {
+            locals = {
                 'log': log,
                 'ctx': ctx,
                 'vars': ctx.variables,
@@ -40,6 +40,6 @@ class PythonPreProcessor(PreProcessor):
                 'prev': ctx.previous_result,
                 'sampler': ctx.current_sampler
             }
-            exec(script, {}, local_vars)
+            exec(script, {}, locals)
         except Exception:
             log.error(traceback.format_exc())

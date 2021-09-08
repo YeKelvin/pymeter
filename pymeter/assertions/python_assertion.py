@@ -36,7 +36,7 @@ class PythonAssertion(Assertion):
         props = GlobalUtils.get_properties()
 
         # 定义局部变量
-        local_vars = {
+        locals = {
             'log': log,
             'ctx': ctx,
             'vars': ctx.variables,
@@ -49,17 +49,24 @@ class PythonAssertion(Assertion):
             'stop_test': response.stop_test,
             'stop_test_now': response.stop_test_now
         }
-
-        # 执行脚本
-        exec(script, {}, local_vars)
+        try:
+            # 执行脚本
+            exec(script, {}, locals)
+        except AssertionError as e:
+            # 断言失败时，判断是否有定义失败信息，没有则返回断言脚本内容
+            error_msg = str(e)
+            if error_msg:
+                raise
+            else:
+                raise AssertionError(script)
 
         # 更新断言结果
-        result.failure = local_vars['failure']
-        result.message = local_vars['message']
+        result.failure = locals['failure']
+        result.message = locals['message']
 
         # 更新 SamplerResult
-        response.stop_group = local_vars['stop_group']
-        response.stop_test = local_vars['stop_test']
-        response.stop_test_now = local_vars['stop_test_now']
+        response.stop_group = locals['stop_group']
+        response.stop_test = locals['stop_test']
+        response.stop_test_now = locals['stop_test_now']
 
         return result

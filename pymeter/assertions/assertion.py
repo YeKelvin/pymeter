@@ -22,6 +22,12 @@ class AssertionResult:
         # A message describing the failure or error.
         self.message = None
 
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self) -> str:
+        return self.__dict__.__str__()
+
 
 class Assertion(TestElement):
 
