@@ -279,9 +279,9 @@ class TestCompiler(HashTreeTraverser):
                 elif isinstance(item, PreProcessor):
                     inner_pres.append(item)
 
-                assertions.extend(inner_assertions)
-                pres.extend(inner_pres)
-                posts.extend(inner_posts)
+            assertions.extend(inner_assertions)
+            pres.extend(inner_pres)
+            posts.extend(inner_posts)
 
         package = SamplePackage(configs, listeners, timers, assertions, posts, pres, controllers)
         package.sampler = sampler
