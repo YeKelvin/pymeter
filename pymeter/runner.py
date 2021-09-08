@@ -62,7 +62,8 @@ if __name__ == '__main__':
     from pymeter.utils.path_util import PROJECT_PATH
 
     # script = 'http-sampler.json'
-    script = 'while-controller.json'
+    # script = 'while-controller.json'
+    script = 'http-session-manager.json'
 
     with open(os.path.join(PROJECT_PATH, 'scripts', script), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())

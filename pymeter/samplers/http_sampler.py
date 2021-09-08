@@ -11,6 +11,7 @@ import requests
 
 from pymeter.configs.arguments import Arguments
 from pymeter.configs.http_config import HTTPHeaderManager
+from pymeter.configs.http_config import HTTPSessionManager
 from pymeter.samplers.http_cons import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -114,6 +115,10 @@ class HTTPSampler(Sampler):
     def response_timeout(self) -> float:
         return self.get_property_as_float(self.RESPONSE_TIMEOUT)
 
+    def __init__(self, name: str = None):
+        super().__init__(name=name)
+        self.session_manager = None
+
     def sample(self) -> SampleResult:
         result = SampleResult()
         result.sample_name = self.name
@@ -123,7 +128,13 @@ class HTTPSampler(Sampler):
         res = None
 
         try:
-            res = requests.request(
+            impl = None
+            if self.session_manager:
+                impl = self.session_manager.session
+            else:
+                impl = requests
+
+            res = impl.request(
                 method=self.method,
                 url=self.url,
                 headers=self.headers,
@@ -185,22 +196,10 @@ class HTTPSampler(Sampler):
         """@override"""
         if isinstance(el, HTTPHeaderManager):
             self.set_header_manager(el)
+        elif isinstance(el, HTTPSessionManager):
+            self.set_session_manager(el)
         else:
             super().add_test_element(el)
-
-        # if (el instanceof CookieManager) {
-        #     setCookieManager((CookieManager) el);
-        # } else if (el instanceof CacheManager) {
-        #     setCacheManager((CacheManager) el);
-        # } else if (el instanceof HeaderManager) {
-        #     setHeaderManager((HeaderManager) el);
-        # } else if (el instanceof AuthManager) {
-        #     setAuthManager((AuthManager) el);
-        # } else if (el instanceof DNSCacheManager) {
-        #     setDNSResolver((DNSCacheManager) el);
-        # } else {
-        #     super.addTestElement(el);
-        # }
 
     def set_header_manager(self, new_manager: HTTPHeaderManager):
         header_manager = self.header_manager
@@ -209,3 +208,6 @@ class HTTPSampler(Sampler):
             new_manager = header_manager.merge(new_manager)
 
         self.set_property(self.HEADERS, new_manager)
+
+    def set_session_manager(self, manager: HTTPSessionManager):
+        self.session_manager = manager

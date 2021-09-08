@@ -121,6 +121,37 @@ class NoneProperty(PyMeterProperty):
         ...
 
 
+class ObjectProperty(PyMeterProperty):
+
+    def __init__(self, name: str, value=None):
+        super().__init__(name, value)
+        self.saved_value = None
+
+    def get_str(self) -> str:
+        return str(self.value)
+
+    def get_obj(self) -> object:
+        return self.value
+
+    @property
+    def running_version(self):
+        return self._running_version
+
+    @running_version.setter
+    def running_version(self, running):
+        log.debug(f'set running version:[ {running} ] in ObjectProperty:[ {self.name} ]')
+        PyMeterProperty.running_version = running
+        if running:
+            self.saved_value = self.value
+        else:
+            self.saved_value = None
+
+    def recover_running_version(self, owner) -> None:
+        log.debug(f'recover running version in BasicProperty:[ {self.name} ]')
+        if self.saved_value is not None:
+            self.value = self.saved_value
+
+
 class MultiProperty(PyMeterProperty):
 
     @property
@@ -264,7 +295,7 @@ class DictProperty(MultiProperty):
         self.value.pop(prop.name)
 
     def iterator(self) -> Iterable:
-        return self.value.values()
+        return list(self.value.values())
 
     @property
     def running_version(self):

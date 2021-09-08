@@ -37,6 +37,7 @@ __MODULE_PATH__ = {
     'Arguments': 'pymeter.configs.arguments',
     'HTTPHeader': 'pymeter.configs.http_config',
     'HTTPHeaderManager': 'pymeter.configs.http_config',
+    'HTTPSessionManager': 'pymeter.configs.http_config',
     'VariableDataSet': 'pymeter.configs.variable_data_set',
 
     # 逻辑控制器

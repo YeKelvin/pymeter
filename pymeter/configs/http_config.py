@@ -3,12 +3,20 @@
 # @File    : http_config.py
 # @Time    : 2020/2/17 15:41
 # @Author  : Kelvin.Ye
-from pymeter.common.exceptions import HttpHeaderDuplicateException
 from typing import List
 from typing import Optional
 
+import requests
+
+from pymeter.common.exceptions import HttpHeaderDuplicateException
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
+from pymeter.engine.interface import TestGroupListener
+from pymeter.engine.interface import TestIterationListener
+from pymeter.utils.log_util import get_logger
+
+
+log = get_logger(__name__)
 
 
 class HTTPHeader(TestElement):
@@ -105,3 +113,37 @@ class HTTPHeaderManager(ConfigTestElement):
         header.name = name
         header.value = value
         self.headers_as_list.append(header)
+
+
+class Cookie(TestElement):
+
+    VALUE = "Cookie__value"
+
+
+class HTTPSessionManager(ConfigTestElement, TestGroupListener, TestIterationListener):
+
+    COOKIES = 'HTTPSessionManager__cookies'
+
+    CLEAR_EACH_ITERATION = 'HTTPSessionManager__clear_each_iteration'
+
+    @property
+    def clear_each_iteration(self) -> bool:
+        return self.get_property_as_bool(self.CLEAR_EACH_ITERATION)
+
+    def __init__(self):
+        super().__init__()
+        self.session = None  # type: requests.sessions.Session
+
+    def group_started(self) -> None:
+        log.debug('open new http session')
+        self.session = requests.session()
+
+    def group_finished(self) -> None:
+        log.debug(f'close http session:[ {self.session} ]')
+        self.session.close()
+
+    def test_iteration_start(self, controller, iter: int) -> None:
+        if self.clear_each_iteration and iter > 1:
+            log.debug(f'close and open new http session in iteration:[ {iter} ]')
+            self.session.close()
+            self.session = requests.session()
