@@ -58,9 +58,10 @@ __MODULE_PATH__ = {
     'SQLSampler': 'pymeter.samplers.sql_sampler',
 
     # 监听器
+    'FlaskSocketIOResultCollector': 'pymeter.listeners.flask_socketio_result_collector',
     'ResultCollector': 'pymeter.listeners.result_collector',
-    'SocketResultCollector': 'pymeter.listeners.socket_result_collector',
-    'FlaskSocketIOResultCollector': 'pymeter.listeners.flask_socketio_result_collector'
+    'ResultDBStorage': 'pymeter.listeners.result_db_storage',
+    'SocketResultCollector': 'pymeter.listeners.socket_result_collector'
 }
 
 

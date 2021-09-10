@@ -4,6 +4,7 @@
 # @Time    : 2020/1/24 23:35
 # @Author  : Kelvin.Ye
 import traceback
+from typing import Optional
 
 from pymeter.common.advanced_object import transform
 from pymeter.utils import time_util
@@ -57,7 +58,7 @@ class SampleResult:
         self.stop_test_now = False
 
     @property
-    def json(self):
+    def json(self) -> Optional[str]:
         try:
             obj = from_json(self.response_data)
             return transform(obj)
@@ -66,11 +67,11 @@ class SampleResult:
             return None
 
     @property
-    def started(self):
+    def started(self) -> bool:
         return self.start_time != 0
 
     @property
-    def serialization(self):
+    def serialization(self) -> str:
         return {
             'samplerName': self.sample_name,
             'samplerRemark': self.sample_remark,

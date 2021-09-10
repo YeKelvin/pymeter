@@ -55,8 +55,7 @@ def change_strftime_format(strftime: str, old_fmt: str, new_fmt: str = DEFAULE_S
 
 
 def seconds_convert_to_h_m_s(seconds: int) -> str:
-    """秒数转换为时分秒
-    """
+    """秒数转换为时分秒"""
     m, s = divmod(seconds, 60)
     h, m = divmod(m, 60)
     return '%02dh:%02dm:%02ds' % (h, m, s)

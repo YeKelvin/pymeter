@@ -36,6 +36,7 @@ class StandardEngine(Greenlet):
         self.tree = None
         self.serialized = True  # 标识 TestGroup 是否顺序运行
         self.groups = []  # 储存已启动的 TestGroup
+        self.collection: TestCollection = None
 
     def configure(self, tree: HashTree) -> None:
         """将脚本配置到执行引擎中
@@ -48,7 +49,8 @@ class StandardEngine(Greenlet):
         if len(collections) == 0:
             raise EngineException('TestCollection数量少于1，请确保至少存在一个TestCollection')
 
-        self.serialized = collections[0].serialized
+        self.collection = collections[0]
+        self.serialized = self.collection.serialized
         self.active = True
         self.tree = tree
 
