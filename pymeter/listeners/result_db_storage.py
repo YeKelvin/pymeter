@@ -7,8 +7,10 @@ from datetime import datetime
 from typing import Final
 
 from sqlalchemy import create_engine
+from sqlalchemy import text
 from sqlalchemy.engine import Connection
 from sqlalchemy.engine import Engine
+from sqlalchemy.pool import StaticPool
 
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoCoroutineClone
@@ -82,7 +84,9 @@ class ResultDBStorage(
 
     def init_db(self):
         log.debug(f'连接数据库，连接地址:[ {self.database_url} ]')
-        self.engine = create_engine(self.database_url)
+        self.engine = create_engine(
+            self.database_url, poolclass=StaticPool, connect_args={'check_same_thread': False}
+        )
         self.connection = self.engine.connect()
 
     def collection_started(self) -> None:
@@ -139,8 +143,8 @@ class ResultDBStorage(
     def test_iteration_start(self, controller, iter) -> None:
         pass
 
-    def insert_test_collection_result(self, collection_name, collection_remark):
-        expression = f"""
+    def insert_test_collection_result(self):
+        statement = f"""
         insert into TEST_COLLECTION_RESULT (DEL_STATE, REPORT_NO, COLLECTION_NO, COLLECTION_ID,
                                             COLLECTION_NAME, COLLECTION_REMARK, START_TIME, SUCCESS,
                                             CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME)
@@ -149,20 +153,20 @@ class ResultDBStorage(
                 {self.collection_no},
                 {self.collection_id},
                 '{self.collection.name}',
-                '{self.collection.remark}',
+                '{self.collection.remark or 'null'}',
                 {self.collection_start_time},
                 {True},
                 'PyMeter',
-                {datetime.utcnow()},
+                '{datetime.utcnow()}',
                 'PyMeter',
-                {datetime.utcnow()});
+                '{datetime.utcnow()}');
         """
         log.debug('insert collection result')
-        result = self.connection.execute(expression)
+        result = self.connection.execute(text(statement))
         log.debug(result.rowcount)
 
     def insert_test_group_result(self, start_time):
-        expression = f"""
+        statement = f"""
         insert into TEST_GROUP_RESULT (DEL_STATE, REPORT_NO, COLLECTION_ID, GROUP_ID,
                                         GROUP_NAME, GROUP_REMARK, START_TIME, SUCCESS,
                                         CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME)
@@ -171,16 +175,16 @@ class ResultDBStorage(
                 {self.collection_id},
                 {self.group_id},
                 '{self.group.name}',
-                '{self.group.remark}',
+                '{self.group.remark or 'null'}',
                 {start_time},
                 {True},
                 'PyMeter',
-                {datetime.utcnow()},
+                '{datetime.utcnow()}',
                 'PyMeter',
-                {datetime.utcnow()});
+                '{datetime.utcnow()}');
         """
         log.debug('insert group result')
-        result = self.connection.execute(expression)
+        result = self.connection.execute(text(statement))
         log.debug(result.rowcount)
 
     def insert_test_sampler_result(self, result: SampleResult):
@@ -190,7 +194,7 @@ class ResultDBStorage(
             if len(assertions) > 0:
                 err_assertion_data = assertions[0].message
 
-        expression = f"""
+        statement = f"""
         insert into TEST_SAMPLER_RESULT (DEL_STATE, REPORT_NO, GROUP_ID, PARENT_ID, SAMPLER_ID,
                                         SAMPLER_NAME, SAMPLER_REMARK, START_TIME, END_TIME, ELAPSED_TIME, SUCCESS,
                                         REQUEST_URL, REQUEST_DATA, REQUEST_HEADERS,
@@ -200,10 +204,10 @@ class ResultDBStorage(
         values  (0,
                 {self.report_no},
                 {self.group_id},
-                {id(result.parent) if result.parent else None},
+                {id(result.parent) if result.parent else 'null'},
                 {id(result)},
                 '{result.sample_name}',
-                '{result.sample_remark}',
+                '{result.sample_remark or 'null'}',
                 {result.start_time},
                 {result.end_time},
                 {result.elapsed_time},
@@ -215,37 +219,37 @@ class ResultDBStorage(
                 '{result.response_headers}',
                 '{err_assertion_data}'
                 'PyMeter',
-                {datetime.utcnow()},
+                '{datetime.utcnow()}',
                 'PyMeter',
-                {datetime.utcnow()});
+                '{datetime.utcnow()}');
         """
         log.debug('insert sampler result')
-        result = self.connection.execute(expression)
+        result = self.connection.execute(text(statement))
         log.debug(result.rowcount)
 
     def update_test_collection_result(self):
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
-        expression = f"""
+        statement = f"""
         update TEST_COLLECTION_RESULT
-        set END_TIME={self.collection_end_time}
-            ELAPSED_TIME={elapsed_time}
+        set END_TIME={self.collection_end_time},
+            ELAPSED_TIME={elapsed_time},
             SUCCESS={self.success}
         where COLLECTION_ID='{self.collection_id}'
         """
         log.debug('update collection result')
-        result = self.connection.execute(expression)
+        result = self.connection.execute(text(statement))
         log.debug(result.rowcount)
 
     def update_test_group_result(self):
         success = getattr(self.group, 'success', True)
         elapsed_time = int(self.group.end_time * 1000) - int(self.group.start_time * 1000)
-        expression = f"""
+        statement = f"""
         update TEST_GROUP_RESULT
-        set END_TIME={self.group.end_time}
-            ELAPSED_TIME={elapsed_time}
+        set END_TIME={self.group.end_time},
+            ELAPSED_TIME={elapsed_time},
             SUCCESS={success}
         where GROUP_ID='{self.group_id}'
         """
         log.debug('update group result')
-        result = self.connection.execute(expression)
+        result = self.connection.execute(text(statement))
         log.debug(result.rowcount)
