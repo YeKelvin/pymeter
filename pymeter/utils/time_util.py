@@ -54,8 +54,16 @@ def change_strftime_format(strftime: str, old_fmt: str, new_fmt: str = DEFAULE_S
     return datetime.strptime(strftime, old_fmt).strftime(new_fmt)
 
 
-def seconds_convert_to_h_m_s(seconds: int) -> str:
-    """秒数转换为时分秒"""
-    m, s = divmod(seconds, 60)
+def microsecond_to_h_m_s(microsecond: int) -> str:
+    """毫秒转换为时分秒"""
+    s, ms = divmod(microsecond, 1000)
+    m, s = divmod(s, 60)
     h, m = divmod(m, 60)
     return '%02dh:%02dm:%02ds' % (h, m, s)
+
+
+def microsecond_to_m_s(microsecond: int) -> str:
+    """毫秒转换为时分秒"""
+    s, ms = divmod(microsecond, 1000)
+    m, s = divmod(s, 60)
+    return '%02dm:%02ds' % (m, s)
