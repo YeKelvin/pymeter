@@ -64,6 +64,5 @@ class PythonSampler(Sampler):
             result.response_data = traceback.format_exc()
         finally:
             result.sample_end()
-            result.calculate_elapsed_time()
 
         return result

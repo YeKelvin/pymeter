@@ -29,10 +29,10 @@ class SampleResult:
         self.request_headers = None
         self.request_data = None
 
-        self.response_headers = None
-        self.response_data = None
         self.response_code = None
         self.response_message = None
+        self.response_headers = None
+        self.response_data = None
 
         self.start_time = 0
         self.end_time = 0
@@ -97,6 +97,7 @@ class SampleResult:
 
     def sample_end(self):
         self.end_time = time_util.timestamp_now()
+        self.calculate_elapsed_time()
 
     def calculate_elapsed_time(self):
         """计算耗时"""

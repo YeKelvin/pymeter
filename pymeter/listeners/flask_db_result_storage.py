@@ -4,7 +4,6 @@
 # @Time    : 2021-09-09 21:17:33
 # @Author  : Kelvin.Ye
 import importlib
-from datetime import datetime
 from typing import Final
 
 from pymeter.elements.element import TestElement
@@ -15,8 +14,11 @@ from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
-from pymeter.utils import time_util
+from pymeter.utils.json_util import to_json
 from pymeter.utils.log_util import get_logger
+from pymeter.utils.time_util import microsecond_to_m_s
+from pymeter.utils.time_util import timestamp_now
+from pymeter.utils.time_util import timestmp_to_utc8_datetime
 
 
 log = get_logger(__name__)
@@ -80,40 +82,47 @@ class FlaskDBResultStorage(
     def collection_started(self) -> None:
         """@override"""
         # 记录 Collection 开始时间
-        self.collection_start_time = time_util.timestamp_now()
+        self.collection_start_time = timestamp_now()
         # 插入 Collection 数据至数据库
         self.insert_test_collection_result()
 
     def collection_ended(self) -> None:
         """@override"""
         # 记录 Collection 结束时间
-        self.collection_end_time = time_util.timestamp_now()
+        self.collection_end_time = timestamp_now()
         # 更新 Collection 数据
         self.update_test_collection_result()
 
     def group_started(self) -> None:
         """@override"""
         # 记录 Group 开始时间
-        self.group.start_time = time_util.timestamp_now()
+        self.group.start_time = timestamp_now()
         # 插入 Group 数据至数据库
         self.insert_test_group_result()
 
     def group_finished(self) -> None:
         """@override"""
         # 记录 Group 结束时间
-        self.group.end_time = time_util.timestamp_now()
+        self.group.end_time = timestamp_now()
         # 更新 Group 数据
         self.update_test_group_result()
 
     def sample_occurred(self, result: SampleResult) -> None:
         """@override"""
-        # 插入 Sampler 数据至数据库
-        self.insert_test_sampler_result(result)
+        # 递归插入 Sampler 和 SubSampler 数据至数据库
+        self.sampler_occurred_with_subresults(result)
         # 如果 Sample 失败，则同步更新 Group/Collection 的结果也为失败
         if not result.success:
             self.group.success = False
             if self.success:
                 self.success = False
+
+    def sampler_occurred_with_subresults(self, result: SampleResult):
+        # 插入 Sampler 数据至数据库
+        self.insert_test_sampler_result(result)
+        if result.sub_results:
+            for sub in result.sub_results:
+                self.sampler_occurred_with_subresults(sub)
 
     def sample_started(self, sample) -> None:
         """@override"""
@@ -124,6 +133,7 @@ class FlaskDBResultStorage(
         pass
 
     def test_iteration_start(self, controller, iter) -> None:
+        """@override"""
         pass
 
     def insert_test_collection_result(self):
@@ -135,7 +145,7 @@ class FlaskDBResultStorage(
                 COLLECTION_ID=self.collection_id,
                 COLLECTION_NAME=self.collection.name,
                 COLLECTION_REMARK=self.collection.remark,
-                START_TIME=datetime.fromtimestamp(self.collection_start_time),
+                START_TIME=timestmp_to_utc8_datetime(self.collection_start_time),
                 SUCCESS=True,
                 CREATED_BY='PyMeter',
                 UPDATED_BY='PyMeter'
@@ -150,7 +160,7 @@ class FlaskDBResultStorage(
                 GROUP_ID=self.group_id,
                 GROUP_NAME=self.group.name,
                 GROUP_REMARK=self.group.remark,
-                START_TIME=datetime.fromtimestamp(self.group.start_time),
+                START_TIME=timestmp_to_utc8_datetime(self.group.start_time),
                 SUCCESS=True,
                 CREATED_BY='PyMeter',
                 UPDATED_BY='PyMeter'
@@ -172,15 +182,32 @@ class FlaskDBResultStorage(
                 SAMPLER_ID=id(result),
                 SAMPLER_NAME=result.sample_name,
                 SAMPLER_REMARK=result.sample_remark,
-                START_TIME=result.start_time,
-                END_TIME=result.end_time,
+                START_TIME=timestmp_to_utc8_datetime(result.start_time),
+                END_TIME=timestmp_to_utc8_datetime(result.end_time),
                 ELAPSED_TIME=result.elapsed_time,
                 SUCCESS=result.success,
                 REQUEST_URL=result.request_url,
-                REQUEST_DATA=result.request_data,
-                REQUEST_HEADERS=result.request_headers,
-                RESPONSE_DATA=result.response_data,
-                RESPONSE_HEADERS=result.response_headers,
+                REQUEST_HEADERS=(
+                    str(to_json(result.request_headers), encoding='utf8')
+                    if not isinstance(result.request_headers, str)
+                    else result.request_headers
+                ),
+                REQUEST_DATA=(
+                    str(to_json(result.request_data), encoding='utf8')
+                    if not isinstance(result.request_data, str)
+                    else result.request_data
+                ),
+                RESPONSE_CODE=str(result.response_code),
+                RESPONSE_HEADERS=(
+                    str(to_json(result.response_headers), encoding='utf8')
+                    if not isinstance(result.response_headers, str)
+                    else result.response_headers
+                ),
+                RESPONSE_DATA=(
+                    str(to_json(result.response_data), encoding='utf8')
+                    if not isinstance(result.response_data, str)
+                    else result.response_data
+                ),
                 ERROR_ASSERTION=err_assertion_data,
                 CREATED_BY='PyMeter',
                 UPDATED_BY='PyMeter'
@@ -190,19 +217,19 @@ class FlaskDBResultStorage(
         log.debug('update collection result')
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
         with self.app.app_context():
-            self.model.TTestCollectionResult.query_by(COLLECTION_ID=self.collection_id).update(
-                END_TIME=datetime.fromtimestamp(self.collection_end_time),
-                ELAPSED_TIME=time_util.microsecond_to_m_s(elapsed_time),
-                SUCCESS=self.success
-            )
+            self.model.TTestCollectionResult.query_by(COLLECTION_ID=str(self.collection_id)).update({
+                'END_TIME': timestmp_to_utc8_datetime(self.collection_end_time),
+                'ELAPSED_TIME': microsecond_to_m_s(elapsed_time),
+                'SUCCESS': self.success
+            })
 
     def update_test_group_result(self):
         log.debug('update group result')
         success = getattr(self.group, 'success', True)
         elapsed_time = int(self.group.end_time * 1000) - int(self.group.start_time * 1000)
         with self.app.app_context():
-            self.model.TTestGroupResult.query_by(GROUP_ID=self.group_id).update(
-                END_TIME=datetime.fromtimestamp(self.group.end_time),
-                ELAPSED_TIME=time_util.microsecond_to_m_s(elapsed_time),
-                SUCCESS=success
-            )
+            self.model.TTestGroupResult.query_by(GROUP_ID=str(self.group_id)).update({
+                'END_TIME': timestmp_to_utc8_datetime(self.group.end_time),
+                'ELAPSED_TIME': microsecond_to_m_s(elapsed_time),
+                'SUCCESS': success
+            })
