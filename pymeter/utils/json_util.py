@@ -8,7 +8,7 @@ import orjson
 
 def to_json(obj: dict or list) -> str:
     """序列化"""
-    return orjson.dumps(obj)
+    return orjson.dumps(obj).decode('utf8')
 
 
 def from_json(json: str) -> any:

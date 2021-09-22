@@ -78,6 +78,8 @@ class FlaskDBResultStorage(
     def __init__(self):
         TestElement.__init__(self)
         self.success: bool = True
+        self.collection_start_time = 0
+        self.collection_end_time = 0
 
     def collection_started(self) -> None:
         """@override"""
@@ -177,6 +179,7 @@ class FlaskDBResultStorage(
         with self.app.app_context():
             self.model.TTestSamplerResult.insert(
                 REPORT_NO=self.report_no,
+                COLLECTION_ID=self.collection_id,
                 GROUP_ID=self.group_id,
                 PARENT_ID=id(result.parent) if result.parent else None,
                 SAMPLER_ID=id(result),
@@ -188,23 +191,23 @@ class FlaskDBResultStorage(
                 SUCCESS=result.success,
                 REQUEST_URL=result.request_url,
                 REQUEST_HEADERS=(
-                    str(to_json(result.request_headers), encoding='utf8')
+                    to_json(result.request_headers)
                     if not isinstance(result.request_headers, str)
                     else result.request_headers
                 ),
                 REQUEST_DATA=(
-                    str(to_json(result.request_data), encoding='utf8')
+                    to_json(result.request_data)
                     if not isinstance(result.request_data, str)
                     else result.request_data
                 ),
                 RESPONSE_CODE=str(result.response_code),
                 RESPONSE_HEADERS=(
-                    str(to_json(result.response_headers), encoding='utf8')
+                    to_json(result.response_headers)
                     if not isinstance(result.response_headers, str)
                     else result.response_headers
                 ),
                 RESPONSE_DATA=(
-                    str(to_json(result.response_data), encoding='utf8')
+                    to_json(result.response_data)
                     if not isinstance(result.response_data, str)
                     else result.response_data
                 ),
@@ -219,7 +222,7 @@ class FlaskDBResultStorage(
         with self.app.app_context():
             self.model.TTestCollectionResult.query_by(COLLECTION_ID=str(self.collection_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.collection_end_time),
-                'ELAPSED_TIME': microsecond_to_m_s(elapsed_time),
+                'ELAPSED_TIME': elapsed_time,
                 'SUCCESS': self.success
             })
 
@@ -230,6 +233,6 @@ class FlaskDBResultStorage(
         with self.app.app_context():
             self.model.TTestGroupResult.query_by(GROUP_ID=str(self.group_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.group.end_time),
-                'ELAPSED_TIME': microsecond_to_m_s(elapsed_time),
+                'ELAPSED_TIME': elapsed_time,
                 'SUCCESS': success
             })

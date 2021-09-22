@@ -71,7 +71,7 @@ class SampleResult:
         return self.start_time != 0
 
     @property
-    def serialization(self) -> str:
+    def serialization(self) -> dict:
         return {
             'samplerName': self.sample_name,
             'samplerRemark': self.sample_remark,
@@ -97,11 +97,7 @@ class SampleResult:
 
     def sample_end(self):
         self.end_time = time_util.timestamp_now()
-        self.calculate_elapsed_time()
-
-    def calculate_elapsed_time(self):
-        """计算耗时"""
-        self.elapsed_time = f'{int(self.end_time * 1000) - int(self.start_time * 1000)}ms'
+        self.elapsed_time = int(self.end_time * 1000) - int(self.start_time * 1000)
 
     def add_sub_result(self, sub_result: 'SampleResult'):
         log.debug(f'parent:[ {self.sample_name} ] add subResult:[ {sub_result.sample_name} ]')
