@@ -7,7 +7,6 @@ from typing import Final
 
 from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
-from pymeter.engine.globalization import GlobalUtils
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.log_util import get_logger
@@ -33,7 +32,7 @@ class PythonAssertion(Assertion):
             return result
 
         ctx = ContextService.get_context()
-        props = GlobalUtils.get_properties()
+        props = ctx.properties
 
         # 定义局部变量
         locals = {

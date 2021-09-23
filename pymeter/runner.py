@@ -38,17 +38,16 @@ class Runner:
         ymd = time.strftime('%Y-%m-%d', time.localtime(now))
         hms = time.strftime('%H:%M:%S', time.localtime(now))
 
-        log.info(f'START.MS={int(now * 1000)}')
-        log.info(f'START.YMD={ymd}')
-        log.info(f'START.HMS={hms}')
-        log.info('开始加载脚本')
-
         # 加载脚本
         hashtree = script_server.load_tree(script)
         log.debug(f'script hashtree:\n{hashtree}')
 
         # 将脚本配置到执行引擎中
-        engine = StandardEngine()
+        engine = StandardEngine(props={
+            'START.MS': int(now * 1000),
+            'START.YMD': ymd,
+            'START.HMS': hms
+        })
         engine.configure(hashtree)
 
         # 开始执行测试

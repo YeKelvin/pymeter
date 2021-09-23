@@ -26,6 +26,12 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
+class Properties(dict):
+
+    def put(self, key: str, value: any) -> None:
+        self[key] = value
+
+
 class StandardEngine(Greenlet):
 
     def __init__(self, *args, **kwargs):
@@ -37,6 +43,10 @@ class StandardEngine(Greenlet):
         self.serialized = True  # 标识 TestGroup 是否顺序运行
         self.groups = []  # 储存已启动的 TestGroup
         self.collection: TestCollection = None
+        self.properties = Properties()
+        props = getattr(kwargs, 'props', None)
+        if props:
+            self.properties.update(props)
 
     def configure(self, tree: HashTree) -> None:
         """将脚本配置到执行引擎中

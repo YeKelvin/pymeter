@@ -67,6 +67,8 @@ __MODULE_PATH__ = {
 
 def load_tree(source: str) -> HashTree:
     """读取脚本并返回脚本的HashTree对象"""
+    log.info('开始加载脚本')
+
     script = __loads_script(source)
     nodes = __parse(script)
     if not nodes:

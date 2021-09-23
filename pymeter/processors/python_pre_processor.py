@@ -6,7 +6,6 @@
 import traceback
 from typing import Final
 
-from pymeter.engine.globalization import GlobalUtils
 from pymeter.groups.context import ContextService
 from pymeter.processors.pre import PreProcessor
 from pymeter.utils.log_util import get_logger
@@ -31,7 +30,7 @@ class PythonPreProcessor(PreProcessor):
 
         try:
             ctx = ContextService.get_context()
-            props = GlobalUtils.get_properties()
+            props = ctx.properties
             locals = {
                 'log': log,
                 'ctx': ctx,

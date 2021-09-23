@@ -17,6 +17,10 @@ log = get_logger(__name__)
 
 class CoroutineContext:
 
+    @property
+    def properties(self):
+        return self.engine.properties
+
     def __init__(self):
         self.variables = Variables()
         self.engine = None
@@ -82,8 +86,7 @@ class ContextService:
         if engine_ctx.test_start == 0:
             engine_ctx.number_of_active_coroutine = 0
             engine_ctx.test_start = time_util.timestamp_now()
-            from pymeter.engine.globalization import GlobalUtils
-            GlobalUtils.set_property('TESTSTART.MS', engine_ctx.test_start)
+            cls.get_context().properties.put('TESTSTART.MS', engine_ctx.test_start)
 
     @classmethod
     def end_test(cls, engine_id=None):
