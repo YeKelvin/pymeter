@@ -68,9 +68,9 @@ class Argument(TestElement):
     def __str__(self):
         return (
             '{'
-            f'"name"{self.sep}"{self.name}", '
-            f'"value"{self.sep}"{self.value}", '
-            f'"desc"{self.sep}"{self.desc}"'
+            f'  "name"{self.sep}"{self.name}", '
+            f'  "value"{self.sep}"{self.value}", '
+            f'  "desc"{self.sep}"{self.desc}"'
             '}'
         )
 

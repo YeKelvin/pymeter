@@ -3,8 +3,6 @@
 # @File    : context
 # @Time    : 2019/3/15 9:39
 # @Author  : Kelvin.Ye
-from typing import Dict
-
 from gevent.local import local
 
 from pymeter.groups.variables import Variables
@@ -49,20 +47,9 @@ class CoroutineContext:
         self.previous_result = result
 
 
-class EngineContext:
-
-    def __init__(self):
-        self.test_start = 0
-        self.number_of_active_coroutine = 0
-        self.number_of_coroutines_started = 0
-        self.number_of_coroutines_finished = 0
-        self.total_threads = 0
-
-
 class ContextService:
     # 协程本地变量
     coroutine_local = local()
-    engines: Dict[str, EngineContext] = {}
 
     @classmethod
     def get_context(cls) -> CoroutineContext:
@@ -81,46 +68,40 @@ class ContextService:
             cls.coroutine_local.coroutine_context = context
 
     @classmethod
-    def start_test(cls, engine_id=None):
-        engine_ctx = cls.__get_engine_context(engine_id)
+    def start_test(cls):
+        engine_ctx = cls.get_context().engine.context
         if engine_ctx.test_start == 0:
             engine_ctx.number_of_active_coroutine = 0
             engine_ctx.test_start = time_util.timestamp_now()
             cls.get_context().properties.put('TESTSTART.MS', engine_ctx.test_start)
 
     @classmethod
-    def end_test(cls, engine_id=None):
-        engine_ctx = cls.__get_engine_context(engine_id)
+    def end_test(cls):
+        engine_ctx = cls.get_context().engine.context
         engine_ctx.test_start = 0
 
     @classmethod
-    def incr_number_of_coroutines(cls, engine_id=None):
+    def incr_number_of_coroutines(cls):
         """增加活动线程的数量"""
-        engine_ctx = cls.__get_engine_context(engine_id)
+        engine_ctx = cls.get_context().engine.context
         engine_ctx.number_of_active_coroutine += 1
         engine_ctx.number_of_coroutines_started += 1
 
     @classmethod
-    def decr_number_of_coroutines(cls, engine_id=None):
+    def decr_number_of_coroutines(cls):
         """减少活动线程的数量"""
-        engine_ctx = cls.__get_engine_context(engine_id)
+        engine_ctx = cls.get_context().engine.context
         engine_ctx.number_of_active_coroutine -= 1
         engine_ctx.number_of_coroutines_finished += 1
 
     @classmethod
-    def add_total_coroutines(cls, group_number, engine_id=None):
-        engine_ctx = cls.__get_engine_context(engine_id)
+    def add_total_coroutines(cls, group_number):
+        engine_ctx = cls.get_context().engine.context
         engine_ctx.total_threads += group_number
 
     @classmethod
-    def clear_total_coroutines(cls, engine_id=None):
-        engine_ctx = cls.__get_engine_context(engine_id)
+    def clear_total_coroutines(cls):
+        engine_ctx = cls.get_context().engine.context
         engine_ctx.total_threads = 0
         engine_ctx.number_of_coroutines_started = 0
         engine_ctx.number_of_coroutines_finished = 0
-
-    @classmethod
-    def __get_engine_context(cls, engine_id) -> EngineContext:
-        if not engine_id:
-            engine_id = cls.get_context().engine.id
-        return cls.engines.get(engine_id, EngineContext())

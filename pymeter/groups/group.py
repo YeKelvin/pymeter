@@ -8,6 +8,7 @@ from enum import Enum
 from enum import unique
 from typing import Final
 from typing import List
+from typing import Optional
 
 from gevent import Greenlet
 
@@ -17,6 +18,7 @@ from pymeter.common.exceptions import StopTestGroupException
 from pymeter.common.exceptions import StopTestNowException
 from pymeter.controls.controller import Controller
 from pymeter.controls.controller import IteratingController
+from pymeter.controls.loop_controller import LoopController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
@@ -97,7 +99,7 @@ class TestGroup(Controller, TestCompilerHelper):
         return self.get_property_as_int(self.STARTUPS_PER_SECOND)
 
     @property
-    def main_controller(self) -> Controller:
+    def main_controller(self) -> LoopController:
         return self.get_property(self.MAIN_CONTROLLER).get_obj()
 
     @property
@@ -195,6 +197,10 @@ class TestGroup(Controller, TestCompilerHelper):
         """Controller API"""
         self.main_controller.start_next_loop()
 
+    def break_loop(self):
+        """Controller API"""
+        self.main_controller.break_loop()
+
     def add_test_element(self, child):
         """TestElement API"""
         self.main_controller.add_test_element(child)
@@ -276,13 +282,13 @@ class Coroutine(Greenlet):
 
     def __init__(self, group_tree: HashTree, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.engine = None
         self.running = True
         self.group: TestGroup = None
         self.group_main_controller: Controller = group_tree.list()[0]
         self.group_tree = group_tree
         self.coroutine_name = None
         self.coroutine_number = None
-        self.engine = None
         self.compiler: TestCompiler = TestCompiler(self.group_tree)
         self.variables = Variables()
         self.start_time = 0
@@ -331,7 +337,7 @@ class Coroutine(Greenlet):
         # 遍历执行 TestGroupListener
         self.__coroutine_started()
 
-    def _run(self):
+    def _run(self, *args, **kwargs):
         """执行协程的入口"""
         context = ContextService.get_context()
 
@@ -438,7 +444,9 @@ class Coroutine(Greenlet):
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
                 self.stop_test_now()
 
-    def __trigger_loop_logical_action_on_parent_controllers(self, sampler: Sampler, context: CoroutineContext, loop_action):
+    def __trigger_loop_logical_action_on_parent_controllers(
+            self, sampler: Sampler, context: CoroutineContext, loop_action
+    ):
         transaction_sampler = None
 
         if isinstance(sampler, TransactionSampler):
@@ -471,7 +479,9 @@ class Coroutine(Greenlet):
 
         return real_sampler
 
-    def __process_sampler(self, current: Sampler, parent: Sampler, context: CoroutineContext) -> None:
+    def __process_sampler(
+            self, current: Sampler, parent: Optional[Sampler], context: CoroutineContext
+    ) -> Optional[SampleResult]:
         """执行 Sampler"""
         transaction_result = None
         transaction_sampler = None
@@ -604,7 +614,7 @@ class Coroutine(Greenlet):
     def __do_end_transaction_sampler(
         self,
         transaction_sampler: TransactionSampler,
-        parent: Sampler,
+        parent: Optional[Sampler],
         transaction_package: SamplePackage,
         context: CoroutineContext
     ) -> SampleResult:
@@ -629,6 +639,41 @@ class Coroutine(Greenlet):
         self.compiler.done(transaction_package)
         return result
 
+    def __check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext) -> None:
+        """断言 Sampler 结果"""
+        for assertion in assertions:
+            self.__process_assertion(assertion, result)
+
+        log.debug(
+            f'coroutine:[ {self.coroutine_name} ] last sampler:[ {result.sample_name} ] success:[ {result.success} ]'
+        )
+        context.variables.put(self.LAST_SAMPLE_OK, result.success)
+
+    def __process_assertion(self, assertion, result: SampleResult) -> None:
+        """执行断言"""
+        assertion_result = None
+        try:
+            assertion_result = assertion.get_result(result)
+        except AssertionError as e:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
+            assertion_result = AssertionResult(result.sample_name)
+            assertion_result.failure = True
+            assertion_result.message = str(e)
+        except RuntimeError as e:
+            log.error(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
+            assertion_result = AssertionResult(result.sample_name)
+            assertion_result.error = True
+            assertion_result.message = str(e)
+        except Exception as e:
+            log.error(f'coroutine:[ {self.coroutine_name} ] exception processing Assertion: {e}')
+            log.error(traceback.format_exc())
+            assertion_result = AssertionResult(result.sample_name)
+            assertion_result.error = True
+            assertion_result.message = traceback.format_exc()
+        finally:
+            result.success = result.success and not (assertion_result.error or assertion_result.failure)
+            result.assertions.append(assertion_result)
+
     def __get_sample_listeners(
         self, sample_package: SamplePackage, transaction_package: SamplePackage, transaction_sampler: TransactionSampler
     ) -> List[SampleListener]:
@@ -651,40 +696,6 @@ class Coroutine(Greenlet):
             sampler_listeners = only_subsampler_listeners
 
         return sampler_listeners
-
-    def __check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext) -> None:
-        """断言 Sampler 结果"""
-        for assertion in assertions:
-            self.__process_assertion(assertion, result)
-
-        log.debug(
-            f'coroutine:[ {self.coroutine_name} ] last sampler:[ {result.sample_name} ] success:[ {result.success} ]'
-        )
-        context.variables.put(self.LAST_SAMPLE_OK, result.success)
-
-    def __process_assertion(self, assertion, result: SampleResult) -> None:
-        """执行断言"""
-        try:
-            assertion_result = assertion.get_result(result)
-        except AssertionError as e:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
-            assertion_result = AssertionResult(result.sample_name)
-            assertion_result.failure = True
-            assertion_result.message = str(e)
-        except RuntimeError as e:
-            log.error(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
-            assertion_result = AssertionResult(result.sample_name)
-            assertion_result.error = True
-            assertion_result.message = str(e)
-        except Exception as e:
-            log.error(f'coroutine:[ {self.coroutine_name} ] exception processing Assertion: {e}')
-            log.error(traceback.format_exc())
-            assertion_result = AssertionResult(result.sample_name)
-            assertion_result.error = True
-            assertion_result.message = traceback.format_exc()
-        finally:
-            result.success = result.success and not (assertion_result.error or assertion_result.failure)
-            result.assertions.append(assertion_result)
 
     def __continue_on_coroutine_loop(self, path_to_root_traverser) -> None:
         """Sampler 失败时，继续 TestGroup 控制器的循环"""

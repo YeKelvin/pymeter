@@ -32,25 +32,34 @@ class Properties(dict):
         self[key] = value
 
 
+class EngineContext:
+
+    def __init__(self):
+        self.test_start = 0
+        self.number_of_active_coroutine = 0
+        self.number_of_coroutines_started = 0
+        self.number_of_coroutines_finished = 0
+        self.total_threads = 0
+
+
 class StandardEngine(Greenlet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.id = None
         self.running = False
         self.active = False
         self.tree = None
         self.serialized = True  # 标识 TestGroup 是否顺序运行
         self.groups = []  # 储存已启动的 TestGroup
         self.collection: TestCollection = None
-        self.properties = Properties()
+        self.context: EngineContext = EngineContext()
+        self.properties: Properties = Properties()
         props = getattr(kwargs, 'props', None)
         if props:
             self.properties.update(props)
 
     def configure(self, tree: HashTree) -> None:
-        """将脚本配置到执行引擎中
-        """
+        """将脚本配置到执行引擎中"""
         # 查找脚本顶层列表中的 TestCollection 对象
         searcher = SearchByClass(TestCollection)
         tree.traverse(searcher)
@@ -72,12 +81,11 @@ class StandardEngine(Greenlet):
         except EngineException:
             log.error(traceback.format_exc())
 
-    def _run(self) -> None:
+    def _run(self, *args, **kwargs) -> None:
         """脚本执行主体"""
         log.info('开始执行脚本')
         self.running = True
 
-        self.id = f'{id(self)} - {self.minimal_ident}'
         ContextService.get_context().engine = self
         ContextService.start_test()
 
@@ -106,7 +114,7 @@ class StandardEngine(Greenlet):
         teardown_group_iter = iter(teardown_group_searcher.get_search_result())
 
         group_count = 0
-        ContextService.clear_total_coroutines(self.id)  # TODO: 还要修改
+        ContextService.clear_total_coroutines()
 
         # ####################################################################################################
         # SetUpGroup 运行主体
@@ -132,7 +140,7 @@ class StandardEngine(Greenlet):
         self.__wait_groups_stopped()
         log.info('All SetupGroups have ended')
         group_count = 0
-        ContextService.clear_total_coroutines(self.id)
+        ContextService.clear_total_coroutines()
         self.groups.clear()  # The groups have all completed now
 
         # ####################################################################################################
@@ -169,7 +177,7 @@ class StandardEngine(Greenlet):
         self.__wait_groups_stopped()
         log.info('All TestGroups have ended')
         group_count = 0
-        ContextService.clear_total_coroutines(self.id)
+        ContextService.clear_total_coroutines()
         self.groups.clear()  # The groups have all completed now
 
         # ####################################################################################################
@@ -182,12 +190,12 @@ class StandardEngine(Greenlet):
                 group_count += 1
                 group_name = teardown_group.name
                 log.info(f'开始第 {group_count} 个 TearDownGroup，group:[ {group_name} ]')
-                self.__start_task_group(teardown_group, group_count, teardown_group_iter, collection_level_elements)
+                self.__start_task_group(teardown_group, group_count, teardown_group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
                     log.info(f'开始下一个 TearDownGroup 之前等待当前 TearDownGroup 完成，group:[ {group_name} ]')
-                    setup_group.wait_groups_stopped()
+                    teardown_group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 TearDownGroup 已启动')
                 break
@@ -196,7 +204,7 @@ class StandardEngine(Greenlet):
         self.__wait_groups_stopped()
         log.info('All TearDownGroups have ended')
         group_count = 0
-        ContextService.clear_total_coroutines(self.id)
+        ContextService.clear_total_coroutines()
         self.groups.clear()  # The groups have all completed now
 
         # 遍历执行 TestCollectionListener
@@ -212,7 +220,7 @@ class StandardEngine(Greenlet):
 
         # 测试结束
         self.active = False
-        ContextService.end_test(self.id)  # todo 还要修改
+        ContextService.end_test()
 
     def stop_test(self):
         """停止所有 TestGroup（等待当前已启动的所有的 TestGroup 执行完成且不再执行剩余的 TestGroup）"""

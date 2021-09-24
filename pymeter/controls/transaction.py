@@ -82,7 +82,7 @@ class TransactionController(GenericController):
         # This transaction is done
         self.transaction_sampler = None
 
-        super().triggerEndOfLoop()
+        super().trigger_end_of_loop()
 
 
 class TransactionSampler(Sampler):

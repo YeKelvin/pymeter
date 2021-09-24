@@ -66,5 +66,5 @@ class NoCoroutineClone:
 
 class TestCompilerHelper:
 
-    def add_test_element_once(child) -> bool:
+    def add_test_element_once(self, child) -> bool:
         raise NotImplementedError

@@ -278,8 +278,10 @@ class ElementProperty(MultiProperty):
 
 class DictProperty(MultiProperty):
 
-    def __init__(self, name: str, value: Dict[str, PyMeterProperty] = {}):
+    def __init__(self, name: str, value: Dict[str, PyMeterProperty] = None):
         super().__init__(name, value)
+        if value is None:
+            self.value = {}
         self.saved_value = None
 
     def get_str(self) -> str:

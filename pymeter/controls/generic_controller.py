@@ -135,7 +135,7 @@ class GenericController(Controller, TestCompilerHelper):
         self.increment_current()
         return sampler
 
-    def next_is_controller(self, controller: Controller) -> Controller:
+    def next_is_controller(self, controller: Controller) -> Sampler:
         sampler = controller.next()
         if sampler is None:
             self.current_returned_none(controller)

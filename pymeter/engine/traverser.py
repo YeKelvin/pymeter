@@ -328,7 +328,7 @@ class FindTestElementsUpToRoot(HashTreeTraverser):
         while len(stack_copy) > 0:
             element = stack_copy[-1]
             if isinstance(element, Controller):
-                result.add(element)
+                result.append(element)
 
             stack_copy.pop()
 

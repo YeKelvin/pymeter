@@ -53,6 +53,6 @@ class IfController(GenericController):
         except NextIsNullException:
             return None
 
-    def trigger_end_of_loop():
-        super().initializeSubControllers()
+    def trigger_end_of_loop(self):
+        super().initialize_sub_controllers()
         super().trigger_end_of_loop()

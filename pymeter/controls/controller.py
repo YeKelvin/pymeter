@@ -28,10 +28,10 @@ class Controller(TestElement):
         """在控制器上触发循环结束条件"""
         raise NotImplementedError
 
-    def add_iteration_listener(self):
+    def add_iteration_listener(self, listener):
         raise NotImplementedError
 
-    def remove_iteration_listener(self):
+    def remove_iteration_listener(self, listener):
         raise NotImplementedError
 
 
