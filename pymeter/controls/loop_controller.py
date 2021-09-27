@@ -67,7 +67,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
                 if not self.continue_forever:
                     log.info(
                         f'协程:[ {self.ctx.coroutine_name} ] '
-                        f'控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次迭代'
+                        f'控制器:[ {self.name} ] 开始第[ {self._loop_count + 1} ]次迭代'
                     )
                 else:
                     log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个迭代')

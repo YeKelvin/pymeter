@@ -23,7 +23,7 @@ class Runner:
         if not script:
             raise Exception('脚本不允许为空')
 
-        log.debug(f'script json:\n{script}')
+        # log.debug(f'script json:\n{script}')
         try:
             Runner.run(script)
         except Exception:
@@ -61,8 +61,8 @@ if __name__ == '__main__':
     from pymeter.utils.path_util import PROJECT_PATH
 
     # script = 'http-sampler.json'
-    # script = 'while-controller.json'
-    script = 'http-session-manager.json'
+    script = 'while-controller.json'
+    # script = 'http-session-manager.json'
 
     with open(os.path.join(PROJECT_PATH, 'scripts', script), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())

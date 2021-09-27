@@ -39,7 +39,7 @@
             "class": "PythonSampler",
             "enabled": true,
             "property": {
-              "PythonSampler__script": "vars.put('x', '3')"
+              "PythonSampler__script": "vars.put('x', '5')"
             },
             "children": null
           },
@@ -102,7 +102,7 @@
                 "children": null
               },
               {
-                "name": "set x",
+                "name": "x - 1",
                 "remark": "描述",
                 "class": "PythonSampler",
                 "enabled": true,

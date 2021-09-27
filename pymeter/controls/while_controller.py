@@ -3,6 +3,7 @@
 # @File    : while_controller.py
 # @Time    : 2021-08-26 18:08:15
 # @Author  : Kelvin.Ye
+import time
 import traceback
 from typing import Final
 
@@ -42,6 +43,7 @@ class WhileController(GenericController, IteratingController):
     def __init__(self):
         super().__init__()
         self._break_loop = False
+        self._start_time = 0
 
     # Evaluate the condition, which can be:
     # blank or LAST = was the last sampler OK?
@@ -60,11 +62,25 @@ class WhileController(GenericController, IteratingController):
         if loop_end and cnd.isspace():
             result = self.last_sample_ok.lower() == 'false'
         else:
-            # 如果 next() 被调用，条件可能为空
-            result = eval(cnd)
+
+            if self.max_loop_count and (self.iter_count > self.max_loop_count):
+                log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]')
+                result = False
+            elif self.timeout:
+                elapsed = int(time.time() * 1000) - int(self._start_time * 1000)
+                if elapsed > self.timeout:
+                    log.info(
+                        f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] '
+                        f'停止循环:[ while 循环超时 ] 循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ]'
+                    )
+                    result = False
+                else:
+                    result = eval(cnd)
+            else:
+                result = eval(cnd)  # 如果 next() 被调用，条件可能为空
 
         log.debug(
-            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while condition result:[ {result} ]')
+            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while result:[ {result} ]')
         return not result
 
     def next_is_null(self):
@@ -88,15 +104,21 @@ class WhileController(GenericController, IteratingController):
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.update_iteration_index(self.name, self.iter_count)
         try:
+            # 如果设置了 timeout 则记录开始循环时间
+            if self.iter_count == 0 and self.timeout:
+                self._start_time = time.time()
+
             # 如果第一次进入时条件为假，则完全跳过控制器
             if self.first and self.end_of_loop(False):
                 self.reset_break_loop()
                 self.reset_loop_count()
                 log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
                 return None
-            next = super().next()
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next} ]')
-            return next
+
+            # 获取下一个 sampler
+            next_sampler = super().next()
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
+            return next_sampler
         except Exception:
             log.debug(traceback.format_exc())
         finally:

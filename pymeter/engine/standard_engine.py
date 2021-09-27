@@ -147,31 +147,31 @@ class StandardEngine(Greenlet):
         # TestGroup 运行主体
         # ####################################################################################################
         while self.running:
-            log.info(f'开始执行TestGroup，执行方式:[ {"顺序" if self.serialized else "并行"}执行 ]')
+            log.info(f'开始执行 TestGroup ，执行方式:[ {"顺序" if self.serialized else "并行"}执行 ]')
             try:
                 group: TestGroup = next(group_iter)
                 if isinstance(group, SetupGroup) or isinstance(group, TearDownGroup):
                     continue
                 group_count += 1
                 group_name = group.name
-                log.info(f'开始第 {group_count} 个TestGroup，group:[ {group_name} ]')
+                log.info(f'开始第[ {group_count} ]个 TestGroup，group:[ {group_name} ]')
                 self.__start_task_group(group, group_count, group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'开始下一个TestGroup之前等待当前TestGroup完成，group:[ {group_name} ]')
+                    log.info(f'开始下一个 TestGroup 之前等待当前 TestGroup 完成，group:[ {group_name} ]')
                     group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 TestGroup 已启动')
                 break
 
         if group_count == 0:
-            log.warning('TestCollection下找不到已启用的TestGroup或所有TestGroup已被禁用')
+            log.warning('TestCollection 下找不到已启用的 TestGroup 或所有 TestGroup 已被禁用')
         else:
             if not self.running:
-                log.info('测试已停止，不再启动剩余的TestGroup')
+                log.info('测试已停止，不再启动剩余的 TestGroup')
             if not self.serialized:
-                log.info('等待所有TestGroup执行完成')
+                log.info('等待所有 TestGroup 执行完成')
 
         log.info('Waiting for all test groups to exit')
         self.__wait_groups_stopped()
@@ -259,7 +259,7 @@ class StandardEngine(Greenlet):
             # 把 TestCollection 子代节点（非 TestGroup 节点）添加至 TestGroup
             group_tree = group_searcher.get_subtree(group)
             group_tree.add_key_and_subkeys(group, collection_level_elements)
-            log.info(f'TestGroup:[ {group_name} ] 启动 {number_groups} 个协程')
+            log.info(f'TestGroup:[ {group_name} ] 启动[ {number_groups} ]个协程')
 
             # 存储当前 TestGroup，用于后续管理协程（启动、停止或循环）
             self.groups.append(group)

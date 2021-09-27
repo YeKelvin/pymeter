@@ -184,11 +184,7 @@ class TestElement:
         return self.__str__()
 
     def __str__(self):
-        return str({
-            'name': self.name,
-            'class': type(self).__name__,
-            'id': id(self)
-        })
+        return f"<'{self.name}' ({type(self).__name__} @ {id(self)})>"
 
 
 class ConfigTestElement(TestElement, ConfigElement):
