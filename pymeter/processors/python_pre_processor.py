@@ -27,6 +27,7 @@ class PythonPreProcessor(PreProcessor):
         script = self.script
         if not script:
             return
+        script = 'import random\n' + script
 
         try:
             ctx = ContextService.get_context()

@@ -30,6 +30,7 @@ class PythonAssertion(Assertion):
         script = self.script
         if not script:
             return result
+        script = 'import random\n' + script
 
         ctx = ContextService.get_context()
         props = ctx.properties

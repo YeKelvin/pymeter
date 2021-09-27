@@ -7,6 +7,7 @@ import traceback
 from typing import Optional
 
 from pymeter.common.advanced_object import transform
+from pymeter.utils import json_util
 from pymeter.utils import time_util
 from pymeter.utils.json_util import from_json
 from pymeter.utils.log_util import get_logger
@@ -119,3 +120,6 @@ class SampleResult:
 
         self.sub_results.append(sub_result)
         sub_result.parent = self
+
+    def json_path(self, xpath, choice=False, index=None):
+        return json_util.json_path(self.response_data, xpath, choice, index)
