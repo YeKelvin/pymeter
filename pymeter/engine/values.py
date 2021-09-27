@@ -54,11 +54,13 @@ class CompoundVariable:
         results = []
         for item in self.compiled_components:
             if isinstance(item, Function):
-                log.debug(f'appending execution result from function:[ {item.REF_KEY} ]')
-                results.append(item.execute())
+                result = item.execute()
+                log.debug(f'appending execution result:[ {result} ] from function:[ {item.REF_KEY} ]')
+                results.append(result)
             elif isinstance(item, SimpleVariable):
-                log.debug(f'appending actual value from variable:[ {item.name} ]')
-                results.append(str(item.value))
+                value = str(item.value)
+                log.debug(f'appending actual value:[ {value} ] from variable:[ {item.name} ]')
+                results.append(value)
             else:
                 results.append(item)
         results_str = ''.join(results)
@@ -122,9 +124,15 @@ class SimpleVariable:
         return ContextService.get_context().variables
 
     @property
+    def properties(self):
+        return ContextService.get_context().properties
+
+    @property
     def value(self):
         if self.name in self.variables:
             return self.variables.get(self.name)
+        elif self.name in self.properties:
+            return self.properties.get(self.name)
         else:
             return '${' + self.name + '}'
 
@@ -280,7 +288,7 @@ class FunctionParser:
 
         # 退出，未匹配到参数列表结束符 ")"
         str_buffer = ''.join(buffer)
-        log.warn(f'may be invalid function string: {str_buffer}')
+        log.warning(f'may be invalid function string: {str_buffer}')
         var = CompoundVariable()
         var.set_parameters(str_buffer)
         result.append(var)
