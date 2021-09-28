@@ -48,7 +48,9 @@ class PythonSampler(Sampler):
         result.sample_start()
 
         try:
-            exec(self.script_wrapper, {}, {'self': self})
+            # 定义脚本中可用的内置变量
+            params = {'self': self}
+            exec(self.script_wrapper, params, params)
             ctx = ContextService.get_context()
             props = ctx.properties
             res = self.wrapper(

@@ -35,8 +35,8 @@ class PythonAssertion(Assertion):
         ctx = ContextService.get_context()
         props = ctx.properties
 
-        # 定义局部变量
-        locals = {
+        # 定义脚本中可用的内置变量
+        params = {
             'log': log,
             'ctx': ctx,
             'vars': ctx.variables,
@@ -50,8 +50,8 @@ class PythonAssertion(Assertion):
             'stop_test_now': response.stop_test_now
         }
         try:
-            # 执行脚本
-            exec(script, {}, locals)
+            # 执行脚本（在模块层级上，globals 和 locals 是同一个字典）
+            exec(script, params, params)
         except AssertionError as e:
             # 断言失败时，判断是否有定义失败信息，没有则返回断言脚本内容
             error_msg = str(e)
@@ -61,12 +61,12 @@ class PythonAssertion(Assertion):
                 raise AssertionError(script)
 
         # 更新断言结果
-        result.failure = locals['failure']
-        result.message = locals['message']
+        result.failure = params['failure']
+        result.message = params['message']
 
         # 更新 SamplerResult
-        response.stop_group = locals['stop_group']
-        response.stop_test = locals['stop_test']
-        response.stop_test_now = locals['stop_test_now']
+        response.stop_group = params['stop_group']
+        response.stop_test = params['stop_test']
+        response.stop_test_now = params['stop_test_now']
 
         return result

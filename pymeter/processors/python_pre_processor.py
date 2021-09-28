@@ -32,7 +32,8 @@ class PythonPreProcessor(PreProcessor):
         try:
             ctx = ContextService.get_context()
             props = ctx.properties
-            locals = {
+            # 定义脚本中可用的内置变量
+            params = {
                 'log': log,
                 'ctx': ctx,
                 'vars': ctx.variables,
@@ -40,6 +41,6 @@ class PythonPreProcessor(PreProcessor):
                 'prev': ctx.previous_result,
                 'sampler': ctx.current_sampler
             }
-            exec(script, {}, locals)
+            exec(script, params, params)
         except Exception:
             log.error(traceback.format_exc())

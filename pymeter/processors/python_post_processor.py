@@ -32,13 +32,14 @@ class PythonPostProcessor(PostProcessor):
         try:
             ctx = ContextService.get_context()
             props = ctx.properties
-            locals = {
+            # 定义脚本中可用的内置变量
+            params = {
                 'log': log,
                 'ctx': ctx,
                 'vars': ctx.variables,
                 'props': props,
                 'result': ctx.previous_result
             }
-            exec(script, {}, locals)
+            exec(script, params, params)
         except Exception:
             log.error(traceback.format_exc())
