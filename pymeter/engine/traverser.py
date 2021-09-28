@@ -226,7 +226,7 @@ class TestCompiler(HashTreeTraverser):
                     duplicate = not parent.add_test_element_once(child)
 
             if duplicate:
-                log.warn(f'Unexpected duplicate for {parent} and {child}')
+                log.warning(f'Unexpected duplicate for {parent} and {child}')
 
     def process_path(self) -> None:
         """@override"""

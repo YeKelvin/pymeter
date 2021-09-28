@@ -490,7 +490,7 @@ class Coroutine(Greenlet):
         if isinstance(current, TransactionSampler):
             transaction_sampler = current
             transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
-            log.debug(f'transactionPackage:[ {transaction_package} ]')
+            log.debug(f'transaction package:[ {transaction_package} ]')
 
             # 检查事务是否已完成
             if current.transaction_done:
@@ -619,7 +619,7 @@ class Coroutine(Greenlet):
         context: CoroutineContext
     ) -> SampleResult:
         log.debug(
-            f'coroutine:[ {self.coroutine_name} ] do end transactionSampler:[ {transaction_sampler} ] parent:[ {parent} ]'
+            f'coroutine:[ {self.coroutine_name} ] do end transaction:[ {transaction_sampler} ] parent:[ {parent} ]'
         )
 
         # Get the transaction sample result
@@ -632,7 +632,7 @@ class Coroutine(Greenlet):
         if not isinstance(parent, TransactionSampler):
             # 遍历执行 SampleListener
             log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
-            log.debug(f'transactionSampler listeners:{transaction_package.listeners}')
+            log.debug(f'transaction sampler listeners:{transaction_package.listeners}')
             for listener in transaction_package.listeners:
                 listener.sample_occurred(result)
 
@@ -682,7 +682,7 @@ class Coroutine(Greenlet):
         if transaction_sampler:
             only_subsampler_listeners = []
             for listener in sample_package.listeners:
-                # 检查再 TransactionListenerList 中是否有重复的 listener
+                # 检查在 TransactionListenerList 中是否有重复的 listener
                 found = False
                 for trans in transaction_package.listeners:
                     # 过滤相同的 listener
