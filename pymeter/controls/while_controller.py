@@ -66,16 +66,12 @@ class WhileController(GenericController, IteratingController):
             if self.max_loop_count and (self.iter_count > self.max_loop_count):
                 log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]')
                 result = False
-            elif self.timeout:
-                elapsed = int(time.time() * 1000) - int(self._start_time * 1000)
-                if elapsed > self.timeout:
-                    log.info(
-                        f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] '
-                        f'停止循环:[ while 循环超时 ] 循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ]'
-                    )
-                    result = False
-                else:
-                    result = eval(cnd)
+            elif self.timeout and (elapsed := int(time.time() * 1000) - int(self._start_time * 1000)) > self.timeout:
+                log.info(
+                    f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] '
+                    f'停止循环:[ while 循环超时 ] 循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ]'
+                )
+                result = False
             else:
                 result = eval(cnd)  # 如果 next() 被调用，条件可能为空
 

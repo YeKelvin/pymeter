@@ -17,7 +17,7 @@ log = get_logger(__name__)
 class Runner:
 
     @staticmethod
-    def start(script: str, throw_ex: bool = False) -> None:
+    def start(script: str or list, throw_ex: bool = False) -> None:
         """脚本执行主入口"""
         # 校验 script脚本不能为空
         if not script:
