@@ -3,9 +3,10 @@
 # @File    : transaction_parameter.py
 # @Time    : 2021/9/29 16:20
 # @Author  : Kelvin.Ye
-from pymeter.configs.arguments import TransactionArguments
+from pymeter.configs.arguments import Arguments
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import TransactionListener
+from pymeter.engine.interface import TransactionConfig
 from pymeter.groups.context import ContextService
 from pymeter.utils.log_util import get_logger
 
@@ -13,7 +14,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class TransactionParameter(TransactionArguments, TransactionListener, NoConfigMerge):
+class TransactionParameter(Arguments, TransactionConfig, NoConfigMerge, TransactionListener):
 
     def transaction_started(self) -> None:
         """@override"""

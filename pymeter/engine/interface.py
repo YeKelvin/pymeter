@@ -56,20 +56,6 @@ class LoopIterationListener:
         raise NotImplementedError
 
 
-class NoConfigMerge:
-    ...
-
-
-class NoCoroutineClone:
-    ...
-
-
-class TestCompilerHelper:
-
-    def add_test_element_once(self, child) -> bool:
-        raise NotImplementedError
-
-
 class TransactionListener:
 
     def transaction_started(self) -> None:
@@ -79,3 +65,21 @@ class TransactionListener:
     def transaction_ended(self) -> None:
         """在 TransactionController 结束后调用"""
         raise NotImplementedError
+
+
+class TestCompilerHelper:
+
+    def add_test_element_once(self, child) -> bool:
+        raise NotImplementedError
+
+
+class NoConfigMerge:
+    ...
+
+
+class NoCoroutineClone:
+    ...
+
+
+class TransactionConfig:
+    ...

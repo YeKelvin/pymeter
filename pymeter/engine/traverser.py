@@ -13,12 +13,12 @@ from pymeter.controls.transaction import TransactionController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import ConfigElement
 from pymeter.elements.element import TestElement
-from pymeter.elements.element import TransactionConfigTestElement
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCompilerHelper
+from pymeter.engine.interface import TransactionConfig
 from pymeter.engine.interface import TransactionListener
 from pymeter.groups.package import SamplePackage
 from pymeter.processors.post import PostProcessor
@@ -262,7 +262,7 @@ class TestCompiler(HashTreeTraverser):
             inner_posts = []
             inner_assertions = []
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
-                if isinstance(item, ConfigElement) and not isinstance(item, TransactionConfigTestElement):
+                if isinstance(item, ConfigElement) and not isinstance(item, TransactionConfig):
                     configs.append(item)
                 elif isinstance(item, SampleListener):
                     listeners.append(item)
@@ -295,7 +295,7 @@ class TestCompiler(HashTreeTraverser):
         posts = []
         trans_configs = []
         trans_samplers = []
-        for i in range(level := (len(self.stack) - 1), -1, -1):
+        for i in range(direct_level_number := (len(self.stack) - 1), -1, -1):
             self.__add_direct_parent_controllers(controllers, self.stack[i])
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
                 if isinstance(item, SampleListener):
@@ -303,13 +303,13 @@ class TestCompiler(HashTreeTraverser):
                 elif isinstance(item, Assertion):
                     assertions.append(item)
                 # 添加 Transaction 直系监听器
-                elif isinstance(item, TransactionListener) and (i == level):
+                elif isinstance(item, TransactionListener) and (i == direct_level_number):
                     trans_listeners.append(item)
                 # 添加 Transaction 直系配置器
-                elif isinstance(item, TransactionConfigTestElement) and (i == level):
+                elif isinstance(item, ConfigElement) and isinstance(item, TransactionConfig) and (i == direct_level_number):
                     trans_configs.append(item)
                 # 临时存储 Transaction 直系取样器
-                elif isinstance(item, Sampler) and (i == level):
+                elif isinstance(item, Sampler) and (i == direct_level_number):
                     trans_samplers.append(item)
 
         for sampler in trans_samplers:

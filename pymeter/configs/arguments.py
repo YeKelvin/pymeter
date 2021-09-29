@@ -6,7 +6,6 @@
 from typing import List
 
 from pymeter.elements.element import ConfigTestElement
-from pymeter.elements.element import TransactionConfigTestElement
 from pymeter.elements.element import TestElement
 
 
@@ -87,28 +86,6 @@ class Arguments(ConfigTestElement):
     @property
     def arguments(self) -> List[Argument]:
         return self.get_property(self.ARGUMENTS).get_obj()
-
-    def add(self, arg: Argument):
-        self.arguments.append(arg)
-
-    def to_dict(self) -> dict:
-        args = {}
-        for arg in self.arguments:
-            args[arg.name] = arg.value
-        return args
-
-
-class TransactionArguments(TransactionConfigTestElement):
-
-    TRANSACTION_ARGUMENTS = 'TransactionArguments__arguments'
-
-    def __init__(self):
-        super().__init__()
-        self.add_property(self.TRANSACTION_ARGUMENTS, [])
-
-    @property
-    def arguments(self) -> List[Argument]:
-        return self.get_property(self.TRANSACTION_ARGUMENTS).get_obj()
 
     def add(self, arg: Argument):
         self.arguments.append(arg)

@@ -192,7 +192,3 @@ class ConfigTestElement(TestElement, ConfigElement):
     def __init__(self):
         TestElement.__init__(self)
         ConfigElement.__init__(self)
-
-
-class TransactionConfigTestElement(ConfigTestElement):
-    ...
