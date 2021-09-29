@@ -129,7 +129,7 @@ class HTTPSampler(Sampler):
 
         try:
             impl = None
-            if self.session_manager:
+            if self.session_manager and self.session_manager.session:
                 impl = self.session_manager.session
             else:
                 impl = requests

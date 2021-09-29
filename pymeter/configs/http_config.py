@@ -11,8 +11,10 @@ import requests
 from pymeter.common.exceptions import HttpHeaderDuplicateException
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
+from pymeter.elements.element import TransactionConfigTestElement
 from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
+from pymeter.engine.interface import TransactionListener
 from pymeter.utils.log_util import get_logger
 
 
@@ -86,10 +88,10 @@ class HTTPHeaderManager(ConfigTestElement):
                 if merged_header.name.lower() == new_header.name.lower():
                     found = True
 
-            if found:
-                merged_header.update(new_header)
-            else:
-                merged_manager.headers_as_list.append(new_header)
+                if found:
+                    merged_header.update(new_header)
+                else:
+                    merged_manager.headers_as_list.append(new_header)
 
         return merged_manager
 
@@ -132,7 +134,7 @@ class HTTPSessionManager(ConfigTestElement, TestGroupListener, TestIterationList
 
     def __init__(self):
         super().__init__()
-        self.session = None  # type: requests.sessions.Session
+        self.session = None  # type: Optional[requests.sessions.Session]
 
     def group_started(self) -> None:
         log.debug('open new http session')
@@ -147,3 +149,20 @@ class HTTPSessionManager(ConfigTestElement, TestGroupListener, TestIterationList
             log.debug(f'close and open new http session in iteration:[ {iter} ]')
             self.session.close()
             self.session = requests.session()
+
+
+class TransactionHTTPSessionManager(TransactionConfigTestElement, TransactionListener):
+
+    def __init__(self):
+        super().__init__()
+        self.session = None  # type: Optional[requests.sessions.Session]
+
+    def transaction_started(self) -> None:
+        """@override"""
+        log.debug('open new http session')
+        self.session = requests.session()
+
+    def transaction_ended(self) -> None:
+        """@override"""
+        log.debug(f'close http session:[ {self.session} ]')
+        self.session.close()

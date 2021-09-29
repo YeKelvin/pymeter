@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : variable_data_set.py
-# @Time    : 2021-08-02 17:28:54
+# @File    : transaction_parameter.py
+# @Time    : 2021/9/29 16:20
 # @Author  : Kelvin.Ye
-from pymeter.configs.arguments import Arguments
+from pymeter.configs.arguments import TransactionArguments
 from pymeter.engine.interface import NoConfigMerge
-from pymeter.engine.interface import NoCoroutineClone
-from pymeter.engine.interface import TestCollectionListener
+from pymeter.engine.interface import TransactionListener
 from pymeter.groups.context import ContextService
 from pymeter.utils.log_util import get_logger
 
@@ -14,9 +13,9 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class VariableDataSet(Arguments, TestCollectionListener, NoConfigMerge, NoCoroutineClone):
+class TransactionParameter(TransactionArguments, TransactionListener, NoConfigMerge):
 
-    def collection_started(self) -> None:
+    def transaction_started(self) -> None:
         """@override"""
         variables = ContextService.get_context().variables
         for key, value in self.to_dict().items():
@@ -24,6 +23,6 @@ class VariableDataSet(Arguments, TestCollectionListener, NoConfigMerge, NoCorout
                 continue
             variables.put(key, value)
 
-    def collection_ended(self) -> None:
+    def transaction_ended(self) -> None:
         """@override"""
         ...

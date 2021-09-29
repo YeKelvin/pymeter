@@ -3,6 +3,7 @@
 # @File    : transaction.py
 # @Time    : 2021-08-24 23:23:12
 # @Author  : Kelvin.Ye
+from typing import Optional
 from pymeter.controls.controller import Controller
 from pymeter.controls.generic_controller import GenericController
 from pymeter.samplers.sample_result import SampleResult
@@ -17,13 +18,13 @@ class TransactionController(GenericController):
 
     def __init__(self):
         super().__init__()
-        self.transaction_sampler = None  # type: TransactionSampler
+        self.transaction_sampler = None  # type: Optional[TransactionSampler]
 
     def next(self):
         """@override"""
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next sampler')
         next_sampler = self.next_with_transaction_sampler()
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] nextSampler:[ {next_sampler} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next sampler:[ {next_sampler} ]')
         return next_sampler
 
     def next_with_transaction_sampler(self):
@@ -102,6 +103,10 @@ class TransactionSampler(Sampler):
         self.transaction_sample_result.sample_name = name
         self.transaction_sample_result.success = True
         self.transaction_sample_result.sample_start()
+
+    def sample(self):
+        """@override"""
+        raise NotImplementedError
 
     def add_sub_sampler_result(self, result: SampleResult):
         # Another subsample for the transaction

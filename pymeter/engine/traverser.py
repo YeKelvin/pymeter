@@ -13,11 +13,13 @@ from pymeter.controls.transaction import TransactionController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import ConfigElement
 from pymeter.elements.element import TestElement
+from pymeter.elements.element import TransactionConfigTestElement
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCompilerHelper
+from pymeter.engine.interface import TransactionListener
 from pymeter.groups.package import SamplePackage
 from pymeter.processors.post import PostProcessor
 from pymeter.processors.pre import PreProcessor
@@ -232,12 +234,6 @@ class TestCompiler(HashTreeTraverser):
         """@override"""
         pass
 
-    def __configure_with_config_elements(self, sampler: Sampler, configs: list):
-        sampler.clear_test_element_children()
-        for config in configs:
-            if not isinstance(config, NoConfigMerge):
-                sampler.add_test_element(config)
-
     def __track_iteration_listeners(self, stack):
         child = stack[-1]
         if isinstance(child, LoopIterationListener):
@@ -253,20 +249,22 @@ class TestCompiler(HashTreeTraverser):
                     item.add_iteration_listener(child)
 
     def __save_sampler_configs(self, sampler):
-        configs = []
+        configs = deque()
         controllers = []
         listeners = []
         timers = []
-        assertions = []
-        pres = []
-        posts = []
+        assertions = deque()
+        pres = deque()
+        posts = deque()
+        log.error(f'saving {sampler=}')
         for i in range(len(self.stack) - 1, -1, -1):
             self.__add_direct_parent_controllers(controllers, self.stack[i])
             inner_pres = []
             inner_posts = []
             inner_assertions = []
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
-                if isinstance(item, ConfigElement):
+                log.error(f'{i=}, {item=}')
+                if isinstance(item, ConfigElement) and not isinstance(item, TransactionConfigTestElement):
                     configs.append(item)
                 elif isinstance(item, SampleListener):
                     listeners.append(item)
@@ -279,11 +277,11 @@ class TestCompiler(HashTreeTraverser):
                 elif isinstance(item, PreProcessor):
                     inner_pres.append(item)
 
-            assertions.extend(inner_assertions)
-            pres.extend(inner_pres)
-            posts.extend(inner_posts)
+            assertions.extendleft(inner_assertions)
+            pres.extendleft(inner_pres)
+            posts.extendleft(inner_posts)
 
-        package = SamplePackage(configs, listeners, timers, assertions, posts, pres, controllers)
+        package = SamplePackage(configs, listeners, [], timers, assertions, posts, pres, controllers)
         package.sampler = sampler
         package.set_running_version(True)
         self.sampler_config_dict[sampler] = package
@@ -292,26 +290,50 @@ class TestCompiler(HashTreeTraverser):
         configs = []
         controllers = []
         listeners = []
+        trans_listeners = []
         timers = []
         assertions = []
         pres = []
         posts = []
-        for i in range(len(self.stack) - 1, -1, -1):
+        trans_configs = []
+        trans_samplers = []
+        log.error(f'saving {trans_controller=}')
+        for i in range(level := (len(self.stack) - 1), -1, -1):
             self.__add_direct_parent_controllers(controllers, self.stack[i])
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
+                log.error(f'{i=}, {item=}')
                 if isinstance(item, SampleListener):
                     listeners.append(item)
                 elif isinstance(item, Assertion):
                     assertions.append(item)
+                # 添加 Transaction 直系监听器
+                elif isinstance(item, TransactionListener) and (i == level):
+                    trans_listeners.append(item)
+                # 添加 Transaction 直系配置器
+                elif isinstance(item, TransactionConfigTestElement) and (i == level):
+                    trans_configs.append(item)
+                # 临时存储 Transaction 直系取样器
+                elif isinstance(item, Sampler) and (i == level):
+                    trans_samplers.append(item)
 
-        package = SamplePackage(configs, listeners, timers, assertions, posts, pres, controllers)
+        for sampler in trans_samplers:
+            sampler_package = self.sampler_config_dict.get(sampler)
+            sampler_package.configs.extendleft(trans_configs)
+
+        package = SamplePackage(configs, listeners, trans_listeners, timers, assertions, posts, pres, controllers)
         package.sampler = TransactionSampler(trans_controller, trans_controller.name)
         package.set_running_version(True)
         self.transaction_controller_config_dict[trans_controller] = package
 
+    def __configure_with_config_elements(self, sampler: Sampler, configs: list):
+        sampler.clear_test_element_children()
+        for config in configs:
+            if not isinstance(config, NoConfigMerge):
+                sampler.add_test_element(config)
+
     def __add_direct_parent_controllers(self, controllers: list, maybe_controller):
         if isinstance(maybe_controller, Controller):
-            log.debug(f'adding controller:[ {maybe_controller} ] to sampler config')
+            # log.debug(f'adding controller:[ {maybe_controller} ] to sampler config')
             controllers.append(maybe_controller)
 
 

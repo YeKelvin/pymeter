@@ -500,8 +500,13 @@ class Coroutine(Greenlet):
                 # 事务已完成，Sampler 无需继续执行
                 current = None
             else:
+                # 遍历执行 TransactionListener
+                for trans_listener in transaction_package.trans_listeners:
+                    trans_listener.transaction_started()
+                # 获取 Transaction 直系子代
                 prev = current
                 current = transaction_sampler.sub_sampler
+                # 如果 Transaction 直系子代还是 Transaction，则递归执行
                 if isinstance(current, TransactionSampler):
                     result = self.__process_sampler(current, prev, context)  # 递归处理
                     context.set_current_sampler(prev)
@@ -538,7 +543,7 @@ class Coroutine(Greenlet):
         context.set_current_sampler(sampler)
 
         package = self.compiler.configure_sampler(sampler)
-        log.debug(f'samplerPackage:[ {package} ]')
+        log.debug(f'sampler package:[ {package} ]')
 
         # 执行前置处理器
         self.__run_pre_processors(package.pre_processors)
@@ -636,6 +641,11 @@ class Coroutine(Greenlet):
             for listener in transaction_package.listeners:
                 listener.sample_occurred(result)
 
+        # 遍历执行 TransactionListener
+        for trans_listener in transaction_package.trans_listeners:
+            trans_listener.transaction_ended()
+
+        # 标记事务已完成
         self.compiler.done(transaction_package)
         return result
 
