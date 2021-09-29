@@ -256,14 +256,12 @@ class TestCompiler(HashTreeTraverser):
         assertions = deque()
         pres = deque()
         posts = deque()
-        log.error(f'saving {sampler=}')
         for i in range(len(self.stack) - 1, -1, -1):
             self.__add_direct_parent_controllers(controllers, self.stack[i])
             inner_pres = []
             inner_posts = []
             inner_assertions = []
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
-                log.error(f'{i=}, {item=}')
                 if isinstance(item, ConfigElement) and not isinstance(item, TransactionConfigTestElement):
                     configs.append(item)
                 elif isinstance(item, SampleListener):
@@ -297,11 +295,9 @@ class TestCompiler(HashTreeTraverser):
         posts = []
         trans_configs = []
         trans_samplers = []
-        log.error(f'saving {trans_controller=}')
         for i in range(level := (len(self.stack) - 1), -1, -1):
             self.__add_direct_parent_controllers(controllers, self.stack[i])
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
-                log.error(f'{i=}, {item=}')
                 if isinstance(item, SampleListener):
                     listeners.append(item)
                 elif isinstance(item, Assertion):
