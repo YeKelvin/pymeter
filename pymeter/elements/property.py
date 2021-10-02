@@ -183,7 +183,7 @@ class MultiProperty(PyMeterProperty):
             else:
                 if isinstance(prop, PyMeterProperty):
                     prop.recover_running_version(owner)
-                else:
+                elif hasattr(prop, 'recover_running_version'):
                     prop.recover_running_version()  # prop: TestElement
 
 
