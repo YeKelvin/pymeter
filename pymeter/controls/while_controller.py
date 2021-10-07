@@ -7,6 +7,8 @@ import time
 import traceback
 from typing import Final
 
+import gevent
+
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.groups.group import Coroutine
@@ -24,6 +26,8 @@ class WhileController(GenericController, IteratingController):
 
     TIMEOUT: Final = 'WhileController__timeout'
 
+    DELAY: Final = 'WhileController__delay'
+
     @property
     def condition(self) -> str:
         return self.get_property_as_str(self.CONDITION)
@@ -35,6 +39,10 @@ class WhileController(GenericController, IteratingController):
     @property
     def timeout(self) -> int:
         return self.get_property_as_int(self.TIMEOUT)
+
+    @property
+    def delay(self) -> int:
+        return self.get_property_as_int(self.DELAY)
 
     @property
     def last_sample_ok(self) -> str:
@@ -62,7 +70,6 @@ class WhileController(GenericController, IteratingController):
         if loop_end and cnd.isspace():
             result = self.last_sample_ok.lower() == 'false'
         else:
-
             if self.max_loop_count and (self.iter_count > self.max_loop_count):
                 log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]')
                 result = False
@@ -77,6 +84,12 @@ class WhileController(GenericController, IteratingController):
 
         log.debug(
             f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while result:[ {result} ]')
+
+        if result and self.delay:
+            log.debug(
+                f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] delay:[ {self.delay}ms ]')
+            gevent.sleep(float(self.delay / 1000))
+
         return not result
 
     def next_is_null(self):
