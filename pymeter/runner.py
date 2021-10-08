@@ -69,4 +69,5 @@ if __name__ == '__main__':
 
     with open(os.path.join(PROJECT_PATH, 'scripts', script), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())
-        cProfile.run('Runner.start(script)', filename='profile.out')
+        # cProfile.run('Runner.start(script)', filename='profile.out')
+        Runner.start(script)
