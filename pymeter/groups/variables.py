@@ -16,3 +16,6 @@ class Variables(dict):
 
     def put(self, key: str, value: any) -> None:
         self[key] = value
+
+    def has(self, key: str) -> bool:
+        return key in self

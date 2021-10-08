@@ -10,8 +10,8 @@ from typing import Optional
 import requests
 
 from pymeter.configs.arguments import Arguments
-from pymeter.configs.http_config import HTTPHeaderManager
-from pymeter.configs.http_config import HTTPSessionManager
+from pymeter.configs.httpconfigs import HTTPHeaderManager
+from pymeter.configs.httpconfigs import SessionManager
 from pymeter.samplers.http_cons import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -195,7 +195,7 @@ class HTTPSampler(Sampler):
         """@override"""
         if isinstance(el, HTTPHeaderManager):
             self.set_header_manager(el)
-        elif isinstance(el, HTTPSessionManager):
+        elif isinstance(el, SessionManager):
             self.set_session_manager(el)
         else:
             super().add_test_element(el)
@@ -208,5 +208,5 @@ class HTTPSampler(Sampler):
 
         self.set_property(self.HEADERS, new_manager)
 
-    def set_session_manager(self, manager: HTTPSessionManager):
+    def set_session_manager(self, manager: SessionManager):
         self.session_manager = manager

@@ -35,12 +35,12 @@ __MODULE_PATH__ = {
     # 配置器
     'Argument': 'pymeter.configs.arguments',
     'Arguments': 'pymeter.configs.arguments',
-    'HTTPHeader': 'pymeter.configs.http_config',
-    'HTTPHeaderManager': 'pymeter.configs.http_config',
-    'HTTPSessionManager': 'pymeter.configs.http_config',
-    'VariableDataSet': 'pymeter.configs.variable_data_set',
-    'TransactionHTTPSessionManager': 'pymeter.configs.http_config',
-    'TransactionParameter': 'pymeter.configs.transaction_parameter',
+    'HTTPHeader': 'pymeter.configs.httpconfigs',
+    'HTTPHeaderManager': 'pymeter.configs.httpconfigs',
+    'HTTPSessionManager': 'pymeter.configs.httpconfigs',
+    'VariableDataSet': 'pymeter.configs.dataset',
+    'TransactionHTTPSessionManager': 'pymeter.configs.transactions',
+    'TransactionParameter': 'pymeter.configs.transactions',
 
     # 逻辑控制器
     'IfController': 'pymeter.controls.if_controller',
