@@ -329,7 +329,6 @@ class TestCompiler(HashTreeTraverser):
 
     def __add_direct_parent_controllers(self, controllers: list, maybe_controller):
         if isinstance(maybe_controller, Controller):
-            # log.debug(f'adding controller:[ {maybe_controller} ] to sampler config')
             controllers.append(maybe_controller)
 
 
@@ -366,8 +365,6 @@ class FindTestElementsUpToRoot(HashTreeTraverser):
         """@override"""
         if self.stop_recording:
             return
-
-        log.debug(f'Subtracting node, stack size = {len(self.stack)}')
 
         self.stack.pop()
 

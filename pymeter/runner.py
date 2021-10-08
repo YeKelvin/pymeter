@@ -56,16 +56,17 @@ class Runner:
 
 
 if __name__ == '__main__':
+    import cProfile
     import os
-
     from pymeter.utils.path_util import PROJECT_PATH
 
     # script = 'http-sampler.json'
     # script = 'while-controller.json'
     # script = 'http-session-manager.json'
     # script = 'transaction-listener.json'
-    script = 'transaction-http-session-manager.json'
+    # script = 'transaction-http-session-manager.json'
+    script = 'debug.json'
 
     with open(os.path.join(PROJECT_PATH, 'scripts', script), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())
-        Runner.start(script)
+        cProfile.run('Runner.start(script)', filename='profile.out')
