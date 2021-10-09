@@ -61,6 +61,9 @@ class SampleResult:
 
     @property
     def json(self) -> Optional[str]:
+        if self.error:
+            return None
+
         try:
             obj = from_json(self.response_data)
             return transform(obj)
