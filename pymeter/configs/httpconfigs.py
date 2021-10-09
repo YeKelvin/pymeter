@@ -137,9 +137,6 @@ class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListene
     def clear_each_iteration(self) -> bool:
         return self.get_property_as_bool(self.CLEAR_EACH_ITERATION)
 
-    def __init__(self):
-        super().__init__()
-
     def group_started(self) -> None:
         log.debug('open new http session')
         self.session = requests.session()

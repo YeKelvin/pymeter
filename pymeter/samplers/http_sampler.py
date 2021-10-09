@@ -154,6 +154,9 @@ class HTTPSampler(Sampler):
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
         except Exception:
             result.success = False
+            result.error = True
+            result.request_data = result.request_data or self.get_payload(self.url)
+            result.request_headers = result.request_headers or self.headers
             result.response_data = traceback.format_exc()
         finally:
             result.sample_end()

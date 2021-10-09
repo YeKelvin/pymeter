@@ -264,15 +264,15 @@ class TestCompiler(HashTreeTraverser):
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
                 if isinstance(item, ConfigElement) and not isinstance(item, TransactionConfig):
                     configs.append(item)
-                elif isinstance(item, SampleListener):
+                if isinstance(item, SampleListener):
                     listeners.append(item)
-                elif isinstance(item, Timer):
+                if isinstance(item, Timer):
                     timers.append(item)
-                elif isinstance(item, Assertion):
+                if isinstance(item, Assertion):
                     inner_assertions.append(item)
-                elif isinstance(item, PostProcessor):
+                if isinstance(item, PostProcessor):
                     inner_posts.append(item)
-                elif isinstance(item, PreProcessor):
+                if isinstance(item, PreProcessor):
                     inner_pres.append(item)
 
             assertions.extendleft(inner_assertions)
@@ -295,22 +295,22 @@ class TestCompiler(HashTreeTraverser):
         posts = []
         trans_configs = []
         trans_samplers = []
-        for i in range(direct_level_number := (len(self.stack) - 1), -1, -1):
+        for i in range(direct_level := (len(self.stack) - 1), -1, -1):
             self.__add_direct_parent_controllers(controllers, self.stack[i])
             for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
                 if isinstance(item, SampleListener):
                     listeners.append(item)
-                elif isinstance(item, Assertion):
+                if isinstance(item, Assertion):
                     assertions.append(item)
-                # 添加 Transaction 直系监听器
-                elif isinstance(item, TransactionListener) and (i == direct_level_number):
-                    trans_listeners.append(item)
-                # 添加 Transaction 直系配置器
-                elif isinstance(item, ConfigElement) and isinstance(item, TransactionConfig) and (i == direct_level_number):
-                    trans_configs.append(item)
-                # 临时存储 Transaction 直系取样器
-                elif isinstance(item, Sampler) and (i == direct_level_number):
-                    trans_samplers.append(item)
+                # 添加 Transaction 直系子代
+                if i == direct_level:
+                    if isinstance(item, TransactionListener):
+                        trans_listeners.append(item)
+                    if isinstance(item, ConfigElement) and isinstance(item, TransactionConfig):
+                        trans_configs.append(item)
+                    # 临时存储 Transaction 直系取样器
+                    if isinstance(item, Sampler):
+                        trans_samplers.append(item)
 
         for sampler in trans_samplers:
             sampler_package = self.sampler_config_dict.get(sampler)
@@ -341,7 +341,7 @@ class FindTestElementsUpToRoot(HashTreeTraverser):
 
     def get_controllers_to_root(self) -> List[Controller]:
         result = []
-        stack_copy = deque()
+        stack_copy = self.stack.copy()
         while len(stack_copy) > 0:
             element = stack_copy[-1]
             if isinstance(element, Controller):

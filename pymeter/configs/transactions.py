@@ -34,15 +34,12 @@ class TransactionParameter(Arguments, TransactionConfig, NoConfigMerge, Transact
 
 class TransactionHTTPSessionManager(SessionManager, TransactionConfig, TransactionListener):
 
-    def __init__(self):
-        super().__init__()
-
     def transaction_started(self) -> None:
         """@override"""
-        log.debug('open new http session')
+        log.debug('open new transaction http session')
         self.session = requests.session()
 
     def transaction_ended(self) -> None:
         """@override"""
-        log.debug(f'close http session:[ {self.session} ]')
+        log.debug(f'close transaction http session:[ {self.session} ]')
         self.session.close()

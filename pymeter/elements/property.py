@@ -41,7 +41,7 @@ class PyMeterProperty:
     def get_bool(self) -> bool:
         raise NotImplementedError
 
-    def get_obj(self) -> object:
+    def get_obj(self) -> any:
         raise NotImplementedError
 
     def recover_running_version(self, owner) -> None:
