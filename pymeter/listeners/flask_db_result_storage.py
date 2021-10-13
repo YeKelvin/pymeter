@@ -220,7 +220,7 @@ class FlaskDBResultStorage(
         log.debug('update collection result')
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
         with self.app.app_context():
-            self.model.TTestCollectionResult.query_by(COLLECTION_ID=str(self.collection_id)).update({
+            self.model.TTestCollectionResult.filter_by(COLLECTION_ID=str(self.collection_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.collection_end_time),
                 'ELAPSED_TIME': elapsed_time,
                 'SUCCESS': self.success
@@ -231,7 +231,7 @@ class FlaskDBResultStorage(
         success = getattr(self.group, 'success', True)
         elapsed_time = int(self.group.end_time * 1000) - int(self.group.start_time * 1000)
         with self.app.app_context():
-            self.model.TTestGroupResult.query_by(GROUP_ID=str(self.group_id)).update({
+            self.model.TTestGroupResult.filter_by(GROUP_ID=str(self.group_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.group.end_time),
                 'ELAPSED_TIME': elapsed_time,
                 'SUCCESS': success
