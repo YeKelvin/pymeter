@@ -16,7 +16,6 @@ from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.json_util import to_json
 from pymeter.utils.log_util import get_logger
-from pymeter.utils.time_util import microsecond_to_m_s
 from pymeter.utils.time_util import timestamp_now
 from pymeter.utils.time_util import timestmp_to_utc8_datetime
 
