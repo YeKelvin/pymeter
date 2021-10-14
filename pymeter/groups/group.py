@@ -10,6 +10,7 @@ from typing import Final
 from typing import List
 from typing import Optional
 
+import gevent
 from gevent import Greenlet
 
 from pymeter.assertions.assertion import AssertionResult
@@ -549,8 +550,8 @@ class Coroutine(Greenlet):
         # 执行前置处理器
         self.__run_pre_processors(package.pre_processors)
 
-        # TODO: 执行时间控制器
-        # self.delay(pack.timers)
+        # 执行时间控制器
+        self.delay(package.timers)
 
         # 执行取样器
         result = None
@@ -684,6 +685,14 @@ class Coroutine(Greenlet):
         finally:
             result.success = result.success and not (assertion_result.error or assertion_result.failure)
             result.assertions.append(assertion_result)
+
+    def delay(self, timers: list):
+        total_delay = 0
+        for timer in timers:
+            delay = timer.delay()
+            total_delay = total_delay + delay
+        if total_delay > 0:
+            gevent.sleep(float(total_delay / 1000))
 
     def __get_sample_listeners(
         self, sample_package: SamplePackage, transaction_package: SamplePackage, transaction_sampler: TransactionSampler
