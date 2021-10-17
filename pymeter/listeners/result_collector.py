@@ -33,8 +33,8 @@ class ResultCollector(
         return id(ContextService.get_context().group)
 
     @property
-    def group_name(self):
-        return ContextService.get_context().group.name
+    def group(self):
+        return ContextService.get_context().group
 
     def collection_started(self) -> None:
         self.startTime = time_util.timestamp_now()
@@ -45,7 +45,7 @@ class ResultCollector(
     def group_started(self) -> None:
         self.groups[self.group_id] = {
             'groupId': self.group_id,
-            'groupName': self.group_name,
+            'groupName': self.group.name,
             'startTime': time_util.strftime_now(),
             'endTime': 0,
             'elapsedTime': 0,
@@ -78,7 +78,7 @@ class ResultCollector(
             'endTime': time_util.timestamp_to_strftime(result.end_time),
             'elapsedTime': result.elapsed_time,
             'assertions': [str(assertion) for assertion in result.assertions],
-            'subResults': '[' + ''.join([str(sub.__dict__) + ',' for sub in result.sub_results])[:-1] + ']'
+            'subResults': [sub.serialization for sub in result.sub_results]
         })
 
         if not result.success:

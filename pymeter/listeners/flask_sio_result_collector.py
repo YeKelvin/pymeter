@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : flask_sio_collection_result_collector.py.py
+# @File    : flask_sio_result_collector.py.py
 # @Time    : 2021/10/15 16:44
 # @Author  : Kelvin.Ye
 import importlib
@@ -22,16 +22,22 @@ from pymeter.utils.time_util import timestamp_to_strftime
 log = get_logger(__name__)
 
 
-class FlaskSIOCollectionResultCollector(
+class FlaskSIOResultCollector(
     TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoCoroutineClone
 ):
 
     # 消息接收方的 sid
-    SID: Final = 'FlaskSIOCollectionResultCollector__sid'
+    SID: Final = 'FlaskSIOResultCollector__sid'
+
+    RESULT_NAME: Final = 'FlaskSIOResultCollector__result_name'
 
     @property
     def sid(self):
         return self.get_property_as_str(self.SID)
+
+    @property
+    def result_name(self):
+        return self.get_property_as_str(self.RESULT_NAME)
 
     @property
     def collection(self):
@@ -39,7 +45,7 @@ class FlaskSIOCollectionResultCollector(
 
     @property
     def collection_id(self):
-        return id(self.collection)
+        return str(id(self.collection))
 
     @property
     def group(self):
@@ -47,7 +53,7 @@ class FlaskSIOCollectionResultCollector(
 
     @property
     def group_id(self):
-        return id(self.group)
+        return str(id(self.group))
 
     def __init__(self):
         TestElement.__init__(self)
@@ -58,7 +64,8 @@ class FlaskSIOCollectionResultCollector(
 
         self.namespace = '/'
         self.result_summary_event = 'pymeter_result_summary'
-        self.result_event = 'pymeter_result'
+        self.result_group_event = 'pymeter_group_result'
+        self.result_sampler_event = 'pymeter_sampler_result'
 
         self.collection_start_time = 0
         self.collection_end_time = 0
@@ -76,16 +83,14 @@ class FlaskSIOCollectionResultCollector(
         self.init_flask_sio()
         self.emit(self.result_summary_event, {
             'resultId': self.collection_id,
-            'summary': {
-                'resultName': self.collection.name,
-                'resultType': 'COLLECTION',
+            'result': {
+                'id': self.collection_id,
+                'name': self.result_name,
                 'startTime': timestamp_to_strftime(self.collection_start_time),
                 'endTime': 0,
                 'elapsedTime': 0,
-                'running': True,
-                'success': True
-            },
-            'result': []
+                'details': []
+            }
         })
 
     def collection_ended(self) -> None:
@@ -93,10 +98,9 @@ class FlaskSIOCollectionResultCollector(
         self.collection_end_time = timestamp_now()
         self.emit(self.result_summary_event, {
             'resultId': self.collection_id,
-            'summary': {
+            'result': {
                 'endTime': timestamp_to_strftime(self.collection_end_time),
-                'elapsedTime': int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000),
-                'running': False
+                'elapsedTime': int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
             }
         })
         self.flask_sio.emit('pymeter_completed', namespace=self.namespace, to=self.sid)
@@ -104,34 +108,31 @@ class FlaskSIOCollectionResultCollector(
     def group_started(self) -> None:
         """@override"""
         self.group.start_time = timestamp_now()
-        self.emit(self.result_event, {
+        self.emit(self.result_group_event, {
             'resultId': self.collection_id,
-            'result': {
-                'group': {
-                    'groupId': self.group_id,
-                    'groupName': self.group.name,
-                    'startTime': time_util.strftime_now(),
-                    'endTime': 0,
-                    'elapsedTime': 0,
-                    'running': True,
-                    'success': True,
-                    'children': []
-                }
+            'groupId': self.group_id,
+            'group': {
+                'id': self.group_id,
+                'name': self.group.name,
+                'startTime': time_util.strftime_now(),
+                'endTime': 0,
+                'elapsedTime': 0,
+                'running': True,
+                'success': True,
+                'children': []
             }
         })
 
     def group_finished(self) -> None:
         """@override"""
         self.group.end_time = timestamp_now()
-        self.emit(self.result_event, {
+        self.emit(self.result_group_event, {
             'resultId': self.collection_id,
-            'result': {
-                'group': {
-                    'groupId': self.group_id,
-                    'endTime': time_util.strftime_now(),
-                    'elapsedTime': int(self.group.end_time * 1000) - int(self.group.start_time * 1000),
-                    'running': False
-                }
+            'groupId': self.group_id,
+            'group': {
+                'endTime': time_util.strftime_now(),
+                'elapsedTime': int(self.group.end_time * 1000) - int(self.group.start_time * 1000),
+                'running': False
             }
         })
 
@@ -140,37 +141,15 @@ class FlaskSIOCollectionResultCollector(
         if not result:
             return
 
-        self.emit(self.result_event, {
+        self.emit(self.result_sampler_event, {
             'resultId': self.collection_id,
-            'result': {
-                'group': {
-                    'groupId': self.group_id,
-                    'sampler': {
-                        'samplerId': id(result),
-                        'samplerName': result.sample_name,
-                        'samplerRemark': result.sample_remark,
-                        'url': result.request_url,
-                        'request': result.request_data,
-                        'requestHeaders': result.request_headers,
-                        'response': result.response_data,
-                        'responseHeaders': result.response_headers,
-                        'responseCode': result.response_code,
-                        'responseMessage': result.response_message,
-                        'requestSize': result.request_size,
-                        'responseSize': result.response_size,
-                        'success': result.success,
-                        'startTime': time_util.timestamp_to_strftime(result.start_time),
-                        'endTime': time_util.timestamp_to_strftime(result.end_time),
-                        'elapsedTime': result.elapsed_time,
-                        'assertions': [str(assertion) for assertion in result.assertions],
-                        'children': [sub.serialization for sub in result.sub_results]
-                    }
-                }
-            }
+            'groupId': self.group_id,
+            'sampler': sample_result_to_dict(result)
         })
 
         if not result.success:
             self.emit(self.result_event, {
+                'resultId': self.collection_id,
                 'groupId': self.group_id,
                 'group': {
                     'success': False
@@ -187,3 +166,34 @@ class FlaskSIOCollectionResultCollector(
 
     def test_iteration_start(self, controller, iter) -> None:
         ...
+
+
+def sample_result_to_dict(result):
+    return {
+        'id': str(id(result)),
+        'name': result.sample_name,
+        'remark': result.sample_remark,
+        'url': result.request_url,
+        'request': result.request_data,
+        'requestHeaders': result.request_headers,
+        'response': result.response_data,
+        'responseHeaders': result.response_headers,
+        'responseCode': result.response_code,
+        'responseMessage': result.response_message,
+        'requestSize': result.request_size,
+        'responseSize': result.response_size,
+        'success': result.success,
+        'startTime': time_util.timestamp_to_strftime(result.start_time),
+        'endTime': time_util.timestamp_to_strftime(result.end_time),
+        'elapsedTime': result.elapsed_time,
+        'failedAssertions': failed_assertion(result.assertions),
+        'children': [sample_result_to_dict(sub) for sub in result.sub_results]
+    }
+
+
+def failed_assertion(assertions):
+    for assertion in assertions:
+        if assertion.failure or assertion.error:
+            return {
+                'message': assertion.message
+            }

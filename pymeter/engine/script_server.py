@@ -48,6 +48,9 @@ __MODULE_PATH__ = {
     'TransactionController': 'pymeter.controls.transaction',
     'WhileController': 'pymeter.controls.while_controller',
 
+    # 时间控制器
+    'ConstantTimer': 'pymeter.timers.constant_timer',
+
     # 前置处理器
     'PythonPreProcessor': 'pymeter.processors.python_pre_processor',
 
@@ -61,7 +64,7 @@ __MODULE_PATH__ = {
 
     # 监听器
     'FlaskDBResultStorage': 'pymeter.listeners.flask_db_result_storage',
-    'FlaskSocketIOResultCollector': 'pymeter.listeners.flask_socketio_result_collector',
+    'FlaskSIOResultCollector': 'pymeter.listeners.flask_sio_result_collector',
     'ResultCollector': 'pymeter.listeners.result_collector',
     'SocketResultCollector': 'pymeter.listeners.socket_result_collector'
 }
