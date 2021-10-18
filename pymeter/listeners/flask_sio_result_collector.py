@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : flask_sio_result_collector.py.py
+# @File    : flask_sio_result_collector.py
 # @Time    : 2021/10/15 16:44
 # @Author  : Kelvin.Ye
 import importlib
@@ -148,7 +148,7 @@ class FlaskSIOResultCollector(
         })
 
         if not result.success:
-            self.emit(self.result_event, {
+            self.emit(self.result_sampler_event, {
                 'resultId': self.collection_id,
                 'groupId': self.group_id,
                 'group': {

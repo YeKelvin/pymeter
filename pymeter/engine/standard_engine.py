@@ -113,6 +113,7 @@ class StandardEngine(Greenlet):
         group_iter = iter(group_searcher.get_search_result())
         teardown_group_iter = iter(teardown_group_searcher.get_search_result())
 
+        group_total = 0
         group_count = 0
         ContextService.clear_total_coroutines()
 
@@ -139,6 +140,7 @@ class StandardEngine(Greenlet):
         log.info('Waiting for all setup groups to exit')
         self.__wait_groups_stopped()
         log.info('All SetupGroups have ended')
+        group_total = group_total + group_count
         group_count = 0
         ContextService.clear_total_coroutines()
         self.groups.clear()  # The groups have all completed now
@@ -165,9 +167,8 @@ class StandardEngine(Greenlet):
                 log.info('所有 TestGroup 已启动')
                 break
 
-        if group_count == 0:
-            log.warning('TestCollection 下找不到已启用的 TestGroup 或所有 TestGroup 已被禁用')
-        else:
+        group_total = group_total + group_count
+        if group_count > 0:
             if not self.running:
                 log.info('测试已停止，不再启动剩余的 TestGroup')
             if not self.serialized:
@@ -203,9 +204,13 @@ class StandardEngine(Greenlet):
         log.info('Waiting for all teardown groups to exit')
         self.__wait_groups_stopped()
         log.info('All TearDownGroups have ended')
+        group_total = group_total + group_count
         group_count = 0
         ContextService.clear_total_coroutines()
         self.groups.clear()  # The groups have all completed now
+
+        if group_total == 0:
+            log.warning('TestCollection 下找不到启用的 Group 或所有 Group 已被禁用')
 
         # 遍历执行 TestCollectionListener
         self.__notify_test_listeners_of_end(test_listener_searcher)
