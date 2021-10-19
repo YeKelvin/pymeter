@@ -148,7 +148,7 @@ class FlaskSIOResultCollector(
         })
 
         if not result.success:
-            self.emit(self.result_sampler_event, {
+            self.emit(self.result_group_event, {
                 'resultId': self.collection_id,
                 'groupId': self.group_id,
                 'group': {
@@ -186,7 +186,7 @@ def sample_result_to_dict(result):
         'startTime': time_util.timestamp_to_strftime(result.start_time),
         'endTime': time_util.timestamp_to_strftime(result.end_time),
         'elapsedTime': result.elapsed_time,
-        'failedAssertions': failed_assertion(result.assertions),
+        'failedAssertion': failed_assertion(result.assertions),
         'children': [sample_result_to_dict(sub) for sub in result.sub_results]
     }
 
@@ -197,3 +197,4 @@ def failed_assertion(assertions):
             return {
                 'message': assertion.message
             }
+    return None
