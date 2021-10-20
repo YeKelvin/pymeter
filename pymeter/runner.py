@@ -8,6 +8,7 @@ import traceback
 
 from pymeter.engine import script_server
 from pymeter.engine.standard_engine import StandardEngine
+from pymeter.utils import log_util
 from pymeter.utils.log_util import get_logger
 
 
@@ -17,22 +18,38 @@ log = get_logger(__name__)
 class Runner:
 
     @staticmethod
-    def start(script: str or list, throw_ex: bool = False) -> None:
-        """脚本执行主入口"""
+    def start(script: str or list, throw_ex: bool = False, sio=None, sid=None, ext=None, plugins=None) -> None:
+        """执行脚本的入口
+
+        Args:
+            script:     脚本
+            throw_ex:   是否抛出异常
+            sio:        SocketIO实例
+            sid:        用户sid
+            ext:        外部扩展字典，用于传递外部对象
+            plugins:    插件
+
+        Returns:
+
+        """
         # 校验 script脚本不能为空
         if not script:
             raise Exception('脚本不允许为空')
 
-        # log.debug(f'script json:\n{script}')
+        if sio and sid:
+            log_util.SOCKET_IO_HANDLER.LOCAL.sio = sio
+            log_util.SOCKET_IO_HANDLER.LOCAL.sid = sid
+
+        # log.debug(f'script:\n{script}')
         try:
-            Runner.run(script)
+            Runner.run(script, ext)
         except Exception:
             log.error(traceback.format_exc())
             if throw_ex:
                 raise
 
     @staticmethod
-    def run(script: str) -> None:
+    def run(script: str, ext=None) -> None:
         """加载并解析脚本，将脚本反序列化为 HashTree对象"""
         now = time.time()
         ymd = time.strftime('%Y-%m-%d', time.localtime(now))
@@ -58,6 +75,7 @@ class Runner:
 if __name__ == '__main__':
     import cProfile
     import os
+
     from pymeter.utils.path_util import PROJECT_PATH
 
     # script = 'http-sampler.json'

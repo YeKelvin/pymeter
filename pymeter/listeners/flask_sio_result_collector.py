@@ -103,7 +103,6 @@ class FlaskSIOResultCollector(
                 'elapsedTime': int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
             }
         })
-        self.flask_sio.emit('pymeter_completed', namespace=self.namespace, to=self.sid)
 
     def group_started(self) -> None:
         """@override"""
