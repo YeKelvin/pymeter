@@ -63,7 +63,7 @@ FILE_HANDLER.setFormatter(FORMATTER)
 # 通过 SocketIo 传递日志
 EXTERNAL_SOCKET_IO_HANDLER = ExternalSocketIOHandler()
 EXTERNAL_SOCKET_IO_HANDLER.setFormatter(
-    ExternalSocketIOFormatter(fmt='[%(asctime)s][%(levelname)s][%(name)s] %(message)s')
+    ExternalSocketIOFormatter(fmt='[%(asctime)s][%(levelname)s][%(name)s:%(lineno)d] %(message)s')
 )
 
 
