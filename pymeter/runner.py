@@ -18,16 +18,21 @@ log = get_logger(__name__)
 class Runner:
 
     @staticmethod
-    def start(script: str or list, throw_ex: bool = False, sio=None, sid=None, ext=None, plugins=None) -> None:
+    def start(
+            script: str or list,
+            throw_ex: bool = False,
+            use_sio_log_handler: bool = False,
+            ext: dict = None,
+            plugins=None
+    ) -> None:
         """执行脚本的入口
 
         Args:
-            script:     脚本
-            throw_ex:   是否抛出异常
-            sio:        SocketIO实例
-            sid:        用户sid
-            ext:        外部扩展字典，用于传递外部对象
-            plugins:    插件
+            script:                 脚本
+            throw_ex:               是否抛出异常
+            use_sio_log_handler:    是否使用 socket 实时传递运行时日志
+            ext:                    外部扩展，用于传递外部对象
+            plugins:                插件
 
         Returns:
 
@@ -36,11 +41,14 @@ class Runner:
         if not script:
             raise Exception('脚本不允许为空')
 
-        if sio and sid:
-            log_util.SOCKET_IO_HANDLER.LOCAL.sio = sio
-            log_util.SOCKET_IO_HANDLER.LOCAL.sid = sid
+        if use_sio_log_handler:
+            if 'sio' not in ext or 'sid' not in ext:
+                raise Exception('使用 ExternalSocketIOHandler 时，EXT中 sio 和 sid 不能为空')
+            log_util.EXTERNAL_SOCKET_IO_HANDLER.LOCAL.sio = ext.get('sio')
+            log_util.EXTERNAL_SOCKET_IO_HANDLER.LOCAL.sid = ext.get('sid')
 
         # log.debug(f'script:\n{script}')
+        # noinspection PyBroadException
         try:
             Runner.run(script, ext)
         except Exception:
@@ -78,14 +86,14 @@ if __name__ == '__main__':
 
     from pymeter.utils.path_util import PROJECT_PATH
 
-    # script = 'http-sampler.json'
-    # script = 'while-controller.json'
-    # script = 'http-session-manager.json'
-    # script = 'transaction-listener.json'
-    # script = 'transaction-http-session-manager.json'
-    script = 'debug.json'
+    # file = 'http-sampler.json'
+    # file = 'while-controller.json'
+    # file = 'http-session-manager.json'
+    # file = 'transaction-listener.json'
+    # file = 'transaction-http-session-manager.json'
+    file = 'debug.json'
 
-    with open(os.path.join(PROJECT_PATH, 'scripts', script), 'r', encoding='utf-8') as f:
-        script = ''.join(f.readlines())
+    with open(os.path.join(PROJECT_PATH, 'scripts', file), 'r', encoding='utf-8') as f:
+        debug_script = ''.join(f.readlines())
         # cProfile.run('Runner.start(script)', filename='profile.out')
-        Runner.start(script)
+        Runner.start(debug_script)

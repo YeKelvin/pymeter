@@ -56,6 +56,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
     def next(self) -> Optional[Sampler]:
         self.update_iteration_index(self.name, self._loop_count)
+        # noinspection PyBroadException
         try:
             if self.end_of_loop():
                 if not self.continue_forever:

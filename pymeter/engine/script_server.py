@@ -98,6 +98,7 @@ def __loads_script(source) -> List[dict]:
     if isinstance(source, list):
         script = source
     elif isinstance(source, str):
+        # noinspection PyBroadException
         try:
             script = json_util.from_json(source)
         except Exception:

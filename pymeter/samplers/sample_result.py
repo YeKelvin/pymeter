@@ -64,6 +64,7 @@ class SampleResult:
         if self.error:
             return None
 
+        # noinspection PyBroadException
         try:
             obj = from_json(self.response_data)
             return transform(obj)

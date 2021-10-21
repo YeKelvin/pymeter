@@ -342,6 +342,7 @@ class Coroutine(Greenlet):
         """执行协程的入口"""
         context = ContextService.get_context()
 
+        # noinspection PyBroadException
         try:
             self.init_run(context)
 
@@ -604,6 +605,7 @@ class Coroutine(Greenlet):
             listener.sample_started(sampler)
 
         result = None
+        # noinspection PyBroadException
         try:
             log.debug(f'doing sample, sampler:[ {sampler} ]')
             result = sampler.sample()

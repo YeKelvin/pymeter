@@ -127,6 +127,7 @@ class HTTPSampler(Sampler):
         result.sample_start()
         res = None
 
+        # noinspection PyBroadException
         try:
             impl = None
             if self.session_manager and self.session_manager.session:

@@ -112,6 +112,7 @@ class WhileController(GenericController, IteratingController):
         """@override"""
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.update_iteration_index(self.name, self.iter_count)
+        # noinspection PyBroadException
         try:
             # 如果设置了 timeout 则记录开始循环时间
             if self.iter_count == 0 and self.timeout:

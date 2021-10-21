@@ -5,6 +5,7 @@
 # @Author  : Kelvin.Ye
 import logging
 import traceback
+from typing import Optional
 
 from gevent import Greenlet
 
@@ -51,9 +52,9 @@ class StandardEngine(Greenlet):
         self.tree = None
         self.serialized = True  # 标识 TestGroup 是否顺序运行
         self.groups = []  # 储存已启动的 TestGroup
-        self.collection: TestCollection = None
         self.context: EngineContext = EngineContext()
         self.properties: Properties = Properties()
+        self.collection: Optional[TestCollection] = None
         props = getattr(kwargs, 'props', None)
         if props:
             self.properties.update(props)
@@ -121,17 +122,17 @@ class StandardEngine(Greenlet):
         # SetUpGroup 运行主体
         # ####################################################################################################
         while self.running:
-            log.info('Starting setUp groups')
+            log.info('Starting Setup Groups')
             try:
                 setup_group: SetupGroup = next(setup_group_iter)
                 group_count += 1
                 group_name = setup_group.name
-                log.info(f'开始第 {group_count} 个 SetUpGroup，group:[ {group_name} ]')
+                log.info(f'开始第 {group_count} 个 SetUpGroup ，分组名称:[ {group_name} ]')
                 self.__start_task_group(setup_group, group_count, setup_group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'开始下一个 SetUpGroup 之前等待当前 SetUpGroup 完成，group:[ {group_name} ]')
+                    log.info(f'开始下一个 SetUpGroup 之前等待当前 SetUpGroup 完成，分组名称:[ {group_name} ]')
                     setup_group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 SetUpGroup 已启动')
@@ -156,12 +157,12 @@ class StandardEngine(Greenlet):
                     continue
                 group_count += 1
                 group_name = group.name
-                log.info(f'开始第[ {group_count} ]个 TestGroup，group:[ {group_name} ]')
+                log.info(f'开始第[ {group_count} ]个 TestGroup ，分组名称:[ {group_name} ]')
                 self.__start_task_group(group, group_count, group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'开始下一个 TestGroup 之前等待当前 TestGroup 完成，group:[ {group_name} ]')
+                    log.info(f'开始下一个 TestGroup 之前等待当前 TestGroup 完成，分组名称:[ {group_name} ]')
                     group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 TestGroup 已启动')
@@ -185,7 +186,7 @@ class StandardEngine(Greenlet):
         # TeardownGroup 运行主体
         # ####################################################################################################
         while self.running:
-            log.info('Starting teardown groups')
+            log.info('Starting Teardown Groups')
             try:
                 teardown_group: TearDownGroup = next(teardown_group_iter)
                 group_count += 1
@@ -195,7 +196,7 @@ class StandardEngine(Greenlet):
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'开始下一个 TearDownGroup 之前等待当前 TearDownGroup 完成，group:[ {group_name} ]')
+                    log.info(f'开始下一个 TearDownGroup 之前等待当前 TearDownGroup 完成，分组名称:[ {group_name} ]')
                     teardown_group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 TearDownGroup 已启动')
@@ -205,7 +206,6 @@ class StandardEngine(Greenlet):
         self.__wait_groups_stopped()
         log.info('All TearDownGroups have ended')
         group_total = group_total + group_count
-        group_count = 0
         ContextService.clear_total_coroutines()
         self.groups.clear()  # The groups have all completed now
 

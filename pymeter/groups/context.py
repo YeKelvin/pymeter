@@ -3,7 +3,9 @@
 # @File    : context
 # @Time    : 2019/3/15 9:39
 # @Author  : Kelvin.Ye
-from gevent.local import local
+from threading import local as ThreadLocal
+
+from gevent.local import local as CoroutineLocal
 
 from pymeter.groups.variables import Variables
 from pymeter.utils import time_util
@@ -48,8 +50,12 @@ class CoroutineContext:
 
 
 class ContextService:
+
+    # 线程本地变量
+    thread_local = ThreadLocal()
+
     # 协程本地变量
-    coroutine_local = local()
+    coroutine_local = CoroutineLocal()
 
     @classmethod
     def get_context(cls) -> CoroutineContext:
@@ -63,9 +69,8 @@ class ContextService:
             del cls.coroutine_local.coroutine_context
 
     @classmethod
-    def replace_context(cls, context) -> None:
-        if hasattr(cls.coroutine_local, 'coroutine_context'):
-            cls.coroutine_local.coroutine_context = context
+    def replace_context(cls, ctx) -> None:
+        setattr(cls.coroutine_local, 'coroutine_context', ctx)
 
     @classmethod
     def start_test(cls):

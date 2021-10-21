@@ -47,6 +47,7 @@ class PythonSampler(Sampler):
         result.request_data = self.script
         result.sample_start()
 
+        # noinspection PyBroadException
         try:
             # 定义脚本中可用的内置变量
             params = {'self': self}

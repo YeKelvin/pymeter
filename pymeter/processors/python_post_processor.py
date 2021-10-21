@@ -29,6 +29,7 @@ class PythonPostProcessor(PostProcessor):
             return
         script = 'import random\n' + script
 
+        # noinspection PyBroadException
         try:
             ctx = ContextService.get_context()
             props = ctx.properties
