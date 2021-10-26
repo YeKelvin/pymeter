@@ -27,9 +27,6 @@ class FlaskDBResultStorage(
     TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoCoroutineClone
 ):
 
-    # 测试计划编号
-    PLAN_NO: Final = 'FlaskDBResultStorage__plan_no'
-
     # 测试报告编号
     REPORT_NO: Final = 'FlaskDBResultStorage__report_no'
 
@@ -45,10 +42,6 @@ class FlaskDBResultStorage(
     @property
     def model(self):
         return importlib.import_module('app.script.model')
-
-    @property
-    def plan_no(self):
-        return self.get_property_as_str(self.PLAN_NO)
 
     @property
     def report_no(self):
