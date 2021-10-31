@@ -632,7 +632,7 @@ class Coroutine(Greenlet):
         )
 
         # Get the transaction sample result
-        result = transaction_sampler.transaction_sample_result
+        result = transaction_sampler.transaction_result
 
         # Check assertions for the transaction sample
         self.__check_assertions(transaction_package.assertions, result, context)

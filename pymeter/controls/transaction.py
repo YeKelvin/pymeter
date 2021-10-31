@@ -77,7 +77,7 @@ class TransactionController(GenericController):
         # to notify the children of TransactionController and
         # update them with SubSamplerResult
         if isinstance(sub_sampler, TransactionSampler):
-            self.transaction_sampler.add_sub_sampler_result(sub_sampler.transaction_sample_result)
+            self.transaction_sampler.add_sub_sampler_result(sub_sampler.transaction_result)
 
         self.transaction_sampler.set_transaction_done()
         # This transaction is done
@@ -99,10 +99,10 @@ class TransactionSampler(Sampler):
         self.no_failing_samples = 0
         self.total_time = 0
 
-        self.transaction_sample_result = SampleResult()
-        self.transaction_sample_result.sample_name = name
-        self.transaction_sample_result.success = True
-        self.transaction_sample_result.sample_start()
+        self.transaction_result = SampleResult()
+        self.transaction_result.sample_name = name
+        self.transaction_result.success = True
+        self.transaction_result.sample_start()
 
     def sample(self):
         """@override"""
@@ -114,24 +114,21 @@ class TransactionSampler(Sampler):
 
         # Set Response code of transaction
         if self.no_failing_samples == 0:
-            self.transaction_sample_result.response_code = result.response_code
+            self.transaction_result.response_code = result.response_code
 
         # The transaction fails if any sub sample fails
         if not result.success:
-            self.transaction_sample_result.success = False
+            self.transaction_result.success = False
             self.no_failing_samples += 1
 
         # Add the sub result to the transaction result
-        self.transaction_sample_result.add_sub_result(result)
+        self.transaction_result.add_sub_result(result)
 
         # Add current time to total for later use (exclude pause time)
-        self.total_time += (result.end_time - result.start_time - result.idle_time)
+        self.total_time += result.elapsed_time - int(result.idle_time * 1000)
 
     def set_transaction_done(self):
         self.transaction_done = True
-        # Set the overall status for the transaction sample
-        self.transaction_sample_result.response_message = (
-            f'Number of samples in transaction:[ {self.calls} ], number of failing samples:[ {self.no_failing_samples} ]')
-
-        if self.transaction_sample_result.success:
-            self.transaction_sample_result.response_code = 200
+        self.transaction_result.elapsed_time = self.total_time
+        if self.transaction_result.success:
+            self.transaction_result.response_code = 200

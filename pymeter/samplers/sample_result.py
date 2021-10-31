@@ -106,7 +106,7 @@ class SampleResult:
         self.elapsed_time = int(self.end_time * 1000) - int(self.start_time * 1000)
 
     def add_sub_result(self, sub_result: 'SampleResult'):
-        log.debug(f'parent:[ {self.sample_name} ] add subResult:[ {sub_result.sample_name} ]')
+        log.debug(f'parent:[ {self.sample_name} ] add sub result:[ {sub_result.sample_name} ]')
 
         if not sub_result:
             return
