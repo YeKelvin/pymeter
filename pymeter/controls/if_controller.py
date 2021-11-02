@@ -39,7 +39,7 @@ class IfController(GenericController):
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition:[ {cnd} ]')
         result = True
         if self.first:
-            result = eval(cnd)
+            result = eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
 
         log.debug(
             f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition result:[ {result} ]')

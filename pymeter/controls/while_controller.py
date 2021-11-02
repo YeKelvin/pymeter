@@ -80,7 +80,7 @@ class WhileController(GenericController, IteratingController):
                 )
                 result = False
             else:
-                result = eval(cnd)  # 如果 next() 被调用，条件可能为空
+                result = eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))  # 如果 next() 被调用，条件可能为空
 
         log.debug(
             f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while result:[ {result} ]')
