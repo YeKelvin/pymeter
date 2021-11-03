@@ -35,7 +35,6 @@ class RSA(Function):
         if not public_key.endswith(RSA.PUBLIC_KEY_SUFFIX):
             public_key = public_key + RSA.PUBLIC_KEY_SUFFIX
 
-        log.debug(f'public_key:\n{public_key}')
         result = rsa_util.encrypt_by_public_key(plaintext, public_key).decode(encoding='UTF-8')
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
