@@ -3,6 +3,7 @@
 # @File    : function_parser
 # @Time    : 2021/5/30 17:11
 # @Author  : Kelvin.Ye
+import traceback
 from typing import List
 
 from pymeter.common.exceptions import InvalidVariableException
@@ -52,18 +53,24 @@ class CompoundVariable:
             return ''
 
         results = []
-        for item in self.compiled_components:
-            if isinstance(item, Function):
-                result = item.execute()
-                log.debug(f'appending execution result:[ {result} ] from function:[ {item.REF_KEY} ]')
-                results.append(result)
-            elif isinstance(item, SimpleVariable):
-                value = str(item.value)
-                log.debug(f'appending actual value:[ {value} ] from variable:[ {item.name} ]')
-                results.append(value)
-            else:
-                results.append(item)
-        results_str = ''.join(results)
+        # noinspection PyBroadException
+        try:
+            for item in self.compiled_components:
+                if isinstance(item, Function):
+                    result = item.execute()
+                    log.debug(f'appending execution result:[ {result} ] from function:[ {item.REF_KEY} ]')
+                    results.append(result)
+                elif isinstance(item, SimpleVariable):
+                    value = str(item.value)
+                    log.debug(f'appending actual value:[ {value} ] from variable:[ {item.name} ]')
+                    results.append(value)
+                else:
+                    results.append(item)
+        except Exception as e:
+            results.append(str(e))
+            log.error(traceback.format_exc())
+        finally:
+            results_str = ''.join(results)
 
         # 非动态函数时，缓存函数结果
         if not self.dynamic:

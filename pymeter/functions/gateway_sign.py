@@ -104,8 +104,8 @@ class GatewaySign(Function):
         # 根据首字母排序
         sorted_dict = dict(sorted(value.items(), key=lambda x: x[0]))
         buffer = ['{']
-        for key, value in sorted_dict.items():
-            self.traverse(buffer, key, value)
+        for k, v in sorted_dict.items():
+            self.traverse(buffer, k, v)
 
         return (''.join(buffer))[:-1] + '}'
 
@@ -117,8 +117,8 @@ class GatewaySign(Function):
         for item in value:
             if isinstance(item, dict):
                 buffer.append(self.traverse_dict(item))
-            elif isinstance(value, list):
-                buffer.append(self.traverse_list(value))
+            elif isinstance(item, list):
+                buffer.append(self.traverse_list(item))
             else:
                 buffer.append(item)
             buffer.append(',')
@@ -135,6 +135,3 @@ if __name__ == '__main__':
     }
     s = sorted(json.items(), key=lambda x: x[0])
     print(s)
-    print(type(s))
-    print(dict(s))
-    print(type(dict(s)))
