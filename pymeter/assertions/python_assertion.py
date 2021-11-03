@@ -7,6 +7,7 @@ from typing import Final
 
 from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
+from pymeter.common.python_support import DEFAULT_IMPORT_MODULE
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.log_util import get_logger
@@ -30,7 +31,7 @@ class PythonAssertion(Assertion):
         script = self.script
         if not script:
             return result
-        script = 'import random\n' + script
+        script = DEFAULT_IMPORT_MODULE + script
 
         ctx = ContextService.get_context()
         props = ctx.properties
