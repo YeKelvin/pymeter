@@ -59,7 +59,7 @@ class PythonAssertion(Assertion):
             if error_msg:
                 raise
             else:
-                raise AssertionError(script)
+                raise AssertionError(self.script)
 
         # 更新断言结果
         result.failure = params['failure']
