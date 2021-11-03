@@ -6,6 +6,8 @@
 import traceback
 from typing import Final
 
+from pymeter.common.python_support import DEFAULT_LOCAL_IMPORT_MODULE
+from pymeter.common.python_support import INDENT
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -25,20 +27,17 @@ class PythonSampler(Sampler):
         return self.get_property_as_str(self.SCRIPT)
 
     @property
-    def script_wrapper(self):
-        func = [
-            'def func(log, ctx, vars, props, prev, result):\n',
-            '\timport random\n'
-        ]
+    def function_wrapper(self):
+        func = ['def func(log, ctx, vars, props, prev, result):\n' + DEFAULT_LOCAL_IMPORT_MODULE]
 
         if not self.script or self.script.isspace():
-            func.append('\t...\n')
+            func.append(f'{INDENT}...\n')
         else:
             lines = self.script.split('\n')
             for line in lines:
-                func.append(f'\t{line}\n')
+                func.append(f'{INDENT}{line}\n')
 
-        func.append('self.wrapper = func')
+        func.append('self.function = func')
         return ''.join(func)
 
     def sample(self) -> SampleResult:
@@ -51,10 +50,10 @@ class PythonSampler(Sampler):
         try:
             # 定义脚本中可用的内置变量
             params = {'self': self}
-            exec(self.script_wrapper, params, params)
+            exec(self.function_wrapper, params, params)
             ctx = ContextService.get_context()
             props = ctx.properties
-            res = self.wrapper(
+            res = self.function(
                 log=log,
                 ctx=ctx,
                 vars=ctx.variables,

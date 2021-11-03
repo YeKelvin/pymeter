@@ -6,6 +6,7 @@
 import traceback
 from typing import Final
 
+from pymeter.common.python_support import DEFAULT_IMPORT_MODULE
 from pymeter.groups.context import ContextService
 from pymeter.processors.pre import PreProcessor
 from pymeter.utils.log_util import get_logger
@@ -27,7 +28,7 @@ class PythonPreProcessor(PreProcessor):
         script = self.script
         if not script:
             return
-        script = 'import random\n' + script
+        script = DEFAULT_IMPORT_MODULE + script
 
         # noinspection PyBroadException
         try:
