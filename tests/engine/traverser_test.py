@@ -5,16 +5,16 @@
 # @Author  : Kelvin.Ye
 import os
 
+from pymeter import config as CONFIG
 from pymeter.engine import script_server
 from pymeter.engine.collection import TestCollection
 from pymeter.engine.traverser import SearchByClass
-from pymeter.utils.path_util import PROJECT_PATH
 
 
 class SearchByClassTest:
 
     def test_search_by_class(self):
-        with open(os.path.join(PROJECT_PATH, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
+        with open(os.path.join(CONFIG.PROJECT_PATH, 'docs', 'test-script.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
             tree = script_server.load_tree(script)
             searcher = SearchByClass(TestCollection)

@@ -7,7 +7,7 @@ import datetime as dt
 import logging
 import threading
 
-from pymeter.utils import project
+from pymeter import config as CONFIG
 
 
 class ExternalSocketIOHandler(logging.Handler):
@@ -42,15 +42,12 @@ class ExternalSocketIOFormatter(logging.Formatter):
 
 # 日志格式
 LOG_FORMAT = '[%(asctime)s][%(levelname)s][%(threadName)s][%(name)s.%(funcName)s %(lineno)d] %(message)s'
-
-# 日志级别
-LEVEL = project.config.get('log', 'level', default='INFO')
-
-# 日志文件名称
-LOG_FILE_NAME = project.config.get('log', 'name', default='pymeter')
-
-# 日志格式
 FORMATTER = logging.Formatter(LOG_FORMAT)
+# 日志级别
+LEVEL = CONFIG.LOG_LEVEL
+# 日志文件名称
+LOG_FILE_NAME = CONFIG.LOG_NAME
+
 
 # 输出到控制台
 CONSOLE_HANDLER = logging.StreamHandler()

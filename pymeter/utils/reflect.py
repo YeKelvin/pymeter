@@ -6,7 +6,7 @@
 import pkgutil
 import sys
 
-from pymeter.utils.path_util import SRC_PATH
+from pymeter import config as CONFIG
 
 
 class Reflect:
@@ -43,5 +43,5 @@ instance = clazz()
 if __name__ == '__main__':
     # print(sys.modules)
     # print(getattr(sys.modules, 'Function'))
-    for obj in pkgutil.walk_packages([SRC_PATH], 'pymeter.'):
+    for obj in pkgutil.walk_packages([CONFIG.SRC_PATH], 'pymeter.'):
         print(obj)

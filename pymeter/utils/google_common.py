@@ -24,5 +24,6 @@ class GoogleAuthenticate:
 
 
 if __name__ == '__main__':
-    secret_key = 'SCALISVBXQQ2JBQN'
-    google_code = GoogleAuthenticate.get_code(secret_key)
+    key = 'SCALISVBXQQ2JBQN'
+    google_code = GoogleAuthenticate.get_code(key)
+    print(google_code)

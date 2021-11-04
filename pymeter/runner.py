@@ -84,7 +84,7 @@ if __name__ == '__main__':
     import cProfile
     import os
 
-    from pymeter.utils.path_util import PROJECT_PATH
+    from pymeter import config as CONFIG
 
     # file = 'http-sampler.json'
     # file = 'while-controller.json'
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     # file = 'transaction-http-session-manager.json'
     file = 'debug.json'
 
-    with open(os.path.join(PROJECT_PATH, 'scripts', file), 'r', encoding='utf-8') as f:
+    with open(os.path.join(CONFIG.PROJECT_PATH, 'scripts', file), 'r', encoding='utf-8') as f:
         debug_script = ''.join(f.readlines())
         # cProfile.run('Runner.start(script)', filename='profile.out')
         Runner.start(debug_script)

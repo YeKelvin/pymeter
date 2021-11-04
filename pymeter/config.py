@@ -9,8 +9,14 @@ import os
 
 # 项目路径
 PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+# 源代码目录路径
+SRC_PATH = os.path.join(PROJECT_PATH, 'pymeter')
 # 配置文件路径
-CONFIG_PATH = os.environ.get('CONFIG_PATH', os.path.join(PROJECT_PATH, 'config.ini'))
+if 'CONFIG_PATH' not in os.environ:
+    CONFIG_PATH = os.path.join(PROJECT_PATH, 'config.ini')
+    os.environ['CONFIG_PATH'] = CONFIG_PATH
+else:
+    CONFIG_PATH = os.environ.get('CONFIG_PATH')
 
 
 # 配置对象

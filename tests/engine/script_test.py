@@ -5,15 +5,15 @@
 # @Author  : Kelvin.Ye
 import os
 
+from pymeter import config as CONFIG
 from pymeter.engine import script_server
 from pymeter.engine.traverser import TreeCloner
-from pymeter.utils.path_util import PROJECT_PATH
 
 
 class ScriptServerTest:
 
     def test_load_tree(self):
-        with open(os.path.join(PROJECT_PATH, 'docs', 'test-sampler.json'), 'r', encoding='utf-8') as f:
+        with open(os.path.join(CONFIG.PROJECT_PATH, 'docs', 'test-sampler.json'), 'r', encoding='utf-8') as f:
             script = ''.join(f.readlines())
             tree = script_server.load_tree(script)
             print(f'tree=\n{tree}')
@@ -23,7 +23,7 @@ class ScriptServerTest:
 
 
 if __name__ == '__main__':
-    with open(os.path.join(PROJECT_PATH, 'docs', 'script-v2.json'), 'r', encoding='utf-8') as f:
+    with open(os.path.join(CONFIG.PROJECT_PATH, 'docs', 'script-v2.json'), 'r', encoding='utf-8') as f:
         script = ''.join(f.readlines())
         tree = script_server.load_tree(script)
         print(f'tree=\n{tree}')
