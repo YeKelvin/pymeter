@@ -5,7 +5,11 @@
 # @Author  : Kelvin.Ye
 import datetime as dt
 import logging
+import multiprocessing
 import threading
+from logging.handlers import QueueHandler
+from logging.handlers import QueueListener
+from logging.handlers import TimedRotatingFileHandler
 
 from pymeter import config as CONFIG
 
@@ -46,18 +50,27 @@ FORMATTER = logging.Formatter(LOG_FORMAT)
 # 日志级别
 LEVEL = CONFIG.LOG_LEVEL
 # 日志文件名称
-LOG_FILE_NAME = CONFIG.LOG_NAME
+LOG_FILE_NAME = 'pymeter.log'
 
 
-# 输出到控制台
+# 控制台 Handler
 CONSOLE_HANDLER = logging.StreamHandler()
 CONSOLE_HANDLER.setFormatter(FORMATTER)
 
-# 写入日志文件
-FILE_HANDLER = logging.FileHandler(LOG_FILE_NAME, encoding='utf-8')
+# 文件 Handler
+# FILE_HANDLER = logging.FileHandler(LOG_FILE_NAME, encoding='utf-8')
+# 文件滚动日志（进程不安全）
+FILE_HANDLER = TimedRotatingFileHandler(LOG_FILE_NAME, when='D', interval=1, backupCount=30, encoding='utf-8')
 FILE_HANDLER.setFormatter(FORMATTER)
+FILE_HANDLER.namer = lambda name: name.replace('.log', '') + '.log'
 
-# 通过 SocketIo 传递日志
+# 队列 Handler
+QUEUE = multiprocessing.Queue(-1)
+QUEUE_HANDLER = QueueHandler(QUEUE)
+QUEUE_LISTENER = QueueListener(QUEUE, FILE_HANDLER, respect_handler_level=True)
+QUEUE_LISTENER.start()
+
+# SocketIo Handler
 EXTERNAL_SOCKET_IO_HANDLER = ExternalSocketIOHandler()
 EXTERNAL_SOCKET_IO_HANDLER.setFormatter(
     ExternalSocketIOFormatter(fmt='[%(asctime)s][%(levelname)s][%(name)s:%(lineno)d] %(message)s')
@@ -69,6 +82,6 @@ def get_logger(name) -> logging.Logger:
     logger.propagate = False
     logger.setLevel(LEVEL)
     logger.addHandler(CONSOLE_HANDLER)
-    # logger.addHandler(FILE_HANDLER)
+    logger.addHandler(QUEUE_HANDLER)
     logger.addHandler(EXTERNAL_SOCKET_IO_HANDLER)
     return logger
