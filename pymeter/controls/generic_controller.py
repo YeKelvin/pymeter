@@ -35,13 +35,17 @@ class GenericController(Controller, TestCompilerHelper):
         self.current = 0
 
         # 当前迭代数
-        self.iter_count = 0
+        self._iter_count = 0
 
         # 第一个Sampler或Controller
         self.first = True
 
         # 当控制器完成所有Sampler的交付时，设置为True，表示协程已完成
         self._done = False  # @override
+
+    @property
+    def iter_count(self) -> int:
+        return self._iter_count
 
     @property
     def done(self) -> bool:
@@ -59,7 +63,7 @@ class GenericController(Controller, TestCompilerHelper):
         self.current = 0
 
     def reset_iter_count(self):
-        self.iter_count = 0
+        self._iter_count = 0
 
     def initialize(self):
         """初始化Controller"""
@@ -86,7 +90,7 @@ class GenericController(Controller, TestCompilerHelper):
         self.current += 1
 
     def increment_iter_count(self):
-        self.iter_count += 1
+        self._iter_count += 1
 
     def next(self) -> Optional[Sampler]:
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')

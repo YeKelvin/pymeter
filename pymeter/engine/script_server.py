@@ -44,6 +44,7 @@ __MODULE_PATH__ = {
 
     # 逻辑控制器
     'IfController': 'pymeter.controls.if_controller',
+    'ForInController': 'pymeter.controls.forin_controller',
     'LoopController': 'pymeter.controls.loop_controller',
     'TransactionController': 'pymeter.controls.transaction',
     'WhileController': 'pymeter.controls.while_controller',

@@ -81,8 +81,8 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
     def trigger_end_of_loop(self):
         """触发循环结束"""
-        self.reset_loop_count()
         super().trigger_end_of_loop()
+        self.reset_loop_count()
 
     def end_of_loop(self) -> bool:
         """判断循环是否结束"""
