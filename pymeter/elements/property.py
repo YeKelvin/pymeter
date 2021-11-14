@@ -339,14 +339,14 @@ class FunctionProperty(PyMeterProperty):
             log.debug('not running version, return raw function string')
             return self.function.raw_parameters
 
-        iter = self.ctx.variables.iteration if self.ctx.variables else -1
+        iteration = self.ctx.variables.iteration if self.ctx.variables else -1
 
-        if iter < self.test_iteration:
+        if iteration < self.test_iteration:
             self.test_iteration = -1
 
-        if iter > self.test_iteration or self.cache_value is None:
+        if iteration > self.test_iteration or self.cache_value is None:
             log.debug('executing function in FunctionProperty')
-            self.test_iteration = iter
+            self.test_iteration = iteration
             self.cache_value = self.function.execute()
 
         return self.cache_value

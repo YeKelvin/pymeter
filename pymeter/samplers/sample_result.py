@@ -6,7 +6,7 @@
 import traceback
 from typing import Optional
 
-from pymeter.common.advanced_object import transform
+from pymeter.common.advanced import transform
 from pymeter.utils import json_util
 from pymeter.utils import time_util
 from pymeter.utils.json_util import from_json

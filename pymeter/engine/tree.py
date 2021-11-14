@@ -58,7 +58,7 @@ class HashTree(dict):
         HashTree to that new node.
 
         @param key     key to create in this tree
-        @param subTree sub tree to add to the node created for the first argument.
+        @param subtree sub tree to add to the node created for the first argument.
         """
         self.add_key(key).add_newtree(subtree)
 
@@ -67,7 +67,7 @@ class HashTree(dict):
         Adds all the nodes and branches of the given tree to this tree.
         Is like merging two trees. Duplicates are ignored.
 
-        @param newTree the tree to be added
+        @param newtree the tree to be added
         """
         for item in newtree.list():
             self.add_key(item).add_newtree(newtree.get_subtree(item))
@@ -108,7 +108,7 @@ class HashTree(dict):
         If the path doesn't already exist, it is created (the objects are added along the way).
         At the path, the object in the second argument is added as a node.
 
-        @param treePath a list of objects representing a path
+        @param treepath a list of objects representing a path
         @param value    Object to add as a node to bottom-most node
         @return HashTree for which <code>value</code> is the key
         """
@@ -122,7 +122,7 @@ class HashTree(dict):
         If the path doesn't already exist, it is created (the objects are added along the way).
         At the path, all the objects in the second argument are added as nodes.
 
-        @param treePath a SortedSet of objects representing a path
+        @param treepath a SortedSet of objects representing a path
         @param values   Collection of values to be added as keys to bottom-most node
         """
         tree = self._add_treepath(treepath)

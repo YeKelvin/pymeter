@@ -3,6 +3,7 @@
 # @File    : generic_controller
 # @Time    : 2020/2/28 17:25
 # @Author  : Kelvin.Ye
+from collections import deque
 from typing import Optional
 
 from pymeter.common.exceptions import NextIsNullException
@@ -23,36 +24,43 @@ class GenericController(Controller, TestCompilerHelper):
 
     def __init__(self):
         super().__init__()
+
+        # 用于 TestCompilerHelper
         self.children = []
 
-        # 存储Sampler或Controller
-        self.sub_controllers_and_samplers = []
+        # GenericController::subControllersAndSamplers
+        # 存储 Sampler 或 Controller
+        # 由 TestCompiler 编译时通过 addElement 添加
+        self.sub_elements = []
 
-        # 存储子代控制器的LoopIterationListener
-        self.sub_iteration_listeners = []
+        # 存储子代控制器的 LoopIterationListener
+        self.iteration_listeners = deque()
 
-        # Sampler或Controller的索引
+        # 控制器下当前元素的索引（Sampler 或 Controller）
         self.current = 0
 
-        # 当前迭代数
-        self._iter_count = 0
-
-        # 第一个Sampler或Controller
+        # 是否控制器下的第一个元素（Sampler 或 Controller）
         self.first = True
 
-        # 当控制器完成所有Sampler的交付时，设置为True，表示协程已完成
-        self._done = False  # @override
+        # 当前迭代次数
+        self._iter_count = 0
+
+        # 是否已经完成控制器下所有的取样器和迭代
+        self._done = False
 
     @property
     def iter_count(self) -> int:
+        """只读，增长由 increment_iter_count() 控制"""
         return self._iter_count
 
     @property
     def done(self) -> bool:
+        """@override"""
         return self._done
 
     @done.setter
     def done(self, val: bool):
+        """@override"""
         self._done = val
 
     @property
@@ -60,13 +68,15 @@ class GenericController(Controller, TestCompilerHelper):
         return ContextService.get_context()
 
     def reset_current(self):
+        """重置当前元素的索引"""
         self.current = 0
 
     def reset_iter_count(self):
+        """重置当前迭代次数"""
         self._iter_count = 0
 
     def initialize(self):
-        """初始化Controller"""
+        """初始化控制器"""
         self.done = False
         self.first = True
         self.reset_current()
@@ -74,13 +84,13 @@ class GenericController(Controller, TestCompilerHelper):
         self.initialize_sub_controllers()
 
     def initialize_sub_controllers(self):
-        """初始化子Controller"""
-        for element in self.sub_controllers_and_samplers:
+        """初始化子代控制器"""
+        for element in self.sub_elements:
             if isinstance(element, GenericController):
                 element.initialize()
 
     def re_initialize(self):
-        """重置Controller（在Controller的最后一个子代之后调用）"""
+        """重新初始化控制器（在控制器最后一个子代元素执行完成之后调用）"""
         self.reset_current()
         self.increment_iter_count()
         self.first = True
@@ -93,27 +103,28 @@ class GenericController(Controller, TestCompilerHelper):
         self._iter_count += 1
 
     def next(self) -> Optional[Sampler]:
+        """获取控制器的下一个子代元素"""
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.fire_iter_events()
 
         if self.done:
             return None
 
-        next = None
+        next_sampler = None
         try:
-            current_element = self.get_current_element()
+            current_element = self.get_current_element()  # type: Optional[Sampler, Controller]
             if current_element is None:
-                next = self.next_is_null()
+                next_sampler = self.next_is_null()
             else:
                 if isinstance(current_element, Sampler):
-                    next = self.next_is_sampler(current_element)
+                    next_sampler = self.next_is_sampler(current_element)
                 else:
-                    next = self.next_is_controller(current_element)
+                    next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
             log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is null')
 
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next} ]')
-        return next
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
+        return next_sampler
 
     def fire_iter_events(self):
         if self.first:
@@ -122,35 +133,42 @@ class GenericController(Controller, TestCompilerHelper):
 
     def fire_iteration_start(self):
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
-        for listener in self.sub_iteration_listeners[::-1]:
+        for listener in self.iteration_listeners:
             listener.iteration_start(self, self.iter_count)
 
     def get_current_element(self):
-        if self.current < len(self.sub_controllers_and_samplers):
-            return self.sub_controllers_and_samplers[self.current]
+        """根据当前索引获取元素"""
+        if self.current < len(self.sub_elements):
+            return self.sub_elements[self.current]
 
-        if not self.sub_controllers_and_samplers:
+        if not self.sub_elements:
             self.done = True
             raise NextIsNullException()
 
         return None
 
     def next_is_sampler(self, sampler: Sampler) -> Sampler:
+        """下一个元素是取样器时的处理方法"""
         self.increment_current()
         return sampler
 
     def next_is_controller(self, controller: Controller) -> Sampler:
+        """下一个元素是控制器时的处理方法"""
+        # 获取子代控制器的下一个取样器
         sampler = controller.next()
+        # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:
             self.current_returned_none(controller)
             sampler = self.next()
         return sampler
 
     def next_is_null(self) -> None:
+        """下一个元素为空时的处理方法（即没有下一个元素了）"""
         self.re_initialize()
         return None
 
     def current_returned_none(self, controller: Controller):
+        """子代控制器的下一个取样器为空时的处理方法"""
         if controller.done:
             self.remove_current_element()
         else:
@@ -158,7 +176,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def add_element(self, child):
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add element:[ {child} ]')
-        self.sub_controllers_and_samplers.append(child)
+        self.sub_elements.append(child)
 
     def add_test_element(self, child):
         if isinstance(child, Controller) or isinstance(child, Sampler):
@@ -174,16 +192,17 @@ class GenericController(Controller, TestCompilerHelper):
             return False
 
     def remove_current_element(self):
-        self.sub_controllers_and_samplers.remove(self.sub_controllers_and_samplers[self.current])
+        self.sub_elements.remove(self.sub_elements[self.current])
 
     def add_iteration_listener(self, listener: LoopIterationListener):
         log.debug(
             f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ] '
         )
-        self.sub_iteration_listeners.append(listener)
+        self.iteration_listeners.appendleft(listener)
 
     def remove_iteration_listener(self, listener: LoopIterationListener):
-        self.sub_iteration_listeners.remove(listener)
+        self.iteration_listeners.remove(listener)
 
     def trigger_end_of_loop(self):
+        """触发结束循环"""
         self.re_initialize()

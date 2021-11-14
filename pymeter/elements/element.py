@@ -8,6 +8,7 @@ from copy import deepcopy
 from typing import Deque
 from typing import Dict
 from typing import Iterable
+from typing import Optional
 
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import CollectionProperty
@@ -36,8 +37,8 @@ class TestElement:
     REMARK = 'TestElement__remark'
 
     def __init__(self, name: str = None):
-        self.properties: Dict[str, PyMeterProperty] = {}
-        self.temporary_properties: Deque = None
+        self.properties = {}  # type: Dict[str, PyMeterProperty]
+        self.temporary_properties = None  # type: Optional[Deque]
         self.context = None
         self._running_version = False
         if name:
@@ -94,13 +95,13 @@ class TestElement:
             else:
                 self.add_property(key, BasicProperty(key, value))
 
-    def add_property(self, key: str, property: PyMeterProperty) -> None:
+    def add_property(self, key: str, prop: PyMeterProperty) -> None:
         if self.running_version:
-            self.set_temporary(property)
+            self.set_temporary(prop)
         else:
-            self.clear_temporary(property)
+            self.clear_temporary(prop)
 
-        self.properties[key] = property
+        self.properties[key] = prop
 
     def get_property(self, key: str, default: any = None) -> PyMeterProperty:
         if default:
@@ -157,24 +158,24 @@ class TestElement:
         """清空属性"""
         self.properties.clear()
 
-    def is_temporary(self, property) -> bool:
+    def is_temporary(self, prop) -> bool:
         if self.temporary_properties is None:
             return False
         else:
-            return property in self.temporary_properties
+            return prop in self.temporary_properties
 
-    def set_temporary(self, property) -> None:
+    def set_temporary(self, prop) -> None:
         if self.temporary_properties is None:
             self.temporary_properties = deque()
 
-        self.temporary_properties.append(property)
-        if isinstance(property, MultiProperty):
-            for prop in property.iterator():
+        self.temporary_properties.append(prop)
+        if isinstance(prop, MultiProperty):
+            for prop in prop.iterator():
                 self.set_temporary(prop)
 
-    def clear_temporary(self, property):
+    def clear_temporary(self, prop):
         if self.temporary_properties is not None:
-            self.temporary_properties.remove(property)
+            self.temporary_properties.remove(prop)
 
     def empty_temporary(self):
         if self.temporary_properties is not None:

@@ -284,7 +284,7 @@ class TestCompiler(HashTreeTraverser):
         package.set_running_version(True)
         self.sampler_config_dict[sampler] = package
 
-    def __save_transaction_controller_configs(self, trans_controller: Controller):
+    def __save_transaction_controller_configs(self, trans_controller: TransactionController):
         configs = []
         controllers = []
         listeners = []

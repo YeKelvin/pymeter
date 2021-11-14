@@ -4,6 +4,7 @@
 # @Time    : 2021/11/12 14:42
 # @Author  : Kelvin.Ye
 import traceback
+from collections import Iterable
 from typing import Final
 
 import gevent
@@ -78,6 +79,14 @@ class ForInController(GenericController, IteratingController):
             self._instance = self.ctx.variables.get(self.in_code)
         else:
             self._instance = from_json(self.in_code)
+
+        if isinstance(self._instance, str):
+            self._instance = from_json(self._instance)
+
+        if not isinstance(self._instance, Iterable):
+            log.error(f'in:[ {self.in_code} ] 不是可迭代的对象')
+            self.done = True
+            return
 
         if isinstance(self._instance, dict):
             self._instance = list(self._instance.items())

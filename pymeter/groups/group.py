@@ -285,12 +285,12 @@ class Coroutine(Greenlet):
         super().__init__(*args, **kwargs)
         self.engine = None
         self.running = True
-        self.group: TestGroup = None
-        self.group_main_controller: Controller = group_tree.list()[0]
+        self.group = None  # type: Optional[TestGroup]
+        self.group_main_controller = group_tree.list()[0]  # type: Controller
         self.group_tree = group_tree
         self.coroutine_name = None
         self.coroutine_number = None
-        self.compiler: TestCompiler = TestCompiler(self.group_tree)
+        self.compiler = TestCompiler(self.group_tree)
         self.variables = Variables()
         self.start_time = 0
         self.end_time = 0

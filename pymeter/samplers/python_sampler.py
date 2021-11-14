@@ -6,8 +6,8 @@
 import traceback
 from typing import Final
 
-from pymeter.common.python_support import DEFAULT_LOCAL_IMPORT_MODULE
-from pymeter.common.python_support import INDENT
+from pymeter.common.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
+from pymeter.common.python_code_snippets import INDENT
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -37,7 +37,7 @@ class PythonSampler(Sampler):
             for line in lines:
                 func.append(f'{INDENT}{line}\n')
 
-        func.append('self.function = func')
+        func.append('self.dynamic_function = func')
         return ''.join(func)
 
     def sample(self) -> SampleResult:
@@ -53,7 +53,7 @@ class PythonSampler(Sampler):
             exec(self.function_wrapper, params, params)
             ctx = ContextService.get_context()
             props = ctx.properties
-            res = self.function(
+            res = self.dynamic_function(  # noqa
                 log=log,
                 ctx=ctx,
                 vars=ctx.variables,

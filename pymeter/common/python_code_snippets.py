@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : python_support.py
+# @File    : python_code_snippets.py
 # @Time    : 2021/11/3 13:06
 # @Author  : Kelvin.Ye
 

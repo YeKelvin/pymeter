@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : advanced_object.py
+# @File    : advanced.py
 # @Time    : 2021-09-08 11:06:50
 # @Author  : Kelvin.Ye
 
