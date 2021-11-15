@@ -75,7 +75,7 @@ class LoopController(GenericController, IteratingController, LoopIterationListen
 
             return super().next()
         except Exception:
-            log.debug(traceback.format_exc())
+            log.error(traceback.format_exc())
         finally:
             self.update_iteration_index(self.name, self._loop_count)
 

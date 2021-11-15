@@ -4,7 +4,7 @@
 # @Time    : 2021/11/12 14:42
 # @Author  : Kelvin.Ye
 import traceback
-from collections import Iterable
+from collections.abc import Iterable
 from typing import Final
 
 import gevent
@@ -20,25 +20,25 @@ log = get_logger(__name__)
 
 class ForInController(GenericController, IteratingController):
 
-    FOR_CODE: Final = 'ForInController__for_code'
+    ITERATING_VARIABLES: Final = 'ForInController__iterating_variables'
 
-    IN_CODE: Final = 'ForInController__in_code'
+    STATEMENTS: Final = 'ForInController__statements'
 
-    USE_VARIABLES: Final = 'ForInController__use_variables'
+    USE_VARIABLE: Final = 'ForInController__use_variable'
 
     DELAY: Final = 'ForInController__delay'
 
     @property
-    def for_code(self) -> str:
-        return self.get_property_as_str(self.FOR_CODE)
+    def iterating_variables(self) -> str:
+        return self.get_property_as_str(self.ITERATING_VARIABLES)
 
     @property
-    def in_code(self) -> str:
-        return self.get_property_as_str(self.IN_CODE)
+    def statements(self) -> str:
+        return self.get_property_as_str(self.STATEMENTS)
 
     @property
-    def use_variables(self) -> bool:
-        return self.get_property_as_bool(self.USE_VARIABLES)
+    def use_variable(self) -> bool:
+        return self.get_property_as_bool(self.USE_VARIABLE)
 
     @property
     def delay(self) -> int:
@@ -53,7 +53,7 @@ class ForInController(GenericController, IteratingController):
         if self._loop_count >= self._end_index:
             return True
 
-        if isinstance(self._instance, dict):
+        if self._instance_type is dict and self._keys_length == 2:
             for i in range(self._keys_length):
                 self.ctx.variables.put(self._keys[i], self._instance[self._loop_count][i])
         else:
@@ -70,32 +70,49 @@ class ForInController(GenericController, IteratingController):
         self._loop_count: int = 0
         self._break_loop: bool = False
         self._instance = None
+        self._instance_type = None
         self._keys = None
         self._keys_length = 0
         self._end_index = 0
 
-    def initial_forin_instance(self):
-        if self.use_variables:
-            self._instance = self.ctx.variables.get(self.in_code)
-        else:
-            self._instance = from_json(self.in_code)
-
-        if isinstance(self._instance, str):
-            self._instance = from_json(self._instance)
-
-        if not isinstance(self._instance, Iterable):
-            log.error(f'in:[ {self.in_code} ] 不是可迭代的对象')
+    def initial_forin(self):
+        # 分割迭代变量
+        self._keys = self.iterating_variables.split(',')
+        self._keys_length = len(self._keys)
+        # 判断迭代变量的个数
+        if self._keys_length > 2:
+            log.error(f'for迭代变量:[ {self.iterating_variables} ] 个数不合法，终止遍历')
             self.done = True
             return
-
-        if isinstance(self._instance, dict):
-            self._instance = list(self._instance.items())
-
-        self._keys = self.for_code.split(',')
-        self._keys_length = len(self._keys)
+        # 移除迭代变量首尾的空格
         for i, key in enumerate(self._keys):
             self._keys[i] = key.strip()
 
+        # 获取迭代对象或反序列化对象
+        if self.use_variable:
+            self._instance = self.ctx.variables.get(self.statements)
+            if isinstance(self._instance, str):
+                self._instance = from_json(self._instance)
+        else:
+            self._instance = from_json(self.statements)
+
+        # 记录迭代对象的类型
+        self._instance_type = type(self._instance)
+
+        # 判断 in 对象是否为可迭代的对象
+        if not isinstance(self._instance, Iterable):
+            log.error(f'in对象/代码:[ {self.statements} ] 不是可迭代的对象，终止遍历')
+            self.done = True
+            return
+
+        # 判断迭代变量的个数决定使用 dict.values() 还是 items()
+        if isinstance(self._instance, dict):
+            if self._keys_length == 1:
+                self._instance = list(self._instance.values())
+            else:
+                self._instance = list(self._instance.items())
+
+        # 计算最后一个迭代的索引
         self._end_index = len(self._instance)
 
     def next(self):
@@ -104,7 +121,7 @@ class ForInController(GenericController, IteratingController):
         # noinspection PyBroadException
         try:
             if self.first:
-                self.initial_forin_instance()
+                self.initial_forin()
 
             if self.end_of_loop():
                 self.reset_break_loop()
@@ -112,12 +129,13 @@ class ForInController(GenericController, IteratingController):
 
             if self.delay:
                 log.debug(
-                    f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] delay:[ {self.delay}ms ]')
+                    f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] delay:[ {self.delay}ms ]'
+                )
                 gevent.sleep(float(self.delay / 1000))
 
             return super().next()
         except Exception:
-            log.debug(traceback.format_exc())
+            log.error(traceback.format_exc())
         finally:
             self.update_iteration_index(self.name, self._loop_count)
 

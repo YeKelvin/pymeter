@@ -130,7 +130,7 @@ class WhileController(GenericController, IteratingController):
             log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
             return next_sampler
         except Exception:
-            log.debug(traceback.format_exc())
+            log.error(traceback.format_exc())
         finally:
             self.update_iteration_index(self.name, self.iter_count)
 
