@@ -162,11 +162,11 @@ class FlaskDBResultStorage(
 
     def insert_test_sampler_result(self, result: SampleResult):
         log.debug('insert sampler result')
-        err_assertion_data = None
+        failed_assertion_data = None
         if result.assertions:
             assertions = [assertion for assertion in result.assertions if assertion.failure or assertion.error]
             if len(assertions) > 0:
-                err_assertion_data = assertions[0].message
+                failed_assertion_data = assertions[0].message
 
         with self.app.app_context():
             self.model.TTestSamplerResult.insert(
@@ -203,7 +203,7 @@ class FlaskDBResultStorage(
                     if not isinstance(result.response_data, str)
                     else result.response_data
                 ),
-                ERROR_ASSERTION=err_assertion_data,
+                FAILED_ASSERTION=failed_assertion_data,
                 CREATED_BY='PyMeter',
                 UPDATED_BY='PyMeter'
             )

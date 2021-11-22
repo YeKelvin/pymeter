@@ -59,10 +59,7 @@
         "titleBar.activeForeground": "#15202b",
         "titleBar.inactiveBackground": "#daa52099",
         "titleBar.inactiveForeground": "#15202b99",
-        "editorGroup.border": "#e4b849",
-        "panel.border": "#e4b849",
-        "sash.hoverBorder": "#e4b849",
-        "sideBar.border": "#e4b849"
+        "sash.hoverBorder": "#e4b849"
     },
     "peacock.color": "#DAA520"
 }

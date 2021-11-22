@@ -34,6 +34,7 @@ python-socketio = "5.5.0"
 requests="2.26.0"
 flask = "2.0.2"
 flask-socketio = "5.1.1"
+pytypes = "1.0b9"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"
