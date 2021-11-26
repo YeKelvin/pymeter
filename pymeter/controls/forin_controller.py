@@ -125,6 +125,8 @@ class ForInController(GenericController, IteratingController):
 
             if self.end_of_loop():
                 self.reset_break_loop()
+                self.re_initialize()
+                self.reset_break_loop()
                 return None
 
             if self.delay:
@@ -151,6 +153,7 @@ class ForInController(GenericController, IteratingController):
     def next_is_null(self):
         self.re_initialize()
         if self.end_of_loop():
+            self.reset_break_loop()
             self.reset_loop_count()
             return None
         return self.next()
