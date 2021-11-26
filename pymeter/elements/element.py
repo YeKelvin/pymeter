@@ -147,11 +147,12 @@ class TestElement:
         return self.properties.values()
 
     def clone(self) -> 'TestElement':
-        """克隆副本，如果子类有 property以外的属性，请在子类重写该方法
-        """
+        """克隆副本，如果子类有 property 以外的属性，请在子类重写该方法"""
         cloned_element = self.__class__()
         cloned_element.properties = deepcopy(self.properties)
         cloned_element.running_version = deepcopy(self.running_version)
+        for k, p in cloned_element.properties.items():
+            log.error(f'{self.name}, {k=}, saved_value={p.saved_value if hasattr(p, "saved_value") else "None"}')
         return cloned_element
 
     def clear(self) -> None:

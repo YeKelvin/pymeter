@@ -19,7 +19,7 @@ class CoroutineContext:
 
     @property
     def properties(self):
-        return self.engine.properties
+        return self.engine.properties if self.engine else None
 
     def __init__(self):
         self.variables = Variables()

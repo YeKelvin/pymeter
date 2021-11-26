@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : function_parser
+# @File    : values.py
 # @Time    : 2021/5/30 17:11
 # @Author  : Kelvin.Ye
 import traceback
@@ -138,7 +138,7 @@ class SimpleVariable:
     def value(self):
         if self.name in self.variables:
             return self.variables.get(self.name)
-        elif self.name in self.properties:
+        elif self.properties and self.name in self.properties:
             return self.properties.get(self.name)
         else:
             return '${' + self.name + '}'
@@ -233,7 +233,7 @@ class FunctionParser:
                 previous = current
 
         str_buffer = ''.join(buffer)
-        log.warn(f'may be invalid function string: {str_buffer}')
+        log.warning(f'may be invalid function string: {str_buffer}')
         return str_buffer
 
     @staticmethod

@@ -84,12 +84,11 @@ class HTTPHeaderManager(ConfigTestElement):
             found = False
             for merged_header in merged_manager.headers_as_list:
                 if merged_header.name.lower() == new_header.name.lower():
+                    merged_header.update(new_header)
                     found = True
 
-                if found:
-                    merged_header.update(new_header)
-                else:
-                    merged_manager.headers_as_list.append(new_header)
+            if not found:
+                merged_manager.headers_as_list.append(new_header)
 
         return merged_manager
 
