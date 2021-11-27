@@ -224,15 +224,13 @@ class CollectionProperty(MultiProperty):
         MultiProperty.running_version = running
         if running:
             self.saved_value = self.value
-            log.error(f'{self.name=}, set saved_value {self.value}')
         else:
             self.saved_value = None
 
     def recover_running_version(self, owner) -> None:
-        log.debug(f'recover running version in CollectionProperty:[ {self.name} ]')
+        # log.debug(f'recover running version in CollectionProperty:[ {self.name} ]')
         if self.saved_value is not None:
             self.value = self.saved_value
-        log.error(f'{self.name=}, {self.value=}')
         self.recover_running_version_of_subelements(owner)
 
 

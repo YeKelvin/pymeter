@@ -10,6 +10,7 @@ from typing import Dict
 from typing import Iterable
 from typing import Optional
 
+from pymeter.common.exceptions import InvalidPropertyException
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import CollectionProperty
 from pymeter.elements.property import DictProperty
@@ -83,7 +84,15 @@ class TestElement:
         self.empty_temporary()
 
     def set_property(self, key: str, value: any) -> None:
-        if key:
+        if not key:
+            raise InvalidPropertyException('key cannot be None')
+
+        if self.running_version:
+            if isinstance(self.get_property(key), NoneProperty):
+                self.add_property(key, value)
+            else:
+                self.get_property(key).value = value
+        else:
             if isinstance(value, TestElement):
                 self.add_property(key, ElementProperty(key, value))
             elif isinstance(value, list):
@@ -151,8 +160,6 @@ class TestElement:
         cloned_element = self.__class__()
         cloned_element.properties = deepcopy(self.properties)
         cloned_element.running_version = deepcopy(self.running_version)
-        for k, p in cloned_element.properties.items():
-            log.error(f'{self.name}, {k=}, saved_value={p.saved_value if hasattr(p, "saved_value") else "None"}')
         return cloned_element
 
     def clear(self) -> None:

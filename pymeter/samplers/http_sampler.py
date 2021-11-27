@@ -134,7 +134,7 @@ class HTTPSampler(Sampler):
                 impl = self.session_manager.session
             else:
                 impl = requests
-            log.error(f'{self.name=}, {self.headers=}')
+
             res = impl.request(
                 method=self.method,
                 url=self.url,
@@ -205,15 +205,11 @@ class HTTPSampler(Sampler):
             super().add_test_element(el)
 
     def set_header_manager(self, new_manager: HTTPHeaderManager):
-        log.error(f'{self.name=}, {self.headers=}')
         header_manager = self.header_manager
-        log.error(f'before merge header_manager={len(header_manager.headers_as_list) if header_manager else "None"}')
-        log.error(f'before merge new_manager={len(new_manager.headers_as_list) if new_manager else "None"}')
 
         if header_manager:
             new_manager = header_manager.merge(new_manager)
-        log.error(f'new_manager={len(new_manager.headers_as_list) if new_manager else "None"}')
-        log.error(f'new_manager.saved_value={getattr(new_manager.get_property(new_manager.HEADERS), "saved_value")}')
+
         self.set_property(self.HEADERS, new_manager)
 
     def set_session_manager(self, manager: SessionManager):
