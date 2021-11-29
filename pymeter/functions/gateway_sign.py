@@ -95,7 +95,7 @@ class GatewaySign(Function):
         elif isinstance(value, list):
             buffer.append(f'{key}={self.traverse_list(value)}&')
         else:
-            buffer.append(f'{key}={value}&')
+            buffer.append(f'{key}={value if value is not None else "null"}&')
 
     def traverse_dict(self, value: dict):
         if not value:
@@ -123,7 +123,7 @@ class GatewaySign(Function):
                 buffer.append(item)
             buffer.append(',')
 
-        return (''.join(buffer))[:-1] + ']'
+        return (''.join(buffer))[:-1] + ']'  # 去掉最后一个逗号
 
 
 if __name__ == '__main__':
