@@ -10,7 +10,7 @@ from typing import Optional
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import LoopIterationListener
+# from pymeter.engine.interface import LoopIterationListener
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
 
@@ -18,7 +18,8 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class LoopController(GenericController, IteratingController, LoopIterationListener):
+# class LoopController(GenericController, IteratingController, LoopIterationListener):
+class LoopController(GenericController, IteratingController):
 
     # 循环次数
     LOOPS: Final = 'LoopController__loops'
