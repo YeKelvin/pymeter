@@ -43,6 +43,7 @@ class SampleResult:
         self.connect_time = 0
 
         self.success = True
+        self.retrying = False
         self.error = False
         self.assertions = []
         self.sub_results = []

@@ -410,8 +410,15 @@ class Coroutine(Greenlet):
 
         # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
         if not last_sample_ok and not self.group.on_error_continue:
+            # 重试失败的 Sampler
+            if getattr(sampler, 'retrying', False):
+                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, retrying current sampler')
+                self.__trigger_loop_logical_action_on_parent_controllers(
+                    sampler, context, self.__continue_on_current_loop
+                )
+
             # 错误时开始下一个 TestGroup 循环
-            if self.group.on_error_start_next_coroutine:
+            elif self.group.on_error_start_next_coroutine:
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next continue loop')
                 self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__continue_on_coroutine_loop
@@ -447,7 +454,7 @@ class Coroutine(Greenlet):
                 self.stop_test_now()
 
     def __trigger_loop_logical_action_on_parent_controllers(
-            self, sampler: Sampler, context: CoroutineContext, loop_action
+            self, sampler: Sampler, context: CoroutineContext, loop_logical_action
     ):
         transaction_sampler = None
 
@@ -465,7 +472,7 @@ class Coroutine(Greenlet):
         path_to_root_traverser = FindTestElementsUpToRoot(real_sampler)
         self.group_tree.traverse(path_to_root_traverser)
 
-        loop_action(path_to_root_traverser)
+        loop_logical_action(path_to_root_traverser)
 
         # When using Start Next Loop option combined to TransactionController.
         # if an error occurs in a Sample (child of TransactionController)
@@ -569,6 +576,9 @@ class Coroutine(Greenlet):
             # 执行断言
             self.__check_assertions(package.assertions, result, context)
 
+            if not result.success and getattr(sampler, 'retrying', False):
+                result.retrying = True
+
             # 遍历执行 SampleListener
             log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
             sample_listeners = self.__get_sample_listeners(package, transaction_package, transaction_sampler)
@@ -663,30 +673,30 @@ class Coroutine(Greenlet):
         )
         context.variables.put(self.LAST_SAMPLE_OK, result.success)
 
-    def __process_assertion(self, assertion, result: SampleResult) -> None:
+    def __process_assertion(self, assertion, sample_result: SampleResult) -> None:
         """执行断言"""
         assertion_result = None
         try:
-            assertion_result = assertion.get_result(result)
+            assertion_result = assertion.get_result(sample_result)
         except AssertionError as e:
             log.debug(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
-            assertion_result = AssertionResult(result.sample_name)
+            assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.failure = True
             assertion_result.message = str(e)
         except RuntimeError as e:
             log.error(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
-            assertion_result = AssertionResult(result.sample_name)
+            assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
             assertion_result.message = str(e)
         except Exception as e:
             log.error(f'coroutine:[ {self.coroutine_name} ] exception processing Assertion: {e}')
             log.error(traceback.format_exc())
-            assertion_result = AssertionResult(result.sample_name)
+            assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
             assertion_result.message = traceback.format_exc()
         finally:
-            result.success = result.success and not (assertion_result.error or assertion_result.failure)
-            result.assertions.append(assertion_result)
+            sample_result.success = sample_result.success and not (assertion_result.error or assertion_result.failure)
+            sample_result.assertions.append(assertion_result)
 
     def delay(self, timers: list):
         total_delay = 0

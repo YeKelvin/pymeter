@@ -7,6 +7,8 @@ import traceback
 from typing import Final
 from typing import Optional
 
+import gevent
+
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
@@ -38,8 +40,8 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
         return self.get_property_as_int(self.RETRIES)
 
     @property
-    def intervals(self) -> bool:
-        return self.get_property_as_bool(self.INTERVALS)
+    def intervals(self) -> int:
+        return self.get_property_as_int(self.INTERVALS)
 
     @property
     def done(self):
@@ -54,7 +56,6 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
         self._done = value
 
     def next(self) -> Optional[Sampler]:
-        self.update_iteration_index(self.name, self._retry_count)
         # noinspection PyBroadException
         try:
             if self.end_of_retry():
@@ -65,11 +66,19 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
             nsampler = super().next()
             if self._retry_count < self.retries:
                 nsampler.retrying = True
+                nsampler.retry_count = self._retry_count
+
+            # 重试延迟
+            if not self.first and self.intervals:
+                log.debug(
+                    f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
+                    f'retrying delay:[ {self.intervals}ms ]'
+                )
+                gevent.sleep(float(self.intervals / 1000))
+
             return nsampler
         except Exception:
             log.error(traceback.format_exc())
-        finally:
-            self.update_iteration_index(self.name, self._retry_count)
 
     def next_is_null(self):
         """@override"""
