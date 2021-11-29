@@ -87,12 +87,11 @@ class TestElement:
         if not key:
             raise InvalidPropertyException('key cannot be None')
 
-        if self.running_version:
-            if isinstance(self.get_property(key), NoneProperty):
-                self.add_property(key, value)
-            else:
-                self.get_property(key).value = value
-        else:
+        if self.running_version and not isinstance(prop := self.get_property(key), NoneProperty):
+            prop.value = value
+            return
+
+        if (self.running_version and isinstance(self.get_property(key), NoneProperty)) or (not self.running_version):
             if isinstance(value, TestElement):
                 self.add_property(key, ElementProperty(key, value))
             elif isinstance(value, list):
@@ -103,6 +102,7 @@ class TestElement:
                 self.add_property(key, NoneProperty(key))
             else:
                 self.add_property(key, BasicProperty(key, value))
+            return
 
     def add_property(self, key: str, prop: PyMeterProperty) -> None:
         if self.running_version:
