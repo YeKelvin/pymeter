@@ -46,6 +46,7 @@ __MODULE_PATH__ = {
     'IfController': 'pymeter.controls.if_controller',
     'ForInController': 'pymeter.controls.forin_controller',
     'LoopController': 'pymeter.controls.loop_controller',
+    'RetryController': 'pymeter.controls.retry_controller',
     'TransactionController': 'pymeter.controls.transaction',
     'WhileController': 'pymeter.controls.while_controller',
 

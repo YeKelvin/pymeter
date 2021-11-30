@@ -13,6 +13,7 @@ from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
+from pymeter.groups.group import Coroutine
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
 
@@ -27,6 +28,9 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
     # 重试间隔
     INTERVALS: Final = 'RetryController__intervals'
+
+    # 重试标识前缀
+    FLAG_PREFIX: Final = 'RetryController__flag_prefix'
 
     def __init__(self):
         TestElement.__init__(self)
@@ -44,6 +48,10 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
         return self.get_property_as_int(self.INTERVALS)
 
     @property
+    def flag_prefix(self) -> str:
+        return self.get_property_as_str(self.FLAG_PREFIX)
+
+    @property
     def done(self):
         """@override"""
         return self._done
@@ -55,6 +63,10 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
         self.reset_break_retry()
         self._done = value
 
+    @property
+    def last_sample_ok(self) -> str:
+        return self.ctx.variables.get(Coroutine.LAST_SAMPLE_OK)
+
     def next(self) -> Optional[Sampler]:
         # noinspection PyBroadException
         try:
@@ -64,17 +76,19 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
             # 给下一个 Sampler 添加重试标识
             nsampler = super().next()
-            if self._retry_count < self.retries:
-                nsampler.retrying = True
-                nsampler.retry_count = self._retry_count
+            if nsampler:
+                # 延迟重试（间隔）
+                if not self.first and self.intervals:
+                    log.debug(
+                        f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
+                        f'retrying delay:[ {self.intervals}ms ]'
+                    )
+                    gevent.sleep(float(self.intervals / 1000))
 
-            # 重试延迟
-            if not self.first and self.intervals:
-                log.debug(
-                    f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
-                    f'retrying delay:[ {self.intervals}ms ]'
-                )
-                gevent.sleep(float(self.intervals / 1000))
+                # 添加重试标识
+                if self._retry_count < self.retries:
+                    nsampler.retrying = True
+                    nsampler.retry_flag = f'[{self.flag_prefix}{self._retry_count}]' if self.flag_prefix else None
 
             return nsampler
         except Exception:
@@ -83,6 +97,9 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
     def next_is_null(self):
         """@override"""
         self.re_initialize()
+        if self.last_sample_ok:
+            log.error(f'retry controller next is null {self.last_sample_ok=}')
+            self._break_retry = True
         if self.end_of_retry():
             self.reset_retry_count()
             return None

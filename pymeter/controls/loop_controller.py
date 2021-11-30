@@ -18,7 +18,6 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-# class LoopController(GenericController, IteratingController, LoopIterationListener):
 class LoopController(GenericController, IteratingController):
 
     # 循环次数

@@ -576,8 +576,12 @@ class Coroutine(Greenlet):
             # 执行断言
             self.__check_assertions(package.assertions, result, context)
 
-            if not result.success and getattr(sampler, 'retrying', False):
+            # 添加重试标识，标识来自 RetryController
+            retrying = getattr(sampler, 'retrying', False)
+            if retrying:
+                retryflag = getattr(sampler, 'retry_flag', None)
                 result.retrying = True
+                result.sample_name = f'{result.sample_name} {retryflag}' if retryflag else result.sample_name
 
             # 遍历执行 SampleListener
             log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
