@@ -196,7 +196,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def add_iteration_listener(self, listener: LoopIterationListener):
         log.debug(
-            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ] '
+            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ]'
         )
         self.iteration_listeners.appendleft(listener)
 

@@ -22,9 +22,9 @@ class TransactionController(GenericController):
 
     def next(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next sampler')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         next_sampler = self.next_with_transaction_sampler()
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next sampler:[ {next_sampler} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
         return next_sampler
 
     def next_with_transaction_sampler(self):

@@ -162,7 +162,7 @@ class TestGroup(Controller, TestCompilerHelper):
             else:
                 break
 
-        log.info(f'开始第 {self.group_number} 个TestGroup')
+        log.info(f'开始执行第 {self.group_number} 个线程组')
 
     @property
     def done(self):
@@ -325,7 +325,7 @@ class Coroutine(Greenlet):
         context.variables.put(self.LAST_SAMPLE_OK, True)
 
         # 编译 TestGroup 的子代节点
-        log.info('开始编译 TestGroup 节点')
+        log.debug('start to compile TestGroup node')
         self.group_tree.traverse(self.compiler)
 
         # 初始化 TestGroup 控制器
@@ -362,7 +362,7 @@ class Coroutine(Greenlet):
 
                 if self.group_main_controller.done:
                     self.running = False
-                    log.info(f'协程:[ {self.coroutine_name} ] 循环迭代已结束')
+                    log.info(f'线程:[ {self.coroutine_name} ] 循环迭代已结束')
 
         except StopTestGroupException:
             log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestGroupException Exception, stoping coroutine')
@@ -376,7 +376,7 @@ class Coroutine(Greenlet):
         except Exception:
             log.error(traceback.format_exc())
         finally:
-            log.info(f'协程:[ {self.coroutine_name} ] 已执行完成')
+            log.info(f'线程:[ {self.coroutine_name} ] 执行完成')
             # 遍历执行 TestGroupListener
             self.__coroutine_finished()
             context.clear()
@@ -389,7 +389,7 @@ class Coroutine(Greenlet):
             2、遍历执行 TestGroupListener
         """
         ContextService.incr_number_of_coroutines()
-        log.debug(f'协程:[ {self.coroutine_name} ] notify all TestGroupListener to start')
+        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestGroupListener to start')
         for listener in self.group_listeners:
             listener.group_started()
 
@@ -411,7 +411,9 @@ class Coroutine(Greenlet):
         # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
         if not last_sample_ok and not self.group.on_error_continue:
             # 重试失败的 Sampler
-            if getattr(sampler, 'retrying', False):
+            if getattr(sampler, 'retrying', False) or (
+                    isinstance(sampler, TransactionSampler) and getattr(sampler.sub_sampler, 'retrying', False)
+            ):
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, retrying current sampler')
                 self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler, context, self.__continue_on_current_loop
@@ -456,17 +458,10 @@ class Coroutine(Greenlet):
     def __trigger_loop_logical_action_on_parent_controllers(
             self, sampler: Sampler, context: CoroutineContext, loop_logical_action
     ):
-        transaction_sampler = None
-
-        if isinstance(sampler, TransactionSampler):
-            transaction_sampler = sampler
-
         real_sampler = self.__find_real_sampler(sampler)
 
         if not real_sampler:
-            raise RuntimeError(
-                f'Got null subSampler calling findRealSampler for:[ {sampler} ], sampler:[ {sampler} ]'
-            )
+            raise RuntimeError(f'Got null subSampler calling findRealSampler for:[ {sampler} ]')
 
         # 查找父级 Controllers
         path_to_root_traverser = FindTestElementsUpToRoot(real_sampler)
@@ -477,9 +472,9 @@ class Coroutine(Greenlet):
         # When using Start Next Loop option combined to TransactionController.
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
-        if transaction_sampler:
-            transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
-            self.__do_end_transaction_sampler(transaction_sampler, None, transaction_package, context)
+        if isinstance(sampler, TransactionSampler) and not getattr(sampler.sub_sampler, 'retrying', False):
+            transaction_package = self.compiler.configure_transaction_sampler(sampler)
+            self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
 
     def __find_real_sampler(self, sampler: Sampler):
         real_sampler = sampler
@@ -489,7 +484,7 @@ class Coroutine(Greenlet):
         return real_sampler
 
     def __process_sampler(
-            self, current: Sampler, parent: Optional[Sampler], context: CoroutineContext
+        self, current: Sampler, parent: Optional[Sampler], context: CoroutineContext
     ) -> Optional[SampleResult]:
         """执行 Sampler"""
         transaction_result = None
@@ -499,7 +494,7 @@ class Coroutine(Greenlet):
         if isinstance(current, TransactionSampler):
             transaction_sampler = current
             transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
-            log.debug(f'transaction package:[ {transaction_package} ]')
+            log.debug(f'transaction package:\n{transaction_package}')
 
             # 检查事务是否已完成
             if current.transaction_done:
@@ -511,6 +506,7 @@ class Coroutine(Greenlet):
             else:
                 # 事务开始时，遍历执行 TransactionListener
                 if transaction_sampler.calls == 0:
+                    log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TransactionListener to start')
                     for listener in transaction_package.trans_listeners:
                         listener.transaction_started()
                 # 获取 Transaction 直系子代
@@ -553,7 +549,7 @@ class Coroutine(Greenlet):
         context.set_current_sampler(sampler)
 
         package = self.compiler.configure_sampler(sampler)
-        log.debug(f'sampler package:[ {package} ]')
+        log.debug(f'sampler package:\n{package}')
 
         # 执行前置处理器
         self.__run_pre_processors(package.pre_processors)
@@ -597,13 +593,13 @@ class Coroutine(Greenlet):
 
             # 检查是否需要停止协程或测试
             if result.stop_group or (not result.success and self.group.on_error_stop_coroutine_group):
-                log.info(f'用户手动设置停止测试组，TestGroup:[ {self.coroutine_name} ]')
+                log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试组')
                 self.stop_coroutine()
             if result.stop_test or (not result.success and self.group.on_error_stop_test):
-                log.info(f'用户手动设置停止测试，TestGroup:[ {self.coroutine_name} ]')
+                log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试')
                 self.stop_test()
             if result.stop_test_now or (not result.success and self.group.on_error_stop_test_now):
-                log.info(f'用户手动设置立即停止测试，TestGroup:[ {self.coroutine_name} ]')
+                log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置立即停止测试')
                 self.stop_test_now()
         else:
             self.compiler.done(package)
@@ -655,11 +651,11 @@ class Coroutine(Greenlet):
         if not isinstance(parent, TransactionSampler):
             # 遍历执行 SampleListener
             log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
-            log.debug(f'transaction sampler listeners:{transaction_package.listeners}')
             for listener in transaction_package.listeners:
                 listener.sample_occurred(result)
 
         # 遍历执行 TransactionListener
+        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TransactionListener to end')
         for listener in transaction_package.trans_listeners:
             listener.transaction_ended()
 
@@ -779,17 +775,17 @@ class Coroutine(Greenlet):
         self.running = False
 
     def stop_group(self) -> None:
-        log.info(f'coroutine:[ {self.coroutine_name} ] 协程发起 StopCoroutineGroup 请求')
+        log.info(f'线程:[ {self.coroutine_name} ] 发起 StopCoroutineGroup 请求')
         self.group.stop_coroutines()
 
     def stop_test(self) -> None:
-        log.info(f'coroutine:[ {self.coroutine_name} ] 协程发起 StopTestCollection 请求')
+        log.info(f'线程:[ {self.coroutine_name} ] 发起 StopTestCollection 请求')
         self.running = False
         if self.engine:
             self.engine.stop_test()
 
     def stop_test_now(self) -> None:
-        log.info(f'coroutine:[ {self.coroutine_name} ] 协程发起 StopTestCollectionNow 请求')
+        log.info(f'coroutine:[ {self.coroutine_name} ] 发起 StopTestCollectionNow 请求')
         self.running = False
         if self.engine:
             self.engine.stop_test_now()

@@ -240,12 +240,8 @@ class TestCompiler(HashTreeTraverser):
             for i in range(len(self.stack) - 1, -1, -1):
                 item = self.stack[i]
                 if item == child:
-                    log.debug('current item is child, continue')
                     continue
                 if isinstance(item, Controller):
-                    log.debug(
-                        f'current item:[ {item} ] add iteration listener:[ {child} ]'
-                    )
                     item.add_iteration_listener(child)
 
     def __save_sampler_configs(self, sampler):

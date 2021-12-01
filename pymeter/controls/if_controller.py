@@ -35,6 +35,7 @@ class IfController(GenericController):
         # time ( first "iteration" ) we are called.
         # For subsequent calls, we are inside the IfControllerGroup,
         # so then we just pass the control to the next item inside the if control
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         cnd = self.condition.strip()
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition:[ {cnd} ]')
         result = True

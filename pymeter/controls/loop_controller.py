@@ -55,6 +55,7 @@ class LoopController(GenericController, IteratingController):
         self._done = value
 
     def next(self) -> Optional[Sampler]:
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.update_iteration_index(self.name, self._loop_count)
         # noinspection PyBroadException
         try:
