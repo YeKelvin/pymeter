@@ -22,18 +22,12 @@ class TransactionController(GenericController):
 
     def next(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
-        next_sampler = self.next_with_transaction_sampler()
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
-        return next_sampler
+        return self.next_with_transaction_sampler()
 
     def next_with_transaction_sampler(self):
         # Check if transaction is done
         if self.transaction_sampler and self.transaction_sampler.transaction_done:
-            log.debug(
-                f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] transaction:[ {self.name} ] '
-                f'end of transaction'
-            )
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] end of transaction')
 
             # This transaction is done
             self.transaction_sampler = None
@@ -41,15 +35,11 @@ class TransactionController(GenericController):
 
         # Check if it is the start of a new transaction
         if self.first:  # must be the start of the subtree
-            log.debug(
-                f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] transaction:[ {self.name} ] '
-                f'start of transaction'
-            )
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] start of transaction')
             self.transaction_sampler = TransactionSampler(self, self.name)
 
         # Sample the children of the transaction
         sub_sampler = super().next()
-        log.error(f'transaction_{sub_sampler=}')
         self.transaction_sampler.sub_sampler = sub_sampler
 
         # If we do not get any sub samplers, the transaction is done

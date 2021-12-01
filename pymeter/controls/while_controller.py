@@ -71,23 +71,22 @@ class WhileController(GenericController, IteratingController):
             result = self.last_sample_ok.lower() == 'false'
         else:
             if self.max_loop_count and (self.iter_count > self.max_loop_count):
-                log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]')
+                log.info(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]')
                 result = False
             elif self.timeout and (elapsed := int(time.time() * 1000) - int(self._start_time * 1000)) > self.timeout:
                 log.info(
-                    f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] '
-                    f'停止循环:[ while 循环超时 ] 循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ]'
+                    f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] '
+                    f'循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ] '
+                    '循环超时，停止 while 循环 ] '
                 )
                 result = False
             else:
                 result = eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))  # 如果 next() 被调用，条件可能为空
 
-        log.debug(
-            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while result:[ {result} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while result:[ {result} ]')
 
         if result and self.delay:
-            log.debug(
-                f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] delay:[ {self.delay}ms ]')
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] delay:[ {self.delay}ms ]')
             gevent.sleep(float(self.delay / 1000))
 
         return not result
@@ -110,7 +109,6 @@ class WhileController(GenericController, IteratingController):
 
     def next(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.update_iteration_index(self.name, self.iter_count)
         # noinspection PyBroadException
         try:
@@ -122,13 +120,10 @@ class WhileController(GenericController, IteratingController):
             if self.first and self.end_of_loop(False):
                 self.reset_break_loop()
                 self.reset_loop_count()
-                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
                 return None
 
             # 获取下一个 sampler
-            next_sampler = super().next()
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
-            return next_sampler
+            return super().next()
         except Exception:
             log.error(traceback.format_exc())
         finally:

@@ -50,12 +50,11 @@ class LoopController(GenericController, IteratingController):
 
     @done.setter
     def done(self, value: bool):
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] isDone:[ {value} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] done:[ {value} ]')
         self.reset_break_loop()
         self._done = value
 
     def next(self) -> Optional[Sampler]:
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.update_iteration_index(self.name, self._loop_count)
         # noinspection PyBroadException
         try:
@@ -68,8 +67,7 @@ class LoopController(GenericController, IteratingController):
             if self.first:
                 if not self.continue_forever:
                     log.info(
-                        f'协程:[ {self.ctx.coroutine_name} ] '
-                        f'控制器:[ {self.name} ] 开始第[ {self._loop_count + 1} ]次迭代'
+                        f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次迭代'
                     )
                 else:
                     log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个迭代')

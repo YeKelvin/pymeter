@@ -117,7 +117,6 @@ class ForInController(GenericController, IteratingController):
 
     def next(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         self.update_iteration_index(self.name, self._loop_count)
         # noinspection PyBroadException
         try:
@@ -130,13 +129,14 @@ class ForInController(GenericController, IteratingController):
                 self.reset_break_loop()
                 return None
 
-            if self.delay:
+            nsampler = super().next()
+            if nsampler and self.delay:
                 log.debug(
                     f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] delay:[ {self.delay}ms ]'
                 )
                 gevent.sleep(float(self.delay / 1000))
 
-            return super().next()
+            return nsampler
         except Exception:
             log.error(traceback.format_exc())
         finally:

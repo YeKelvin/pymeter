@@ -59,7 +59,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
     @done.setter
     def done(self, value: bool):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] isDone:[ {value} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] done:[ {value} ]')
         self.reset_break_retry()
         self._done = value
 
@@ -69,9 +69,9 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
     def next(self) -> Optional[Sampler]:
         # noinspection PyBroadException
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
         try:
             if self.end_of_retry():
+                self.done = True
                 self.reset_break_retry()
                 return None
 
@@ -104,9 +104,10 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
                 f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
                 f'all samplers are successful, stop retrying'
             )
-            self._break_retry = True
+            self.done = True
+            return None
         if self.end_of_retry():
-            self.reset_retry_count()
+            self.done = True
             return None
         return self.next()
 

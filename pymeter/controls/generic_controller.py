@@ -5,6 +5,7 @@
 # @Author  : Kelvin.Ye
 from collections import deque
 from typing import Optional
+from typing import Union
 
 from pymeter.common.exceptions import NextIsNullException
 from pymeter.controls.controller import Controller
@@ -112,7 +113,7 @@ class GenericController(Controller, TestCompilerHelper):
 
         next_sampler = None
         try:
-            current_element = self.get_current_element()  # type: Optional[Sampler, Controller]
+            current_element = self.get_current_element()  # type: Union[Sampler, Controller, None]
             if current_element is None:
                 next_sampler = self.next_is_null()
             else:
@@ -149,7 +150,6 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next_is_sampler(self, sampler: Sampler) -> Sampler:
         """下一个元素是取样器时的处理方法"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is sampler')
         self.increment_current()
         return sampler
 
@@ -166,7 +166,6 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next_is_null(self) -> None:
         """下一个元素为空时的处理方法（即没有下一个元素了）"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is null')
         self.re_initialize()
         return None
 
@@ -178,7 +177,7 @@ class GenericController(Controller, TestCompilerHelper):
             self.increment_current()
 
     def add_element(self, child):
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add element:[ {child} ]')
+        # log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add element:[ {child} ]')
         self.sub_elements.append(child)
 
     def add_test_element(self, child):
@@ -198,9 +197,9 @@ class GenericController(Controller, TestCompilerHelper):
         self.sub_elements.remove(self.sub_elements[self.current])
 
     def add_iteration_listener(self, listener: LoopIterationListener):
-        log.debug(
-            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ]'
-        )
+        # log.debug(
+        #     f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ]'
+        # )
         self.iteration_listeners.appendleft(listener)
 
     def remove_iteration_listener(self, listener: LoopIterationListener):
