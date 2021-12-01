@@ -411,6 +411,9 @@ class Coroutine(Greenlet):
         # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
         if not last_sample_ok and not self.group.on_error_continue:
             # 重试失败的 Sampler
+            log.error(f'{getattr(sampler, "retrying", False)=}')
+            log.error(f'{isinstance(sampler, TransactionSampler) and getattr(sampler.sub_sampler, "retrying", False)=}')
+            log.error(f'{sampler.__dict__=}')
             if getattr(sampler, 'retrying', False) or (
                     isinstance(sampler, TransactionSampler) and getattr(sampler.sub_sampler, 'retrying', False)
             ):

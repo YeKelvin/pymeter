@@ -49,6 +49,7 @@ class TransactionController(GenericController):
 
         # Sample the children of the transaction
         sub_sampler = super().next()
+        log.error(f'transaction_{sub_sampler=}')
         self.transaction_sampler.sub_sampler = sub_sampler
 
         # If we do not get any sub samplers, the transaction is done

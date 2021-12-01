@@ -47,7 +47,7 @@ class Runner:
             log_util.EXTERNAL_SOCKET_IO_HANDLER.LOCAL.sio = ext.get('sio')
             log_util.EXTERNAL_SOCKET_IO_HANDLER.LOCAL.sid = ext.get('sid')
 
-        # log.debug(f'script:\n{script}')
+        log.debug(f'script:\n{script}')
         # noinspection PyBroadException
         try:
             Runner.run(script, ext)

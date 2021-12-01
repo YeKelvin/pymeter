@@ -87,8 +87,9 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
                     gevent.sleep(float(self.intervals / 1000))
 
                 # 添加重试标识
-                if self._retry_count < self.retries:
+                if self._retry_count < self.retries - 1:
                     nsampler.retrying = True
+                if self._retry_count < self.retries:
                     nsampler.retry_flag = f'[{self.flag_prefix}{self._retry_count}]' if self.flag_prefix else None
 
             return nsampler

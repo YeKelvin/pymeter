@@ -149,12 +149,14 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next_is_sampler(self, sampler: Sampler) -> Sampler:
         """下一个元素是取样器时的处理方法"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is sampler')
         self.increment_current()
         return sampler
 
     def next_is_controller(self, controller: Controller) -> Sampler:
         """下一个元素是控制器时的处理方法"""
         # 获取子代控制器的下一个取样器
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is controller')
         sampler = controller.next()
         # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:
@@ -164,6 +166,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next_is_null(self) -> None:
         """下一个元素为空时的处理方法（即没有下一个元素了）"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is null')
         self.re_initialize()
         return None
 
