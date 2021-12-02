@@ -62,7 +62,7 @@ class PythonSampler(Sampler):
                 result=result
             )
             if res:
-                result.response_data = res
+                result.response_data = res if isinstance(res, str) else str(res)
         except Exception:
             result.success = False
             result.response_data = traceback.format_exc()

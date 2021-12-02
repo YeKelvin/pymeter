@@ -345,7 +345,7 @@ class FunctionProperty(PyMeterProperty):
             self.test_iteration = -1
 
         if iteration > self.test_iteration or self.cache_value is None:
-            log.debug(f'[ {self.name}]  executing function in FunctionProperty')
+            log.debug(f'property:[ {self.name} ] executing function')
             self.test_iteration = iteration
             self.cache_value = self.function.execute()
 

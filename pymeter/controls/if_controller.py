@@ -27,6 +27,7 @@ class IfController(GenericController):
 
     @done.setter
     def done(self, val: bool):
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     def next(self):

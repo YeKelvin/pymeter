@@ -63,6 +63,7 @@ class ForInController(GenericController, IteratingController):
 
     @done.setter
     def done(self, val: bool):
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     def __init__(self):
@@ -124,9 +125,11 @@ class ForInController(GenericController, IteratingController):
                 self.initial_forin()
 
             if self.end_of_loop():
+                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
                 self.reset_break_loop()
                 self.re_initialize()
                 self.reset_break_loop()
+                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
                 return None
 
             nsampler = super().next()
@@ -143,7 +146,7 @@ class ForInController(GenericController, IteratingController):
             self.update_iteration_index(self.name, self._loop_count)
 
     def trigger_end_of_loop(self):
-        """触发循环结束"""
+        """@override"""
         super().trigger_end_of_loop()
         self.reset_loop_count()
 
@@ -152,6 +155,7 @@ class ForInController(GenericController, IteratingController):
         return self._break_loop or (self._loop_count >= self._end_index)
 
     def next_is_null(self):
+        """@override"""
         self.re_initialize()
         if self.end_of_loop():
             self.reset_break_loop()
@@ -166,6 +170,7 @@ class ForInController(GenericController, IteratingController):
         self._loop_count = 0
 
     def re_initialize(self):
+        """@override"""
         self.first = True
         self.reset_current()
         self.increment_loop_count()
@@ -176,9 +181,13 @@ class ForInController(GenericController, IteratingController):
             self._break_loop = False
 
     def start_next_loop(self):
+        """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
         self.re_initialize()
 
     def break_loop(self):
+        """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
         self._break_loop = True
         self.first = True
         self.reset_current()
@@ -186,5 +195,6 @@ class ForInController(GenericController, IteratingController):
         self.recover_running_version()
 
     def iteration_start(self, source, iter_count):
+        """@override"""
         self.re_initialize()
         self.reset_loop_count()

@@ -26,12 +26,13 @@ class TransactionController(GenericController):
 
     def next_with_transaction_sampler(self):
         # Check if transaction is done
-        if self.transaction_sampler and self.transaction_sampler.transaction_done:
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] end of transaction')
-
+        if self.transaction_sampler and self.transaction_sampler.done:
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
             # This transaction is done
             self.transaction_sampler = None
-            return
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] end of transaction')
+            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
+            return None
 
         # Check if it is the start of a new transaction
         if self.first:  # must be the start of the subtree
@@ -44,13 +45,15 @@ class TransactionController(GenericController):
 
         # If we do not get any sub samplers, the transaction is done
         if sub_sampler is None:
-            self.transaction_sampler.set_transaction_done()
+            self.transaction_sampler.set_done()
 
         return self.transaction_sampler
 
     def next_is_controller(self, controller: Controller):
         """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is controller')
         sampler = controller.next()
+        # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:
             self.current_returned_none(controller)
             # We need to call the super.next, instead of this.next, which is done in GenericController,
@@ -68,9 +71,9 @@ class TransactionController(GenericController):
         # to notify the children of TransactionController and
         # update them with SubSamplerResult
         if isinstance(sub_sampler, TransactionSampler):
-            self.transaction_sampler.add_sub_sampler_result(sub_sampler.transaction_result)
+            self.transaction_sampler.add_sub_sampler_result(sub_sampler.result)
 
-        self.transaction_sampler.set_transaction_done()
+        self.transaction_sampler.set_done()
         # This transaction is done
         self.transaction_sampler = None
 
@@ -81,19 +84,18 @@ class TransactionSampler(Sampler):
 
     def __init__(self, controller: TransactionController, name: str):
         super().__init__(name)
-        self.transaction_controller = controller
-
-        self.transaction_done = False
+        self.controller = controller
+        self.done = False
         self.sub_sampler = None
 
         self.calls = 0
         self.no_failing_samples = 0
         self.total_time = 0
 
-        self.transaction_result = SampleResult()
-        self.transaction_result.sample_name = name
-        self.transaction_result.success = True
-        self.transaction_result.sample_start()
+        self.result = SampleResult()
+        self.result.sample_name = name
+        self.result.success = True
+        self.result.sample_start()
 
     def sample(self):
         """@override"""
@@ -105,21 +107,22 @@ class TransactionSampler(Sampler):
 
         # Set Response code of transaction
         if self.no_failing_samples == 0:
-            self.transaction_result.response_code = result.response_code
+            self.result.response_code = result.response_code
 
         # The transaction fails if any sub sample fails
         if not result.success:
-            self.transaction_result.success = False
+            self.result.success = False
             self.no_failing_samples += 1
 
         # Add the sub result to the transaction result
-        self.transaction_result.add_sub_result(result)
+        self.result.add_sub_result(result)
 
         # Add current time to total for later use (exclude pause time)
         self.total_time += result.elapsed_time - int(result.idle_time * 1000)
 
-    def set_transaction_done(self):
-        self.transaction_done = True
-        self.transaction_result.elapsed_time = self.total_time
-        if self.transaction_result.success:
-            self.transaction_result.response_code = 200
+    def set_done(self):
+        log.debug(f'coroutine:[ {self.controller.ctx.coroutine_name} ] transaction:[ {self.controller.name} ] done')
+        self.done = True
+        self.result.elapsed_time = self.total_time
+        if self.result.success:
+            self.result.response_code = 200

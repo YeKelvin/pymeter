@@ -184,23 +184,24 @@ class TestCompiler(HashTreeTraverser):
 
         self.test_tree = tree
 
+    @staticmethod
+    def done(package) -> None:
+        log.debug(f'package:[ {package.sampler}] sampler package done')
+        package.recover_running_version()
+
     def configure_sampler(self, sampler) -> SamplePackage:
-        log.debug(f'configure sampler:[ {sampler} ]')
+        log.debug(f'sampler:[ {sampler} ] configure to package')
         package = self.sampler_config_dict.get(sampler)
         package.sampler = sampler
         self.__configure_with_config_elements(sampler, package.configs)
         return package
 
     def configure_transaction_sampler(self, transaction_sampler: TransactionSampler) -> SamplePackage:
-        log.debug(f'configure transaction sampler:[ {transaction_sampler} ]')
-        controller = transaction_sampler.transaction_controller
+        log.debug(f'transaction:[ {transaction_sampler} ] configure to package')
+        controller = transaction_sampler.controller
         package = self.transaction_controller_config_dict.get(controller)
         package.sampler = transaction_sampler
         return package
-
-    def done(self, package) -> None:
-        log.debug('SamplerPackage Done')
-        package.recover_running_version()
 
     def add_node(self, node, subtree) -> None:
         """@override"""

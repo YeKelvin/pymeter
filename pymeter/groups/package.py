@@ -44,7 +44,7 @@ class SamplePackage:
         self.sampler = None
 
     def set_running_version(self, running) -> None:
-        log.debug(f'set running version in package, running:[ {running} ]')
+        log.debug(f'package:[ {self.sampler} ] set running:[ {running} ]')
         for el in self.configs:
             el.running_version = running
         for el in self.pre_processors:
@@ -62,7 +62,7 @@ class SamplePackage:
         self.sampler.running_version = running
 
     def recover_running_version(self) -> None:
-        log.debug('recover running version in package')
+        log.debug(f'package:[ {self.sampler} ] recover running')
         for el in self.configs:
             el.recover_running_version()
         for el in self.pre_processors:

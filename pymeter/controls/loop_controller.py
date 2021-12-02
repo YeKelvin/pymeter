@@ -10,7 +10,6 @@ from typing import Optional
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
-# from pymeter.engine.interface import LoopIterationListener
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
 
@@ -49,28 +48,25 @@ class LoopController(GenericController, IteratingController):
         return self._done
 
     @done.setter
-    def done(self, value: bool):
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] done:[ {value} ]')
+    def done(self, val: bool):
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self.reset_break_loop()
-        self._done = value
+        self._done = val
 
     def next(self) -> Optional[Sampler]:
         self.update_iteration_index(self.name, self._loop_count)
         # noinspection PyBroadException
         try:
             if self.end_of_loop():
+                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
                 if not self.continue_forever:
                     self.done = True
                 self.reset_break_loop()
+                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
                 return None
 
             if self.first:
-                if not self.continue_forever:
-                    log.info(
-                        f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次迭代'
-                    )
-                else:
-                    log.info(f'协程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个迭代')
+                log.info(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次迭代')
 
             return super().next()
         except Exception:
@@ -114,9 +110,11 @@ class LoopController(GenericController, IteratingController):
             self._break_loop = False
 
     def start_next_loop(self):
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
         self.re_initialize()
 
     def break_loop(self):
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
         self._break_loop = True
         self.first = True
         self.reset_current()

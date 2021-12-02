@@ -11,7 +11,6 @@ import gevent
 
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
-from pymeter.groups.group import Coroutine
 from pymeter.utils.log_util import get_logger
 
 
@@ -46,7 +45,7 @@ class WhileController(GenericController, IteratingController):
 
     @property
     def last_sample_ok(self) -> str:
-        return self.ctx.variables.get(Coroutine.LAST_SAMPLE_OK)
+        return self.ctx.variables.get('Coroutine__last_sample_ok')
 
     def __init__(self):
         super().__init__()
@@ -118,8 +117,10 @@ class WhileController(GenericController, IteratingController):
 
             # 如果第一次进入时条件为假，则完全跳过控制器
             if self.first and self.end_of_loop(False):
+                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
                 self.reset_break_loop()
                 self.reset_loop_count()
+                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
                 return None
 
             # 获取下一个 sampler
@@ -134,6 +135,7 @@ class WhileController(GenericController, IteratingController):
 
     def start_next_loop(self):
         """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
         self.re_initialize()
 
     def reset_break_loop(self):
@@ -142,6 +144,7 @@ class WhileController(GenericController, IteratingController):
 
     def break_loop(self):
         """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
         self._break_loop = True
         self.first = True
         self.reset_current()

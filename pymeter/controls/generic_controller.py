@@ -40,11 +40,11 @@ class GenericController(Controller, TestCompilerHelper):
         # 控制器下当前元素的索引（Sampler 或 Controller）
         self.current = 0
 
-        # 是否控制器下的第一个元素（Sampler 或 Controller）
-        self.first = True
-
         # 当前迭代次数
         self._iter_count = 0
+
+        # 是否控制器下的第一个元素（Sampler 或 Controller）
+        self._first = True
 
         # 是否已经完成控制器下所有的取样器和迭代
         self._done = False
@@ -55,6 +55,14 @@ class GenericController(Controller, TestCompilerHelper):
         return self._iter_count
 
     @property
+    def first(self) -> bool:
+        return self._first
+
+    @first.setter
+    def first(self, val: bool):
+        self._first = val
+
+    @property
     def done(self) -> bool:
         """@override"""
         return self._done
@@ -62,6 +70,7 @@ class GenericController(Controller, TestCompilerHelper):
     @done.setter
     def done(self, val: bool):
         """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     @property
@@ -105,7 +114,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next(self) -> Optional[Sampler]:
         """获取控制器的下一个子代元素"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start to get next')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
         self.fire_iter_events()
 
         if self.done:

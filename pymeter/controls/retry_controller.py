@@ -13,7 +13,6 @@ from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
-from pymeter.groups.group import Coroutine
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
 
@@ -57,15 +56,15 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
         return self._done
 
     @done.setter
-    def done(self, value: bool):
+    def done(self, val: bool):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] done:[ {value} ]')
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self.reset_break_retry()
-        self._done = value
+        self._done = val
 
     @property
     def last_sample_ok(self) -> str:
-        return self.ctx.variables.get(Coroutine.LAST_SAMPLE_OK)
+        return self.ctx.variables.get('Coroutine__last_sample_ok')
 
     def next(self) -> Optional[Sampler]:
         # noinspection PyBroadException
@@ -138,10 +137,12 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
     def start_next_loop(self):
         """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
         self.re_initialize()
 
     def break_loop(self):
         """@override"""
+        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
         self._break_retry = True
         self.first = True
         self.reset_current()
