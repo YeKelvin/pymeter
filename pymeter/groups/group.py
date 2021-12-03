@@ -121,7 +121,7 @@ class TestGroup(Controller, TestCompilerHelper):
         return self.on_sample_error == LogicalAction.BREAK_CURRENT_LOOP.value
 
     @property
-    def on_error_stop_coroutine_group(self) -> bool:
+    def on_error_stop_test_group(self) -> bool:
         return self.on_sample_error == LogicalAction.STOP_TEST_GROUP.value
 
     @property
@@ -408,7 +408,8 @@ class Coroutine(Greenlet):
 
     def __control_loop_by_logical_action(self, sampler: Sampler, context: CoroutineContext) -> None:
         """Sampler 失败时，根据 TestGroup 的 on_sample_error 选项，控制循环的动作"""
-        if isinstance(sampler, TransactionSampler) and sampler.done:
+        if isinstance(sampler, TransactionSampler) and self.__find_real_transaction_sampler(sampler).done:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] transaction:[ {sampler} ] transaction done, continue next')
             return
 
         last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
@@ -416,11 +417,7 @@ class Coroutine(Greenlet):
         # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
         if not last_sample_ok and not self.group.on_error_continue:
             # 重试失败的 Sampler
-            if (
-                getattr(sampler, 'retrying', False)  # noqa
-                or  # noqa
-                (isinstance(sampler, TransactionSampler) and getattr(sampler.sub_sampler, 'retrying', False))  # noqa
-            ):
+            if self.is_retrying_sampler(sampler):
                 log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, retrying current sampler')
                 self.__trigger_loop_logical_action_on_parent_controllers(
                     sampler,
@@ -456,8 +453,8 @@ class Coroutine(Greenlet):
                 )
 
             # 错误时停止协程
-            elif self.group.on_error_stop_coroutine_group:
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping coroutine group')
+            elif self.group.on_error_stop_test_group:
+                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping main group')
                 self.stop_group()
 
             # 错误时停止测试
@@ -490,15 +487,30 @@ class Coroutine(Greenlet):
         # When using Start Next Loop option combined to TransactionController.
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
-        if isinstance(sampler, TransactionSampler) and sampler.done:
+        if isinstance(sampler, TransactionSampler) and self.__find_real_transaction_sampler(sampler).done:
             transaction_package = self.compiler.configure_transaction_sampler(sampler)
             self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
+
+    def is_retrying_sampler(self, sampler: Sampler):
+        return (
+            getattr(sampler, 'retrying', False)  # noqa
+            or  # noqa
+            (isinstance(sampler, TransactionSampler) and getattr(self.__find_real_sampler(sampler), 'retrying',False)) # noqa
+        )
+
+    def __find_real_transaction_sampler(self, transaction_sampler: TransactionSampler):
+        real_transaction = transaction_sampler
+        while isinstance(real_transaction, TransactionSampler):
+            if isinstance(sub_sampler := real_transaction.sub_sampler, TransactionSampler):
+                real_transaction = sub_sampler
+            else:
+                break
+        return real_transaction
 
     def __find_real_sampler(self, sampler: Sampler):
         real_sampler = sampler
         while isinstance(real_sampler, TransactionSampler):
             real_sampler = real_sampler.sub_sampler
-
         return real_sampler
 
     def __process_sampler(
@@ -579,7 +591,7 @@ class Coroutine(Greenlet):
         self.__run_pre_processors(package.pre_processors)
 
         # 执行时间控制器
-        self.delay(package.timers)
+        self.__run_timers(package.timers)
 
         # 执行取样器
         result = None
@@ -616,7 +628,7 @@ class Coroutine(Greenlet):
                 transaction_sampler.add_sub_sampler_result(result)
 
             # 检查是否需要停止协程或测试
-            if result.stop_group or (not result.success and self.group.on_error_stop_coroutine_group):
+            if result.stop_group or (not result.success and self.group.on_error_stop_test_group):
                 log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试组')
                 self.stop_coroutine()
             if result.stop_test or (not result.success and self.group.on_error_stop_test):
@@ -705,17 +717,20 @@ class Coroutine(Greenlet):
         try:
             assertion_result = assertion.get_result(sample_result)
         except AssertionError as e:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
+            log.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
+                      f'error processing Assertion: {e}')
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.failure = True
             assertion_result.message = str(e)
         except RuntimeError as e:
-            log.error(f'coroutine:[ {self.coroutine_name} ] error processing Assertion: {e}')
+            log.error(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
+                      f'error processing Assertion: {e}')
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
             assertion_result.message = str(e)
         except Exception as e:
-            log.error(f'coroutine:[ {self.coroutine_name} ] exception processing Assertion: {e}')
+            log.error(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
+                      f'exception processing Assertion: {e}')
             log.error(traceback.format_exc())
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
@@ -724,7 +739,7 @@ class Coroutine(Greenlet):
             sample_result.success = sample_result.success and not (assertion_result.error or assertion_result.failure)
             sample_result.assertions.append(assertion_result)
 
-    def delay(self, timers: list):
+    def __run_timers(self, timers: list):
         total_delay = 0
         for timer in timers:
             delay = timer.delay()

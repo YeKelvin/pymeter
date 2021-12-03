@@ -79,17 +79,16 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
             if nsampler:
                 # 延迟重试（间隔）
                 if not self.first and self.intervals:
-                    log.debug(
-                        f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
-                        f'retrying delay:[ {self.intervals}ms ]'
-                    )
+                    log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
+                              f'retrying delay:[ {self.intervals}ms ]')
                     gevent.sleep(float(self.intervals / 1000))
 
-                # 添加重试标识
+                # 添加重试标识，最后一次无需添加
                 if self._retry_count < self.retries - 1:
                     nsampler.retrying = True
+                # 给重试取样器名称添加重试标识后缀
                 if self._retry_count < self.retries:
-                    nsampler.retry_flag = f'[{self.flag_prefix}{self._retry_count}]' if self.flag_prefix else None
+                    nsampler.retry_flag = f'[{self.flag_prefix}{self._retry_count + 1}]' if self.flag_prefix else None
 
             return nsampler
         except Exception:
