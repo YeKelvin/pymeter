@@ -67,6 +67,10 @@ class FlaskDBResultStorage(
     def group_id(self):
         return id(self.group)
 
+    @property
+    def last_sample_ok(self) -> bool:
+        return ContextService.get_context().variables.get('Coroutine__last_sample_ok')
+
     def __init__(self):
         TestElement.__init__(self)
         self.success: bool = True
@@ -91,6 +95,10 @@ class FlaskDBResultStorage(
         """@override"""
         # 记录 Group 开始时间
         self.group.start_time = timestamp_now()
+        # 最后一个 Sample 失败时，同步更新 Group/Collection 的结果也为失败
+        if not self.last_sample_ok:
+            self.group.success = False
+            self.success = False
         # 插入 Group 数据至数据库
         self.insert_test_group_result()
 
@@ -105,11 +113,6 @@ class FlaskDBResultStorage(
         """@override"""
         # 递归插入 Sampler 和 SubSampler 数据至数据库
         self.sampler_occurred_with_subresults(result)
-        # 如果 Sample 失败，则同步更新 Group/Collection 的结果也为失败
-        if not result.success:
-            self.group.success = False
-            if self.success:
-                self.success = False
 
     def sampler_occurred_with_subresults(self, result: SampleResult):
         # 插入 Sampler 数据至数据库
@@ -181,6 +184,7 @@ class FlaskDBResultStorage(
                 END_TIME=timestmp_to_utc8_datetime(result.end_time),
                 ELAPSED_TIME=result.elapsed_time,
                 SUCCESS=result.success,
+                RETRYING=result.retrying,
                 REQUEST_URL=result.request_url,
                 REQUEST_HEADERS=(
                     to_json(result.request_headers)

@@ -55,6 +55,10 @@ class FlaskSIOResultCollector(
     def group_id(self):
         return str(id(self.group))
 
+    @property
+    def last_sample_ok(self) -> bool:
+        return ContextService.get_context().variables.get('Coroutine__last_sample_ok')
+
     def __init__(self):
         TestElement.__init__(self)
 
@@ -131,7 +135,8 @@ class FlaskSIOResultCollector(
             'group': {
                 'endTime': time_util.strftime_now(),
                 'elapsedTime': int(self.group.end_time * 1000) - int(self.group.start_time * 1000),
-                'running': False
+                'running': False,
+                'success': True if self.last_sample_ok else False
             }
         })
 
@@ -145,15 +150,6 @@ class FlaskSIOResultCollector(
             'groupId': self.group_id,
             'sampler': sample_result_to_dict(result)
         })
-
-        if not result.success:
-            self.emit(self.result_group_event, {
-                'resultId': self.collection_id,
-                'groupId': self.group_id,
-                'group': {
-                    'success': False
-                }
-            })
 
     def sample_started(self, sample) -> None:
         """@override"""
@@ -182,6 +178,7 @@ def sample_result_to_dict(result):
         'requestSize': result.request_size,
         'responseSize': result.response_size,
         'success': result.success,
+        'retrying': result.retrying,
         'startTime': time_util.timestamp_to_strftime(result.start_time),
         'endTime': time_util.timestamp_to_strftime(result.end_time),
         'elapsedTime': result.elapsed_time,

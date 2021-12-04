@@ -412,9 +412,8 @@ class Coroutine(Greenlet):
             log.debug(f'coroutine:[ {self.coroutine_name} ] transaction:[ {sampler} ] transaction done, continue next')
             return
 
-        last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
-
         # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
+        last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
         if not last_sample_ok and not self.group.on_error_continue:
             # 重试失败的 Sampler
             if self.is_retrying_sampler(sampler):
@@ -487,15 +486,19 @@ class Coroutine(Greenlet):
         # When using Start Next Loop option combined to TransactionController.
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
-        if isinstance(sampler, TransactionSampler) and self.__find_real_transaction_sampler(sampler).done:
-            transaction_package = self.compiler.configure_transaction_sampler(sampler)
-            self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
+        if isinstance(sampler, TransactionSampler):
+            transaction_sampler = self.__find_real_transaction_sampler(sampler)
+            if transaction_sampler.done:
+                transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
+                self.__do_end_transaction_sampler(transaction_sampler, None, transaction_package, context)
 
     def is_retrying_sampler(self, sampler: Sampler):
         return (
-            getattr(sampler, 'retrying', False)  # noqa
-            or  # noqa
-            (isinstance(sampler, TransactionSampler) and getattr(self.__find_real_sampler(sampler), 'retrying',False)) # noqa
+            getattr(sampler, 'retrying', False) or  # noqa
+            (
+                isinstance(sampler, TransactionSampler) and  # noqa
+                getattr(self.__find_real_sampler(sampler), 'retrying', False)  # noqa
+            )  # noqa
         )
 
     def __find_real_transaction_sampler(self, transaction_sampler: TransactionSampler):
@@ -642,7 +645,6 @@ class Coroutine(Greenlet):
 
     def __do_sampling(self, sampler: Sampler, context: CoroutineContext, listeners: list) -> SampleResult:
         """执行Sampler"""
-        # TODO: 给sampler设置context好像没啥用，可以ContextService获取
         sampler.context = context
 
         # 遍历执行 SampleListener
@@ -658,7 +660,12 @@ class Coroutine(Greenlet):
             log.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sampler} ] sample done')
         except Exception:
             log.error(traceback.format_exc())
-            # TODO: 将异常堆栈写入SampleResult
+            if result:
+                result.response_data = traceback.format_exc()
+            else:
+                result = SampleResult()
+                result.sample_name = sampler.name
+                result.response_data = traceback.format_exc()
         finally:
             # 遍历执行 SampleListener
             log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to end')
