@@ -136,7 +136,7 @@ class FlaskSIOResultCollector(
                 'endTime': time_util.strftime_now(),
                 'elapsedTime': int(self.group.end_time * 1000) - int(self.group.start_time * 1000),
                 'running': False,
-                'success': True if self.last_sample_ok else False
+                'success': self.last_sample_ok
             }
         })
 

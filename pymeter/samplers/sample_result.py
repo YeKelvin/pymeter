@@ -106,24 +106,24 @@ class SampleResult:
         self.end_time = time_util.timestamp_now()
         self.elapsed_time = int(self.end_time * 1000) - int(self.start_time * 1000)
 
-    def add_sub_result(self, sub_result: 'SampleResult'):
-        if not sub_result:
+    def add_sub_result(self, subresult: 'SampleResult'):
+        if not subresult:
             return
 
         # Extend the time to the end of the added sample
-        self.end_time = max(self.end_time, sub_result.end_time)
+        self.end_time = max(self.end_time, subresult.end_time)
 
         # Include the byte count for the added sample
-        self.request_headers_size = self.request_headers_size + sub_result.request_headers_size
-        self.request_data_size = self.request_data_size + sub_result.request_data_size
-        self.request_size = self.request_size + sub_result.request_size
+        self.request_headers_size = self.request_headers_size + subresult.request_headers_size
+        self.request_data_size = self.request_data_size + subresult.request_data_size
+        self.request_size = self.request_size + subresult.request_size
 
-        self.response_headers_size = self.response_headers_size + sub_result.response_headers_size
-        self.response_data_size = self.response_data_size + sub_result.response_data_size
-        self.response_size = self.response_size + sub_result.response_size
+        self.response_headers_size = self.response_headers_size + subresult.response_headers_size
+        self.response_data_size = self.response_data_size + subresult.response_data_size
+        self.response_size = self.response_size + subresult.response_size
 
-        self.sub_results.append(sub_result)
-        sub_result.parent = self
+        self.sub_results.append(subresult)
+        subresult.parent = self
 
     def json_path(self, xpath, choice=False, index=None):
         return json_util.json_path(self.response_data, xpath, choice, index)

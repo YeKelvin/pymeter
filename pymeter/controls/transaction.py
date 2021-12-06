@@ -110,7 +110,7 @@ class TransactionSampler(Sampler):
             self.result.response_code = result.response_code
 
         # The transaction fails if any sub sample fails
-        if not result.success:
+        if not result.success and not result.retrying:
             self.result.success = False
             self.no_failing_samples += 1
 

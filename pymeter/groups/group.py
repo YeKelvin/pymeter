@@ -295,6 +295,7 @@ class Coroutine(Greenlet):
         self.variables = Variables()
         self.start_time = 0
         self.end_time = 0
+        self.next_continue = True
 
         # 搜索 TestGroupListener 节点
         group_listener_searcher = SearchByClass(TestGroupListener)
@@ -356,11 +357,14 @@ class Coroutine(Greenlet):
                     log.debug(f'coroutine:[ {self.coroutine_name} ] current sampler:[ {sampler} ]')
                     # 处理 Sampler
                     self.__process_sampler(sampler, None, context)
-                    # 根据 Sampler 结果控制循环
-                    self.__control_loop_by_logical_action(sampler, context)
-                    # 获取下一个 Sampler
-                    if self.running:
-                        sampler = self.group_main_controller.next()
+                    # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
+                    last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
+                    if not self.next_continue or (not last_sample_ok and self.group.on_error_continue):
+                        self.__control_loop_by_logical_action(sampler, context)
+                        self.next_continue = True
+                        sampler = None
+                    else:
+                        sampler = self.group_main_controller.next()  # 获取下一个 Sampler
 
                 if self.group_main_controller.done:
                     self.running = False
@@ -379,8 +383,7 @@ class Coroutine(Greenlet):
             log.error(traceback.format_exc())
         finally:
             log.info(f'线程:[ {self.coroutine_name} ] 执行完成')
-            # 遍历执行 TestGroupListener
-            self.__coroutine_finished()
+            self.__coroutine_finished()  # 遍历执行 TestGroupListener
             context.clear()
             ContextService.remove_context()
 
@@ -407,64 +410,40 @@ class Coroutine(Greenlet):
         ContextService.decr_number_of_coroutines()
 
     def __control_loop_by_logical_action(self, sampler: Sampler, context: CoroutineContext) -> None:
-        """Sampler 失败时，根据 TestGroup 的 on_sample_error 选项，控制循环的动作"""
-        if isinstance(sampler, TransactionSampler) and self.__find_real_transaction_sampler(sampler).done:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] transaction:[ {sampler} ] transaction done, continue next')
-            return
+        # 重试失败的 Sampler
+        if self.is_retrying_sampler(sampler):
+            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, retrying current sampler')
+            self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_retry)
 
-        # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
-        last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
-        if not last_sample_ok and not self.group.on_error_continue:
-            # 重试失败的 Sampler
-            if self.is_retrying_sampler(sampler):
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, retrying current sampler')
-                self.__trigger_loop_logical_action_on_parent_controllers(
-                    sampler,
-                    context,
-                    self.__continue_on_retry
-                )
+        # 错误时开始下一个 TestGroup 循环
+        elif self.group.on_error_start_next_coroutine:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next main loop')
+            self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_main_loop)
 
-            # 错误时开始下一个 TestGroup 循环
-            elif self.group.on_error_start_next_coroutine:
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next main loop')
-                self.__trigger_loop_logical_action_on_parent_controllers(
-                    sampler,
-                    context,
-                    self.__continue_on_main_loop
-                )
+        # 错误时开始下一个当前控制器循环
+        elif self.group.on_error_start_next_current_loop:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next current loop')
+            self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_current_loop)
 
-            # 错误时开始下一个当前控制器循环
-            elif self.group.on_error_start_next_current_loop:
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next current loop')
-                self.__trigger_loop_logical_action_on_parent_controllers(
-                    sampler,
-                    context,
-                    self.__continue_on_current_loop
-                )
+        # 错误时中断当前控制器循环
+        elif self.group.on_error_break_current_loop:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, breaking current loop')
+            self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__break_on_current_loop)
 
-            # 错误时中断当前控制器循环
-            elif self.group.on_error_break_current_loop:
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, breaking current loop')
-                self.__trigger_loop_logical_action_on_parent_controllers(
-                    sampler,
-                    context,
-                    self.__break_on_current_loop
-                )
+        # 错误时停止协程
+        elif self.group.on_error_stop_test_group:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping main group')
+            self.stop_group()
 
-            # 错误时停止协程
-            elif self.group.on_error_stop_test_group:
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping main group')
-                self.stop_group()
+        # 错误时停止测试
+        elif self.group.on_error_stop_test:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test')
+            self.stop_test()
 
-            # 错误时停止测试
-            elif self.group.on_error_stop_test:
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test')
-                self.stop_test()
-
-            # 错误时立即停止测试（中断所有协程）
-            elif self.group.on_error_stop_test_now:
-                log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
-                self.stop_test_now()
+        # 错误时立即停止测试（中断所有协程）
+        elif self.group.on_error_stop_test_now:
+            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
+            self.stop_test_now()
 
     def __trigger_loop_logical_action_on_parent_controllers(
             self,
@@ -487,10 +466,9 @@ class Coroutine(Greenlet):
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
         if isinstance(sampler, TransactionSampler):
-            transaction_sampler = self.__find_real_transaction_sampler(sampler)
-            if transaction_sampler.done:
-                transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
-                self.__do_end_transaction_sampler(transaction_sampler, None, transaction_package, context)
+            if sampler.done:
+                transaction_package = self.compiler.configure_transaction_sampler(sampler)
+                self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
 
     def is_retrying_sampler(self, sampler: Sampler):
         return (
@@ -500,15 +478,6 @@ class Coroutine(Greenlet):
                 getattr(self.__find_real_sampler(sampler), 'retrying', False)  # noqa
             )  # noqa
         )
-
-    def __find_real_transaction_sampler(self, transaction_sampler: TransactionSampler):
-        real_transaction = transaction_sampler
-        while isinstance(real_transaction, TransactionSampler):
-            if isinstance(sub_sampler := real_transaction.sub_sampler, TransactionSampler):
-                real_transaction = sub_sampler
-            else:
-                break
-        return real_transaction
 
     def __find_real_sampler(self, sampler: Sampler):
         real_sampler = sampler
@@ -614,8 +583,9 @@ class Coroutine(Greenlet):
             # 添加重试标识，标识来自 RetryController
             retrying = getattr(sampler, 'retrying', False)
             if retrying:
-                retryflag = getattr(sampler, 'retry_flag', None)
                 result.retrying = True
+            retryflag = getattr(sampler, 'retry_flag', None)
+            if retryflag:
                 result.sample_name = f'{result.sample_name} {retryflag}' if retryflag else result.sample_name
 
             # 遍历执行 SampleListener
@@ -640,6 +610,8 @@ class Coroutine(Greenlet):
             if result.stop_test_now or (not result.success and self.group.on_error_stop_test_now):
                 log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置立即停止测试')
                 self.stop_test_now()
+            if not result.success:
+                self.next_continue = False
         else:
             self.compiler.done(package)
 
