@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : function
+# @File    : function.py
 # @Time    : 2020/1/19 17:05
 # @Author  : Kelvin.Ye
 from pymeter.common.exceptions import InvalidVariableException

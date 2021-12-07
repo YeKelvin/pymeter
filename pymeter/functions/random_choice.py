@@ -23,9 +23,10 @@ class RandomChoice(Function):
     def execute(self):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
-        seq = int(self.seq.execute().strip())
+        seq = self.seq.execute().strip().split(',')
+        seq = [s.strip() for s in seq]
 
-        result = str(random.choice(list(seq)))
+        result = str(random.choice(seq))
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
         return result

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : random
+# @File    : random.py
 # @Time    : 2020/1/20 16:06
 # @Author  : Kelvin.Ye
 import random
@@ -23,13 +23,13 @@ class Random(Function):
     def execute(self):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
-        if self.length == 1:
+        if self.length:
             length = int(self.length.execute().strip())
-            result = ''.join([random.randint(0, 9) for x in range(length)])
+            result = ''.join([str(random.randint(0, 9)) for x in range(length)])
             log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
             return result
 
-        result = str(random.random() * 8)
+        result = str(random.random()).replace('0.', '')
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
         return result
 

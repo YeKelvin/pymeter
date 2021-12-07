@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : time
+# @File    : time.py
 # @Time    : 2020/1/20 16:07
 # @Author  : Kelvin.Ye
 import time
