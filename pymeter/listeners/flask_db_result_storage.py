@@ -95,9 +95,6 @@ class FlaskDBResultStorage(
         """@override"""
         # 记录 Group 开始时间
         self.group.start_time = timestamp_now()
-        # 最后一个 Sample 失败时，同步更新 Group/Collection 的结果也为失败
-        self.group.success = self.last_sample_ok
-        self.success = self.last_sample_ok
         # 插入 Group 数据至数据库
         self.insert_test_group_result()
 
@@ -105,6 +102,9 @@ class FlaskDBResultStorage(
         """@override"""
         # 记录 Group 结束时间
         self.group.end_time = timestamp_now()
+        # 最后一个 Sample 失败时，同步更新 Group/Collection 的结果也为失败
+        self.group.success = self.last_sample_ok
+        self.success = self.last_sample_ok
         # 更新 Group 数据
         self.update_test_group_result()
 
