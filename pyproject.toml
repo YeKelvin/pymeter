@@ -44,11 +44,8 @@ yapf = "*"
 isort = "*"
 
 [build-system]
-requires = [
-    "setuptools>=50.0",
-    "poetry>=1.1.5"
-]
-build-backend = "poetry.masonry.api"
+requires = ["poetry_core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 profile = "pycharm"
