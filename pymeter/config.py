@@ -12,19 +12,18 @@ PROJECT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir
 # 源代码目录路径
 SRC_PATH = os.path.join(PROJECT_PATH, 'pymeter')
 # 配置文件路径
-if 'CONFIG_PATH' not in os.environ:
-    CONFIG_PATH = os.path.join(PROJECT_PATH, 'config.ini')
-    os.environ['CONFIG_PATH'] = CONFIG_PATH
+if 'APP_CONFIG_FILE' not in os.environ:
+    APP_CONFIG_FILE = os.path.join(PROJECT_PATH, 'config.ini')
+    os.environ['APP_CONFIG_FILE'] = APP_CONFIG_FILE
 else:
-    CONFIG_PATH = os.environ.get('CONFIG_PATH')
+    APP_CONFIG_FILE = os.environ.get('APP_CONFIG_FILE')
 
 
 # 配置对象
 __config__ = configparser.ConfigParser()
-__config__.read(CONFIG_PATH)
+__config__.read(APP_CONFIG_FILE)
 
 
 # 配置项
 # 日志相关配置
-LOG_NAME = __config__.get('log', 'name')
 LOG_LEVEL = __config__.get('log', 'level')
