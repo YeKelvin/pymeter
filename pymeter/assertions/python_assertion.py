@@ -43,6 +43,7 @@ class PythonAssertion(Assertion):
             'vars': ctx.variables,
             'props': props,
             'prev': ctx.previous_result,
+            'sampler': ctx.current_sampler,
             'result': response,
             'failure': not response.success,
             'message': None,

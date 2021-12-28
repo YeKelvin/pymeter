@@ -47,3 +47,7 @@ class UnsupportedOperationException(Exception):
 
 class HttpHeaderDuplicateException(Exception):
     ...
+
+
+class HttpCookieDuplicateException(Exception):
+    ...

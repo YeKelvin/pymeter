@@ -8,6 +8,7 @@ from typing import Optional
 
 import requests
 
+from pymeter.common.exceptions import HttpCookieDuplicateException
 from pymeter.common.exceptions import HttpHeaderDuplicateException
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
@@ -44,7 +45,7 @@ class HTTPHeader(TestElement):
         self.set_property(self.HEADER_VALUE, value)
 
     def update(self, header) -> None:
-        """更新值"""
+        """更新value"""
         self.add_property(self.HEADER_VALUE, header.get_property(self.HEADER_VALUE))
 
     def __repr__(self):
@@ -107,7 +108,7 @@ class HTTPHeaderManager(ConfigTestElement):
 
     def add_header(self, name: str, value: str) -> None:
         if self.has_header(name):
-            raise HttpHeaderDuplicateException(f'header:[ {name} ] 已存在同名')
+            raise HttpHeaderDuplicateException(f'header:[ {name} ] 已存在')
 
         header = HTTPHeader()
         header.name = name
@@ -115,9 +116,117 @@ class HTTPHeaderManager(ConfigTestElement):
         self.headers_as_list.append(header)
 
 
-class Cookie(TestElement):
+class HTTPCookie(TestElement):
 
-    VALUE = "Cookie__value"
+    COOKIE_NAME = 'Cookie__name'
+    COOKIE_VALUE = 'Cookie__value'
+    COOKIE_DOMAIN = 'Cookie__domain'
+    COOKIE_PATH = 'Cookie__path'
+
+    @property
+    def name(self):
+        return self.get_property_as_str(self.COOKIE_NAME)
+
+    @name.setter
+    def name(self, val):
+        self.set_property(self.COOKIE_NAME, val)
+
+    @property
+    def value(self):
+        return self.get_property_as_str(self.COOKIE_VALUE)
+
+    @value.setter
+    def value(self, val):
+        self.set_property(self.COOKIE_VALUE, val)
+
+    @property
+    def domain(self):
+        return self.get_property_as_str(self.COOKIE_DOMAIN)
+
+    @domain.setter
+    def domain(self, val):
+        self.set_property(self.COOKIE_DOMAIN, val)
+
+    @property
+    def path(self):
+        return self.get_property_as_str(self.COOKIE_PATH)
+
+    @path.setter
+    def path(self, val):
+        self.set_property(self.COOKIE_PATH, val)
+
+    def update(self, cookie) -> None:
+        """更新value"""
+        self.add_property(self.COOKIE_VALUE, cookie.get_property(self.COOKIE_VALUE))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __str__(self):
+        return '{' + f'"{self.name}":"{self.value}";"{self.domain}{self.path}"' + '}'
+
+
+class HTTPCookieManager(ConfigTestElement):
+
+    COOKIES = 'CookieManager__cookies'
+
+    def __init__(self):
+        super().__init__()
+        self.add_property(self.COOKIES, [])
+
+    @property
+    def cookies_as_list(self) -> List[HTTPCookie]:
+        return self.get_property(self.COOKIES).get_obj()
+
+    @property
+    def cookies_as_dict(self) -> dict:
+        cookies = {}
+        for cookie in self.cookies_as_list:
+            cookies[cookie.name] = cookie.value
+        return cookies
+
+    def merge(self, el):
+        if not isinstance(el, HTTPCookieManager):
+            raise Exception(f'cannot merge type: {self} with type: {el}')
+
+        merged_manager = self.clone()  # type: HTTPCookieManager
+        new_manager = el  # type: HTTPCookieManager
+
+        for new_cookie in new_manager.cookies_as_list:
+            found = False
+            for merged_header in merged_manager.cookies_as_list:
+                if merged_header.name.lower() == new_cookie.name.lower():
+                    merged_header.update(new_cookie)
+                    found = True
+                    break
+
+            if not found:
+                merged_manager.cookies_as_list.append(new_cookie)
+
+        return merged_manager
+
+    def get_cookie(self, name: str) -> Optional[HTTPCookie]:
+        for cookie in self.cookies_as_list:
+            if cookie.name.lower() == name.lower():
+                return cookie
+        return None
+
+    def has_cookie(self, name: str) -> bool:
+        for cookie in self.cookies_as_list:
+            if cookie.name.lower() == name.lower():
+                return True
+        return False
+
+    def add_cookie(self, name: str, value: str, domain: str = None, path: str = None) -> None:
+        if self.has_cookie(name):
+            raise HttpCookieDuplicateException(f'cookie:[ {name} ] 已存在')
+
+        cookie = HTTPCookie()
+        cookie.name = name
+        cookie.value = value
+        cookie.domain = domain
+        cookie.path = path
+        self.cookies_as_list.append(cookie)
 
 
 class SessionManager(ConfigTestElement):

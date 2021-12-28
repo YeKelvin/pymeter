@@ -8,11 +8,12 @@ from typing import Final
 from typing import Optional
 
 import requests
+from requests.models import Response
 
 from pymeter.configs.arguments import Arguments
 from pymeter.configs.httpconfigs import HTTPHeaderManager
 from pymeter.configs.httpconfigs import SessionManager
-from pymeter.samplers.http_cons import HTTP_STATUS_CODE
+from pymeter.samplers.http_constants import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.utils.log_util import get_logger
@@ -125,11 +126,9 @@ class HTTPSampler(Sampler):
         result.sample_remark = self.remark
         result.request_url = self.url
         result.sample_start()
-        res = None
 
         # noinspection PyBroadException
         try:
-            impl = None
             if self.session_manager and self.session_manager.session:
                 impl = self.session_manager.session
             else:
@@ -140,14 +139,14 @@ class HTTPSampler(Sampler):
                 url=self.url,
                 headers=self.headers,
                 params=self.params,
-                data=self.get_data(),
+                data=self.get_body(),
                 files=self.files,
                 cookies=None,
                 timeout=self.get_timeout(),
                 allow_redirects=self.allow_redirects
             )
 
-            result.request_data = self.get_payload(res.request.url)
+            result.request_data = self.get_payload(res)
             result.request_headers = dict(res.request.headers)
             result.response_headers = dict(res.headers)
             result.response_data = res.text
@@ -156,7 +155,7 @@ class HTTPSampler(Sampler):
         except Exception:
             result.success = False
             result.error = True
-            result.request_data = result.request_data or self.get_payload(self.url)
+            result.request_data = result.request_data or self.get_payload_on_error()
             result.request_headers = result.request_headers or self.headers
             result.response_data = traceback.format_exc()
         finally:
@@ -164,12 +163,8 @@ class HTTPSampler(Sampler):
 
         return result
 
-    def get_data(self):
-        if (
-            self.headers  # noqa
-            and 'content-type' in self.headers  # noqa
-            and self.headers['content-type'].lower() == 'application/x-www-form-urlencoded'  # noqa
-        ):
+    def get_body(self):
+        if self.is_form_urlencoded():
             return self.form
         else:
             return self.data
@@ -179,21 +174,31 @@ class HTTPSampler(Sampler):
             return None
         return self.connect_timeout or 0, self.response_timeout or 0
 
-    def get_payload(self, full_url):
-        url = f'{self.method} {full_url}'
+    def get_payload(self, res: Response):
+        url = f'{self.method} {res.request.url}'
+        payload = ''
+
+        if res.request.body:
+            payload = f'\n\n{res.request.body}'
+
+        return url + payload
+
+    def get_payload_on_error(self):
+        url = f'{self.method} {self.url}'
         payload = ''
 
         if self.params:
-            if self.params:
-                payload = '\n\n'
-                for name, value in self.params.items():
-                    payload = payload + f'{name}={value}\n'
-                payload = payload[:-1]
+            for name, value in self.params.items():
+                payload = payload + f'{name}={value}&'
+            return f'{url}?{payload[:-1]}'
+
+        if self.is_form_urlencoded():
+            for name, value in self.params.items():
+                payload = payload + f'{name}={value}&'
+            return f'{url}\n\n{payload[:-1]}'
 
         if self.data:
-            payload = f'\n\n{self.data}'
-
-        return url + payload
+            return f'{url}\n\n{self.data}'
 
     def add_test_element(self, el) -> None:
         """@override"""
@@ -214,3 +219,10 @@ class HTTPSampler(Sampler):
 
     def set_session_manager(self, manager: SessionManager):
         self.session_manager = manager
+
+    def is_form_urlencoded(self):
+        return (
+            self.headers  # noqa
+            and 'content-type' in self.headers  # noqa
+            and self.headers['content-type'].lower() == 'application/x-www-form-urlencoded'  # noqa
+        )

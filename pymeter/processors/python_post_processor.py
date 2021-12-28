@@ -40,6 +40,7 @@ class PythonPostProcessor(PostProcessor):
                 'ctx': ctx,
                 'vars': ctx.variables,
                 'props': props,
+                'sampler': ctx.current_sampler,
                 'result': ctx.previous_result
             }
             exec(script, params, params)
