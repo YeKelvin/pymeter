@@ -181,26 +181,27 @@ class HTTPSampler(Sampler):
         payload = ''
 
         if res.request.body:
-            payload = f'\n\n{res.request.body}'
+            payload = f'\n\n{self.method} data:\n{res.request.body}'
 
         return url + payload
 
     def get_payload_on_error(self):
         url = f'{self.method} {self.url}'
-        payload = ''
 
         if self.params:
+            payload = f'{url}?'
             for name, value in self.params.items():
                 payload = payload + f'{name}={value}&'
-            return f'{url}?{payload[:-1]}'
+            return payload[:-1]
 
         if self.is_form_urlencoded():
+            payload = f'{url}\n\n{self.method} data:\n'
             for name, value in self.params.items():
                 payload = payload + f'{name}={value}&'
-            return f'{url}\n\n{payload[:-1]}'
+            return payload[:-1]
 
         if self.data:
-            return f'{url}\n\n{self.data}'
+            return f'{url}\n\n{self.method} data:\n{self.data}'
 
     def add_test_element(self, el) -> None:
         """@override"""
