@@ -33,6 +33,7 @@ class SampleResult:
         self.response_code = None
         self.response_message = None
         self.response_headers = None
+        self.response_cookies = None
         self.response_data = None
 
         self.start_time = 0

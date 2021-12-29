@@ -146,17 +146,19 @@ class HTTPSampler(Sampler):
                 allow_redirects=self.allow_redirects
             )
 
-            result.request_data = self.get_payload(res)
             result.request_headers = dict(res.request.headers)
-            result.response_headers = dict(res.headers)
-            result.response_data = res.text
+            result.request_data = self.get_payload(res)
             result.response_code = res.status_code
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
+            result.response_headers = dict(res.headers)
+            result.response_cookies = res.cookies.get_dict()
+            result.response_data = res.text
         except Exception:
             result.success = False
             result.error = True
-            result.request_data = result.request_data or self.get_payload_on_error()
             result.request_headers = result.request_headers or self.headers
+            result.request_data = result.request_data or self.get_payload_on_error()
+            result.response_message = 'PyMeterException'
             result.response_data = traceback.format_exc()
         finally:
             result.sample_end()

@@ -37,6 +37,7 @@ __MODULE_PATH__ = {
     'Arguments': 'pymeter.configs.arguments',
     'HTTPHeader': 'pymeter.configs.httpconfigs',
     'HTTPHeaderManager': 'pymeter.configs.httpconfigs',
+    'HTTPCookieManager': 'pymeter.configs.httpconfigs',
     'HTTPSessionManager': 'pymeter.configs.httpconfigs',
     'VariableDataSet': 'pymeter.configs.dataset',
     'TransactionHTTPSessionManager': 'pymeter.configs.transactions',
