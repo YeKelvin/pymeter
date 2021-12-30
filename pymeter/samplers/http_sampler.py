@@ -102,7 +102,7 @@ class HTTPSampler(Sampler):
 
     @property
     def encoding(self) -> str:
-        return self.get_property_as_str(self.ENCODING)
+        return self.get_property_as_str(self.ENCODING) or 'utf-8'
 
     @property
     def allow_redirects(self) -> bool:
@@ -145,6 +145,7 @@ class HTTPSampler(Sampler):
                 timeout=self.get_timeout(),
                 allow_redirects=self.allow_redirects
             )
+            res.encoding = self.encoding
 
             result.request_headers = dict(res.request.headers)
             result.request_data = self.get_payload(res)
@@ -167,9 +168,11 @@ class HTTPSampler(Sampler):
 
     def get_body(self):
         if self.is_form_urlencoded():
-            return self.form
+            return self.get_form_urlencoded_byte_data()
+        elif data := self.data:
+            return data.encode(encoding=self.encoding)
         else:
-            return self.data
+            return None
 
     def get_timeout(self) -> Optional[tuple]:
         if not (self.connect_timeout and self.response_timeout):
@@ -177,31 +180,38 @@ class HTTPSampler(Sampler):
         return self.connect_timeout or 0, self.response_timeout or 0
 
     def get_payload(self, res: Response):
-        url = f'{self.method} {res.request.url}'
+        url = f'{self.method} {self.url}'
         payload = ''
 
-        if res.request.body:
-            payload = f'\n\n{self.method} data:\n{res.request.body}'
+        if params := self.params:
+            query = ''
+            for name, value in params.items():
+                query = query + f'{name}={value}&'
+            url = f'{url}?{query[:-1]}'
+
+        if body := res.request.body:
+            body = body.decode(encoding=self.encoding) if isinstance(body, bytes) else body
+            payload = f'\n\n{self.method} data:\n{body}'
 
         return url + payload
 
     def get_payload_on_error(self):
         url = f'{self.method} {self.url}'
 
-        if self.params:
-            payload = f'{url}?'
-            for name, value in self.params.items():
-                payload = payload + f'{name}={value}&'
-            return payload[:-1]
+        if params := self.params:
+            query = f'{url}?'
+            for name, value in params.items():
+                query = query + f'{name}={value}&'
+            return query[:-1]
 
-        if self.is_form_urlencoded():
+        if self.is_form_urlencoded() and (form := self.form):
             payload = f'{url}\n\n{self.method} data:\n'
-            for name, value in self.params.items():
+            for name, value in form.items():
                 payload = payload + f'{name}={value}&'
             return payload[:-1]
 
-        if self.data:
-            return f'{url}\n\n{self.method} data:\n{self.data}'
+        if data := self.data:
+            return f'{url}\n\n{self.method} data:\n{data}'
 
     def add_test_element(self, el) -> None:
         """@override"""
@@ -229,3 +239,9 @@ class HTTPSampler(Sampler):
             and 'content-type' in self.headers  # noqa
             and self.headers['content-type'].lower() == 'application/x-www-form-urlencoded'  # noqa
         )
+
+    def get_form_urlencoded_byte_data(self):
+        payload = ''
+        for name, value in self.form.items():
+            payload = payload + f'{name}={value}&'
+        return payload[:-1].encode(encoding=self.encoding)
