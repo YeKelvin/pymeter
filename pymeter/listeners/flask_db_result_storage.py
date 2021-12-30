@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : flask_result_storage.py
+# @File    : flask_db_result_storage.py
 # @Time    : 2021-09-09 21:17:33
 # @Author  : Kelvin.Ye
 import importlib
@@ -95,6 +95,7 @@ class FlaskDBResultStorage(
         """@override"""
         # 记录 Group 开始时间
         self.group.start_time = timestamp_now()
+        self.group.success = True
         # 插入 Group 数据至数据库
         self.insert_test_group_result()
 
@@ -102,14 +103,15 @@ class FlaskDBResultStorage(
         """@override"""
         # 记录 Group 结束时间
         self.group.end_time = timestamp_now()
-        # 最后一个 Sample 失败时，同步更新 Group/Collection 的结果也为失败
-        self.group.success = self.last_sample_ok
-        self.success = self.last_sample_ok
         # 更新 Group 数据
         self.update_test_group_result()
 
     def sample_occurred(self, result: SampleResult) -> None:
         """@override"""
+        # 最后一个 Sample 失败时，同步更新 Group/Collection 的结果也为失败
+        if not self.last_sample_ok:
+            self.group.success = False
+            self.success = False
         # 递归插入 Sampler 和 SubSampler 数据至数据库
         self.sampler_occurred_with_subresults(result)
 
@@ -218,16 +220,17 @@ class FlaskDBResultStorage(
             self.model.TTestCollectionResult.filter_by(COLLECTION_ID=str(self.collection_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.collection_end_time),
                 'ELAPSED_TIME': elapsed_time,
-                'SUCCESS': self.success
+                'SUCCESS': self.success,
+                'UPDATED_BY': 'PyMeter'
             })
 
     def update_test_group_result(self):
         log.debug('update group result')
-        success = getattr(self.group, 'success', True)
         elapsed_time = int(self.group.end_time * 1000) - int(self.group.start_time * 1000)
         with self.app.app_context():
             self.model.TTestGroupResult.filter_by(GROUP_ID=str(self.group_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.group.end_time),
                 'ELAPSED_TIME': elapsed_time,
-                'SUCCESS': success
+                'SUCCESS': self.group.success,
+                'UPDATED_BY': 'PyMeter'
             })

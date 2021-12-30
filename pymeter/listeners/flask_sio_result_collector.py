@@ -111,6 +111,7 @@ class FlaskSIOResultCollector(
     def group_started(self) -> None:
         """@override"""
         self.group.start_time = timestamp_now()
+        self.group.success = True
         self.emit(self.result_group_event, {
             'resultId': self.collection_id,
             'groupId': self.group_id,
@@ -136,15 +137,15 @@ class FlaskSIOResultCollector(
                 'endTime': time_util.strftime_now(),
                 'elapsedTime': int(self.group.end_time * 1000) - int(self.group.start_time * 1000),
                 'running': False,
-                'success': self.last_sample_ok
+                'success': self.group.success
             }
         })
 
     def sample_occurred(self, result) -> None:
         """@override"""
-        if not result:
-            return
-
+        # 最后一个 Sample 失败时，同步更新 Group 的结果也为失败
+        if not self.last_sample_ok:
+            self.group.success = False
         self.emit(self.result_sampler_event, {
             'resultId': self.collection_id,
             'groupId': self.group_id,
