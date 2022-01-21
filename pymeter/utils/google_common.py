@@ -11,19 +11,20 @@ import time
 
 
 class GoogleAuthenticate:
+
     @staticmethod
     def get_code(secret_key):
         key = base64.b32decode(secret_key, True)
         intervals_no = int(time.time()) // 30
-        msg = struct.pack(">Q", intervals_no)
+        msg = struct.pack('>Q', intervals_no)
         h = hmac.new(key, msg, hashlib.sha1).digest()
         o = ord(chr(h[19])) & 15
-        h = (struct.unpack(">I", h[o:o + 4])[0] & 0x7fffffff) % 1000000
+        h = (struct.unpack('>I', h[o:o + 4])[0] & 0x7fffffff) % 1000000
         code = '%06d' % h
         return code
 
 
 if __name__ == '__main__':
-    key = 'SCALISVBXQQ2JBQN'
-    google_code = GoogleAuthenticate.get_code(key)
+    google_key = 'SCALISVBXQQ2JBQN'
+    google_code = GoogleAuthenticate.get_code(google_key)
     print(google_code)
