@@ -11,7 +11,6 @@ from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestGroupListener
-from pymeter.engine.interface import TestIterationListener
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.json_util import to_json
@@ -23,25 +22,13 @@ from pymeter.utils.time_util import timestmp_to_utc8_datetime
 log = get_logger(__name__)
 
 
-class FlaskDBResultStorage(
-    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoCoroutineClone
-):
+class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListener, SampleListener, NoCoroutineClone):
 
     # 测试报告编号
     REPORT_NO: Final = 'FlaskDBResultStorage__report_no'
 
     # 测试集合编号
     COLLECTION_NO: Final = 'FlaskDBResultStorage__collection_no'
-
-    @property
-    def app(self):
-        module = importlib.import_module('app')
-        app = getattr(module, '__app__')
-        return app
-
-    @property
-    def model(self):
-        return importlib.import_module('app.script.model')
 
     @property
     def report_no(self):
@@ -73,6 +60,11 @@ class FlaskDBResultStorage(
 
     def __init__(self):
         TestElement.__init__(self)
+        self.flask_instance = getattr(importlib.import_module('app'), '__app__')
+        self.table_model = importlib.import_module('app.script.model')
+        self.TTestCollectionResult = self.table_model.TTestCollectionResult  # noqa
+        self.TTestGroupResult = self.table_model.TTestGroupResult  # noqa
+        self.TTestSamplerResult = self.table_model.TTestSamplerResult  # noqa
         self.success: bool = True
         self.collection_start_time = 0
         self.collection_end_time = 0
@@ -130,14 +122,10 @@ class FlaskDBResultStorage(
         """@override"""
         pass
 
-    def test_iteration_start(self, controller, iter) -> None:
-        """@override"""
-        pass
-
     def insert_test_collection_result(self):
         log.debug('insert collection result')
-        with self.app.app_context():
-            self.model.TTestCollectionResult.insert(
+        with self.flask_instance.app_context():
+            self.TTestCollectionResult.insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_NO=self.collection_no,
                 COLLECTION_ID=self.collection_id,
@@ -151,8 +139,8 @@ class FlaskDBResultStorage(
 
     def insert_test_group_result(self):
         log.debug('insert group result')
-        with self.app.app_context():
-            self.model.TTestGroupResult.insert(
+        with self.flask_instance.app_context():
+            self.TTestGroupResult.insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
                 GROUP_ID=self.group_id,
@@ -172,8 +160,8 @@ class FlaskDBResultStorage(
             if len(assertions) > 0:
                 failed_assertion_data = assertions[0].message
 
-        with self.app.app_context():
-            self.model.TTestSamplerResult.insert(
+        with self.flask_instance.app_context():
+            self.TTestSamplerResult.insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
                 GROUP_ID=self.group_id,
@@ -216,8 +204,8 @@ class FlaskDBResultStorage(
     def update_test_collection_result(self):
         log.debug('update collection result')
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
-        with self.app.app_context():
-            self.model.TTestCollectionResult.filter_by(COLLECTION_ID=str(self.collection_id)).update({
+        with self.flask_instance.app_context():
+            self.TTestCollectionResult.filter_by(COLLECTION_ID=str(self.collection_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.collection_end_time),
                 'ELAPSED_TIME': elapsed_time,
                 'SUCCESS': self.success,
@@ -227,8 +215,8 @@ class FlaskDBResultStorage(
     def update_test_group_result(self):
         log.debug('update group result')
         elapsed_time = int(self.group.end_time * 1000) - int(self.group.start_time * 1000)
-        with self.app.app_context():
-            self.model.TTestGroupResult.filter_by(GROUP_ID=str(self.group_id)).update({
+        with self.flask_instance.app_context():
+            self.TTestGroupResult.filter_by(GROUP_ID=str(self.group_id)).update({
                 'END_TIME': timestmp_to_utc8_datetime(self.group.end_time),
                 'ELAPSED_TIME': elapsed_time,
                 'SUCCESS': self.group.success,
