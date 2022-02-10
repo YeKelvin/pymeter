@@ -23,9 +23,16 @@ class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListene
     # 执行记录编号
     EXECUTION_NO: Final = 'FlaskDBIterationStorage__execution_no'
 
+    # 测试集合编号
+    COLLECTION_NO: Final = 'FlaskDBIterationStorage__collection_no'
+
     @property
     def execution_no(self):
         return self.get_property_as_str(self.EXECUTION_NO)
+
+    @property
+    def collection_no(self):
+        return self.get_property_as_str(self.COLLECTION_NO)
 
     @property
     def last_sample_ok(self) -> bool:
@@ -46,13 +53,19 @@ class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListene
         """@override"""
         with self.flask_instance.app_context():
             if self.success:
-                self.TTestplanExecutionItems.filter_by(EXECUTION_NO=self.execution_no).update({
+                self.TTestplanExecutionItems.filter_by(
+                    EXECUTION_NO=self.execution_no,
+                    COLLECTION_NO=self.collection_no
+                ).update({
                     'ITERATION_COUNT': self.TTestplanExecutionItems.ITERATION_COUNT + 1,
                     'SUCCESS_COUNT': self.TTestplanExecutionItems.SUCCESS_COUNT + 1,
                     'UPDATED_BY': 'PyMeter'
                 })
             else:
-                self.TTestplanExecutionItems.filter_by(EXECUTION_NO=self.execution_no).update({
+                self.TTestplanExecutionItems.filter_by(
+                    EXECUTION_NO=self.execution_no,
+                    COLLECTION_NO=self.collection_no
+                ).update({
                     'ITERATION_COUNT': self.TTestplanExecutionItems.ITERATION_COUNT + 1,
                     'FAILURE_COUNT': self.TTestplanExecutionItems.FAILURE_COUNT + 1,
                     'UPDATED_BY': 'PyMeter'
