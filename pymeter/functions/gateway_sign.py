@@ -94,6 +94,8 @@ class GatewaySign(Function):
             buffer.append(f'{key}={self.traverse_dict(value)}&')
         elif isinstance(value, list):
             buffer.append(f'{key}={self.traverse_list(value)}&')
+        elif isinstance(value, bool):
+            buffer.append(f'{key}={"true" if value else "false"}&')
         else:
             buffer.append(f'{key}={value if value is not None else "null"}&')
 
@@ -124,14 +126,3 @@ class GatewaySign(Function):
             buffer.append(',')
 
         return (''.join(buffer))[:-1] + ']'  # 去掉最后一个逗号
-
-
-if __name__ == '__main__':
-    json = {
-        'c11': '3',
-        'b11': '2',
-        'd11': '4',
-        'a11': '1',
-    }
-    s = sorted(json.items(), key=lambda x: x[0])
-    print(s)
