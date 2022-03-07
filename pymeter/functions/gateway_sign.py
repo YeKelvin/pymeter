@@ -121,8 +121,10 @@ class GatewaySign(Function):
                 buffer.append(self.traverse_dict(item))
             elif isinstance(item, list):
                 buffer.append(self.traverse_list(item))
+            elif isinstance(item, bool):
+                buffer.append('true' if item else 'false')
             else:
-                buffer.append(item)
+                buffer.append(str(item))
             buffer.append(',')
 
         return (''.join(buffer))[:-1] + ']'  # 去掉最后一个逗号
