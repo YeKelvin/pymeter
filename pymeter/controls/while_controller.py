@@ -80,7 +80,7 @@ class WhileController(GenericController, IteratingController):
                 )
                 result = False
             else:
-                result = eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))  # 如果 next() 被调用，条件可能为空
+                result = self.evaluate(cnd)  # 如果 next() 被调用，条件可能为空
 
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] while result:[ {result} ]')
 
@@ -154,3 +154,12 @@ class WhileController(GenericController, IteratingController):
         """@override"""
         self.re_initialize()
         self.reset_loop_count()
+
+    @staticmethod
+    def evaluate(cnd: str):
+        # noinspection PyBroadException
+        try:
+            return eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
+        except Exception:
+            log.error(traceback.format_exc())
+            return False

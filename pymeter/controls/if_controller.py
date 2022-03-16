@@ -3,6 +3,7 @@
 # @File    : if_controller.py
 # @Time    : 2020/2/29 10:49
 # @Author  : Kelvin.Ye
+import traceback
 from typing import Final
 
 from pymeter.common.exceptions import NextIsNullException
@@ -40,7 +41,7 @@ class IfController(GenericController):
         log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition:[ {cnd} ]')
         result = True
         if self.first:
-            result = eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
+            result = self.evaluate(cnd)
 
         log.debug(
             f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition result:[ {result} ]')
@@ -57,3 +58,12 @@ class IfController(GenericController):
     def trigger_end_of_loop(self):
         super().initialize_sub_controllers()
         super().trigger_end_of_loop()
+
+    @staticmethod
+    def evaluate(cnd: str):
+        # noinspection PyBroadException
+        try:
+            return eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
+        except Exception:
+            log.error(traceback.format_exc())
+            return False
