@@ -29,6 +29,8 @@ class FlaskSIOResultCollector(
     # 消息接收方的 sid
     SID: Final = 'FlaskSIOResultCollector__sid'
 
+    RESULT_ID: Final = 'FlaskSIOResultCollector__result_id'
+
     RESULT_NAME: Final = 'FlaskSIOResultCollector__result_name'
 
     @property
@@ -36,16 +38,12 @@ class FlaskSIOResultCollector(
         return self.get_property_as_str(self.SID)
 
     @property
+    def result_id(self):
+        return self.get_property_as_str(self.RESULT_ID)
+
+    @property
     def result_name(self):
         return self.get_property_as_str(self.RESULT_NAME)
-
-    @property
-    def collection(self):
-        return ContextService.get_context().engine.collection
-
-    @property
-    def collection_id(self):
-        return str(id(self.collection))
 
     @property
     def group(self):
@@ -86,13 +84,15 @@ class FlaskSIOResultCollector(
         self.collection_start_time = timestamp_now()
         self.init_flask_sio()
         self.emit(self.result_summary_event, {
-            'resultId': self.collection_id,
+            'resultId': self.result_id,
             'result': {
-                'id': self.collection_id,
+                'id': self.result_id,
                 'name': self.result_name,
                 'startTime': timestamp_to_strftime(self.collection_start_time),
                 'endTime': 0,
                 'elapsedTime': 0,
+                'loading': False,
+                'running': True,
                 'details': []
             }
         })
@@ -101,10 +101,11 @@ class FlaskSIOResultCollector(
         """@override"""
         self.collection_end_time = timestamp_now()
         self.emit(self.result_summary_event, {
-            'resultId': self.collection_id,
+            'resultId': self.result_id,
             'result': {
                 'endTime': timestamp_to_strftime(self.collection_end_time),
-                'elapsedTime': int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
+                'elapsedTime': int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000),
+                'running': False
             }
         })
 
@@ -113,7 +114,7 @@ class FlaskSIOResultCollector(
         self.group.start_time = timestamp_now()
         self.group.success = True
         self.emit(self.result_group_event, {
-            'resultId': self.collection_id,
+            'resultId': self.result_id,
             'groupId': self.group_id,
             'group': {
                 'id': self.group_id,
@@ -131,7 +132,7 @@ class FlaskSIOResultCollector(
         """@override"""
         self.group.end_time = timestamp_now()
         self.emit(self.result_group_event, {
-            'resultId': self.collection_id,
+            'resultId': self.result_id,
             'groupId': self.group_id,
             'group': {
                 'endTime': time_util.strftime_now(),
@@ -147,7 +148,7 @@ class FlaskSIOResultCollector(
         if not self.last_sample_ok:
             self.group.success = False
         self.emit(self.result_sampler_event, {
-            'resultId': self.collection_id,
+            'resultId': self.result_id,
             'groupId': self.group_id,
             'sampler': sample_result_to_dict(result)
         })
