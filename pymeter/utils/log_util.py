@@ -73,7 +73,7 @@ QUEUE_LISTENER.start()
 # SocketIo Handler
 EXTERNAL_SOCKET_IO_HANDLER = ExternalSocketIOHandler()
 EXTERNAL_SOCKET_IO_HANDLER.setFormatter(
-    ExternalSocketIOFormatter(fmt='[%(asctime)s][%(levelname)s][%(name)s:%(lineno)d] %(message)s')
+    ExternalSocketIOFormatter(fmt='[%(asctime)s][%(levelname)s][%(module)s:%(lineno)d] %(message)s')
 )
 
 
