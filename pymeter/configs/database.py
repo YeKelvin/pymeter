@@ -93,6 +93,19 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
 
     @property
     def url(self) -> str:
+        """
+        cx-Oracle: oracle+cx_oracle
+
+        mysqlclient: mysql+mysqldb
+        PyMySQL: mysql+pymysql
+        mysql-connector-python: mysql+mysqlconnector
+
+        psycopg2: postgresql+psycopg2
+        pg8000: postgresql+pg8000
+
+        pyodbc: mssql+pyodbc
+        pymssql: mssql+pymssql
+        """
         url = '{}+{}://{}:{}@{}:{}/{}'.format(
             self.database_type,
             self.driver_name,
