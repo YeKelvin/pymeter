@@ -27,7 +27,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
     DATABASE_TYPE: Final = 'DatabaseEngine__database_type'
 
     # 驱动名称
-    DRIVER_NAME: Final = 'DatabaseEngine__driver_name'
+    DRIVER: Final = 'DatabaseEngine__driver'
 
     # 用户名称
     USERNAME: Final = 'DatabaseEngine__username'
@@ -59,8 +59,8 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
         return self.get_property_as_str(self.DATABASE_TYPE)
 
     @property
-    def driver_name(self) -> str:
-        return self.get_property_as_str(self.DRIVER_NAME)
+    def driver(self) -> str:
+        return self.get_property_as_str(self.DRIVER)
 
     @property
     def username(self) -> str:
@@ -108,7 +108,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
         """
         url = '{}+{}://{}:{}@{}:{}/{}'.format(
             self.database_type,
-            self.driver_name,
+            self.driver,
             self.username,
             self.password,
             self.host,
