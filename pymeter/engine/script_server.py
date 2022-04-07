@@ -35,6 +35,7 @@ __MODULE_PATH__ = {
     # 配置器
     'Argument': 'pymeter.configs.arguments',
     'Arguments': 'pymeter.configs.arguments',
+    'DatabaseEngine': 'pymeter.configs.database',
     'HTTPHeader': 'pymeter.configs.httpconfigs',
     'HTTPHeaderManager': 'pymeter.configs.httpconfigs',
     'HTTPCookieManager': 'pymeter.configs.httpconfigs',

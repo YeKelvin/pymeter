@@ -30,14 +30,14 @@ class SQLSampler(Sampler):
     RESULT_NAME: Final = 'SQLSampler__result_name'
 
     # 超时时间
-    TIMEOUT: Final = 'SQLSampler__timeout'
+    QUERY_TIMEOUT: Final = 'SQLSampler__query_timeout'
 
     @property
-    def properties(self) -> dict:
+    def properties(self):
         return self.context.properties
 
     @property
-    def variables(self) -> dict:
+    def variables(self):
         return self.context.variables
 
     @property
@@ -54,8 +54,8 @@ class SQLSampler(Sampler):
         return self.get_property_as_str(self.RESULT_NAME)
 
     @property
-    def timeout(self) -> float:
-        ms = self.get_property_as_int(self.TIMEOUT)
+    def query_timeout(self) -> float:
+        ms = self.get_property_as_int(self.QUERY_TIMEOUT)
         return float(ms / 1000)
 
     def sample(self) -> SampleResult:
@@ -67,7 +67,7 @@ class SQLSampler(Sampler):
         # noinspection PyBroadException
         try:
             with self.engine.connect() as connection:
-                with gevent.Timeout(self.timeout, False):
+                with gevent.Timeout(self.query_timeout, False):
                     result = connection.execute(text(self.statement))
                     if result:
                         self.variables.put(self.result_name, result)
