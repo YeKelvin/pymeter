@@ -88,7 +88,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
 
     @property
     def connect_timeout(self) -> int:
-        ms = self.get_property_as_int(self.CONNECT_TIMEOUT)
+        ms = self.get_property_as_int(self.CONNECT_TIMEOUT, 10000)
         return int(ms / 1000)
 
     @property
@@ -122,7 +122,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
         return url
 
     @property
-    def properties(self) -> dict:
+    def props(self):
         return ContextService.get_context().properties
 
     def __init__(self):
@@ -134,7 +134,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
         log.debug(f'database:[ {self.database_type}/{self.database} ] start to connect')
         self.engine = self._connect()
         log.debug(f'database:[ {self.database_type}/{self.database} ] connected')
-        self.properties.put(self.variable_name, self.engine)
+        self.props.put(self.variable_name, self.engine)
 
     def collection_ended(self) -> None:
         """@override"""

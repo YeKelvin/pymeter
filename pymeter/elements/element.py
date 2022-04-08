@@ -24,11 +24,6 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class ConfigElement:
-    """Interface"""
-    ...
-
-
 class TestElement:
 
     # 组件名称
@@ -196,8 +191,10 @@ class TestElement:
         return f"<'{self.name}' ({type(self).__name__} @ {id(self)})>"
 
 
-class ConfigTestElement(TestElement, ConfigElement):
+class ConfigElement(TestElement):
+    """Interface"""
+    ...
 
-    def __init__(self):
-        TestElement.__init__(self)
-        ConfigElement.__init__(self)
+
+class ConfigTestElement(ConfigElement):
+    ...

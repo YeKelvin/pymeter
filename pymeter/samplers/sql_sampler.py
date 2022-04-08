@@ -33,7 +33,7 @@ class SQLSampler(Sampler):
     QUERY_TIMEOUT: Final = 'SQLSampler__query_timeout'
 
     @property
-    def properties(self):
+    def props(self):
         return self.context.properties
 
     @property
@@ -43,7 +43,7 @@ class SQLSampler(Sampler):
     @property
     def engine(self) -> Engine:
         engine_name = self.get_property_as_str(self.ENGINE_NAME)
-        return self.properties.get(engine_name)
+        return self.props.get(engine_name)
 
     @property
     def statement(self) -> str:
@@ -51,11 +51,11 @@ class SQLSampler(Sampler):
 
     @property
     def result_name(self) -> str:
-        return self.get_property_as_str(self.RESULT_NAME)
+        return self.get_property_as_str(self.RESULT_NAME, 'rows')
 
     @property
     def query_timeout(self) -> float:
-        ms = self.get_property_as_int(self.QUERY_TIMEOUT)
+        ms = self.get_property_as_int(self.QUERY_TIMEOUT, 10000)
         return float(ms / 1000)
 
     def sample(self) -> SampleResult:
@@ -68,9 +68,9 @@ class SQLSampler(Sampler):
         try:
             with self.engine.connect() as connection:
                 with gevent.Timeout(self.query_timeout, False):
-                    result = connection.execute(text(self.statement))
-                    if result:
-                        self.variables.put(self.result_name, result)
+                    query_result = connection.execute(text(self.statement))
+                    if query_result:
+                        self.variables.put(self.result_name, query_result)
         except Exception:
             result.success = False
             result.response_data = traceback.format_exc()
