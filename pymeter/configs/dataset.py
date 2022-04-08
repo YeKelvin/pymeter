@@ -14,7 +14,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class VariableDataSet(Arguments, TestCollectionListener, NoConfigMerge, NoCoroutineClone):
+class VariableDataset(Arguments, TestCollectionListener, NoConfigMerge, NoCoroutineClone):
 
     def collection_started(self) -> None:
         """@override"""

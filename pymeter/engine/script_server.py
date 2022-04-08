@@ -40,7 +40,7 @@ __MODULE_PATH__ = {
     'HTTPHeaderManager': 'pymeter.configs.httpconfigs',
     'HTTPCookieManager': 'pymeter.configs.httpconfigs',
     'HTTPSessionManager': 'pymeter.configs.httpconfigs',
-    'VariableDataSet': 'pymeter.configs.dataset',
+    'VariableDataset': 'pymeter.configs.dataset',
     'TransactionHTTPSessionManager': 'pymeter.configs.transactions',
     'TransactionParameter': 'pymeter.configs.transactions',
 
