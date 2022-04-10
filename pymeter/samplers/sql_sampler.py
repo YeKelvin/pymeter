@@ -52,12 +52,12 @@ class SQLSampler(Sampler):
     @property
     def engine(self) -> Engine:
         engine_name = self.get_property_as_str(self.ENGINE_NAME)
-        return self.props.get(engine_name).engine
+        return self.props.get(engine_name).get('engine')
 
     @property
     def database_type(self) -> Engine:
         engine_name = self.get_property_as_str(self.ENGINE_NAME)
-        return self.props.get(engine_name).database_type
+        return self.props.get(engine_name).get('database_type')
 
     @property
     def statement(self) -> str:
@@ -92,12 +92,12 @@ class SQLSampler(Sampler):
             stmt = self.get_statement()
             log.debug(f'sampler:[ {self.name} ] execute:[ {stmt} ]')
             if query_result := connection.execute(text(stmt)):
-                result.request_data = 'rowcount={query_result.rowcount}'
+                result.response_data = f'rowcount={query_result.rowcount}'
                 if query_result.returns_rows:
                     mappings = query_result.mappings()
                     rows = mappings.all()
-                    result.request_data = '{}\n{}'.format(
-                        result.request_data,
+                    result.response_data = '{}\n{}'.format(
+                        result.response_data,
                         tabulate(rows, headers={key: key for key in mappings.keys()}, tablefmt='grid')
                     )
                     self.variables.put(self.result_name, rows)

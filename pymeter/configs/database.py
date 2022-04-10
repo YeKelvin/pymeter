@@ -6,6 +6,7 @@
 from typing import Final
 
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.engine.interface import NoConfigMerge
@@ -117,7 +118,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
         )
 
         if self.query:
-            url = url + '?' + self.query
+            url = f'{url}?{self.query}'
 
         return url
 
@@ -131,16 +132,16 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
 
     def collection_started(self) -> None:
         """@override"""
-        log.debug(f'database:[ {self.database_type}/{self.database} ] start to connect')
+        log.debug(f'database:[ {self.database_type}/{self.database} ] connect engine')
         self.engine = self.connect()
-        log.debug(f'database:[ {self.database_type}/{self.database} ] connected')
+        log.debug(f'database:[ {self.database_type}/{self.database} ] engine connected')
         self.props.put(self.variable_name, {'engine': self.engine, 'type': self.database_type})
 
     def collection_ended(self) -> None:
         """@override"""
-        log.debug(f'database:[ {self.database_type}/{self.database} ] start to close')
-        self.engine.close()
-        log.debug(f'database:[ {self.database_type}/{self.database} ] closed')
+        log.debug(f'database:[ {self.database_type}/{self.database} ] close engine')
+        self.engine.dispose()
+        log.debug(f'database:[ {self.database_type}/{self.database} ] engine closed')
 
-    def connect(self):
+    def connect(self) -> Engine:
         return create_engine(self.url, connect_args={'connect_timeout': self.connect_timeout})
