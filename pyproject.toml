@@ -43,7 +43,6 @@ flask = "2.1.1"
 flask-socketio = "5.1.1"
 pytypes = "1.0b10"
 tabulate = "0.8.9"
-types-tabulate = "0.8.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "*"

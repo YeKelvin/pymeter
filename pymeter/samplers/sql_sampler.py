@@ -3,12 +3,15 @@
 # @File    : sql_sampler.py
 # @Time    : 2020/2/17 15:33
 # @Author  : Kelvin.Ye
+import re
 import traceback
+from collections import deque
 from typing import Final
 
 import gevent
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
+from tabulate import tabulate
 
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
@@ -26,11 +29,17 @@ class SQLSampler(Sampler):
     # 语句
     STATEMENT: Final = 'SQLSampler__statement'
 
+    # 查询限制结果数
+    LIMIT: Final = 'SQLSampler__limit'
+
     # 结果变量名称
     RESULT_NAME: Final = 'SQLSampler__result_name'
 
     # 超时时间
     QUERY_TIMEOUT: Final = 'SQLSampler__query_timeout'
+
+    # 查询语句正则表达式
+    SELECT_PATTERN = re.compile(r'(select)(.|\n)+(from)(.|\n)*', re.IGNORECASE)
 
     @property
     def props(self):
@@ -43,11 +52,22 @@ class SQLSampler(Sampler):
     @property
     def engine(self) -> Engine:
         engine_name = self.get_property_as_str(self.ENGINE_NAME)
-        return self.props.get(engine_name)
+        return self.props.get(engine_name).engine
+
+    @property
+    def database_type(self) -> Engine:
+        engine_name = self.get_property_as_str(self.ENGINE_NAME)
+        return self.props.get(engine_name).database_type
 
     @property
     def statement(self) -> str:
-        return self.get_property_as_str(self.STATEMENT)
+        if stmt := self.get_property_as_str(self.STATEMENT):
+            stmt = stmt.strip()
+        return stmt
+
+    @property
+    def limit(self) -> str:
+        return self.get_property_as_str(self.LIMIT, '10')
 
     @property
     def result_name(self) -> str:
@@ -64,17 +84,97 @@ class SQLSampler(Sampler):
         result.request_data = self.statement
         result.sample_start()
 
-        # noinspection PyBroadException
+        connection = self.engine.connect()
+        timeout = gevent.Timeout(1)
+        timeout.start()
+
         try:
-            with self.engine.connect() as connection:
-                with gevent.Timeout(self.query_timeout, False):
-                    query_result = connection.execute(text(self.statement))
-                    if query_result:
-                        self.variables.put(self.result_name, query_result)
-        except Exception:
+            stmt = self.get_statement()
+            log.debug(f'sampler:[ {self.name} ] execute:[ {stmt} ]')
+            if query_result := connection.execute(text(stmt)):
+                result.request_data = 'rowcount={query_result.rowcount}'
+                if query_result.returns_rows:
+                    mappings = query_result.mappings()
+                    rows = mappings.all()
+                    result.request_data = '{}\n{}'.format(
+                        result.request_data,
+                        tabulate(rows, headers={key: key for key in mappings.keys()}, tablefmt='grid')
+                    )
+                    self.variables.put(self.result_name, rows)
+        except gevent.Timeout:
             result.success = False
-            result.response_data = traceback.format_exc()
+            result.response_data = 'timeout'
+        except Exception as e:
+            result.success = False
+            result.response_data = e
+            log.error(traceback.format_exc())
         finally:
+            timeout.close()
             result.sample_end()
+            not connection.closed and connection.close()
 
         return result
+
+    def get_statement(self):
+        """获取sql表达式，如果是select语句则添加限制"""
+        stmt = self.statement
+        if self.SELECT_PATTERN.search(stmt):
+            stmt = self.add_limit(stmt)
+        else:
+            stmt = stmt.strip()
+        return stmt
+
+    def add_limit(self, stmt):
+        """添加查询结果数限制，防止大数据结果集"""
+        stmt = self.remove_comments(stmt)
+        if self.database_type == 'oracle':
+            stmt = f'select * from ({stmt}) where rownum<={self.limit}'
+        if self.database_type == 'mysql':
+            stmt = f'select * from ({stmt}) limit {self.limit}'
+        if self.database_type == 'postgresql':
+            stmt = f'select * from ({stmt}) limit {self.limit}'
+        if self.database_type == 'mssql':
+            stmt = f'select top {self.limit} * from ({stmt})'
+        return stmt
+
+    @staticmethod
+    def remove_comments(stmt) -> str:
+        """删除表达式中的注释部分"""
+        sql = deque()
+        pre = ''
+        single_quotes = False
+        double_quotes = False
+        single_line_comment = False
+        multi_line_comment = False
+        for ch in stmt:
+            if ch == '#' and not single_quotes and not double_quotes:  # match '#'
+                single_line_comment = True
+                pre = ch
+                continue
+            if ch == ' ' and pre == '-' and sql[-1] == '-' and not single_quotes and not double_quotes:  # match '-- '
+                single_line_comment = True
+                sql.pop()
+                sql.pop()
+                pre = ch
+                continue
+            if ch == '\n' and single_line_comment and not single_quotes and not double_quotes:
+                single_line_comment = False
+            if ch == '*' and pre == '/' and not single_quotes and not double_quotes:  # match '/*'
+                multi_line_comment = True
+                sql.pop()
+                pre = ch
+                continue
+            if ch == '/' and pre == '*' and multi_line_comment and not single_quotes and not double_quotes:  # match '*/'
+                multi_line_comment = False
+                pre = ch
+                continue
+            if single_line_comment or multi_line_comment:
+                pre = ch
+                continue
+            if ch == "'" and pre != '\\':
+                single_quotes = not single_quotes
+            if ch == '"' and pre != '\\':
+                double_quotes = not double_quotes
+            sql.append(ch)
+            pre = ch
+        return ''.join(sql).strip()

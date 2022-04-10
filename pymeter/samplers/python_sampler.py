@@ -34,9 +34,7 @@ class PythonSampler(Sampler):
             func.append(f'{INDENT}...\n')
         else:
             lines = self.script.split('\n')
-            for line in lines:
-                func.append(f'{INDENT}{line}\n')
-
+            func.extend(f'{INDENT}{line}\n' for line in lines)
         func.append('self.dynamic_function = func')
         return ''.join(func)
 
@@ -53,15 +51,14 @@ class PythonSampler(Sampler):
             exec(self.function_wrapper, params, params)
             ctx = ContextService.get_context()
             props = ctx.properties
-            res = self.dynamic_function(  # noqa
+            if res := self.dynamic_function(  # noqa
                 log=log,
                 ctx=ctx,
                 vars=ctx.variables,
                 props=props,
                 prev=ctx.previous_result,
                 result=result
-            )
-            if res:
+            ):
                 result.response_data = res if isinstance(res, str) else str(res)
         except Exception:
             result.success = False

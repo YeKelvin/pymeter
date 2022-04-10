@@ -175,9 +175,11 @@ class HTTPSampler(Sampler):
             return None
 
     def get_timeout(self) -> Optional[tuple]:
-        if not (self.connect_timeout and self.response_timeout):
-            return None
-        return self.connect_timeout or 0, self.response_timeout or 0
+        return (
+            (self.connect_timeout or 0, self.response_timeout or 0)
+            if (self.connect_timeout and self.response_timeout)
+            else None
+        )
 
     def get_payload(self, res: Response):
         url = f'{self.method} {self.url}'
@@ -186,7 +188,7 @@ class HTTPSampler(Sampler):
         if params := self.params:
             query = ''
             for name, value in params.items():
-                query = query + f'{name}={value}&'
+                query = f'{query}{name}={value}&'
             url = f'{url}?{query[:-1]}'
 
         if body := res.request.body:
@@ -201,13 +203,13 @@ class HTTPSampler(Sampler):
         if params := self.params:
             query = f'{url}?'
             for name, value in params.items():
-                query = query + f'{name}={value}&'
+                query = f'{query}{name}={value}&'
             return query[:-1]
 
         if self.is_form_urlencoded() and (form := self.form):
             payload = f'{url}\n\n{self.method} data:\n'
             for name, value in form.items():
-                payload = payload + f'{name}={value}&'
+                payload = f'{payload}{name}={value}&'
             return payload[:-1]
 
         if data := self.data:
@@ -223,9 +225,7 @@ class HTTPSampler(Sampler):
             super().add_test_element(el)
 
     def set_header_manager(self, new_manager: HTTPHeaderManager):
-        header_manager = self.header_manager
-
-        if header_manager:
+        if header_manager := self.header_manager:
             new_manager = header_manager.merge(new_manager)
 
         self.set_property(self.HEADERS, new_manager)
@@ -243,5 +243,5 @@ class HTTPSampler(Sampler):
     def get_form_urlencoded_byte_data(self):
         payload = ''
         for name, value in self.form.items():
-            payload = payload + f'{name}={value}&'
+            payload = f'{payload}{name}={value}&'
         return payload[:-1].encode(encoding=self.encoding)
