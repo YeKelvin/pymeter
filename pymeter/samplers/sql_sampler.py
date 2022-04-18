@@ -42,22 +42,8 @@ class SQLSampler(Sampler):
     SELECT_PATTERN = re.compile(r'(select)(.|\n)+(from)(.|\n)*', re.IGNORECASE)
 
     @property
-    def props(self):
-        return self.context.properties
-
-    @property
-    def variables(self):
-        return self.context.variables
-
-    @property
-    def engine(self) -> Engine:
-        engine_name = self.get_property_as_str(self.ENGINE_NAME)
-        return self.props.get(engine_name).get('engine')
-
-    @property
-    def database_type(self) -> Engine:
-        engine_name = self.get_property_as_str(self.ENGINE_NAME)
-        return self.props.get(engine_name).get('database_type')
+    def engine_name(self) -> str:
+        return self.get_property_as_str(self.ENGINE_NAME)
 
     @property
     def statement(self) -> str:
@@ -78,13 +64,29 @@ class SQLSampler(Sampler):
         ms = self.get_property_as_int(self.QUERY_TIMEOUT, 10000)
         return float(ms / 1000)
 
+    @property
+    def database_engine(self) -> Engine:
+        return self.props.get(self.engine_name).get('engine')
+
+    @property
+    def database_type(self) -> str:
+        return self.props.get(self.engine_name).get('type')
+
+    @property
+    def props(self):
+        return self.context.properties
+
+    @property
+    def variables(self):
+        return self.context.variables
+
     def sample(self) -> SampleResult:
         result = SampleResult()
         result.sample_name = self.name
         result.request_data = self.statement
         result.sample_start()
 
-        connection = self.engine.connect()
+        connection = self.database_engine.connect()
         timeout = gevent.Timeout(1)
         timeout.start()
 
@@ -128,13 +130,13 @@ class SQLSampler(Sampler):
         """添加查询结果数限制，防止大数据结果集"""
         stmt = self.remove_comments(stmt)
         if self.database_type == 'oracle':
-            stmt = f'select * from ({stmt}) where rownum<={self.limit}'
+            stmt = f'select * from ({stmt}) t where rownum<={self.limit}'
         if self.database_type == 'mysql':
-            stmt = f'select * from ({stmt}) limit {self.limit}'
+            stmt = f'select * from ({stmt}) t limit {self.limit}'
         if self.database_type == 'postgresql':
-            stmt = f'select * from ({stmt}) limit {self.limit}'
+            stmt = f'select * from ({stmt}) t limit {self.limit}'
         if self.database_type == 'mssql':
-            stmt = f'select top {self.limit} * from ({stmt})'
+            stmt = f'select top {self.limit} * from ({stmt}) t'
         return stmt
 
     @staticmethod
