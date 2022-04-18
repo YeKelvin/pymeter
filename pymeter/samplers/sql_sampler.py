@@ -86,11 +86,12 @@ class SQLSampler(Sampler):
         result.request_data = self.statement
         result.sample_start()
 
-        connection = self.database_engine.connect()
+        connection = None
         timeout = gevent.Timeout(1)
         timeout.start()
 
         try:
+            connection = self.database_engine.connect()
             stmt = self.get_statement()
             log.debug(f'sampler:[ {self.name} ] execute:[ {stmt} ]')
             if query_result := connection.execute(text(stmt)):
@@ -113,7 +114,7 @@ class SQLSampler(Sampler):
         finally:
             timeout.close()
             result.sample_end()
-            not connection.closed and connection.close()
+            connection and not connection.closed and connection.close()
 
         return result
 
