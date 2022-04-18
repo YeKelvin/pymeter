@@ -18,6 +18,7 @@ class VariableDataset(Arguments, TestCollectionListener, NoConfigMerge, NoCorout
 
     def collection_started(self) -> None:
         """@override"""
+        log.debug('start to load dataset')
         variables = ContextService.get_context().variables
         for key, value in self.to_dict().items():
             if not key:

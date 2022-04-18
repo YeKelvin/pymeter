@@ -191,10 +191,11 @@ class TestElement:
         return f"<'{self.name}' ({type(self).__name__} @ {id(self)})>"
 
 
-class ConfigElement(TestElement):
-    """Interface"""
-    ...
+class ConfigElement:
+
+    def add_config_element(self, config: 'ConfigElement'):
+        raise NotImplementedError
 
 
-class ConfigTestElement(ConfigElement):
+class ConfigTestElement(ConfigElement, TestElement):
     ...

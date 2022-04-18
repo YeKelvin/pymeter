@@ -132,16 +132,16 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
 
     def collection_started(self) -> None:
         """@override"""
-        log.debug(f'database:[ {self.database_type}/{self.database} ] connect engine')
+        self.running_version = True
         self.engine = self.connect()
-        log.debug(f'database:[ {self.database_type}/{self.database} ] engine connected')
         self.props.put(self.variable_name, {'engine': self.engine, 'type': self.database_type})
 
     def collection_ended(self) -> None:
         """@override"""
         log.debug(f'database:[ {self.database_type}/{self.database} ] close engine')
         self.engine.dispose()
-        log.debug(f'database:[ {self.database_type}/{self.database} ] engine closed')
 
     def connect(self) -> Engine:
-        return create_engine(self.url, connect_args={'connect_timeout': self.connect_timeout})
+        url = self.url
+        log.debug(f'connect database engine:[ {self.url} ]')
+        return create_engine(url, connect_args={'connect_timeout': self.connect_timeout})
