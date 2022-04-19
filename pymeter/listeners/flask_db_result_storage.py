@@ -134,7 +134,8 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
                 START_TIME=timestmp_to_utc8_datetime(self.collection_start_time),
                 SUCCESS=True,
                 CREATED_BY='PyMeter',
-                UPDATED_BY='PyMeter'
+                UPDATED_BY='PyMeter',
+                record=False
             )
 
     def insert_test_group_result(self):
@@ -149,7 +150,8 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
                 START_TIME=timestmp_to_utc8_datetime(self.group.start_time),
                 SUCCESS=True,
                 CREATED_BY='PyMeter',
-                UPDATED_BY='PyMeter'
+                UPDATED_BY='PyMeter',
+                record=False
             )
 
     def insert_test_sampler_result(self, result: SampleResult):
@@ -198,7 +200,8 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
                 ),
                 FAILED_ASSERTION=failed_assertion_data,
                 CREATED_BY='PyMeter',
-                UPDATED_BY='PyMeter'
+                UPDATED_BY='PyMeter',
+                record=False
             )
 
     def update_test_collection_result(self):
