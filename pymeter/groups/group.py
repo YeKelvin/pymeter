@@ -465,10 +465,9 @@ class Coroutine(Greenlet):
         # When using Start Next Loop option combined to TransactionController.
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
-        if isinstance(sampler, TransactionSampler):
-            if sampler.done:
-                transaction_package = self.compiler.configure_transaction_sampler(sampler)
-                self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
+        if isinstance(sampler, TransactionSampler) and sampler.done:
+            transaction_package = self.compiler.configure_transaction_sampler(sampler)
+            self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
 
     def is_retrying_sampler(self, sampler: Sampler):
         return (
@@ -570,50 +569,50 @@ class Coroutine(Greenlet):
         if self.running:
             result = self.__do_sampling(sampler, context, package.listeners)
 
-        if result:
-            # 设置为上一个结果
-            context.set_previous_result(result)
-
-            # 执行后置处理器
-            self.__run_post_processors(package.post_processors)
-
-            # 执行断言
-            self.__check_assertions(package.assertions, result, context)
-
-            # 添加重试标识，标识来自 RetryController
-            retrying = getattr(sampler, 'retrying', False)
-            if retrying:
-                result.retrying = True
-            retryflag = getattr(sampler, 'retry_flag', None)
-            if retryflag:
-                result.sample_name = f'{result.sample_name} {retryflag}' if retryflag else result.sample_name
-
-            # 遍历执行 SampleListener
-            log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
-            sample_listeners = self.__get_sample_listeners(package, transaction_package, transaction_sampler)
-            for listener in sample_listeners:
-                listener.sample_occurred(result)
-
+        if not result:
             self.compiler.done(package)
+            return
 
-            # Add the result as subsample of transaction if we are in a transaction
-            if transaction_sampler:
-                transaction_sampler.add_sub_sampler_result(result)
+        # 执行后置处理器
+        self.__run_post_processors(package.post_processors)
 
-            # 检查是否需要停止协程或测试
-            if result.stop_group or (not result.success and self.group.on_error_stop_test_group):
-                log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试组')
-                self.stop_coroutine()
-            if result.stop_test or (not result.success and self.group.on_error_stop_test):
-                log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试')
-                self.stop_test()
-            if result.stop_test_now or (not result.success and self.group.on_error_stop_test_now):
-                log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置立即停止测试')
-                self.stop_test_now()
-            if not result.success:
-                self.next_continue = False
-        else:
-            self.compiler.done(package)
+        # 执行断言
+        self.__check_assertions(package.assertions, result, context)
+
+        # 设置为上一个结果
+        context.set_previous_result(result)
+
+        # 添加重试标识，标识来自 RetryController
+        retrying = getattr(sampler, 'retrying', False)
+        if retrying:
+            result.retrying = True
+        if retryflag := getattr(sampler, 'retry_flag', None):
+            result.sample_name = f'{result.sample_name} {retryflag}' if retryflag else result.sample_name
+
+        # 遍历执行 SampleListener
+        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
+        sample_listeners = self.__get_sample_listeners(package, transaction_package, transaction_sampler)
+        for listener in sample_listeners:
+            listener.sample_occurred(result)
+
+        self.compiler.done(package)
+
+        # Add the result as subsample of transaction if we are in a transaction
+        if transaction_sampler:
+            transaction_sampler.add_sub_sampler_result(result)
+
+        # 检查是否需要停止协程或测试
+        if result.stop_group or (not result.success and self.group.on_error_stop_test_group):
+            log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试组')
+            self.stop_coroutine()
+        if result.stop_test or (not result.success and self.group.on_error_stop_test):
+            log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试')
+            self.stop_test()
+        if result.stop_test_now or (not result.success and self.group.on_error_stop_test_now):
+            log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置立即停止测试')
+            self.stop_test_now()
+        if not result.success:
+            self.next_continue = False
 
     def __do_sampling(self, sampler: Sampler, context: CoroutineContext, listeners: list) -> SampleResult:
         """执行Sampler"""
@@ -632,12 +631,10 @@ class Coroutine(Greenlet):
             log.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sampler} ] sample done')
         except Exception:
             log.error(traceback.format_exc())
-            if result:
-                result.response_data = traceback.format_exc()
-            else:
+            if not result:
                 result = SampleResult()
                 result.sample_name = sampler.name
-                result.response_data = traceback.format_exc()
+            result.response_data = traceback.format_exc()
         finally:
             # 遍历执行 SampleListener
             log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to end')
@@ -696,26 +693,32 @@ class Coroutine(Greenlet):
         try:
             assertion_result = assertion.get_result(sample_result)
         except AssertionError as e:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
-                      f'error processing Assertion: {e}')
+            log.debug(
+                f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
+                f'error processing Assertion: {e}'
+            )
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.failure = True
             assertion_result.message = str(e)
         except RuntimeError as e:
-            log.error(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
-                      f'error processing Assertion: {e}')
+            log.error(
+                f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
+                f'error processing Assertion: {e}'
+            )
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
             assertion_result.message = str(e)
         except Exception as e:
-            log.error(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
-                      f'exception processing Assertion: {e}')
+            log.error(
+                f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
+                f'exception processing Assertion: {e}'
+            )
             log.error(traceback.format_exc())
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
             assertion_result.message = traceback.format_exc()
         finally:
-            sample_result.success = sample_result.success and not (assertion_result.error or assertion_result.failure)
+            sample_result.success = sample_result.success and not assertion_result.error and not assertion_result.failure
             sample_result.assertions.append(assertion_result)
 
     def __run_timers(self, timers: list):
@@ -738,13 +741,13 @@ class Coroutine(Greenlet):
             only_subsampler_listeners = []
             for listener in sample_package.listeners:
                 # 检查在 TransactionListenerList 中是否有重复的 listener
-                found = False
-                for trans in transaction_package.listeners:
-                    # 过滤相同的 listener
-                    if trans is listener:
-                        found = True
-                        break
-
+                # found = False
+                # for trans in transaction_package.listeners:
+                #     # 过滤相同的 listener
+                #     if trans is listener:
+                #         found = True
+                #         break
+                found = any(trans is listener for trans in transaction_package.listeners)
                 if not found:
                     only_subsampler_listeners.append(listener)
 
