@@ -6,8 +6,8 @@
 import traceback
 from typing import Final
 
-from pymeter.common.exceptions import NextIsNullException
 from pymeter.controls.generic_controller import GenericController
+from pymeter.tools.exceptions import NextIsNullException
 from pymeter.utils.log_util import get_logger
 
 

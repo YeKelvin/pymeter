@@ -6,9 +6,9 @@
 import traceback
 from typing import Final
 
-from pymeter.common.python_code_snippets import DEFAULT_IMPORT_MODULE
 from pymeter.groups.context import ContextService
 from pymeter.processors.post import PostProcessor
+from pymeter.tools.python_code_snippets import DEFAULT_IMPORT_MODULE
 from pymeter.utils.log_util import get_logger
 
 

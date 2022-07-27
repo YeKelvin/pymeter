@@ -6,11 +6,11 @@
 import traceback
 from typing import Final
 
-from pymeter.common.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
-from pymeter.common.python_code_snippets import INDENT
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
+from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
+from pymeter.tools.python_code_snippets import INDENT
 from pymeter.utils.log_util import get_logger
 
 

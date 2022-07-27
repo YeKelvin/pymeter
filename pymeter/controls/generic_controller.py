@@ -7,13 +7,13 @@ from collections import deque
 from typing import Optional
 from typing import Union
 
-from pymeter.common.exceptions import NextIsNullException
 from pymeter.controls.controller import Controller
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import TestCompilerHelper
 from pymeter.groups.context import ContextService
 from pymeter.groups.context import CoroutineContext
 from pymeter.samplers.sampler import Sampler
+from pymeter.tools.exceptions import NextIsNullException
 from pymeter.utils.log_util import get_logger
 
 

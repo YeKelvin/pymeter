@@ -9,8 +9,6 @@ from typing import Optional
 
 from gevent import Greenlet
 
-from pymeter.common.exceptions import EngineException
-from pymeter.common.exceptions import StopTestException
 from pymeter.elements.element import TestElement
 from pymeter.engine.collection import TestCollection
 from pymeter.engine.interface import TestCollectionListener
@@ -21,6 +19,8 @@ from pymeter.groups.group import SetupGroup
 from pymeter.groups.group import TearDownGroup
 from pymeter.groups.group import TestGroup
 from pymeter.listeners.result_collector import ResultCollector
+from pymeter.tools.exceptions import EngineException
+from pymeter.tools.exceptions import StopTestException
 from pymeter.utils.log_util import get_logger
 
 

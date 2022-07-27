@@ -10,7 +10,6 @@ from typing import Dict
 from typing import Iterable
 from typing import Optional
 
-from pymeter.common.exceptions import InvalidPropertyException
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import CollectionProperty
 from pymeter.elements.property import DictProperty
@@ -18,6 +17,7 @@ from pymeter.elements.property import ElementProperty
 from pymeter.elements.property import MultiProperty
 from pymeter.elements.property import NoneProperty
 from pymeter.elements.property import PyMeterProperty
+from pymeter.tools.exceptions import InvalidPropertyException
 from pymeter.utils.log_util import get_logger
 
 

@@ -27,9 +27,7 @@ def get_number(length: int, prefix: str = '', suffix: str = '') -> str:
     :param suffix:  后缀
     :return:        随机数
     """
-    number = []
-    for x in range(length):
-        number.append(str(randint(0, 9)))
+    number = [str(randint(0, 9)) for _ in range(length)]
     return prefix.join(number).join(suffix)
 
 
@@ -43,9 +41,9 @@ def get_idcard():
     idcard += str(randint(100, 300))  # 顺序号
     count = 0
 
-    for i in range(0, len(idcard)):
+    for i in range(len(idcard)):
         count += int(idcard[i]) * WEIGHT[i]
-        idcard = idcard + CHECK_CODE[str(count % 11)]  # 算出校验码
+        idcard += CHECK_CODE[str(count % 11)]
         return idcard
 
 
@@ -130,8 +128,7 @@ def get_phone_number_cambodia():
     else:
         num_length = random.randint(6, 6)
 
-    register_number = phone_segment + "".join(random.choice("0123456789") for i in range(num_length))
-    return register_number
+    return phone_segment + ''.join(random.choice("0123456789") for _ in range(num_length))
 
 
 def now() -> str:

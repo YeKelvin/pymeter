@@ -14,9 +14,6 @@ import gevent
 from gevent import Greenlet
 
 from pymeter.assertions.assertion import AssertionResult
-from pymeter.common.exceptions import StopTestException
-from pymeter.common.exceptions import StopTestGroupException
-from pymeter.common.exceptions import StopTestNowException
 from pymeter.controls.controller import Controller
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.loop_controller import LoopController
@@ -39,6 +36,9 @@ from pymeter.groups.package import SamplePackage
 from pymeter.groups.variables import Variables
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
+from pymeter.tools.exceptions import StopTestException
+from pymeter.tools.exceptions import StopTestGroupException
+from pymeter.tools.exceptions import StopTestNowException
 from pymeter.utils.log_util import get_logger
 
 

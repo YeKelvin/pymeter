@@ -8,12 +8,12 @@ from typing import Optional
 
 import requests
 
-from pymeter.common.exceptions import HttpCookieDuplicateException
-from pymeter.common.exceptions import HttpHeaderDuplicateException
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
+from pymeter.tools.exceptions import HttpCookieDuplicateException
+from pymeter.tools.exceptions import HttpHeaderDuplicateException
 from pymeter.utils.log_util import get_logger
 
 

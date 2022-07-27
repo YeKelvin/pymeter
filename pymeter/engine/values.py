@@ -6,11 +6,11 @@
 import traceback
 from typing import List
 
-from pymeter.common.exceptions import InvalidVariableException
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import FunctionProperty
 from pymeter.functions import Function
 from pymeter.groups.context import ContextService
+from pymeter.tools.exceptions import InvalidVariableException
 from pymeter.utils.class_finder import ClassFinder
 from pymeter.utils.log_util import get_logger
 from pymeter.utils.str_reader import StringReader

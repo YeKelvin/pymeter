@@ -9,10 +9,10 @@ from typing import Iterable
 from typing import List
 from typing import Tuple
 
-from pymeter.common.exceptions import ScriptParseException
 from pymeter.elements.element import TestElement
 from pymeter.engine.tree import HashTree
 from pymeter.engine.values import ValueReplacer
+from pymeter.tools.exceptions import ScriptParseException
 from pymeter.utils import json_util
 from pymeter.utils.log_util import get_logger
 
