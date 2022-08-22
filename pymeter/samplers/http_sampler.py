@@ -72,7 +72,14 @@ class HTTPSampler(Sampler):
     @property
     def headers(self) -> dict:
         hm = self.header_manager
-        return hm.headers_as_dict if hm else None
+        return hm.headers_as_dict if hm else {}
+
+    @property
+    def encoded_headers(self) -> dict:
+        headers = self.headers
+        for name, value in headers.items():
+            headers[name] = value.encode(encoding=self.encoding)
+        return headers
 
     @property
     def params_manager(self) -> Optional[Arguments]:
@@ -137,7 +144,7 @@ class HTTPSampler(Sampler):
             res = impl.request(
                 method=self.method,
                 url=self.url,
-                headers=self.headers,
+                headers=self.encoded_headers,
                 params=self.params,
                 data=self.get_body(),
                 files=self.files,
@@ -147,7 +154,7 @@ class HTTPSampler(Sampler):
             )
             res.encoding = self.encoding
 
-            result.request_headers = dict(res.request.headers)
+            result.request_headers = self.decode_headers(dict(res.request.headers))
             result.request_data = self.get_payload(res)
             result.response_code = res.status_code
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
@@ -245,3 +252,8 @@ class HTTPSampler(Sampler):
         for name, value in self.form.items():
             payload = f'{payload}{name}={value}&'
         return payload[:-1].encode(encoding=self.encoding)
+
+    def decode_headers(self, headers):
+        for name, value in headers.items():
+            headers[name] = value.decode(encoding=self.encoding) if isinstance(value, bytes) else value
+        return headers

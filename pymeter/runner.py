@@ -9,6 +9,7 @@ import traceback
 from pymeter.engine import script_server
 from pymeter.engine.standard_engine import StandardEngine
 from pymeter.utils import log_util
+from pymeter.utils.json_util import to_json
 from pymeter.utils.log_util import get_logger
 
 
@@ -47,7 +48,8 @@ class Runner:
             log_util.EXTERNAL_SOCKET_IO_HANDLER.LOCAL.sio = ext.get('sio')
             log_util.EXTERNAL_SOCKET_IO_HANDLER.LOCAL.sid = ext.get('sid')
 
-        log.debug(f'script:\n{script}')
+        log.debug(f'script:\n{to_json(script)}')
+
         # noinspection PyBroadException
         try:
             Runner.run(script, ext)
