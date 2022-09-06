@@ -39,9 +39,6 @@ class HTTPSampler(Sampler):
     # 请求主体
     DATA: Final = 'HTTPSampler__data'
 
-    # 请求表单
-    FORM: Final = 'HTTPSampler__form'
-
     # 请求上传文件
     FILES: Final = 'HTTPSampler__files'
 
@@ -82,26 +79,26 @@ class HTTPSampler(Sampler):
         return headers
 
     @property
-    def params_manager(self) -> Optional[Arguments]:
+    def query_params_manager(self) -> Optional[Arguments]:
         return self.get_property(self.PARAMS).get_obj()
 
     @property
-    def params(self) -> dict:
-        pm = self.params_manager
+    def query_params(self) -> dict:
+        pm = self.query_params_manager
         return pm.to_dict() if pm else {}
+
+    @property
+    def form_params_manager(self) -> Optional[Arguments]:
+        return self.get_property(self.DATA).get_obj()
+
+    @property
+    def form_params(self) -> dict:
+        fm = self.form_params_manager
+        return fm.to_dict() if fm else {}
 
     @property
     def data(self) -> str:
         return self.get_property_as_str(self.DATA)
-
-    @property
-    def form_manager(self) -> Optional[Arguments]:
-        return self.get_property(self.FORM).get_obj()
-
-    @property
-    def form(self) -> dict:
-        fm = self.form_manager
-        return fm.to_dict() if fm else {}
 
     @property
     def files(self) -> str:
@@ -145,8 +142,8 @@ class HTTPSampler(Sampler):
                 method=self.method,
                 url=self.url,
                 headers=self.encoded_headers,
-                params=self.params,
-                data=self.get_body(),
+                params=self.query_params,
+                data=self.get_body_data(),
                 files=self.files,
                 cookies=None,
                 timeout=self.get_timeout(),
@@ -173,9 +170,9 @@ class HTTPSampler(Sampler):
 
         return result
 
-    def get_body(self):
-        if self.is_form_urlencoded():
-            return self.get_form_urlencoded_byte_data()
+    def get_body_data(self):
+        if self.is_x_www_form_urlencoded():
+            return self.urlencode(self.form_params)
         elif data := self.data:
             return data.encode(encoding=self.encoding)
         else:
@@ -189,38 +186,41 @@ class HTTPSampler(Sampler):
         )
 
     def get_payload(self, res: Response):
+        # res.url 是转码后的值，如果包含中文，就看不懂了，因为这里是为了展示数据
         url = f'{self.method} {self.url}'
         payload = ''
 
-        if params := self.params:
+        if query_params := self.query_params:
             query = ''
-            for name, value in params.items():
+            for name, value in query_params.items():
                 query = f'{query}{name}={value}&'
             url = f'{url}?{query[:-1]}'
 
         if body := res.request.body:
             body = body.decode(encoding=self.encoding) if isinstance(body, bytes) else body
-            payload = f'\n\n{self.method} data:\n{body}'
+            payload = f'\n\n{self.method} DATA:\n{body}'
 
         return url + payload
 
     def get_payload_on_error(self):
         url = f'{self.method} {self.url}'
 
-        if params := self.params:
+        if query_params := self.query_params:
             query = f'{url}?'
-            for name, value in params.items():
+            for name, value in query_params.items():
                 query = f'{query}{name}={value}&'
-            return query[:-1]
+            url = f'{url}?{query[:-1]}'
 
-        if self.is_form_urlencoded() and (form := self.form):
-            payload = f'{url}\n\n{self.method} data:\n'
-            for name, value in form.items():
+        if self.is_x_www_form_urlencoded() and (form_params := self.form_params):
+            payload = f'{url}\n\n{self.method} DATA:\n'
+            for name, value in form_params.items():
                 payload = f'{payload}{name}={value}&'
             return payload[:-1]
 
         if data := self.data:
-            return f'{url}\n\n{self.method} data:\n{data}'
+            return f'{url}\n\n{self.method} DATA:\n{data}'
+
+        return url
 
     def add_test_element(self, el) -> None:
         """@override"""
@@ -240,18 +240,24 @@ class HTTPSampler(Sampler):
     def set_session_manager(self, manager: SessionManager):
         self.session_manager = manager
 
-    def is_form_urlencoded(self):
+    def is_x_www_form_urlencoded(self):
+        headers = self.headers
         return (
-            self.headers  # noqa
-            and 'content-type' in self.headers  # noqa
-            and self.headers['content-type'].lower() == 'application/x-www-form-urlencoded'  # noqa
+            headers  # noqa
+            and 'content-type' in headers  # noqa
+            and headers['content-type'].lower() == 'application/x-www-form-urlencoded'  # noqa
         )
 
-    def get_form_urlencoded_byte_data(self):
-        payload = ''
-        for name, value in self.form.items():
-            payload = f'{payload}{name}={value}&'
-        return payload[:-1].encode(encoding=self.encoding)
+    def urlencode(self, params: dict):
+        payload = []
+        first = True
+        for name, value in params.items():
+            if first:
+                first = False
+            else:
+                payload.append('&')
+            payload.extend((name, '=', value))
+        return ''.join(payload).encode(encoding=self.encoding)
 
     def decode_headers(self, headers):
         for name, value in headers.items():

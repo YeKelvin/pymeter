@@ -67,7 +67,7 @@ class BasicProperty(PyMeterProperty):
 
     def get_bool(self) -> bool:
         value = self.get_str()
-        return True if value.lower() == 'true' else False
+        return value.lower() == 'true'
 
     def get_obj(self) -> object:
         return self.value
@@ -80,10 +80,7 @@ class BasicProperty(PyMeterProperty):
     def running_version(self, running):
         # log.debug(f'set running version:[ {running} ] in BasicProperty:[ {self.name} ]')
         PyMeterProperty.running_version = running
-        if running:
-            self.saved_value = self.value
-        else:
-            self.saved_value = None
+        self.saved_value = self.value if running else None
 
     def recover_running_version(self, owner) -> None:
         # log.debug(f'recover running version in BasicProperty:[ {self.name} ]')
@@ -141,10 +138,7 @@ class ObjectProperty(PyMeterProperty):
     def running_version(self, running):
         # log.debug(f'set running version:[ {running} ] in ObjectProperty:[ {self.name} ]')
         PyMeterProperty.running_version = running
-        if running:
-            self.saved_value = self.value
-        else:
-            self.saved_value = None
+        self.saved_value = self.value if running else None
 
     def recover_running_version(self, owner) -> None:
         # log.debug(f'recover running version in BasicProperty:[ {self.name} ]')
@@ -180,16 +174,17 @@ class MultiProperty(PyMeterProperty):
         for prop in self.iterator()[:]:
             if owner.is_temporary(prop):
                 self.remove(prop)
-            else:
-                if isinstance(prop, PyMeterProperty):
-                    prop.recover_running_version(owner)
-                elif hasattr(prop, 'recover_running_version'):
-                    prop.recover_running_version()  # prop: TestElement
+            elif isinstance(prop, PyMeterProperty):
+                prop.recover_running_version(owner)
+            elif hasattr(prop, 'recover_running_version'):
+                prop.recover_running_version()
 
 
 class CollectionProperty(MultiProperty):
 
-    def __init__(self, name: str, value: List[PyMeterProperty] = []):
+    def __init__(self, name: str, value: List[PyMeterProperty] = None):
+        if value is None:
+            value = []
         super().__init__(name, value)
         self.saved_value = None
 
@@ -222,10 +217,7 @@ class CollectionProperty(MultiProperty):
     def running_version(self, running):
         # log.debug(f'set running version:[ {running} ] in CollectionProperty:[ {self.name} ]')
         MultiProperty.running_version = running
-        if running:
-            self.saved_value = self.value
-        else:
-            self.saved_value = None
+        self.saved_value = self.value if running else None
 
     def recover_running_version(self, owner) -> None:
         # log.debug(f'recover running version in CollectionProperty:[ {self.name} ]')
@@ -264,10 +256,7 @@ class ElementProperty(MultiProperty):
         # log.debug(f'set running version:[ {running} ] in ElementProperty:[ {self.name} ]')
         MultiProperty.running_version = running
         self.value.running_version = running
-        if running:
-            self.saved_value = self.value
-        else:
-            self.saved_value = None
+        self.saved_value = self.value if running else None
 
     def recover_running_version(self, owner) -> None:
         # log.debug(f'recover running version in ElementProperty:[ {self.name} ]')
@@ -307,10 +296,7 @@ class DictProperty(MultiProperty):
     def running_version(self, running):
         # log.debug(f'set running version:[ {running} ] in DictProperty:[ {self.name} ]')
         MultiProperty.running_version = running
-        if running:
-            self.saved_value = self.value
-        else:
-            self.saved_value = None
+        self.saved_value = self.value if running else None
 
     def recover_running_version(self, owner) -> None:
         # log.debug(f'recover running version in DictProperty:[ {self.name} ]')

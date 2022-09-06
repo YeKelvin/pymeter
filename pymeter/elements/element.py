@@ -172,7 +172,10 @@ class TestElement:
             self.temporary_properties = deque()
 
         self.temporary_properties.append(prop)
-        if isinstance(prop, MultiProperty):
+        # 虽然 ElementProperty 正在实现 MultiProperty，但它的工作方式不同。
+        # 它不会像 MultiProperty 那样一一合并内部属性。
+        # 因此我们不能将 TestElementProperty 的封闭属性标记为临时。
+        if isinstance(prop, MultiProperty) and not isinstance(prop, ElementProperty):
             for prop in prop.iterator():
                 self.set_temporary(prop)
 

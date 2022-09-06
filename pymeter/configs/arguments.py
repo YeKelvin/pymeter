@@ -7,6 +7,7 @@ from typing import List
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
+from pymeter.elements.property import ElementProperty
 
 
 class Argument(TestElement):
@@ -21,14 +22,14 @@ class Argument(TestElement):
     ARGUMENT_DESCRIPTION = 'Argument__desc'
 
     # 参数元数据，其实就是输出str时用来连接name和value的符号，e.g. name=value
-    ARGUMENT_SEPARATOR = 'Argument__separator'
+    ARGUMENT_CONNECTOR = 'Argument__connector'
 
-    def __init__(self, name: str = None, value: str = None, desc: str = None, sep: str = '='):
+    def __init__(self, name: str = None, value: str = None, desc: str = None, connector: str = '='):
         super().__init__()
         self.name = name
         self.value = value
         self.desc = desc
-        self.sep = sep
+        self.connector = connector
 
     @property
     def name(self):
@@ -55,12 +56,12 @@ class Argument(TestElement):
         self.set_property(self.ARGUMENT_DESCRIPTION, value)
 
     @property
-    def sep(self):
-        return self.get_property_as_str(self.ARGUMENT_SEPARATOR)
+    def connector(self):
+        return self.get_property_as_str(self.ARGUMENT_CONNECTOR)
 
-    @sep.setter
-    def sep(self, value):
-        self.set_property(self.ARGUMENT_SEPARATOR, value)
+    @connector.setter
+    def connector(self, value):
+        self.set_property(self.ARGUMENT_CONNECTOR, value)
 
     def __repr__(self):
         return self.__str__()
@@ -68,9 +69,9 @@ class Argument(TestElement):
     def __str__(self):
         return (
             '{'
-            f'  "name"{self.sep}"{self.name}", '
-            f'  "value"{self.sep}"{self.value}", '
-            f'  "desc"{self.sep}"{self.desc}"'
+            f'  "name"{self.connector}"{self.name}", '
+            f'  "value"{self.connector}"{self.value}", '
+            f'  "desc"{self.connector}"{self.desc}"'
             '}'
         )
 
@@ -87,11 +88,17 @@ class Arguments(ConfigTestElement):
     def arguments(self) -> List[Argument]:
         return self.get_property(self.ARGUMENTS).get_obj()
 
-    def add(self, arg: Argument):
+    def add_argument(self, arg: Argument):
+        prop = ElementProperty(arg.name, arg)
+        if self.running_version:
+            self.set_temporary(prop)
         self.arguments.append(arg)
 
+    def add(self, name=None, value=None, desc=None, connector='='):
+        self.add_argument(Argument(name, value, desc, connector))
+
     def to_dict(self) -> dict:
-        args = {}
-        for arg in self.arguments:
-            args[arg.name] = arg.value
-        return args
+        return {arg.name: arg.value for arg in self.arguments}
+
+    def clear(self):
+        self.arguments.clear()
