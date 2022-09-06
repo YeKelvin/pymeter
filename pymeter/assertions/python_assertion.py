@@ -9,7 +9,8 @@ from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
-from pymeter.tools.python_code_snippets import DEFAULT_IMPORT_MODULE
+from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
+from pymeter.tools.python_code_snippets import INDENT
 from pymeter.utils.log_util import get_logger
 
 
@@ -25,50 +26,53 @@ class PythonAssertion(Assertion):
     def script(self) -> str:
         return self.get_property_as_str(self.SCRIPT)
 
+    @property
+    def raw_function(self):
+        func = [
+            'def function(log, ctx, vars, props, prev, sampler, result):\n',
+            DEFAULT_LOCAL_IMPORT_MODULE
+        ]
+
+        content = self.script
+        if not content or content.isspace():  # 脚本内容为空则生成空函数
+            func.append(f'{INDENT}...\n')
+        else:
+            lines = content.split('\n')
+            func.extend(f'{INDENT}{line}\n' for line in lines)
+        func.append('self.dynamic_function = function')
+        return ''.join(func)
+
     def get_result(self, response: SampleResult) -> AssertionResult:
         result = AssertionResult(self.name)
 
-        script = self.script
-        if not script:
-            return result
-        script = DEFAULT_IMPORT_MODULE + script
-
-        ctx = ContextService.get_context()
-        props = ctx.properties
-
-        # 定义脚本中可用的内置变量
-        params = {
-            'log': log,
-            'ctx': ctx,
-            'vars': ctx.variables,
-            'props': props,
-            'prev': ctx.previous_result,
-            'sampler': ctx.current_sampler,
-            'result': response,
-            'failure': not response.success,
-            'message': None,
-            'stop_group': response.stop_group,
-            'stop_test': response.stop_test,
-            'stop_test_now': response.stop_test_now
-        }
         try:
-            # 执行脚本（在模块层级上，globals 和 locals 是同一个字典）
-            exec(script, params, params)
+            ctx = ContextService.get_context()
+            props = ctx.properties
+            params = {
+                'self': self,
+                'failure': not response.success,
+                'message': None,
+            }
+            exec(self.raw_function, params, params)
+            self.dynamic_function(  # noqa
+                log=log,
+                ctx=ctx,
+                vars=ctx.variables,
+                props=props,
+                prev=ctx.previous_result,
+                sampler=ctx.current_sampler,
+                result=response
+            )
         except AssertionError as e:
             # 断言失败时，判断是否有定义失败信息，没有则返回断言脚本内容
             error_msg = str(e)
             if error_msg:
                 raise
             else:
-                raise AssertionError(self.script)
+                raise AssertionError(self.script) from e
 
         # 更新断言结果
         result.failure = params['failure']
         result.message = params['message']
-
-        # 更新 SamplerResult
-        response.stop_group = params['stop_group']
-        response.stop_test = params['stop_test']
-        response.stop_test_now = params['stop_test_now']
 
         return result

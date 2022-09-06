@@ -27,15 +27,16 @@ class PythonSampler(Sampler):
         return self.get_property_as_str(self.SCRIPT)
 
     @property
-    def function_wrapper(self):
-        func = ['def func(log, ctx, vars, props, prev, result):\n' + DEFAULT_LOCAL_IMPORT_MODULE]
+    def raw_function(self):
+        func = ['def function(log, ctx, vars, props, prev, result):\n' + DEFAULT_LOCAL_IMPORT_MODULE]
 
-        if not self.script or self.script.isspace():
+        content = self.script
+        if not content or content.isspace():  # 脚本内容为空则生成空函数
             func.append(f'{INDENT}...\n')
         else:
-            lines = self.script.split('\n')
+            lines = content.split('\n')
             func.extend(f'{INDENT}{line}\n' for line in lines)
-        func.append('self.dynamic_function = func')
+        func.append('self.dynamic_function = function')
         return ''.join(func)
 
     def sample(self) -> SampleResult:
@@ -48,7 +49,7 @@ class PythonSampler(Sampler):
         try:
             # 定义脚本中可用的内置变量
             params = {'self': self}
-            exec(self.function_wrapper, params, params)
+            exec(self.raw_function, params, params)
             ctx = ContextService.get_context()
             props = ctx.properties
             if res := self.dynamic_function(  # noqa
