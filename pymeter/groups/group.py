@@ -498,7 +498,6 @@ class Coroutine(Greenlet):
         if isinstance(current, TransactionSampler):
             transaction_sampler = current
             transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
-            log.debug(f'transaction package:\n{transaction_package}')
 
             # 检查事务是否已完成
             if current.done:
@@ -539,7 +538,10 @@ class Coroutine(Greenlet):
             and transaction_package is not None  # noqa
         ):
             transaction_result = self.__do_end_transaction_sampler(
-                transaction_sampler, parent, transaction_package, context
+                transaction_sampler,
+                parent,
+                transaction_package,
+                context
             )
 
         return transaction_result
@@ -556,7 +558,6 @@ class Coroutine(Greenlet):
         context.set_current_sampler(sampler)
 
         package = self.compiler.configure_sampler(sampler)
-        log.debug(f'sampler package:\n{package}')
 
         # 执行前置处理器
         self.__run_pre_processors(package.pre_processors)

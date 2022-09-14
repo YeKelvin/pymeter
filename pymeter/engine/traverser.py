@@ -99,7 +99,7 @@ class ConvertToString(HashTreeTraverser):
             while len(self.spaces) < self.depth * 2:
                 self.spaces.append('  ')
         elif len(self.spaces) > self.depth * 2:
-            self.spaces = self.spaces[0:self.depth * 2]
+            self.spaces = self.spaces[:self.depth * 2]
         return ''.join(self.spaces)
 
     def __str__(self):
@@ -156,11 +156,7 @@ class TreeCloner(HashTreeTraverser):
     def add_node(self, node, subtree) -> None:
         """@override"""
         clone = not (self.enable_no_clone and isinstance(node, NoCoroutineClone))
-        if isinstance(node, TestElement) and clone:
-            cloned_node = node.clone()
-        else:
-            cloned_node = node
-
+        cloned_node = node.clone() if isinstance(node, TestElement) and clone else node
         self.new_tree.add_key_by_treepath(self.tree_path, cloned_node)
         self.tree_path.append(cloned_node)
 
@@ -179,32 +175,33 @@ class TestCompiler(HashTreeTraverser):
     def __init__(self, tree):
         self.stack = deque()
 
-        self.sampler_config_dict: Dict[Sampler, SamplePackage] = {}
-        self.transaction_controller_config_dict: Dict[TransactionController, SamplePackage] = {}
+        self.sampler_config_store: Dict[Sampler, SamplePackage] = {}
+        self.transaction_controller_config_store: Dict[TransactionController, SamplePackage] = {}
 
         self.test_tree = tree
 
     @staticmethod
-    def done(package) -> None:
-        log.debug(f'package:[ {package.sampler}] sampler package done')
+    def done(package: SamplePackage) -> None:
+        # log.debug(f'package:[ {package.sampler}] sampler package done')
         package.recover_running_version()
 
     def configure_sampler(self, sampler) -> SamplePackage:
-        log.debug(f'sampler:[ {sampler} ] configure to package')
-        package = self.sampler_config_dict.get(sampler)
+        # log.debug(f'sampler:[ {sampler} ] configure to package')
+        package = self.sampler_config_store.get(sampler)
         package.sampler = sampler
         self.__configure_with_config_elements(sampler, package.configs)
         return package
 
     def configure_transaction_sampler(self, transaction_sampler: TransactionSampler) -> SamplePackage:
-        log.debug(f'transaction:[ {transaction_sampler} ] configure to package')
+        # log.debug(f'transaction:[ {transaction_sampler} ] configure to package')
         controller = transaction_sampler.controller
-        package = self.transaction_controller_config_dict.get(controller)
+        package = self.transaction_controller_config_store.get(controller)
         package.sampler = transaction_sampler
         return package
 
     def add_node(self, node, subtree) -> None:
         """@override"""
+        # log.debug(f'adding ndoe: {node}')
         self.stack.append(node)
 
     def subtract_node(self) -> None:
@@ -224,10 +221,10 @@ class TestCompiler(HashTreeTraverser):
         if len(self.stack) > 0:
             parent = self.stack[-1]
             duplicate = False
-            if isinstance(parent, Controller) and (isinstance(child, Sampler) or isinstance(child, Controller)):
+            if isinstance(parent, Controller) and isinstance(child, (Sampler, Controller)):
                 if isinstance(parent, TestCompilerHelper):
                     duplicate = not parent.add_test_element_once(child)
-
+                # TODO: else: parent.addTestElement(child);
             if duplicate:
                 log.warning(f'Unexpected duplicate for {parent} and {child}')
 
@@ -249,6 +246,7 @@ class TestCompiler(HashTreeTraverser):
         configs = deque()
         controllers = []
         listeners = []
+        trans_listeners = []
         timers = []
         assertions = deque()
         pres = deque()
@@ -258,7 +256,7 @@ class TestCompiler(HashTreeTraverser):
             inner_pres = []
             inner_posts = []
             inner_assertions = []
-            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
+            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(i + 1)]):
                 if isinstance(item, ConfigElement) and not isinstance(item, TransactionConfig):
                     configs.append(item)
                 if isinstance(item, SampleListener):
@@ -272,14 +270,14 @@ class TestCompiler(HashTreeTraverser):
                 if isinstance(item, PreProcessor):
                     inner_pres.append(item)
 
-            assertions.extendleft(inner_assertions)
-            pres.extendleft(inner_pres)
-            posts.extendleft(inner_posts)
+            assertions.extendleft(inner_assertions[::-1])
+            posts.extendleft(inner_posts[::-1])
+            pres.extendleft(inner_pres[::-1])
 
-        package = SamplePackage(configs, listeners, [], timers, assertions, posts, pres, controllers)
+        package = SamplePackage(configs, listeners, trans_listeners, timers, assertions, posts, pres, controllers)
         package.sampler = sampler
         package.set_running_version(True)
-        self.sampler_config_dict[sampler] = package
+        self.sampler_config_store[sampler] = package
 
     def __save_transaction_controller_configs(self, trans_controller: TransactionController):
         configs = []
@@ -292,9 +290,9 @@ class TestCompiler(HashTreeTraverser):
         posts = []
         trans_configs = []
         trans_samplers = []
-        for i in range(direct_level := (len(self.stack) - 1), -1, -1):
+        for i in range(direct_level := len(self.stack) - 1, -1, -1):
             self.__add_direct_parent_controllers(controllers, self.stack[i])
-            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(0, i + 1)]):
+            for item in self.test_tree.list_by_treepath([self.stack[x] for x in range(i + 1)]):
                 if isinstance(item, SampleListener):
                     listeners.append(item)
                 if isinstance(item, Assertion):
@@ -310,13 +308,13 @@ class TestCompiler(HashTreeTraverser):
                         trans_samplers.append(item)
 
         for sampler in trans_samplers:
-            sampler_package = self.sampler_config_dict.get(sampler)
+            sampler_package = self.sampler_config_store.get(sampler)
             sampler_package.configs.extendleft(trans_configs)
 
         package = SamplePackage(configs, listeners, trans_listeners, timers, assertions, posts, pres, controllers)
         package.sampler = TransactionSampler(trans_controller, trans_controller.name)
         package.set_running_version(True)
-        self.transaction_controller_config_dict[trans_controller] = package
+        self.transaction_controller_config_store[trans_controller] = package
 
     def __configure_with_config_elements(self, sampler: Sampler, configs: list):
         sampler.clear_test_element_children()
