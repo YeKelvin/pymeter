@@ -163,7 +163,7 @@ class TestGroup(Controller, TestCompilerHelper):
             else:
                 break
 
-        log.info(f'开始执行第 {self.group_number} 个线程组')
+        log.info(f'开始执行第[ {self.group_number} ]个 #线程组#')
 
     @property
     def done(self):

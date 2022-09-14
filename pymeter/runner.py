@@ -78,7 +78,6 @@ class Runner:
         engine.configure(hashtree)
 
         # 开始执行测试
-        log.info('初始化执行引擎完成，开始执行测试')
         engine.run_test()
 
 

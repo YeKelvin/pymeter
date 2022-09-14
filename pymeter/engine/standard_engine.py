@@ -126,12 +126,12 @@ class StandardEngine(Greenlet):
                 setup_group: SetupGroup = next(setup_group_iter)
                 group_count += 1
                 group_name = setup_group.name
-                log.info(f'初始化第 {group_count} 个 #前置线程组# ，线程组名称:[ {group_name} ]')
+                log.info(f'初始化第 {group_count} 个 #前置线程组# ，名称:[ {group_name} ]')
                 self.__start_test_group(setup_group, group_count, setup_group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'等待当前 #前置线程组# 执行完成，线程组名称:[ {group_name} ]')
+                    log.info(f'等待当前 #前置线程组# 执行完成，名称:[ {group_name} ]')
                     setup_group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 #前置线程组# 已启动')
@@ -156,12 +156,12 @@ class StandardEngine(Greenlet):
                     continue
                 group_count += 1
                 group_name = group.name
-                log.info(f'初始化第 {group_count} 个 #线程组# ，线程组名称:[ {group_name} ]')
+                log.info(f'初始化第 {group_count} 个 #线程组# ，名称:[ {group_name} ]')
                 self.__start_test_group(group, group_count, group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'等待当前 #线程组# 执行完成，线程组名称:[ {group_name} ]')
+                    log.info(f'等待当前 #线程组# 执行完成，名称:[ {group_name} ]')
                     group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 #线程组# 已启动')
@@ -190,12 +190,12 @@ class StandardEngine(Greenlet):
                 teardown_group: TearDownGroup = next(teardown_group_iter)
                 group_count += 1
                 group_name = teardown_group.name
-                log.info(f'初始化第 {group_count} 个 #后置线程组# ，线程组名称:[ {group_name} ]')
+                log.info(f'初始化第 {group_count} 个 #后置线程组# ，名称:[ {group_name} ]')
                 self.__start_test_group(teardown_group, group_count, teardown_group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    log.info(f'等待当前 #后置线程组# 完成，线程组名称:[ {group_name} ]')
+                    log.info(f'等待当前 #后置线程组# 完成，名称:[ {group_name} ]')
                     teardown_group.wait_groups_stopped()
             except StopIteration:
                 log.info('所有 #后置线程组# 已启动')
@@ -263,7 +263,7 @@ class StandardEngine(Greenlet):
             # 把 TestCollection 子代节点（非 TestGroup 节点）添加至 TestGroup
             group_tree = group_searcher.get_subtree(group)
             group_tree.add_key_and_subkeys(group, collection_level_elements)
-            log.info(f'线程组:[ {group_name} ] 启动线程数:[ {number_groups} ]')
+            log.info(f'启动 #线程组# ，名称:[ {group_name} ]，线程数:[ {number_groups} ]')
 
             # 存储当前 TestGroup，用于后续管理线程（启动、停止或循环）
             self.groups.append(group)
