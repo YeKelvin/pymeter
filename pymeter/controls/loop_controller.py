@@ -66,7 +66,8 @@ class LoopController(GenericController, IteratingController):
                 return None
 
             if self.first:
-                log.info(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次迭代')
+                controller_name = f'控制器:[ {self.name} ]' if self.name else ''
+                log.info(f'线程:[ {self.ctx.coroutine_name} ] {controller_name} 开始第 {self._loop_count + 1} 次迭代')
 
             return super().next()
         except Exception:
