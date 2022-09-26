@@ -574,14 +574,14 @@ class Coroutine(Greenlet):
             self.compiler.done(package)
             return
 
+        # 设置为上一个结果
+        context.set_previous_result(result)
+
         # 执行后置处理器
         self.__run_post_processors(package.post_processors)
 
         # 执行断言
         self.__check_assertions(package.assertions, result, context)
-
-        # 设置为上一个结果
-        context.set_previous_result(result)
 
         # 添加重试标识，标识来自 RetryController
         retrying = getattr(sampler, 'retrying', False)
