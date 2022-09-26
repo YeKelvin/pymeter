@@ -19,6 +19,9 @@ log = get_logger(__name__)
 
 class PythonSampler(Sampler):
 
+    # 请求类型
+    REQUEST_TYPE: Final = 'PYTHON'
+
     # 脚本内容
     SCRIPT: Final = 'PythonSampler__script'
 

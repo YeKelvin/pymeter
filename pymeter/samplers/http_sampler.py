@@ -24,6 +24,9 @@ log = get_logger(__name__)
 
 class HTTPSampler(Sampler):
 
+    # 请求类型
+    REQUEST_TYPE: Final = 'HTTP'
+
     # 请求URL
     URL: Final = 'HTTPSampler__url'
 

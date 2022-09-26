@@ -23,6 +23,9 @@ log = get_logger(__name__)
 
 class SQLSampler(Sampler):
 
+    # 请求类型
+    REQUEST_TYPE: Final = 'SQL'
+
     # 数据库引擎变量名称
     ENGINE_NAME: Final = 'SQLSampler__engine_name'
 
