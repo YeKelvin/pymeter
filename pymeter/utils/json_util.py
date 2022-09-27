@@ -5,7 +5,6 @@
 # @Author  : Kelvin.Ye
 import random
 import re
-from collections.abc import Sequence
 
 import orjson
 from jsonpath import jsonpath
@@ -52,14 +51,18 @@ def from_json(val):
         raise e
 
 
-def json_path(val, xpath, choice=False, index=None):
-    results = jsonpath(from_json(val), xpath)
+def json_path(val, expressions, choice=False):
+    results = jsonpath(from_json(val), expressions)
+
+    # jsonpath 没有匹配时会返回 False
+    if not results:
+        return
+
     if len(results) == 1:
         result = results[0]
-        if choice and isinstance(result, Sequence):
-            return random.choice(result)
-        elif index is not None and isinstance(result, Sequence):
-            return result[index]
+        if isinstance(result, list):
+            return random.choice(result) if choice else result
         else:
             return result
+
     return random.choice(results) if choice else results

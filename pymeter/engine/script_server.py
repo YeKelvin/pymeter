@@ -28,10 +28,6 @@ __MODULE_PATH__ = {
     'TestGroup': 'pymeter.groups.group',
     'TearDownGroup': 'pymeter.groups.group',
 
-    # 断言器
-    'JsonPathAssertion': 'pymeter.assertions.json_path_assertion',
-    'PythonAssertion': 'pymeter.assertions.python_assertion',
-
     # 配置器
     'Argument': 'pymeter.configs.arguments',
     'Arguments': 'pymeter.configs.arguments',
@@ -55,16 +51,21 @@ __MODULE_PATH__ = {
     # 时间控制器
     'ConstantTimer': 'pymeter.timers.constant_timer',
 
+    # 取样器
+    'HTTPSampler': 'pymeter.samplers.http_sampler',
+    'PythonSampler': 'pymeter.samplers.python_sampler',
+    'SQLSampler': 'pymeter.samplers.sql_sampler',
+
     # 前置处理器
     'PythonPreProcessor': 'pymeter.processors.python_pre_processor',
 
     # 后置处理器
     'PythonPostProcessor': 'pymeter.processors.python_post_processor',
+    'JsonPathPostProcessor': 'pymeter.processors.json_path_post_processor',
 
-    # 取样器
-    'HTTPSampler': 'pymeter.samplers.http_sampler',
-    'PythonSampler': 'pymeter.samplers.python_sampler',
-    'SQLSampler': 'pymeter.samplers.sql_sampler',
+    # 断言器
+    'PythonAssertion': 'pymeter.assertions.python_assertion',
+    'JsonPathAssertion': 'pymeter.assertions.json_path_assertion',
 
     # 监听器
     'FlaskDBIterationStorage': 'pymeter.listeners.flask_db_iteration_storage',

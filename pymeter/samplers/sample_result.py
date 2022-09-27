@@ -126,5 +126,5 @@ class SampleResult:
         self.sub_results.append(subresult)
         subresult.parent = self
 
-    def json_path(self, xpath, choice=False, index=None):
-        return json_util.json_path(self.response_data, xpath, choice, index)
+    def json_path(self, expressions, choice=False):
+        return json_util.json_path(self.response_data, expressions, choice)
