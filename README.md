@@ -1,4 +1,4 @@
-# Pymeter
+# PyMeter
 
 测试脚本执行引擎
 
@@ -8,7 +8,6 @@
 pymeter/
     |-pymeter/
         |-assertions
-        |-common
         |-configs
         |-controls
         |-elements
@@ -19,6 +18,7 @@ pymeter/
         |-processors
         |-samplers
         |-timers
+        |-tools
         |-utils
     |-config.ini
     |-pytest.ini

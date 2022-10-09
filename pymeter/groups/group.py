@@ -334,7 +334,7 @@ class Coroutine(Greenlet):
         # 初始化 TestGroup 控制器
         self.group_main_controller.initialize()
 
-        # 添加 TestGroup 循环迭代监听器
+        # 添加 TestGroup 迭代监听器
         group_level_iteration_listener = self.IterationListener(self)
         self.group_main_controller.add_iteration_listener(group_level_iteration_listener)
 
@@ -357,7 +357,7 @@ class Coroutine(Greenlet):
                     log.debug(f'coroutine:[ {self.coroutine_name} ] current sampler:[ {sampler} ]')
                     # 处理 Sampler
                     self.__process_sampler(sampler, None, context)
-                    # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制循环迭代
+                    # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制迭代
                     last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
                     if not self.next_continue or (not last_sample_ok and self.group.on_error_continue):
                         self.__control_loop_by_logical_action(sampler, context)
@@ -368,7 +368,7 @@ class Coroutine(Greenlet):
 
                 if self.group_main_controller.done:
                     self.running = False
-                    log.info(f'线程:[ {self.coroutine_name} ] 循环迭代已结束')
+                    log.info(f'线程:[ {self.coroutine_name} ] 迭代已结束')
 
         except StopTestGroupException:
             log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestGroupException Exception, stoping coroutine')
@@ -853,7 +853,7 @@ class Coroutine(Greenlet):
                 elements.remove(element)
 
     class IterationListener(LoopIterationListener):
-        """Coroutine 内部类，用于在 TestGroup 循环迭代开始时触发所有实现类的开始动作"""
+        """Coroutine 内部类，用于在 TestGroup 迭代开始时触发所有实现类的开始动作"""
 
         def __init__(self, parent: 'Coroutine'):
             self.parent = parent

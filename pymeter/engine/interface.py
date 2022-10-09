@@ -52,7 +52,7 @@ class TestIterationListener:
 class LoopIterationListener:
 
     def iteration_start(self, source, iter) -> None:
-        """控制器在循环迭代即将开始前调用"""
+        """控制器在迭代即将开始前调用"""
         raise NotImplementedError
 
 

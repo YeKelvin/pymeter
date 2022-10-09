@@ -140,7 +140,7 @@ class StandardEngine(Greenlet):
         log.info('等待所有 #前置线程组# 执行完成')
         self.__wait_groups_stopped()
         log.info('所有 #前置线程组# 执行完成')
-        group_total = group_total + group_count
+        group_total += group_count
         group_count = 0
         ContextService.clear_total_coroutines()
         self.groups.clear()  # The groups have all completed now
@@ -148,7 +148,7 @@ class StandardEngine(Greenlet):
         # ####################################################################################################
         # TestGroup 运行主体
         # ####################################################################################################
-        log.info(f'开始处理 #线程组# ，处理方式:[ {"顺序" if self.serialized else "并发"} ]')
+        log.info(f'开始 #{"顺序" if self.serialized else "并行"}# 处理 #线程组#')
         while self.running:
             try:
                 group: TestGroup = next(group_iter)
