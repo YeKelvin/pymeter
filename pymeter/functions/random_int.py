@@ -35,7 +35,8 @@ class RandomInt(Function):
     def set_parameters(self, params: list):
         log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
+        # 校验函数参数个数
         self.check_parameter_count(params, 2)
-
+        # 提取参数
         self.minimum = params[0]
         self.maximum = params[1]

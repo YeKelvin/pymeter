@@ -6,7 +6,7 @@
 from typing import Final
 
 from pymeter.functions.function import Function
-from pymeter.utils import rsa_util
+from pymeter.utils import rsa_util as rsa_cryptor
 from pymeter.utils.log_util import get_logger
 
 
@@ -35,7 +35,7 @@ class RSA(Function):
         if not public_key.endswith(RSA.PUBLIC_KEY_SUFFIX):
             public_key = public_key + RSA.PUBLIC_KEY_SUFFIX
 
-        result = rsa_util.encrypt_by_public_key(plaintext, public_key).decode(encoding='UTF-8')
+        result = rsa_cryptor.encrypt_by_public_key(plaintext, public_key).decode(encoding='UTF-8')
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
         return result
@@ -45,6 +45,6 @@ class RSA(Function):
 
         # 校验函数参数个数
         self.check_parameter_count(params, 2)
-
+        # 提取参数
         self.plaintext = params[0]
         self.public_key = params[1]

@@ -35,5 +35,5 @@ class GoogleAuth(Function):
 
         # 校验函数参数个数
         self.check_parameter_count(params, 1)
-
+        # 提取参数
         self.secret_key = params[0]

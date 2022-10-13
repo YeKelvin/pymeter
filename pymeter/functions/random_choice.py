@@ -34,5 +34,7 @@ class RandomChoice(Function):
     def set_parameters(self, params: list):
         log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
+        # 校验函数参数个数
         self.check_parameter_count(params, 1)
+        # 提取参数
         self.seq = params[0]

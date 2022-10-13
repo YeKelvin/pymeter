@@ -25,10 +25,7 @@ class MD5(Function):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
-        encode = 'UTF-8'
-
-        if self.encode:
-            encode = self.encode.execute().strip()
+        encode = self.encode.execute().strip() if self.encode else 'UTF-8'
 
         result = hashlib.md5(plaintext.encode(encoding=encode)).hexdigest()
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
@@ -40,8 +37,6 @@ class MD5(Function):
 
         # 校验函数参数个数
         self.check_parameter_min(params, 1)
-
+        # 提取参数
         self.plaintext = params[0]
-
-        if len(params) > 1:
-            self.encode = params[1]
+        self.encode = params[1] if len(params) > 1 else None

@@ -28,4 +28,8 @@ class Eval(Function):
 
     def set_parameters(self, params: list):
         log.debug(f'{self.REF_KEY} start to set parameters')
+
+        # 校验函数参数个数
+        self.check_parameter_count(params, 1)
+        # 提取参数
         self.parameter = params[0]

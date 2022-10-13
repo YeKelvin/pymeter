@@ -40,8 +40,8 @@ class Time(Function):
     def set_parameters(self, params: list):
         log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
+        # 校验函数参数个数
         self.check_parameter_min(params, 0)
         self.check_parameter_max(params, 1)
-
-        if len(params) > 0:
-            self.format = params[0]
+        # 提取参数
+        self.format = params[0] if params else None

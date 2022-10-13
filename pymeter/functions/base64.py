@@ -1,43 +1,39 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @File    : random.py
-# @Time    : 2020/1/20 16:06
+# @File    : base64.py
+# @Time    : 2022/10/12 18:31
 # @Author  : Kelvin.Ye
-import random
 from typing import Final
 
 from pymeter.functions.function import Function
+from pymeter.utils import base64_util
 from pymeter.utils.log_util import get_logger
 
 
 log = get_logger(__name__)
 
 
-class Random(Function):
+class Base64(Function):
 
-    REF_KEY: Final = '__Random'
+    REF_KEY: Final = '__BASE64'
 
     def __init__(self):
-        self.length = None
+        self.data = None
 
     def execute(self):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
-        if self.length:
-            length = int(self.length.execute().strip())
-            result = ''.join([str(random.randint(0, 9)) for _ in range(length)])
-            log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-            return result
+        data = self.data.execute().strip()
 
-        result = str(random.random()).replace('0.', '')
+        result = base64_util.encode(data)
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
+
         return result
 
     def set_parameters(self, params: list):
         log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
         # 校验函数参数个数
-        self.check_parameter_min(params, 0)
-        self.check_parameter_max(params, 1)
+        self.check_parameter_count(params, 1)
         # 提取参数
-        self.length = params[0] if params else None
+        self.data = params[0]
