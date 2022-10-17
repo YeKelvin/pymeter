@@ -58,10 +58,12 @@ __MODULE_PATH__ = {
 
     # 前置处理器
     'PythonPreProcessor': 'pymeter.processors.python_pre_processor',
+    'SleepPreProcessor': 'pymeter.processors.sleep_pre_processor',
 
     # 后置处理器
     'PythonPostProcessor': 'pymeter.processors.python_post_processor',
     'JsonPathPostProcessor': 'pymeter.processors.json_path_post_processor',
+    'SleepPostProcessor': 'pymeter.processors.sleep_post_processor',
 
     # 断言器
     'PythonAssertion': 'pymeter.assertions.python_assertion',

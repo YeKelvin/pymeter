@@ -13,7 +13,7 @@ log = get_logger(__name__)
 
 class ConstantTimer(Timer):
 
-    # 延迟事件
+    # 延迟时间，单位ms
     DELAY = 'ConstantTimer__delay'
 
     def delay(self):
