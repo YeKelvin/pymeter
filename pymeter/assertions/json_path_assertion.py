@@ -10,6 +10,7 @@ from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.elements.element import TestElement
 from pymeter.samplers.sample_result import SampleResult
+from pymeter.utils.json_util import JsonpathExtractException
 from pymeter.utils.json_util import json_path
 from pymeter.utils.log_util import get_logger
 
@@ -26,6 +27,10 @@ JUDGMENT_TYPES = {
     'NOT_IN': '不包含',
     'START_WITH': '开头包含',
     'END_WITH': '结尾包含',
+    'NULL': '为null',
+    'NOT_NULL': '不为null',
+    'BLANK': '为空',
+    'NOT_BLANK': '不为空',
     'EXISTS': '存在',
     'NOT_EXISTS': '不存在',
     'REGULAR': '正则匹配',
@@ -91,8 +96,13 @@ class JsonPathAssertion(Assertion, TestElement):
             result.message = '期望值为空，请修改后重试'
             return result
 
-        # JsonPath实际值
-        actual_value = json_path(response_data, jsonpath)
+        # 获取JsonPath实际值
+        actual_value = None
+        exists = True
+        try:
+            actual_value = json_path(response_data, jsonpath, throw=True)
+        except JsonpathExtractException:
+            exists = False
 
         # 等于
         if judgment_type == 'EQUAL' and str(actual_value) != expected_value:
@@ -142,14 +152,38 @@ class JsonPathAssertion(Assertion, TestElement):
             result.message = self.get_failure_message(actual_value)
             return result
 
+        # 为null
+        if judgment_type == 'NULL' and actual_value is not None:
+            result.failure = True
+            result.message = self.get_failure_message(actual_value)
+            return result
+
+        # 不为null
+        if judgment_type == 'NOT_NULL' and actual_value is None:
+            result.failure = True
+            result.message = self.get_failure_message(actual_value)
+            return result
+
+        # 为空
+        if judgment_type == 'BLANK' and not actual_value:
+            result.failure = True
+            result.message = self.get_failure_message(actual_value)
+            return result
+
+        # 不为空
+        if judgment_type == 'NOT_BLANK' and actual_value:
+            result.failure = True
+            result.message = self.get_failure_message(actual_value)
+            return result
+
         # 存在
-        if judgment_type == 'EXISTS' and not actual_value:
+        if judgment_type == 'EXISTS' and not exists:
             result.failure = True
             result.message = self.get_failure_message(actual_value)
             return result
 
         # 不存在
-        if judgment_type == 'NOT_EXISTS' and actual_value:
+        if judgment_type == 'NOT_EXISTS' and exists:
             result.failure = True
             result.message = self.get_failure_message(actual_value)
             return result

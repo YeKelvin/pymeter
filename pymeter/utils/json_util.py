@@ -15,6 +15,10 @@ DECODE_ERROR_PATTERN = re.compile(r'line [\d]+ column [\d]+ \(char [\d]+\)$')
 NUMBER_PATTERN = re.compile(r'[\d]+')
 
 
+class JsonpathExtractException(Exception):
+    ...
+
+
 def to_json(obj: dict or list) -> str:
     """序列化"""
     try:
@@ -51,11 +55,13 @@ def from_json(val):
         raise e
 
 
-def json_path(val, expressions, choice=False):
+def json_path(val, expressions, choice=False, throw=False):
     results = jsonpath(from_json(val), expressions)
 
     # jsonpath 没有匹配时会返回 False
     if not results:
+        if throw:
+            raise JsonpathExtractException
         return
 
     if len(results) == 1:
