@@ -46,11 +46,6 @@ class JsonPathAssertion(Assertion, TestElement):
     EXPECTED_VALUE: Final = 'JsonPathAssertion__expected_value'
 
     # 判断类型
-    # 等于(EQUAL)、不等于(NOT_EQUAL)、大于(GREATER_THAN)、小于(LESS_THAN)
-    # 包含(IN)、不包含(NOT_IN)
-    # 开头包含(START_WITH)、结尾包含(END_WITH)
-    # 存在(EXISTS)、不存在(NOT_EXISTS)
-    # 正则匹配(REGULAR)
     JUDGMENT_TYPE: Final = 'JsonPathAssertion__judgment_type'
 
     @property
@@ -91,7 +86,10 @@ class JsonPathAssertion(Assertion, TestElement):
             result.message = '判断类型为空，请修改后重试'
             return result
     
-        if judgment_type not in ['EXISTS', 'NOT_EXISTS'] and not expected_value:
+        if (
+                judgment_type not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS'] and
+                not expected_value
+        ):
             result.failure = True
             result.message = '期望值为空，请修改后重试'
             return result
