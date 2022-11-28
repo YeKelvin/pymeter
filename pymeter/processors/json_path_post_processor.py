@@ -65,7 +65,13 @@ class JsonPathPostProcessor(PostProcessor):
                 # 将提取值放入变量
                 actualvalue = json_path(response_data, jsonpath, self.list_random)
                 ctx.variables.put(varname, actualvalue)
-                log.info(f'Json提取变量成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
+                if actualvalue is not None:
+                    log.info(f'Json提取成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
+                else:
+                    log.info(
+                        f'Json提取失败，请检查jsonpath是否正确，'
+                        f'jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]'
+                    )
             # 设置默认值
             elif self.default_value:
                 ctx.variables.put(varname, self.default_value)
