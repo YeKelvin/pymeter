@@ -48,10 +48,10 @@ class JsonPathPostProcessor(PostProcessor):
     def process(self) -> None:
         ctx = ContextService.get_context()
 
-        variable_name = self.variable_name
+        varname = self.variable_name
         jsonpath = self.jsonpath
 
-        if not variable_name:
+        if not varname:
             log.warning(f'元素: {self.name}, 警告: 变量名称为空，请修改写后重试')
             return
 
@@ -63,12 +63,16 @@ class JsonPathPostProcessor(PostProcessor):
         try:
             if response_data := ctx.previous_result.response_data:
                 # 将提取值放入变量
-                ctx.variables.put(self.variable_name, json_path(response_data, self.jsonpath, self.list_random))
+                actualvalue = json_path(response_data, jsonpath, self.list_random)
+                ctx.variables.put(varname, actualvalue)
+                log.info(f'Json提取变量成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
             # 设置默认值
             elif self.default_value:
-                ctx.variables.put(self.variable_name, self.default_value)
+                ctx.variables.put(varname, self.default_value)
+                log.info(f'响应结果为空，赋予默认值，变量名[ {varname} ]，变量值:[ {self.default_value} ]')
         except Exception:
             log.error(traceback.format_exc())
             # 设置默认值
             if self.default_value:
-                ctx.variables.put(self.variable_name, self.default_value)
+                ctx.variables.put(jsonpath, self.default_value)
+                log.info(f'Json提取异常，赋予默认值，变量名[ {jsonpath} ]，变量值:[ {self.default_value} ]')
