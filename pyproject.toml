@@ -15,15 +15,10 @@ name = "aliyun"
 url = "https://mirrors.aliyun.com/pypi/simple/"
 default = true
 
-# [[tool.poetry.source]]
-# name = "tsinghua"
-# url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-# default = true
-
 [tool.poetry.dependencies]
 python = "^3.8"
 jsonpath = "0.82"
-orjson = "3.8.1"
+orjson = "3.8.2"
 xmltodict = "0.13.0"
 sqlalchemy = "1.4.44"
 cx-Oracle = "8.3.0"
@@ -32,7 +27,7 @@ psycopg2 = { version = "2.9.5", markers = "platform_system=='Windows' or platfor
 psycopg2-binary = { version = "2.9.5", markers = "sys_platform=='darwin'" }
 pyodbc = "4.0.35"
 sshtunnel = "0.4.0"
-pycryptodome = "3.15.0"
+pycryptodome = "3.16.0"
 gevent = "22.10.2"
 python-engineio = "4.3.4"
 python-socketio = "5.7.2"
@@ -57,3 +52,21 @@ profile = "pycharm"
 line_length = 120
 force_single_line = true
 multi_line_output = 3
+
+#[tool.yapf]
+#BASED_ON_STYLE = "google"
+#ARITHMETIC_PRECEDENCE_INDICATION = true
+#BLANK_LINE_BEFORE_NESTED_CLASS_OR_DEF = true
+#BLANK_LINES_BETWEEN_TOP_LEVEL_IMPORTS_AND_VARIABLES = 2
+#COLUMN_LIMIT = 120
+#COALESCE_BRACKETS = true
+#DEDENT_CLOSING_BRACKETS = true
+#INDENT_WIDTH = 4
+#JOIN_MULTIPLE_LINES = true
+#SPACES_BEFORE_COMMENT = 2
+#SPLIT_BEFORE_DOT = true
+
+#[tool.yapfignore]
+#ignore_patterns = [
+#  "temp/**/*.py"
+#]
