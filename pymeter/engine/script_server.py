@@ -82,8 +82,8 @@ def load_tree(source: str) -> HashTree:
     """读取脚本并返回脚本的HashTree对象"""
     log.info('开始加载脚本')
 
-    script = __loads_script(source)
-    nodes = __parse(script)
+    script = __loads_script__(source)
+    nodes = __parse_node__(script)
     if not nodes:
         raise ScriptParseException('脚本为空或脚本已被禁用')
     root_tree = HashTree()
@@ -92,12 +92,7 @@ def load_tree(source: str) -> HashTree:
     return root_tree
 
 
-def save_tree(tree):
-    """序列化脚本对象"""
-    ...
-
-
-def __loads_script(source) -> List[dict]:
+def __loads_script__(source) -> List[dict]:
     """
     反序列化脚本
     TODO: 待优化，增加sourceType，支持object，json，yaml
@@ -119,101 +114,97 @@ def __loads_script(source) -> List[dict]:
     return script
 
 
-def __parse(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
+def __parse_node__(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
     # 校验节点是否有必须的属性
-    __check(script)
+    __check__(script)
     nodes = []
     for item in script:
         # 过滤enabled=False的节点(已禁用的节点)
         if not item.get('enabled'):
             continue
-
-        node = __get_node(item)
-        children = item.get('children', None)
-
-        if children:  # 存在子节点时递归解析
-            child_node_list = __parse(children)
-            if child_node_list:
+        # 实例化节点
+        node = __get_node__(item)
+        # 存在子节点时递归解析
+        if children := item.get('children', None):
+            if child_nodes := __parse_node__(children):
                 hash_tree = HashTree()
-
-                for child_node, child_hash_tree in child_node_list:
+                for child_node, child_hash_tree in child_nodes:
                     hash_tree.put(child_node, child_hash_tree)
-
                 nodes.append((node, hash_tree))
         else:
             nodes.append((node, HashTree()))
     return nodes
 
 
-def __check(script: Iterable[dict]) -> None:
+def __check__(script: Iterable[dict]) -> None:
     if not script:
         raise ScriptParseException('脚本解析失败，当前节点为空')
 
     for item in script:
         if 'name' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 name 属性，item:[ {item} ]')
+            raise ScriptParseException(f'解析异常，节点缺少 name 属性，节点:[ {item} ]')
         if 'remark' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 remark 属性，节点名称:[ {item["name"]} ]')
+            raise ScriptParseException(f'解析异常，节点缺少 remark 属性，节点:[ {item["name"]} ]')
         if 'class' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 class 属性，节点名称:[ {item["name"]} ]')
+            raise ScriptParseException(f'解析异常，节点缺少 class 属性，节点:[ {item["name"]} ]')
         if 'enabled' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 enabled 属性，节点名称:[ {item["name"]} ]')
+            raise ScriptParseException(f'解析异常，节点缺少 enabled 属性，节点:[ {item["name"]} ]')
         if 'property' not in item:
-            raise ScriptParseException(f'脚本解析失败，当前节点缺少 property 属性，节点名称:[ {item["name"]} ]')
+            raise ScriptParseException(f'解析异常，节点缺少 property 属性，节点:[ {item["name"]} ]')
 
 
-def __set_replaced_property(element: TestElement, key: str, value: any) -> None:
+def __set_replaced_property__(element: TestElement, key: str, value: any) -> None:
     if key and value:
         element.add_property(key, ValueReplacer.replace_values(key, value))
 
 
-def __get_node(script: dict) -> TestElement:
+def __get_node__(script: dict) -> TestElement:
     """根据元素的class属性实例化为对象"""
     # 获取节点的类型
     class_name = script.get('class')
     log.debug(f'node class:[ {class_name} ]')
 
     # 根据类型名称获取type对象
-    class_type = __get_class_type(class_name)
+    class_type = __get_class_type__(class_name)
 
     # 实例化节点
     node = class_type()
-    __set_replaced_property(node, TestElement.NAME, script.get('name', None))
-    __set_replaced_property(node, TestElement.REMARK, script.get('remark', None))
+    __set_replaced_property__(node, TestElement.NAME, script.get('name', None))
+    __set_replaced_property__(node, TestElement.REMARK, script.get('remark', None))
 
     # 设置节点的属性
-    __set_properties(node, script.get('property'))
+    __set_properties__(node, script.get('property'))
 
     return node
 
 
-def __set_properties(node, property):
-    if not property:
+def __set_properties__(node, props):
+    if not props:
         return
 
-    for key, value in property.items():
+    for key, value in props.items():
         if isinstance(value, str):
-            __set_replaced_property(node, key, value)
+            __set_replaced_property__(node, key, value)
         elif isinstance(value, dict):
-            __set_object_property(node, key, value)
+            __set_object_property__(node, key, value)
         elif isinstance(value, list):
-            __set_collection_property(node, key, value)
+            __set_collection_property__(node, key, value)
 
 
-def __set_object_property(node, key, value: dict):
+def __set_object_property__(node, key, value: dict):
     if 'class' in value:
-        propnode = __get_node(value)
+        propnode = __get_node__(value)
         node.set_property(key, propnode)
     else:
         node.set_property(key, value)
 
 
-def __set_collection_property(node, key, value: list):
+def __set_collection_property__(node, key, value: list):
     collection = []
     for item in value:
         if isinstance(item, dict):
             if 'class' in item:
-                propnode = __get_node(item)
+                propnode = __get_node__(item)
                 collection.append(propnode)
             else:
                 collection.append(item)
@@ -222,7 +213,7 @@ def __set_collection_property(node, key, value: list):
     node.set_property(key, collection)
 
 
-def __get_class_type(name: str) -> type:
+def __get_class_type__(name: str) -> type:
     """根据类名获取类
 
     Args:
@@ -234,7 +225,7 @@ def __get_class_type(name: str) -> type:
     """
     module_path = __MODULE_PATH__.get(name)
     if not module_path:
-        raise ScriptParseException(f'找不到对应节点的类型名称:[ {name} ] ')
+        raise ScriptParseException(f'节点类型不存在，类型名称:[ {name} ] ')
 
     module = importlib.import_module(module_path)
     return getattr(module, name)

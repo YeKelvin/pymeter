@@ -94,11 +94,11 @@ class StandardEngine(Greenlet):
         self.tree.traverse(test_listener_searcher)
 
         # 遍历执行 TestCollectionListener
-        self.__notify_test_listeners_of_start(test_listener_searcher)
+        self.__notify_test_listeners_of_start__(test_listener_searcher)
 
         # 存储 TestCollection 子代节点(非 TestGroup 节点)
         collection_level_elements = self.tree.index(0).list()
-        self.__remove_groups(collection_level_elements)  # 删除 TestGroup 节点
+        self.__remove_groups__(collection_level_elements)  # 删除 TestGroup 节点
 
         # 查找 SetupGroup / TestGroup / TearDownGroup 对象
         setup_group_searcher = SearchByClass(SetupGroup)
@@ -127,7 +127,7 @@ class StandardEngine(Greenlet):
                 group_count += 1
                 group_name = setup_group.name
                 log.info(f'初始化第 {group_count} 个 #前置线程组# ，名称:[ {group_name} ]')
-                self.__start_test_group(setup_group, group_count, setup_group_searcher, collection_level_elements)
+                self.__start_test_group__(setup_group, group_count, setup_group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
@@ -138,7 +138,7 @@ class StandardEngine(Greenlet):
                 break
 
         log.info('等待所有 #前置线程组# 执行完成')
-        self.__wait_groups_stopped()
+        self.__wait_groups_stopped__()
         log.info('所有 #前置线程组# 执行完成')
         group_total += group_count
         group_count = 0
@@ -157,7 +157,7 @@ class StandardEngine(Greenlet):
                 group_count += 1
                 group_name = group.name
                 log.info(f'初始化第 {group_count} 个 #线程组# ，名称:[ {group_name} ]')
-                self.__start_test_group(group, group_count, group_searcher, collection_level_elements)
+                self.__start_test_group__(group, group_count, group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
@@ -175,7 +175,7 @@ class StandardEngine(Greenlet):
                 log.info('等待所有 #线程组# 执行完成')
 
         log.info('等待所有 #线程组# 执行完成')
-        self.__wait_groups_stopped()
+        self.__wait_groups_stopped__()
         log.info('所有 #线程组# 执行完成')
         group_count = 0
         ContextService.clear_total_coroutines()
@@ -191,7 +191,7 @@ class StandardEngine(Greenlet):
                 group_count += 1
                 group_name = teardown_group.name
                 log.info(f'初始化第 {group_count} 个 #后置线程组# ，名称:[ {group_name} ]')
-                self.__start_test_group(teardown_group, group_count, teardown_group_searcher, collection_level_elements)
+                self.__start_test_group__(teardown_group, group_count, teardown_group_searcher, collection_level_elements)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
@@ -202,7 +202,7 @@ class StandardEngine(Greenlet):
                 break
 
         log.info('等待所有 #后置线程组# 执行完成')
-        self.__wait_groups_stopped()
+        self.__wait_groups_stopped__()
         log.info('所有 #后置线程组# 执行完成')
         group_total = group_total + group_count
         ContextService.clear_total_coroutines()
@@ -212,7 +212,7 @@ class StandardEngine(Greenlet):
             log.warning('集合下找不到 #线程组# 或已被禁用')
 
         # 遍历执行 TestCollectionListener
-        self.__notify_test_listeners_of_end(test_listener_searcher)
+        self.__notify_test_listeners_of_end__(test_listener_searcher)
 
         # DEBUG时输出结果
         if log.level == logging.DEBUG:
@@ -238,7 +238,7 @@ class StandardEngine(Greenlet):
         for group in self.groups:
             group.kill_groups()
 
-    def __start_test_group(
+    def __start_test_group__(
         self,
         group: TestGroup,
         group_count: int,
@@ -271,13 +271,13 @@ class StandardEngine(Greenlet):
         except StopTestException:
             log.error(traceback.format_exc())
 
-    def __wait_groups_stopped(self) -> None:
+    def __wait_groups_stopped__(self) -> None:
         """等待所有线程执行完成"""
         for group in self.groups:
             group.wait_groups_stopped()
 
     @staticmethod
-    def __notify_test_listeners_of_start(searcher: SearchByClass) -> None:
+    def __notify_test_listeners_of_start__(searcher: SearchByClass) -> None:
         """遍历调用 TestCollectionListener
 
         Args:
@@ -292,7 +292,7 @@ class StandardEngine(Greenlet):
             listener.collection_started()
 
     @staticmethod
-    def __notify_test_listeners_of_end(searcher: SearchByClass) -> None:
+    def __notify_test_listeners_of_end__(searcher: SearchByClass) -> None:
         """遍历调用 TestCollectionListener
 
         Args:
@@ -307,7 +307,7 @@ class StandardEngine(Greenlet):
             listener.collection_ended()
 
     @staticmethod
-    def __remove_groups(elements: list) -> None:
+    def __remove_groups__(elements: list) -> None:
         """遍历删除 TestGroup 节点
 
         Args:
@@ -316,6 +316,7 @@ class StandardEngine(Greenlet):
         Returns: None
 
         """
+        # 复制 elements 后遍历
         for node in elements[:]:
             if isinstance(node, TestGroup) or not isinstance(node, TestElement):
                 elements.remove(node)

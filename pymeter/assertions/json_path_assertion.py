@@ -18,7 +18,7 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-JUDGMENT_TYPES = {
+OPERATORS = {
     'EQUAL': '等于',
     'NOT_EQUAL': '不等于',
     'GREATER_THAN': '大于',
@@ -45,8 +45,8 @@ class JsonPathAssertion(Assertion, TestElement):
     # 期望值
     EXPECTED_VALUE: Final = 'JsonPathAssertion__expected_value'
 
-    # 判断类型
-    JUDGMENT_TYPE: Final = 'JsonPathAssertion__judgment_type'
+    # 操作符
+    OPERATOR: Final = 'JsonPathAssertion__operator'
 
     @property
     def jsonpath(self):
@@ -57,42 +57,31 @@ class JsonPathAssertion(Assertion, TestElement):
         return self.get_property_as_str(self.EXPECTED_VALUE)
 
     @property
-    def judgment_type(self):
-        return self.get_property_as_str(self.JUDGMENT_TYPE)
+    def operator(self):
+        return self.get_property_as_str(self.OPERATOR)
 
     def get_result(self, sampler_result: SampleResult) -> AssertionResult:
         result = AssertionResult(self.name)
         response_data = sampler_result.response_data
 
         if not response_data:
-            result.failure = True
-            result.message = '响应结果为空'
-            return result
+            return self.fail(result, '响应结果为空')
 
         # JsonPath表达式
         jsonpath = self.jsonpath
         # 期望值
         expected_value = self.expected_value
         # 判断类型
-        judgment_type = self.judgment_type
+        operator = self.operator
         
         if not jsonpath:
-            result.failure = True
-            result.message = 'JsonPath表达式为空，请修改后重试'
-            return result
+            return self.fail(result, 'JsonPath表达式为空，请修改后重试')
         
-        if not judgment_type:
-            result.failure = True
-            result.message = '判断类型为空，请修改后重试'
-            return result
+        if not operator:
+            return self.fail(result, '判断类型为空，请修改后重试')
     
-        if (
-                judgment_type not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS'] and
-                not expected_value
-        ):
-            result.failure = True
-            result.message = '期望值为空，请修改后重试'
-            return result
+        if operator not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS'] and not expected_value:
+            return self.fail(result, '期望值为空，请修改后重试')
 
         # 获取JsonPath实际值
         actual_value = None
@@ -103,105 +92,86 @@ class JsonPathAssertion(Assertion, TestElement):
             exists = False
 
         # 等于
-        if judgment_type == 'EQUAL' and str(actual_value) != expected_value:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'EQUAL' and str(actual_value) != expected_value:
+            return self.fail(result, actual_value, exists)
 
         # 不等于
-        if judgment_type == 'NOT_EQUAL' and str(actual_value) == expected_value:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'NOT_EQUAL' and str(actual_value) == expected_value:
+            return self.fail(result, actual_value, exists)
 
         # 大于
-        if judgment_type == 'GREATER_THAN' and not (Decimal(str(actual_value)) > Decimal(expected_value)):
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'GREATER_THAN' and not (Decimal(str(actual_value)) > Decimal(expected_value)):
+            return self.fail(result, actual_value, exists)
 
         # 小于
-        if judgment_type == 'LESS_THAN' and not (Decimal(str(actual_value)) < Decimal(expected_value)):
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'LESS_THAN' and not (Decimal(str(actual_value)) < Decimal(expected_value)):
+            return self.fail(result, actual_value, exists)
 
         # 包含
-        if judgment_type == 'IN' and expected_value not in str(actual_value):
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'IN' and expected_value not in str(actual_value):
+            return self.fail(result, actual_value, exists)
 
         # 不包含
-        if judgment_type == 'NOT_IN' and expected_value in str(actual_value):
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'NOT_IN' and expected_value in str(actual_value):
+            return self.fail(result, actual_value, exists)
 
         # 开头包含
-        if judgment_type == 'START_WITH' and not (str(actual_value).startswith(expected_value)):
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'START_WITH' and not (str(actual_value).startswith(expected_value)):
+            return self.fail(result, actual_value, exists)
 
         # 结尾包含
-        if judgment_type == 'END_WITH' and not (str(actual_value).endswith(expected_value)):
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'END_WITH' and not (str(actual_value).endswith(expected_value)):
+            return self.fail(result, actual_value, exists)
 
         # 为null
-        if judgment_type == 'NULL' and actual_value is not None:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'NULL' and actual_value is not None:
+            return self.fail(result, actual_value, exists)
 
         # 不为null
-        if judgment_type == 'NOT_NULL' and actual_value is None:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'NOT_NULL' and actual_value is None:
+            return self.fail(result, actual_value, exists)
 
         # 为空
-        if judgment_type == 'BLANK' and actual_value:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'BLANK' and actual_value:
+            return self.fail(result, actual_value, exists)
 
         # 不为空
-        if judgment_type == 'NOT_BLANK' and not actual_value:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'NOT_BLANK' and not actual_value:
+            return self.fail(result, actual_value, exists)
 
         # 存在
-        if judgment_type == 'EXISTS' and not exists:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'EXISTS' and not exists:
+            return self.fail(result, actual_value, exists)
 
         # 不存在
-        if judgment_type == 'NOT_EXISTS' and exists:
-            result.failure = True
-            result.message = self.get_failure_message(actual_value)
-            return result
+        if operator == 'NOT_EXISTS' and exists:
+            return self.fail(result, actual_value, exists)
 
         # 正则匹配
-        if judgment_type == 'REGULAR':
+        if operator == 'REGULAR':
             ...
 
         return result
 
-    def get_failure_message(self, actual_value):
+    def fail(self, result, msg=None, actual_value=None, exists=None):
+        result.failure = True
+        result.message = msg or self.get_failure_message(actual_value, exists)
+        return result
+
+    def get_failure_message(self, actual_value, exists):
         expected_value_output = (
             f'JsonPath期望值: {self.expected_value}'
-            if self.judgment_type not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS']
+            if self.operator not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS']
             else ''
         )
+        if exists:
+            actual_value = actual_value if actual_value is not None else "null"
+        else:
+            actual_value = None
         return (
             f'元素名称: {self.name}\n'
             f'断言结果: 失败\n'
-            f'判断类型: {JUDGMENT_TYPES.get(self.judgment_type)}\n'
+            f'判断类型: {OPERATORS.get(self.operator)}\n'
             f'JsonPath表达式: {self.jsonpath}\n'
             f'JsonPath实际值: {actual_value}\n'
             f'{expected_value_output}'

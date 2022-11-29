@@ -85,12 +85,12 @@ class SamplePackage:
     def __str__(self):
         return str({
             'sampler': self.sampler,
-            'configs': [config for config in self.configs],
-            'controllers': [controller for controller in self.controllers],
-            'listeners': [listener for listener in self.listeners],
-            'transactionListeners': [listener for listener in self.trans_listeners],
-            'timers': [time for time in self.timers],
-            'assertions': [assertion for assertion in self.assertions],
-            'pres': [processor for processor in self.pre_processors],
-            'posts': [processor for processor in self.post_processors],
+            'configs': list(self.configs),
+            'controllers': list(self.controllers),
+            'listeners': list(self.listeners),
+            'transactionListeners': list(self.trans_listeners),
+            'timers': list(self.timers),
+            'assertions': list(self.assertions),
+            'pres': list(self.pre_processors),
+            'posts': list(self.post_processors)
         })
