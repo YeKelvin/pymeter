@@ -194,15 +194,15 @@ class JsonPathAssertion(Assertion, TestElement):
 
     def get_failure_message(self, actual_value):
         expected_value_output = (
-            f'期望值: {self.expected_value}'
+            f'JsonPath期望值: {self.expected_value}'
             if self.judgment_type not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS']
             else ''
         )
         return (
-            'Json断言失败\n'
             f'元素名称: {self.name}\n'
+            f'断言结果: 失败\n'
+            f'判断类型: {JUDGMENT_TYPES.get(self.judgment_type)}\n'
             f'JsonPath表达式: {self.jsonpath}\n'
             f'JsonPath实际值: {actual_value}\n'
-            f'判断类型: {JUDGMENT_TYPES.get(self.judgment_type)}\n'
             f'{expected_value_output}'
         )
