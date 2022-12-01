@@ -160,7 +160,7 @@ class HTTPSampler(Sampler):
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
             result.response_headers = dict(res.headers)
             result.response_cookies = res.cookies.get_dict()
-            result.response_data = res.text
+            result.response_data = res.text or res.status_code
         except Exception:
             result.success = False
             result.error = True
@@ -220,10 +220,7 @@ class HTTPSampler(Sampler):
                 payload = f'{payload}{name}={value}&'
             return payload[:-1]
 
-        if data := self.data:
-            return f'{url}\n\n{self.method} DATA:\n{data}'
-
-        return url
+        return f'{url}\n\n{self.method} DATA:\n{data}' if (data := self.data) else url
 
     def add_test_element(self, el) -> None:
         """@override"""
