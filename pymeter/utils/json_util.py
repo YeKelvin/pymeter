@@ -24,7 +24,7 @@ def to_json(obj: dict or list) -> str:
     try:
         return orjson.dumps(obj).decode('utf8')
     except TypeError as e:
-        e.args = e.args + (f'obj:[ {obj} ]',)
+        e.args = e.args + (f'source:[ {obj} ]',)
         raise e
 
 

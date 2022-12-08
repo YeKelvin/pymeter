@@ -9,6 +9,7 @@ from typing import Final
 from pymeter.groups.context import ContextService
 from pymeter.processors.post import PostProcessor
 from pymeter.utils.json_util import json_path
+from pymeter.utils.json_util import to_json
 from pymeter.utils.log_util import get_logger
 
 
@@ -63,7 +64,7 @@ class JsonPathPostProcessor(PostProcessor):
         try:
             if response_data := ctx.previous_result.response_data:
                 # 将提取值放入变量
-                actualvalue = json_path(response_data, jsonpath, self.list_random)
+                actualvalue = self.extract(response_data, jsonpath)
                 ctx.variables.put(varname, actualvalue)
                 if actualvalue is not None:
                     log.info(f'Json提取成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
@@ -82,3 +83,16 @@ class JsonPathPostProcessor(PostProcessor):
             if self.default_value:
                 ctx.variables.put(jsonpath, self.default_value)
                 log.info(f'Json提取异常，赋予默认值，变量名[ {jsonpath} ]，变量值:[ {self.default_value} ]')
+
+    def extract(self, json, jsonpath):
+        """提取jsonpath"""
+        value = json_path(json, jsonpath, self.list_random)
+
+        if isinstance(value, (dict, list)):
+            return to_json(value)
+        if isinstance(value, (int, float)):
+            return str(value)
+        if isinstance(value, bool):
+            return 'true' if value else 'false'
+
+        return 'null' if value is None else value
