@@ -202,12 +202,9 @@ def __set_object_property__(node, key, value: dict):
 def __set_collection_property__(node, key, value: list):
     collection = []
     for item in value:
-        if isinstance(item, dict):
-            if 'class' in item:
-                propnode = __get_node__(item)
-                collection.append(propnode)
-            else:
-                collection.append(item)
+        if isinstance(item, dict) and 'class' in item:
+            propnode = __get_node__(item)
+            collection.append(propnode)
         else:
             collection.append(item)
     node.set_property(key, collection)

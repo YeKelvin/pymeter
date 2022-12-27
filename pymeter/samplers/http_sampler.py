@@ -78,7 +78,7 @@ class HTTPSampler(Sampler):
     def encoded_headers(self) -> dict:
         headers = self.headers
         for name, value in headers.items():
-            headers[name] = value.encode(encoding=self.encoding)
+            headers[name] = (value or '').encode(encoding=self.encoding)
         return headers
 
     @property

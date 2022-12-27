@@ -18,9 +18,9 @@ default = true
 [tool.poetry.dependencies]
 python = "^3.8"
 jsonpath = "0.82"
-orjson = "3.8.2"
+orjson = "3.8.3"
 xmltodict = "0.13.0"
-sqlalchemy = "1.4.44"
+sqlalchemy = "1.4.45"
 cx-Oracle = "8.3.0"
 mysql-connector-python = "8.0.31"
 psycopg2 = { version = "2.9.5", markers = "platform_system=='Windows' or platform_system=='Linux'"}

@@ -201,4 +201,6 @@ class ConfigElement:
 
 
 class ConfigTestElement(ConfigElement, TestElement):
-    ...
+
+    def add_config_element(self, config: ConfigElement):
+        raise NotImplementedError

@@ -61,7 +61,7 @@ class HTTPHeaderManager(ConfigTestElement):
 
     def __init__(self):
         super().__init__()
-        self.add_property(self.HEADERS, [])
+        self.set_property(self.HEADERS, [])
 
     @property
     def headers_as_list(self) -> List[HTTPHeader]:
@@ -69,14 +69,11 @@ class HTTPHeaderManager(ConfigTestElement):
 
     @property
     def headers_as_dict(self) -> dict:
-        headers = {}
-        for header in self.headers_as_list:
-            headers[header.name] = header.value
-        return headers
+        return {header.name: header.value for header in self.headers_as_list}
 
     def merge(self, el):
         if not isinstance(el, HTTPHeaderManager):
-            raise Exception(f'cannot merge type: {self} with type: {el}')
+            raise TypeError(f'cannot merge type: {self} with type: {el}')
 
         merged_manager = self.clone()  # type: HTTPHeaderManager
         new_manager = el  # type: HTTPHeaderManager
@@ -101,10 +98,9 @@ class HTTPHeaderManager(ConfigTestElement):
         return None
 
     def has_header(self, name: str) -> bool:
-        for header in self.headers_as_list:
-            if header.name.lower() == name.lower():
-                return True
-        return False
+        return any(
+            header.name.lower() == name.lower() for header in self.headers_as_list
+        )
 
     def add_header(self, name: str, value: str) -> None:
         if self.has_header(name):
@@ -172,7 +168,7 @@ class HTTPCookieManager(ConfigTestElement):
 
     def __init__(self):
         super().__init__()
-        self.add_property(self.COOKIES, [])
+        self.set_property(self.COOKIES, [])
 
     @property
     def cookies_as_list(self) -> List[HTTPCookie]:
@@ -180,14 +176,11 @@ class HTTPCookieManager(ConfigTestElement):
 
     @property
     def cookies_as_dict(self) -> dict:
-        cookies = {}
-        for cookie in self.cookies_as_list:
-            cookies[cookie.name] = cookie.value
-        return cookies
+        return {cookie.name: cookie.value for cookie in self.cookies_as_list}
 
     def merge(self, el):
         if not isinstance(el, HTTPCookieManager):
-            raise Exception(f'cannot merge type: {self} with type: {el}')
+            raise TypeError(f'cannot merge type: {self} with type: {el}')
 
         merged_manager = self.clone()  # type: HTTPCookieManager
         new_manager = el  # type: HTTPCookieManager
@@ -212,10 +205,9 @@ class HTTPCookieManager(ConfigTestElement):
         return None
 
     def has_cookie(self, name: str) -> bool:
-        for cookie in self.cookies_as_list:
-            if cookie.name.lower() == name.lower():
-                return True
-        return False
+        return any(
+            cookie.name.lower() == name.lower() for cookie in self.cookies_as_list
+        )
 
     def add_cookie(self, name: str, value: str, domain: str = None, path: str = None) -> None:
         if self.has_cookie(name):
