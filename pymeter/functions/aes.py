@@ -20,20 +20,20 @@ class AES(Function):
     def __init__(self):
         self.plaintext = None
         self.key = None
-        self.plaintext_encode_type = None
         self.block_size = None
         self.mode = None
+        self.encoding = None
 
     def execute(self):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
         key = self.key.execute().strip()
-        plaintext_encode_type = self.plaintext_encode_type.execute().strip() if self.plaintext_encode_type else 'base64'
-        block_size = self.block_size.execute().strip() if self.block_size else '16'
+        block_size = self.block_size.execute().strip() if self.block_size else '128'
         mode = self.mode.execute().strip() if self.mode else 'ECB'
+        encoding = self.encoding.execute().strip() if self.encoding else 'base64'
 
-        result = aes_cryptor.encrypt(plaintext, key, plaintext_encode_type, block_size, mode)
+        result = aes_cryptor.encrypt(plaintext, key, block_size, mode, encoding)
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
         return result
@@ -47,6 +47,6 @@ class AES(Function):
         # 提取参数
         self.plaintext = params[0]
         self.key = params[1]
-        self.plaintext_encode_type = params[2] if len(params) > 2 else None
-        self.block_size = params[3] if len(params) > 3 else None
-        self.mode = params[4] if len(params) > 4 else None
+        self.block_size = params[2] if len(params) > 2 else None
+        self.mode = params[3] if len(params) > 3 else None
+        self.encoding = params[4] if len(params) > 4 else None

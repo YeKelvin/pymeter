@@ -17,7 +17,7 @@ AES加密有AES-128、AES-192、AES-256三种，分别对应三种密钥长度
 """
 
 
-AES_MODE = {
+AES_MODES = {
     'ECB': AES.MODE_ECB,
     'CBC': AES.MODE_CBC,
     'CFB': AES.MODE_CFB,
@@ -31,35 +31,41 @@ AES_MODE = {
     'OCB': AES.MODE_OCB
 }
 
+BLOCK_SIZES = {
+    '128': 16,
+    '192': 24,
+    '256': 32
+}
 
-def encrypt(plaintext, key, plaintext_encode_type=None, block_size=16, mode='ECB') -> [str, bytes]:
-    if mode not in AES_MODE:
+
+def encrypt(plaintext, key, size='128', mode='ECB', encoding=None) -> [str, bytes]:
+    if mode not in AES_MODES:
         raise KeyError('aes mode 不存在')
 
-    cipher = AES.new(key.encode('utf8'), AES_MODE[mode])
-    ciphertext = cipher.encrypt(pad(plaintext.encode('utf8'), int(block_size)))
+    cipher = AES.new(key.encode('utf8'), AES_MODES[mode])
+    ciphertext = cipher.encrypt(pad(plaintext.encode('utf8'), int(BLOCK_SIZES[size])))
 
-    if plaintext_encode_type == 'base64':
+    if encoding == 'base64':
         return base64.b64encode(ciphertext).decode('utf8')
-    elif plaintext_encode_type == 'hex':
+    elif encoding == 'hex':
         return binascii.b2a_hex(ciphertext).decode('utf8')
     else:
         return ciphertext
 
 
-def decrypt(ciphertext, key, ciphertext_decode_type=None, block_size=16, mode='ECB'):
-    if mode not in AES_MODE:
+def decrypt(ciphertext, key, size='128', mode='ECB', decoding=None):
+    if mode not in AES_MODES:
         raise KeyError('aes mode 不存在')
 
-    if ciphertext_decode_type == 'base64':
+    if decoding == 'base64':
         binary_data = base64.b64decode(ciphertext.encode('utf8'))
-    elif ciphertext_decode_type == 'hex':
+    elif decoding == 'hex':
         binary_data = binascii.a2b_hex(ciphertext.encode('utf8'))
     else:
         binary_data = ciphertext
 
-    decipher = AES.new(key.encode('utf8'), AES_MODE[mode])
-    return unpad(decipher.decrypt(binary_data), int(block_size)).decode('utf8')
+    decipher = AES.new(key.encode('utf8'), AES_MODES[mode])
+    return unpad(decipher.decrypt(binary_data), int(BLOCK_SIZES[size])).decode('utf8')
 
 
 if __name__ == '__main__':

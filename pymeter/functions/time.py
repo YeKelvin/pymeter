@@ -29,8 +29,7 @@ class Time(Function):
         if self.format:
             time_format = self.format.execute().strip()
             struct_time = time.localtime(timestamp)
-            result = time.strftime(time_format, struct_time)
-            return result
+            return time.strftime(time_format, struct_time)
 
         result = str(int(timestamp * 1000))
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
