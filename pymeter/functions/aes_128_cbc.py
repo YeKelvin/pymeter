@@ -13,21 +13,23 @@ from pymeter.utils.log_util import get_logger
 log = get_logger(__name__)
 
 
-class AES(Function):
+class AES128CBC(Function):
 
     REF_KEY: Final = '__AES128CBC'
 
     def __init__(self):
         self.plaintext = None
         self.key = None
+        self.iv = None
 
     def execute(self):
         log.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
         key = self.key.execute().strip()
+        iv = self.iv.execute().strip() or None if self.iv else None
 
-        result = aes_cryptor.encrypt(plaintext, key, '16', 'CBC', 'base64')
+        result = aes_cryptor.encrypt(plaintext, key, size='128', mode='CBC', iv=iv, encoding='base64')
         log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
         return result
@@ -36,7 +38,9 @@ class AES(Function):
         log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
         # 校验函数参数个数
-        self.check_parameter_count(params, 2)
+        self.check_parameter_min(params, 2)
+        self.check_parameter_max(params, 3)
         # 提取参数
         self.plaintext = params[0]
         self.key = params[1]
+        self.iv = params[2] if len(params) > 2 else None

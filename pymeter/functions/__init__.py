@@ -7,10 +7,12 @@
 from .function import Function  # noqa
 
 # 加密相关
+from .aes import AES  # noqa
+from .aes_128_cbc import AES128CBC  # noqa
+from .aes_128_ecb import AES128ECB  # noqa
 from .base64 import Base64  # noqa
 from .md5 import MD5  # noqa
 from .hex import Hex  # noqa
-from .aes import AES  # noqa
 from .rsa import RSA  # noqa
 from .google_auth import GoogleAuth  # noqa
 

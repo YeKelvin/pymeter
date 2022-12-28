@@ -38,12 +38,13 @@ BLOCK_SIZES = {
 }
 
 
-def encrypt(plaintext, key, size='128', mode='ECB', encoding=None) -> [str, bytes]:
+def encrypt(plaintext, key, size='128', mode='ECB', iv=None, encoding=None) -> [str, bytes]:
     if mode not in AES_MODES:
         raise KeyError('aes mode 不存在')
 
-    cipher = AES.new(key.encode('utf8'), AES_MODES[mode])
-    ciphertext = cipher.encrypt(pad(plaintext.encode('utf8'), int(BLOCK_SIZES[size])))
+    cipher = AES.new(key.encode('utf8'), AES_MODES[mode], iv)
+    bdata = pad(plaintext.encode('utf8'), int(BLOCK_SIZES[size]))
+    ciphertext = cipher.encrypt(bdata)
 
     if encoding == 'base64':
         return base64.b64encode(ciphertext).decode('utf8')
@@ -66,14 +67,3 @@ def decrypt(ciphertext, key, size='128', mode='ECB', decoding=None):
 
     decipher = AES.new(key.encode('utf8'), AES_MODES[mode])
     return unpad(decipher.decrypt(binary_data), int(BLOCK_SIZES[size])).decode('utf8')
-
-
-if __name__ == '__main__':
-    # OBStWkqV6YnEIBVmCkC34w==
-    # 3814ad5a4a95e989c42015660a40b7e3
-    data = encrypt('123456', 'UTh7LJTGbo7oupjwt0/Naw==', 'hex')
-    print(data)
-    text1 = decrypt('OBStWkqV6YnEIBVmCkC34w==', 'UTh7LJTGbo7oupjwt0/Naw==', 'base64')
-    print(text1)
-    text2 = decrypt('3814ad5a4a95e989c42015660a40b7e3', 'UTh7LJTGbo7oupjwt0/Naw==', 'hex')
-    print(text2)

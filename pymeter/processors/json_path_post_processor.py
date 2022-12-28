@@ -67,10 +67,10 @@ class JsonPathPostProcessor(PostProcessor):
                 actualvalue = self.extract(response_data, jsonpath)
                 ctx.variables.put(varname, actualvalue)
                 if actualvalue is not None:
-                    log.info(f'Json提取成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
+                    log.info(f'提取成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
                 else:
                     log.info(
-                        f'Json提取失败，请检查jsonpath是否正确，'
+                        f'提取失败，请检查jsonpath是否正确，'
                         f'jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]'
                     )
             # 设置默认值
@@ -82,7 +82,7 @@ class JsonPathPostProcessor(PostProcessor):
             # 设置默认值
             if self.default_value:
                 ctx.variables.put(jsonpath, self.default_value)
-                log.info(f'Json提取异常，赋予默认值，变量名[ {jsonpath} ]，变量值:[ {self.default_value} ]')
+                log.info(f'提取异常，赋予默认值，变量名[ {jsonpath} ]，变量值:[ {self.default_value} ]')
 
     def extract(self, json, jsonpath):
         """提取jsonpath"""

@@ -15,7 +15,7 @@ log = get_logger(__name__)
 
 class Hex(Function):
 
-    REF_KEY: Final = '__HEX'
+    REF_KEY: Final = '__Hex'
 
     def __init__(self):
         self.data = None
