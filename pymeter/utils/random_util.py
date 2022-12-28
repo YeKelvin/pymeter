@@ -55,14 +55,14 @@ def get_bankcard(cardbin, length) -> str:
     :return:            银行卡卡号
     """
     if length < len(cardbin):
-        raise Exception('长度不能小于cardBin的长度')
+        raise ValueError('长度不能小于cardBin的长度')
     return get_number(length - len(cardbin), prefix=str(cardbin))
 
 
-def get_phone_number(operators='ALL'):
+def get_phone_number(operator='ALL'):
     """生成随机手机号
 
-    :param operators:   通讯运营商，默认ALL，可选 CMCC | CUCC | TELECOM
+    :param operator:   通讯运营商，默认ALL，可选 CMCC | CUCC | TELECOM
     :return:            手机号
     """
     return {
@@ -70,8 +70,10 @@ def get_phone_number(operators='ALL'):
         'CMCC': choice(CMCC_CODE),
         'CUCC': choice(CUCC_CODE),
         'TELECOM': choice(TELECOM_CODE)
-    }.get(operators,
-          choice(MOBILENO_PREFIX)) + get_number(8)
+    }.get(
+        operator,
+        choice(MOBILENO_PREFIX)
+    ) + get_number(8)
 
 
 def get_phone_number_cambodia():
@@ -129,19 +131,3 @@ def get_phone_number_cambodia():
         num_length = random.randint(6, 6)
 
     return phone_segment + ''.join(random.choice("0123456789") for _ in range(num_length))
-
-
-def now() -> str:
-    """获取当前时间
-    """
-    return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
-
-
-def get_logid(prefix: str = '', suffix: str = '') -> str:
-    """获取日志id
-
-    :param prefix:  前缀
-    :param suffix:  后缀
-    :return:        日志id
-    """
-    return prefix + str(time.strftime('%Y%m%d%H%M%S', time.localtime(time.time()))) + get_number(6) + suffix

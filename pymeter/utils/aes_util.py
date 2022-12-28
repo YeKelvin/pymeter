@@ -54,16 +54,16 @@ def encrypt(plaintext, key, size='128', mode='ECB', iv=None, encoding=None) -> [
         return ciphertext
 
 
-def decrypt(ciphertext, key, size='128', mode='ECB', decoding=None):
+def decrypt(ciphertext, key, size='128', mode='ECB', iv=None, encoding=None):
     if mode not in AES_MODES:
         raise KeyError('aes mode 不存在')
 
-    if decoding == 'base64':
+    if encoding == 'base64':
         binary_data = base64.b64decode(ciphertext.encode('utf8'))
-    elif decoding == 'hex':
+    elif encoding == 'hex':
         binary_data = binascii.a2b_hex(ciphertext.encode('utf8'))
     else:
         binary_data = ciphertext
 
-    decipher = AES.new(key.encode('utf8'), AES_MODES[mode])
+    decipher = AES.new(key.encode('utf8'), AES_MODES[mode], iv)
     return unpad(decipher.decrypt(binary_data), int(BLOCK_SIZES[size])).decode('utf8')

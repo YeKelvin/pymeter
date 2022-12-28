@@ -23,6 +23,8 @@ from .eval import Eval  # noqa
 from .random_choice import RandomChoice  # noqa
 from .random_int import RandomInt  # noqa
 from .random import Random  # noqa
+from .phone import Phone  # noqa
+from .ulid import ULID  # noqa
 
 # 时间相关
 from .time import Time  # noqa
