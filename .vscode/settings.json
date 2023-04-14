@@ -22,7 +22,6 @@
     "python.testing.cwd": "${workspaceFolder}",
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
     "python.languageServer": "Pylance",
 
     /* Code Runner */
@@ -43,24 +42,24 @@
         "PYTHONPATH": "${workspaceFolder}"
     },
     "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#e4b849",
-        "activityBar.activeBorder": "#158b69",
-        "activityBar.background": "#e4b849",
-        "activityBar.foreground": "#15202b",
-        "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#158b69",
+        "activityBar.activeBorder": "#2a6e3f",
+        "activityBar.activeBackground": "#a64036",
+        "activityBar.background": "#a62228",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#269f21",
         "activityBarBadge.foreground": "#e7e7e7",
-        "statusBar.background": "#daa520",
-        "statusBar.foreground": "#15202b",
-        "statusBarItem.hoverBackground": "#ad8319",
-        "statusBarItem.remoteBackground": "#daa520",
-        "statusBarItem.remoteForeground": "#15202b",
-        "titleBar.activeBackground": "#daa520",
-        "titleBar.activeForeground": "#15202b",
-        "titleBar.inactiveBackground": "#daa52099",
-        "titleBar.inactiveForeground": "#15202b99",
-        "sash.hoverBorder": "#e4b849",
-        "commandCenter.border": "#15202b99"
+        "commandCenter.border": "#e7e7e799",
+        "sash.hoverBorder": "#a62228",
+        "statusBar.background": "#7c191e",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#a62228",
+        "statusBarItem.remoteBackground": "#7c191e",
+        "statusBarItem.remoteForeground": "#e7e7e7",
+        "titleBar.activeBackground": "#7c191e",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.inactiveBackground": "#7c191e99",
+        "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "peacock.color": "#DAA520"
+    "peacock.color": "#7c191e"
 }

@@ -6,7 +6,7 @@
 from typing import List
 from typing import Optional
 
-import requests
+import httpx
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
@@ -225,7 +225,7 @@ class SessionManager(ConfigTestElement):
 
     def __init__(self) -> None:
         super().__init__()
-        self.session = None  # type: Optional[requests.sessions.Session]
+        self.session = None  # type: httpx.Client
 
 
 class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListener):
@@ -240,7 +240,7 @@ class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListene
 
     def group_started(self) -> None:
         log.debug('open new http session')
-        self.session = requests.session()
+        self.session = httpx.Client()
 
     def group_finished(self) -> None:
         log.debug(f'close http session:[ {self.session} ]')
@@ -250,4 +250,4 @@ class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListene
         if self.clear_each_iteration and iter > 1:
             log.debug(f'close and open new http session in iteration:[ {iter} ]')
             self.session.close()
-            self.session = requests.session()
+            self.session = httpx.Client()

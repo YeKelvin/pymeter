@@ -5,6 +5,10 @@
 # @Author  : Kelvin.Ye
 
 
+class InvalidScriptException(Exception):
+    ...
+
+
 class InvalidVariableException(Exception):
     ...
 

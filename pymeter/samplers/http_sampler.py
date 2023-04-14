@@ -7,8 +7,8 @@ import traceback
 from typing import Final
 from typing import Optional
 
-import requests
-from requests.models import Response
+import httpx
+from httpx import Response
 
 from pymeter.configs.arguments import Arguments
 from pymeter.configs.httpconfigs import HTTPHeaderManager
@@ -139,7 +139,7 @@ class HTTPSampler(Sampler):
             if self.session_manager and self.session_manager.session:
                 impl = self.session_manager.session
             else:
-                impl = requests
+                impl = httpx
 
             res = impl.request(
                 method=self.method,
@@ -150,7 +150,7 @@ class HTTPSampler(Sampler):
                 files=self.files,
                 cookies=None,
                 timeout=self.get_timeout(),
-                allow_redirects=self.allow_redirects
+                follow_redirects=self.allow_redirects
             )
             res.encoding = self.encoding
 
@@ -159,7 +159,7 @@ class HTTPSampler(Sampler):
             result.response_code = res.status_code
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
             result.response_headers = dict(res.headers)
-            result.response_cookies = res.cookies.get_dict()
+            result.response_cookies = dict(res.cookies)
             result.response_data = res.text or res.status_code
         except Exception:
             result.success = False
@@ -199,7 +199,7 @@ class HTTPSampler(Sampler):
                 query = f'{query}{name}={value}&'
             url = f'{url}?{query[:-1]}'
 
-        if body := res.request.body:
+        if body := res.request.content:
             body = body.decode(encoding=self.encoding) if isinstance(body, bytes) else body
             payload = f'\n\n{self.method} DATA:\n{body}'
 

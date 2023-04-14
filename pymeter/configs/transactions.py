@@ -3,7 +3,7 @@
 # @File    : transaction.py
 # @Time    : 2021/9/29 16:20
 # @Author  : Kelvin.Ye
-import requests
+import httpx
 
 from pymeter.configs.arguments import Arguments
 from pymeter.configs.httpconfigs import SessionManager
@@ -37,7 +37,7 @@ class TransactionHTTPSessionManager(SessionManager, TransactionConfig, Transacti
     def transaction_started(self) -> None:
         """@override"""
         log.debug('open new transaction http session')
-        self.session = requests.session()
+        self.session = httpx.Client()
 
     def transaction_ended(self) -> None:
         """@override"""

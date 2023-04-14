@@ -4,7 +4,6 @@
 # @Time    : 2021-08-17 19:21:59
 # @Author  : Kelvin.Ye
 import random
-import time
 from datetime import date
 from datetime import timedelta
 from random import choice
