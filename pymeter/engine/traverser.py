@@ -7,6 +7,8 @@ from collections import deque
 from typing import Dict
 from typing import List
 
+from loguru import logger
+
 from pymeter.assertions.assertion import Assertion
 from pymeter.controls.controller import Controller
 from pymeter.controls.transaction import TransactionController
@@ -25,10 +27,6 @@ from pymeter.processors.post import PostProcessor
 from pymeter.processors.pre import PreProcessor
 from pymeter.samplers.sampler import Sampler
 from pymeter.timers.timer import Timer
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class HashTreeTraverser:
@@ -182,18 +180,18 @@ class TestCompiler(HashTreeTraverser):
 
     @staticmethod
     def done(package: SamplePackage) -> None:
-        # log.debug(f'package:[ {package.sampler}] sampler package done')
+        # logger.debug(f'package:[ {package.sampler}] sampler package done')
         package.recover_running_version()
 
     def configure_sampler(self, sampler) -> SamplePackage:
-        # log.debug(f'sampler:[ {sampler} ] configure to package')
+        # logger.debug(f'sampler:[ {sampler} ] configure to package')
         package = self.sampler_config_store.get(sampler)
         package.sampler = sampler
         self.__configure_with_config_elements(sampler, package.configs)
         return package
 
     def configure_transaction_sampler(self, transaction_sampler: TransactionSampler) -> SamplePackage:
-        # log.debug(f'transaction:[ {transaction_sampler} ] configure to package')
+        # logger.debug(f'transaction:[ {transaction_sampler} ] configure to package')
         controller = transaction_sampler.controller
         package = self.transaction_controller_config_store.get(controller)
         package.sampler = transaction_sampler
@@ -201,15 +199,15 @@ class TestCompiler(HashTreeTraverser):
 
     def add_node(self, node, subtree) -> None:
         """@override"""
-        # log.debug(f'adding ndoe: {node}')
+        # logger.debug(f'adding ndoe: {node}')
         self.stack.append(node)
 
     def subtract_node(self) -> None:
         """@override"""
         child = self.stack[-1]
-        # log.debug(f'subtracting node:[ {child} ]')
-        # log.debug(f'stack size:[ {len(self.stack)} ]')
-        # log.debug(f'stack:[ {self.stack} ]')
+        # logger.debug(f'subtracting node:[ {child} ]')
+        # logger.debug(f'stack size:[ {len(self.stack)} ]')
+        # logger.debug(f'stack:[ {self.stack} ]')
         self.__track_iteration_listeners(self.stack)
 
         if isinstance(child, Sampler):
@@ -226,7 +224,7 @@ class TestCompiler(HashTreeTraverser):
                     duplicate = not parent.add_test_element_once(child)
                 # TODO: else: parent.addTestElement(child);
             if duplicate:
-                log.warning(f'Unexpected duplicate for {parent} and {child}')
+                logger.warning(f'Unexpected duplicate for {parent} and {child}')
 
     def process_path(self) -> None:
         """@override"""

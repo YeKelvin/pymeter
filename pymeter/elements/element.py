@@ -18,10 +18,6 @@ from pymeter.elements.property import MultiProperty
 from pymeter.elements.property import NoneProperty
 from pymeter.elements.property import PyMeterProperty
 from pymeter.tools.exceptions import InvalidPropertyException
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class TestElement:
@@ -62,13 +58,13 @@ class TestElement:
 
     @running_version.setter
     def running_version(self, running):
-        # log.debug(f'set running version:[ {running} ] in TestElement:[ {self} ]')
+        # logger.debug(f'set running version:[ {running} ] in TestElement:[ {self} ]')
         self._running_version = running
         for prop in self.property_iterator():
             prop.running_version = running
 
     def recover_running_version(self) -> None:
-        # log.debug(f'recover running version in TestElement:[ {self} ]')
+        # logger.debug(f'recover running version in TestElement:[ {self} ]')
         for prop in list(self.properties.values()):
             if self.is_temporary(prop):
                 self.remove_property(prop.name)

@@ -16,10 +16,6 @@ from pymeter.configs.httpconfigs import SessionManager
 from pymeter.samplers.http_constants import HTTP_STATUS_CODE
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class HTTPSampler(Sampler):

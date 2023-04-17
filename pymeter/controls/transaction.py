@@ -3,22 +3,19 @@
 # @File    : transaction.py
 # @Time    : 2021-08-24 23:23:12
 # @Author  : Kelvin.Ye
-from typing import Optional
+from loguru import logger
+
 from pymeter.controls.controller import Controller
 from pymeter.controls.generic_controller import GenericController
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class TransactionController(GenericController):
 
     def __init__(self):
         super().__init__()
-        self.transaction_sampler = None  # type: Optional[TransactionSampler]
+        self.transaction_sampler = None  # type: TransactionSampler
 
     def next(self):
         """@override"""
@@ -27,16 +24,16 @@ class TransactionController(GenericController):
     def next_with_transaction_sampler(self):
         # Check if transaction is done
         if self.transaction_sampler and self.transaction_sampler.done:
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
+            logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
             # This transaction is done
             self.transaction_sampler = None
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] end of transaction')
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
+            logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] end of transaction')
+            logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
             return None
 
         # Check if it is the start of a new transaction
         if self.first:  # must be the start of the subtree
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] start of transaction')
+            logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] transaction:[ {self.name} ] start of transaction')
             self.transaction_sampler = TransactionSampler(self, self.name)
 
         # Sample the children of the transaction
@@ -51,7 +48,7 @@ class TransactionController(GenericController):
 
     def next_is_controller(self, controller: Controller):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is controller')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is controller')
         sampler = controller.next()
         # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:
@@ -121,7 +118,7 @@ class TransactionSampler(Sampler):
         self.total_time += result.elapsed_time - int(result.idle_time * 1000)
 
     def set_done(self):
-        log.debug(f'coroutine:[ {self.controller.ctx.coroutine_name} ] transaction:[ {self.controller.name} ] done')
+        logger.debug(f'coroutine:[ {self.controller.ctx.coroutine_name} ] transaction:[ {self.controller.name} ] done')
         self.done = True
         self.result.elapsed_time = self.total_time
         if self.result.success:

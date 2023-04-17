@@ -5,6 +5,8 @@
 # @Author  : Kelvin.Ye
 from typing import Sequence
 
+from loguru import logger
+
 from pymeter.assertions.assertion import Assertion
 from pymeter.controls.controller import Controller
 from pymeter.elements.element import ConfigElement
@@ -13,10 +15,6 @@ from pymeter.engine.interface import TransactionListener
 from pymeter.processors.post import PostProcessor
 from pymeter.processors.pre import PreProcessor
 from pymeter.timers.timer import Timer
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class SamplePackage:
@@ -44,7 +42,7 @@ class SamplePackage:
         self.sampler = None
 
     def set_running_version(self, running) -> None:
-        log.debug(f'package:[ {self.sampler} ] set running:[ {running} ]')
+        logger.debug(f'package:[ {self.sampler} ] set running:[ {running} ]')
         for el in self.configs:
             el.running_version = running
         for el in self.pre_processors:
@@ -62,7 +60,7 @@ class SamplePackage:
         self.sampler.running_version = running
 
     def recover_running_version(self) -> None:
-        log.debug(f'package:[ {self.sampler} ] recover running')
+        logger.debug(f'package:[ {self.sampler} ] recover running')
         for el in self.configs:
             el.recover_running_version()
         for el in self.pre_processors:

@@ -5,12 +5,10 @@
 # @Author  : Kelvin.Ye
 from typing import Final
 
+from loguru import logger
+
 from pymeter.functions.function import Function
 from pymeter.utils import rsa_util as rsa_cryptor
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class RSA(Function):
@@ -24,7 +22,7 @@ class RSA(Function):
         self.public_key = None
 
     def execute(self):
-        log.debug(f'start execute function:[ {self.REF_KEY} ]')
+        logger.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
         public_key = self.public_key.execute().strip()
@@ -36,12 +34,12 @@ class RSA(Function):
             public_key = public_key + RSA.PUBLIC_KEY_SUFFIX
 
         result = rsa_cryptor.encrypt_by_public_key(plaintext, public_key).decode(encoding='UTF-8')
-        log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
+        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
         return result
 
     def set_parameters(self, params: list):
-        log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
+        logger.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
         # 校验函数参数个数
         self.check_parameter_count(params, 2)

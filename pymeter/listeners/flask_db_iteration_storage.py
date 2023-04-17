@@ -12,10 +12,6 @@ from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListener, NoCoroutineClone):

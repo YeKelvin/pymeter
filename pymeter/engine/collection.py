@@ -4,10 +4,6 @@
 # @Time    : 2020/2/24 15:35
 # @Author  : Kelvin.Ye
 from pymeter.elements.element import TestElement
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class TestCollection(TestElement):

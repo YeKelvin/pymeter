@@ -7,6 +7,7 @@ import logging
 from typing import Final
 
 import socketio
+from loguru import logger
 
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoCoroutineClone
@@ -17,10 +18,6 @@ from pymeter.engine.interface import TestIterationListener
 from pymeter.groups.context import ContextService
 from pymeter.utils import time_util
 from pymeter.utils.json_util import from_json
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class SocketResultCollector(
@@ -75,26 +72,21 @@ class SocketResultCollector(
         self.reportName = None
         self.startTime = 0
         self.endTime = 0
-        debug = True if log.level <= logging.DEBUG else False
+        debug = logger.level <= logging.DEBUG
         self.sio = socketio.Client(logger=debug, engineio_logger=debug)
 
     def __socket_connect(self):
         """连接 socket.io"""
-        namespace = '/'
-        headers = {}
+        namespace = self.namespace or '/'
+        headers = from_json(self.headers) if self.headers else {}
 
-        if self.namespace:
-            namespace = self.namespace
-        if self.headers:
-            headers = from_json(self.headers)
-
-        log.info(f'socket start to connect url:[ {self.url} ] namespaces:[ {namespace} ]')
+        logger.info(f'socket start to connect url:[ {self.url} ] namespaces:[ {namespace} ]')
         self.sio.connect(self.url, headers=headers, namespaces=namespace)
-        log.info(f'socket state:[ {self.sio.eio.state} ] sid:[ {self.sio.sid} ]')
+        logger.info(f'socket state:[ {self.sio.eio.state} ] sid:[ {self.sio.sid} ]')
 
     def __socket_disconnect(self):
         """关闭 socket.io"""
-        log.info('sid:[ {self.sio.sid} ] socket start to disconnect')
+        logger.info('sid:[ {self.sio.sid} ] socket start to disconnect')
         if self.sio.connected:
             # 通知前端已执行完成
             self.sio.emit('execution_completed', {'to': self.target_sid})

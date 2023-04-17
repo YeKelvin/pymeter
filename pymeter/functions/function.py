@@ -5,10 +5,6 @@
 # @Author  : Kelvin.Ye
 from pymeter.groups.context import ContextService
 from pymeter.tools.exceptions import InvalidVariableException
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class Function:

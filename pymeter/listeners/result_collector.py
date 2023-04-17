@@ -11,10 +11,6 @@ from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.groups.context import ContextService
 from pymeter.utils import time_util
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class ResultCollector(

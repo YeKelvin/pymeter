@@ -3,7 +3,6 @@
 # @File    : group.py
 # @Time    : 2020/2/13 12:58
 # @Author  : Kelvin.Ye
-import traceback
 from enum import Enum
 from enum import unique
 from typing import Final
@@ -12,6 +11,7 @@ from typing import Optional
 
 import gevent
 from gevent import Greenlet
+from loguru import logger
 
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.controls.controller import Controller
@@ -39,10 +39,6 @@ from pymeter.samplers.sampler import Sampler
 from pymeter.tools.exceptions import StopTestException
 from pymeter.tools.exceptions import StopTestGroupException
 from pymeter.tools.exceptions import StopTestNowException
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 @unique
@@ -163,7 +159,7 @@ class TestGroup(Controller, TestCompilerHelper):
             else:
                 break
 
-        log.info(f'开始执行第 {self.group_number} 个 #线程组#')
+        logger.info(f'开始执行第 {self.group_number} 个 #线程组#')
 
     @property
     def done(self):
@@ -327,9 +323,9 @@ class Coroutine(Greenlet):
         context.variables.put(self.LAST_SAMPLE_OK, True)
 
         # 编译 TestGroup 的子代节点
-        log.debug('start to compile TestGroup nodes')
+        logger.debug('start to compile TestGroup nodes')
         self.group_tree.traverse(self.compiler)
-        log.debug('TestGroup nodes compile done')
+        logger.debug('TestGroup nodes compile done')
 
         # 初始化 TestGroup 控制器
         self.group_main_controller.initialize()
@@ -354,7 +350,7 @@ class Coroutine(Greenlet):
                 sampler = self.group_main_controller.next()
 
                 while self.running and sampler:
-                    log.debug(f'coroutine:[ {self.coroutine_name} ] current sampler:[ {sampler} ]')
+                    logger.debug(f'coroutine:[ {self.coroutine_name} ] current sampler:[ {sampler} ]')
                     # 处理 Sampler
                     self.__process_sampler(sampler, None, context)
                     # Sampler 失败且非继续执行时，根据 on_sample_error 选项控制迭代
@@ -368,21 +364,21 @@ class Coroutine(Greenlet):
 
                 if self.group_main_controller.done:
                     self.running = False
-                    log.info(f'线程:[ {self.coroutine_name} ] 迭代已结束')
+                    logger.info(f'线程:[ {self.coroutine_name} ] 迭代已结束')
 
         except StopTestGroupException:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestGroupException Exception, stoping coroutine')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestGroupException Exception, stoping coroutine')
             self.stop_group()
         except StopTestException:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestException Exception, stoping test')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestException Exception, stoping test')
             self.stop_test()
         except StopTestNowException:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestNowException Exception, stop test now')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] except StopTestNowException Exception, stop test now')
             self.stop_test_now()
         except Exception:
-            log.error(traceback.format_exc())
+            logger.exception()
         finally:
-            log.info(f'线程:[ {self.coroutine_name} ] 执行完成')
+            logger.info(f'线程:[ {self.coroutine_name} ] 执行完成')
             self.__coroutine_finished()  # 遍历执行 TestGroupListener
             context.clear()
             ContextService.remove_context()
@@ -394,7 +390,7 @@ class Coroutine(Greenlet):
             2、遍历执行 TestGroupListener
         """
         ContextService.incr_number_of_coroutines()
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestGroupListener to start')
+        logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestGroupListener to start')
         for listener in self.group_listeners:
             listener.group_started()
 
@@ -404,7 +400,7 @@ class Coroutine(Greenlet):
             1、ContextService 统计协程数
             2、遍历执行 TestGroupListener
         """
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestGroupListener to finish')
+        logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestGroupListener to finish')
         for listener in self.group_listeners:
             listener.group_finished()
         ContextService.decr_number_of_coroutines()
@@ -412,37 +408,37 @@ class Coroutine(Greenlet):
     def __control_loop_by_logical_action(self, sampler: Sampler, context: CoroutineContext) -> None:
         # 重试失败的 Sampler
         if self.is_retrying_sampler(sampler):
-            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, retrying current sampler')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, retrying current sampler')
             self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_retry)
 
         # 错误时开始下一个 TestGroup 循环
         elif self.group.on_error_start_next_coroutine:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next main loop')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next main loop')
             self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_main_loop)
 
         # 错误时开始下一个当前控制器循环
         elif self.group.on_error_start_next_current_loop:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next current loop')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, starting next current loop')
             self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_current_loop)
 
         # 错误时中断当前控制器循环
         elif self.group.on_error_break_current_loop:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, breaking current loop')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, breaking current loop')
             self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__break_on_current_loop)
 
         # 错误时停止协程
         elif self.group.on_error_stop_test_group:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping main group')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping main group')
             self.stop_group()
 
         # 错误时停止测试
         elif self.group.on_error_stop_test:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test')
             self.stop_test()
 
         # 错误时立即停止测试（中断所有协程）
         elif self.group.on_error_stop_test_now:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] last sample failed, stoping test now')
             self.stop_test_now()
 
     def __trigger_loop_logical_action_on_parent_controllers(
@@ -512,7 +508,7 @@ class Coroutine(Greenlet):
             else:
                 # 事务开始时，遍历执行 TransactionListener
                 if transaction_sampler.calls == 0:
-                    log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TransactionListener to start')
+                    logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all TransactionListener to start')
                     for listener in transaction_package.trans_listeners:
                         listener.transaction_started()
                 # 获取 Transaction 直系子代
@@ -591,7 +587,7 @@ class Coroutine(Greenlet):
             result.sample_name = f'{result.sample_name} {retryflag}' if retryflag else result.sample_name
 
         # 遍历执行 SampleListener
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
+        logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
         sample_listeners = self.__get_sample_listeners(package, transaction_package, transaction_sampler)
         for listener in sample_listeners:
             listener.sample_occurred(result)
@@ -604,13 +600,13 @@ class Coroutine(Greenlet):
 
         # 检查是否需要停止协程或测试
         if result.stop_group or (not result.success and self.group.on_error_stop_test_group):
-            log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试组')
+            logger.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试组')
             self.stop_coroutine()
         if result.stop_test or (not result.success and self.group.on_error_stop_test):
-            log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试')
+            logger.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置停止测试')
             self.stop_test()
         if result.stop_test_now or (not result.success and self.group.on_error_stop_test_now):
-            log.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置立即停止测试')
+            logger.info(f'线程组:[ {self.coroutine_name} ] 用户手动设置立即停止测试')
             self.stop_test_now()
         if not result.success:
             self.next_continue = False
@@ -620,25 +616,25 @@ class Coroutine(Greenlet):
         sampler.context = context
 
         # 遍历执行 SampleListener
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to start')
+        logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to start')
         for listener in listeners:
             listener.sample_started(sampler)
 
         result = None
         # noinspection PyBroadException
         try:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sampler} ] doing sample')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sampler} ] doing sample')
             result = sampler.sample()
-            log.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sampler} ] sample done')
-        except Exception:
-            log.error(traceback.format_exc())
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] sampler:[ {sampler} ] sample done')
+        except Exception as e:
+            logger.exception()
             if not result:
                 result = SampleResult()
                 result.sample_name = sampler.name
-            result.response_data = traceback.format_exc()
+            result.response_data = e
         finally:
             # 遍历执行 SampleListener
-            log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to end')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to end')
             for listener in listeners:
                 listener.sample_ended(result)
 
@@ -651,7 +647,7 @@ class Coroutine(Greenlet):
             transaction_package: SamplePackage,
             context: CoroutineContext
     ) -> SampleResult:
-        log.debug(
+        logger.debug(
             f'coroutine:[ {self.coroutine_name} ] transaction:[ {transaction_sampler} ] parent:[ {parent} ] ending'
         )
 
@@ -664,12 +660,12 @@ class Coroutine(Greenlet):
         #  Notify listeners with the transaction sample result
         if not isinstance(parent, TransactionSampler):
             # 遍历执行 SampleListener
-            log.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all SampleListener to occurred')
             for listener in transaction_package.listeners:
                 listener.sample_occurred(result)
 
         # 遍历执行 TransactionListener
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TransactionListener to end')
+        logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all TransactionListener to end')
         for listener in transaction_package.trans_listeners:
             listener.transaction_ended()
 
@@ -682,7 +678,7 @@ class Coroutine(Greenlet):
         for assertion in assertions:
             self.__process_assertion(assertion, result)
 
-        log.debug(
+        logger.debug(
             f'coroutine:[ {self.coroutine_name} ] sampler:[ {result.sample_name} ] success:[ {result.success} ] '
             'set LAST_SAMPLE_OK'
         )
@@ -694,7 +690,7 @@ class Coroutine(Greenlet):
         try:
             assertion_result = assertion.get_result(sample_result)
         except AssertionError as e:
-            log.debug(
+            logger.debug(
                 f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
                 f'error processing Assertion: {e}'
             )
@@ -702,7 +698,7 @@ class Coroutine(Greenlet):
             assertion_result.failure = True
             assertion_result.message = str(e)
         except RuntimeError as e:
-            log.error(
+            logger.error(
                 f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
                 f'error processing Assertion: {e}'
             )
@@ -710,14 +706,14 @@ class Coroutine(Greenlet):
             assertion_result.error = True
             assertion_result.message = str(e)
         except Exception as e:
-            log.error(
+            logger.error(
                 f'coroutine:[ {self.coroutine_name} ] sampler:[ {sample_result.sample_name} ] '
                 f'exception processing Assertion: {e}'
             )
-            log.error(traceback.format_exc())
+            logger.exception()
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
-            assertion_result.message = traceback.format_exc()
+            assertion_result.message = e
         finally:
             sample_result.success = sample_result.success and not assertion_result.error and not assertion_result.failure
             sample_result.assertions.append(assertion_result)
@@ -803,7 +799,7 @@ class Coroutine(Greenlet):
 
     def _notify_test_iteration_listeners(self) -> None:
         """遍历执行 TestIterationListener"""
-        log.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestIterationListener to start')
+        logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestIterationListener to start')
         self.variables.inc_iteration()
         for listener in self.test_iteration_listeners:
             listener.test_iteration_start(self.group_main_controller, self.variables.iteration)
@@ -814,17 +810,17 @@ class Coroutine(Greenlet):
         self.running = False
 
     def stop_group(self) -> None:
-        log.info(f'线程:[ {self.coroutine_name} ] 发起 StopCoroutineGroup 请求')
+        logger.info(f'线程:[ {self.coroutine_name} ] 发起 StopCoroutineGroup 请求')
         self.group.stop_coroutines()
 
     def stop_test(self) -> None:
-        log.info(f'线程:[ {self.coroutine_name} ] 发起 StopTestCollection 请求')
+        logger.info(f'线程:[ {self.coroutine_name} ] 发起 StopTestCollection 请求')
         self.running = False
         if self.engine:
             self.engine.stop_test()
 
     def stop_test_now(self) -> None:
-        log.info(f'coroutine:[ {self.coroutine_name} ] 发起 StopTestCollectionNow 请求')
+        logger.info(f'coroutine:[ {self.coroutine_name} ] 发起 StopTestCollectionNow 请求')
         self.running = False
         if self.engine:
             self.engine.stop_test_now()
@@ -832,13 +828,13 @@ class Coroutine(Greenlet):
     def __run_pre_processors(self, pre_processors: list) -> None:
         """执行前置处理器"""
         for pre_processor in pre_processors:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] running preProcessor: {pre_processor.name}')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] running preProcessor: {pre_processor.name}')
             pre_processor.process()
 
     def __run_post_processors(self, post_processors: list) -> None:
         """执行后置处理器"""
         for post_processor in post_processors:
-            log.debug(f'coroutine:[ {self.coroutine_name} ] running postProcessor: {post_processor.name}')
+            logger.debug(f'coroutine:[ {self.coroutine_name} ] running postProcessor: {post_processor.name}')
             post_processor.process()
 
     @staticmethod

@@ -9,15 +9,14 @@ from typing import Iterable
 from typing import List
 from typing import Tuple
 
+from loguru import logger
+
 from pymeter.elements.element import TestElement
 from pymeter.engine.tree import HashTree
 from pymeter.engine.values import ValueReplacer
 from pymeter.tools.exceptions import ScriptParseException
 from pymeter.utils import json_util
-from pymeter.utils.log_util import get_logger
 
-
-log = get_logger(__name__)
 
 __MODULE_PATH__ = {
     # 测试集合
@@ -80,7 +79,7 @@ __MODULE_PATH__ = {
 
 def load_tree(source: str) -> HashTree:
     """读取脚本并返回脚本的HashTree对象"""
-    log.info('开始加载脚本')
+    logger.info('开始加载脚本')
 
     script = __loads_script__(source)
     nodes = __parse_node__(script)
@@ -162,15 +161,15 @@ def __get_node__(script: dict) -> TestElement:
     """根据元素的class属性实例化为对象"""
     # 获取节点的类型
     class_name = script.get('class')
-    log.debug(f'node class:[ {class_name} ]')
+    logger.debug(f'node class:[ {class_name} ]')
 
     # 根据类型名称获取type对象
     class_type = __get_class_type__(class_name)
 
     # 实例化节点
     node = class_type()
-    __set_replaced_property__(node, TestElement.NAME, script.get('name', None))
-    __set_replaced_property__(node, TestElement.REMARK, script.get('remark', None))
+    __set_replaced_property__(node, TestElement.NAME, script.get('name'))
+    __set_replaced_property__(node, TestElement.REMARK, script.get('remark'))
 
     # 设置节点的属性
     __set_properties__(node, script.get('property'))

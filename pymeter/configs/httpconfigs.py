@@ -7,6 +7,7 @@ from typing import List
 from typing import Optional
 
 import httpx
+from loguru import logger
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
@@ -14,10 +15,6 @@ from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.tools.exceptions import HttpCookieDuplicateException
 from pymeter.tools.exceptions import HttpHeaderDuplicateException
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class HTTPHeader(TestElement):
@@ -239,15 +236,15 @@ class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListene
         return self.get_property_as_bool(self.CLEAR_EACH_ITERATION)
 
     def group_started(self) -> None:
-        log.debug('open new http session')
+        logger.debug('open new http session')
         self.session = httpx.Client()
 
     def group_finished(self) -> None:
-        log.debug(f'close http session:[ {self.session} ]')
+        logger.debug(f'close http session:[ {self.session} ]')
         self.session.close()
 
     def test_iteration_start(self, controller, iter: int) -> None:
         if self.clear_each_iteration and iter > 1:
-            log.debug(f'close and open new http session in iteration:[ {iter} ]')
+            logger.debug(f'close and open new http session in iteration:[ {iter} ]')
             self.session.close()
             self.session = httpx.Client()

@@ -6,6 +6,8 @@
 import importlib
 from typing import Final
 
+from loguru import logger
+
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import SampleListener
@@ -14,12 +16,8 @@ from pymeter.engine.interface import TestGroupListener
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.json_util import to_json
-from pymeter.utils.log_util import get_logger
 from pymeter.utils.time_util import timestamp_now
 from pymeter.utils.time_util import timestmp_to_utc8_datetime
-
-
-log = get_logger(__name__)
 
 
 class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListener, SampleListener, NoCoroutineClone):
@@ -123,7 +121,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
         pass
 
     def insert_test_collection_result(self):
-        log.debug('insert collection result')
+        logger.debug('insert collection result')
         with self.flask_instance.app_context():
             self.TTestCollectionResult.insert(
                 REPORT_NO=self.report_no,
@@ -139,7 +137,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
             )
 
     def insert_test_group_result(self):
-        log.debug('insert group result')
+        logger.debug('insert group result')
         with self.flask_instance.app_context():
             self.TTestGroupResult.insert(
                 REPORT_NO=self.report_no,
@@ -155,7 +153,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
             )
 
     def insert_test_sampler_result(self, result: SampleResult):
-        log.debug('insert sampler result')
+        logger.debug('insert sampler result')
         failed_assertion_data = None
         if result.assertions:
             assertions = [assertion for assertion in result.assertions if assertion.failure or assertion.error]
@@ -205,7 +203,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
             )
 
     def update_test_collection_result(self):
-        log.debug('update collection result')
+        logger.debug('update collection result')
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
         with self.flask_instance.app_context():
             self.TTestCollectionResult.filter_by(COLLECTION_ID=str(self.collection_id)).update({
@@ -216,7 +214,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
             })
 
     def update_test_group_result(self):
-        log.debug('update group result')
+        logger.debug('update group result')
         elapsed_time = int(self.group.end_time * 1000) - int(self.group.start_time * 1000)
         with self.flask_instance.app_context():
             self.TTestGroupResult.filter_by(GROUP_ID=str(self.group_id)).update({

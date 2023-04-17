@@ -14,12 +14,8 @@ from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.groups.context import ContextService
 from pymeter.utils import time_util
-from pymeter.utils.log_util import get_logger
 from pymeter.utils.time_util import timestamp_now
 from pymeter.utils.time_util import timestamp_to_strftime
-
-
-log = get_logger(__name__)
 
 
 class FlaskSIOResultCollector(

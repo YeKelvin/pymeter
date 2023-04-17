@@ -3,17 +3,14 @@
 # @File    : python_pre.py
 # @Time    : 2020/2/17 16:29
 # @Author  : Kelvin.Ye
-import traceback
 from typing import Final
+
+from loguru import logger
 
 from pymeter.groups.context import ContextService
 from pymeter.processors.pre import PreProcessor
 from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
 from pymeter.tools.python_code_snippets import INDENT
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class PythonPreProcessor(PreProcessor):
@@ -49,7 +46,7 @@ class PythonPreProcessor(PreProcessor):
             params = {'self': self}
             exec(self.raw_function, params, params)
             self.dynamic_function(  # noqa
-                log=log,
+                log=logger,
                 ctx=ctx,
                 vars=ctx.variables,
                 props=props,
@@ -57,4 +54,4 @@ class PythonPreProcessor(PreProcessor):
                 sampler=ctx.current_sampler
             )
         except Exception:
-            log.error(traceback.format_exc())
+            logger.exception()

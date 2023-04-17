@@ -7,6 +7,8 @@ from collections import deque
 from typing import Optional
 from typing import Union
 
+from loguru import logger
+
 from pymeter.controls.controller import Controller
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import TestCompilerHelper
@@ -14,10 +16,6 @@ from pymeter.groups.context import ContextService
 from pymeter.groups.context import CoroutineContext
 from pymeter.samplers.sampler import Sampler
 from pymeter.tools.exceptions import NextIsNullException
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class GenericController(Controller, TestCompilerHelper):
@@ -70,7 +68,7 @@ class GenericController(Controller, TestCompilerHelper):
     @done.setter
     def done(self, val: bool):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     @property
@@ -114,7 +112,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next(self) -> Optional[Sampler]:
         """获取控制器的下一个子代元素"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
         self.fire_iter_events()
 
         if self.done:
@@ -131,9 +129,9 @@ class GenericController(Controller, TestCompilerHelper):
                 else:
                     next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
-            log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is null')
+            logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is null')
 
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
         return next_sampler
 
     def fire_iter_events(self):
@@ -142,7 +140,7 @@ class GenericController(Controller, TestCompilerHelper):
             self.first = False
 
     def fire_iteration_start(self):
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
         for listener in self.iteration_listeners:
             listener.iteration_start(self, self.iter_count)
 
@@ -165,7 +163,7 @@ class GenericController(Controller, TestCompilerHelper):
     def next_is_controller(self, controller: Controller) -> Sampler:
         """下一个元素是控制器时的处理方法"""
         # 获取子代控制器的下一个取样器
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is controller')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is controller')
         sampler = controller.next()
         # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:
@@ -186,7 +184,7 @@ class GenericController(Controller, TestCompilerHelper):
             self.increment_current()
 
     def add_element(self, child):
-        # log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add element:[ {child} ]')
+        # logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add element:[ {child} ]')
         self.sub_elements.append(child)
 
     def add_test_element(self, child):
@@ -206,7 +204,7 @@ class GenericController(Controller, TestCompilerHelper):
         self.sub_elements.remove(self.sub_elements[self.current])
 
     def add_iteration_listener(self, listener: LoopIterationListener):
-        # log.debug(
+        # logger.debug(
         #     f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ]'
         # )
         self.iteration_listeners.appendleft(listener)

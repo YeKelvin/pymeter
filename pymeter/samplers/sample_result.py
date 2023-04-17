@@ -6,14 +6,12 @@
 import traceback
 from typing import Optional
 
+from loguru import logger
+
 from pymeter.tools.advanced import transform
 from pymeter.utils import json_util
 from pymeter.utils import time_util
 from pymeter.utils.json_util import from_json
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class SampleResult:
@@ -71,7 +69,7 @@ class SampleResult:
             obj = from_json(self.response_data)
             return transform(obj)
         except Exception:
-            log.debug(traceback.format_exc())
+            logger.debug(traceback.format_exc())
             return None
 
     @property

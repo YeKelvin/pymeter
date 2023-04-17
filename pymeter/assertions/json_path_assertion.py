@@ -12,10 +12,6 @@ from pymeter.elements.element import TestElement
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.json_util import JsonpathExtractException
 from pymeter.utils.json_util import json_path
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 OPERATORS = {
@@ -73,13 +69,13 @@ class JsonPathAssertion(Assertion, TestElement):
         expected_value = self.expected_value
         # 判断类型
         operator = self.operator
-        
+
         if not jsonpath:
             return self.fail(result, 'JsonPath表达式为空，请修改后重试')
-        
+
         if not operator:
             return self.fail(result, '判断类型为空，请修改后重试')
-    
+
         if operator not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS'] and not expected_value:
             return self.fail(result, '期望值为空，请修改后重试')
 

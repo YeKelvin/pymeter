@@ -6,15 +6,13 @@
 import traceback
 from typing import Final
 
+from loguru import logger
+
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
 from pymeter.tools.python_code_snippets import INDENT
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class PythonSampler(Sampler):
@@ -56,7 +54,7 @@ class PythonSampler(Sampler):
             ctx = ContextService.get_context()
             props = ctx.properties
             if res := self.dynamic_function(  # noqa
-                log=log,
+                log=logger,
                 ctx=ctx,
                 vars=ctx.variables,
                 props=props,

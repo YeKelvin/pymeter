@@ -5,6 +5,7 @@
 # @Author  : Kelvin.Ye
 from typing import Final
 
+from loguru import logger
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 
@@ -13,10 +14,6 @@ from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoCoroutineClone
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.groups.context import ContextService
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, NoCoroutineClone):
@@ -138,10 +135,10 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
 
     def collection_ended(self) -> None:
         """@override"""
-        log.debug(f'database:[ {self.database_type}/{self.database} ] close engine')
+        logger.debug(f'database:[ {self.database_type}/{self.database} ] close engine')
         self.engine.dispose()
 
     def connect(self) -> Engine:
         url = self.url
-        log.debug(f'connect database engine:[ {self.url} ]')
+        logger.debug(f'connect database engine:[ {self.url} ]')
         return create_engine(url, connect_args={'connect_timeout': self.connect_timeout})

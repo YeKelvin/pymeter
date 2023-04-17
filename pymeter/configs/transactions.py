@@ -4,6 +4,7 @@
 # @Time    : 2021/9/29 16:20
 # @Author  : Kelvin.Ye
 import httpx
+from loguru import logger
 
 from pymeter.configs.arguments import Arguments
 from pymeter.configs.httpconfigs import SessionManager
@@ -11,10 +12,6 @@ from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import TransactionConfig
 from pymeter.engine.interface import TransactionListener
 from pymeter.groups.context import ContextService
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class TransactionParameter(Arguments, TransactionConfig, NoConfigMerge, TransactionListener):
@@ -36,10 +33,10 @@ class TransactionHTTPSessionManager(SessionManager, TransactionConfig, Transacti
 
     def transaction_started(self) -> None:
         """@override"""
-        log.debug('open new transaction http session')
+        logger.debug('open new transaction http session')
         self.session = httpx.Client()
 
     def transaction_ended(self) -> None:
         """@override"""
-        log.debug(f'close transaction http session:[ {self.session} ]')
+        logger.debug(f'close transaction http session:[ {self.session} ]')
         self.session.close()

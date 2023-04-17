@@ -3,19 +3,15 @@
 # @File    : forin_controller.py
 # @Time    : 2021/11/12 14:42
 # @Author  : Kelvin.Ye
-import traceback
 from collections.abc import Iterable
 from typing import Final
 
 import gevent
+from loguru import logger
 
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.utils.json_util import from_json
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class ForInController(GenericController, IteratingController):
@@ -63,7 +59,7 @@ class ForInController(GenericController, IteratingController):
 
     @done.setter
     def done(self, val: bool):
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     def __init__(self):
@@ -82,7 +78,7 @@ class ForInController(GenericController, IteratingController):
         self._keys_length = len(self._keys)
         # 判断迭代变量的个数
         if self._keys_length > 2:
-            log.error(f'for迭代变量:[ {self.iterating_variables} ] 个数不合法，终止遍历')
+            logger.error(f'for迭代变量:[ {self.iterating_variables} ] 个数不合法，终止遍历')
             self.done = True
             return
         # 移除迭代变量首尾的空格
@@ -102,7 +98,7 @@ class ForInController(GenericController, IteratingController):
 
         # 判断 in 对象是否为可迭代的对象
         if not isinstance(self._instance, Iterable):
-            log.error(f'in对象/代码:[ {self.statements} ] 不是可迭代的对象，终止遍历')
+            logger.error(f'in对象/代码:[ {self.statements} ] 不是可迭代的对象，终止遍历')
             self.done = True
             return
 
@@ -125,23 +121,23 @@ class ForInController(GenericController, IteratingController):
                 self.initial_forin()
 
             if self.end_of_loop():
-                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
+                logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
                 self.reset_break_loop()
                 self.re_initialize()
                 self.reset_break_loop()
-                log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
+                logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
                 return None
 
             nsampler = super().next()
             if nsampler and self.delay:
-                log.debug(
+                logger.debug(
                     f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] delay:[ {self.delay}ms ]'
                 )
                 gevent.sleep(float(self.delay / 1000))
 
             return nsampler
         except Exception:
-            log.error(traceback.format_exc())
+            logger.exception()
         finally:
             self.update_iteration_index(self.name, self._loop_count)
 
@@ -182,12 +178,12 @@ class ForInController(GenericController, IteratingController):
 
     def start_next_loop(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
         self.re_initialize()
 
     def break_loop(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
         self._break_loop = True
         self.first = True
         self.reset_current()

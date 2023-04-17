@@ -7,13 +7,11 @@ import hashlib
 import time
 from typing import Final
 
+from loguru import logger
+
 from pymeter.functions.function import Function
 from pymeter.samplers.http_sampler import HTTPSampler
 from pymeter.utils.json_util import from_json
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class GatewaySign(Function):
@@ -21,12 +19,12 @@ class GatewaySign(Function):
     REF_KEY: Final = '__GatewaySign'
 
     def execute(self):
-        log.debug(f'start execute function:[ {self.REF_KEY} ]')
+        logger.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         # 获取当前 HttpSampler 对象
         http_sampler = self.current_sampler
         if not isinstance(http_sampler, HTTPSampler):
-            log.error('__GatewaySign() 函数目前仅支持在 HTTPSampler 下使用')
+            logger.error('__GatewaySign() 函数目前仅支持在 HTTPSampler 下使用')
             return 'error'
 
         data = http_sampler.data
@@ -65,7 +63,7 @@ class GatewaySign(Function):
         return self.sign(data)
 
     def set_parameters(self, params: list):
-        log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
+        logger.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
         # 校验函数参数个数
         self.check_parameter_count(params, 0)
@@ -81,13 +79,13 @@ class GatewaySign(Function):
 
         # 签名去掉最后一个多余的符号
         signature = (''.join(buffer))[:-1]
-        log.debug(f'signature:[ {signature} ]')
+        logger.debug(f'signature:[ {signature} ]')
 
-        if not signature:
-            return ''
-
-        # md5加密
-        return hashlib.md5(signature.encode(encoding='UTF-8')).hexdigest()
+        return (
+            hashlib.md5(signature.encode(encoding='UTF-8')).hexdigest()
+            if signature
+            else ''
+        )
 
     def traverse(self, buffer: list, key, value):
         if isinstance(value, dict):

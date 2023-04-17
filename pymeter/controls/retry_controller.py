@@ -3,21 +3,17 @@
 # @File    : retry_controller.py
 # @Time    : 2021/11/29 11:25
 # @Author  : Kelvin.Ye
-import traceback
 from typing import Final
 from typing import Optional
 
 import gevent
+from loguru import logger
 
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.samplers.sampler import Sampler
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class RetryController(GenericController, IteratingController, LoopIterationListener):
@@ -58,7 +54,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
     @done.setter
     def done(self, val: bool):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self.reset_break_retry()
         self._done = val
 
@@ -79,8 +75,10 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
             if nsampler:
                 # 延迟重试（间隔）
                 if not self.first and self.intervals:
-                    log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
-                              f'retrying delay:[ {self.intervals}ms ]')
+                    logger.debug(
+                        f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
+                        f'retrying delay:[ {self.intervals}ms ]'
+                    )
                     gevent.sleep(float(self.intervals / 1000))
 
                 # 添加重试标识，最后一次无需添加
@@ -91,13 +89,13 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
             return nsampler
         except Exception:
-            log.error(traceback.format_exc())
+            logger.exception()
 
     def next_is_null(self):
         """@override"""
         self.re_initialize()
         if self.last_sample_ok:
-            log.debug(
+            logger.debug(
                 f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] '
                 f'all samplers are successful, stop retrying'
             )
@@ -135,12 +133,12 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
     def start_next_loop(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
         self.re_initialize()
 
     def break_loop(self):
         """@override"""
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
         self._break_retry = True
         self.first = True
         self.reset_current()

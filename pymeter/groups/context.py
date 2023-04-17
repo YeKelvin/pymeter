@@ -9,10 +9,6 @@ from gevent.local import local as CoroutineLocal
 
 from pymeter.groups.variables import Variables
 from pymeter.utils import time_util
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class CoroutineContext:

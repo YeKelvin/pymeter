@@ -4,21 +4,17 @@
 # @Time    : 2020/2/17 15:33
 # @Author  : Kelvin.Ye
 import re
-import traceback
 from collections import deque
 from typing import Final
 
 import gevent
+from loguru import logger
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
 from tabulate import tabulate
 
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class SQLSampler(Sampler):
@@ -96,7 +92,7 @@ class SQLSampler(Sampler):
         try:
             connection = self.database_engine.connect()
             stmt = self.get_statement()
-            log.debug(f'sampler:[ {self.name} ] execute:[ {stmt} ]')
+            logger.debug(f'sampler:[ {self.name} ] execute:[ {stmt} ]')
             if query_result := connection.execute(text(stmt)):
                 result.response_data = f'rowcount={query_result.rowcount}'
                 if query_result.returns_rows:
@@ -113,7 +109,7 @@ class SQLSampler(Sampler):
         except Exception as e:
             result.success = False
             result.response_data = e
-            log.error(traceback.format_exc())
+            logger.exception()
         finally:
             timeout.close()
             result.sample_end()

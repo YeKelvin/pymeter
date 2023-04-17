@@ -5,11 +5,6 @@
 # @Author  : Kelvin.Ye
 from timers.timer import Timer
 
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
-
 
 class ConstantTimer(Timer):
 

@@ -3,15 +3,12 @@
 # @File    : if_controller.py
 # @Time    : 2020/2/29 10:49
 # @Author  : Kelvin.Ye
-import traceback
 from typing import Final
+
+from loguru import logger
 
 from pymeter.controls.generic_controller import GenericController
 from pymeter.tools.exceptions import NextIsNullException
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class IfController(GenericController):
@@ -28,7 +25,7 @@ class IfController(GenericController):
 
     @done.setter
     def done(self, val: bool):
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     def next(self):
@@ -38,12 +35,9 @@ class IfController(GenericController):
         # For subsequent calls, we are inside the IfControllerGroup,
         # so then we just pass the control to the next item inside the if control
         cnd = self.condition.strip()
-        log.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition:[ {cnd} ]')
-        result = True
-        if self.first:
-            result = self.evaluate(cnd)
-
-        log.debug(
+        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition:[ {cnd} ]')
+        result = self.evaluate(cnd) if self.first else True
+        logger.debug(
             f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition result:[ {result} ]')
         if result is True:
             return super().next()
@@ -65,5 +59,5 @@ class IfController(GenericController):
         try:
             return eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
         except Exception:
-            log.error(traceback.format_exc())
+            logger.exception()
             return False

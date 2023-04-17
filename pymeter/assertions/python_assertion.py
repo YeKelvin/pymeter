@@ -5,16 +5,14 @@
 # @Author  : Kelvin.Ye
 from typing import Final
 
+from loguru import logger
+
 from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
 from pymeter.tools.python_code_snippets import INDENT
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class PythonAssertion(Assertion):
@@ -55,7 +53,7 @@ class PythonAssertion(Assertion):
             }
             exec(self.raw_function, params, params)
             self.dynamic_function(  # noqa
-                log=log,
+                log=logger,
                 ctx=ctx,
                 vars=ctx.variables,
                 props=props,

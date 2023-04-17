@@ -5,12 +5,10 @@
 # @Author  : Kelvin.Ye
 from typing import Final
 
+from loguru import logger
+
 from pymeter.functions.function import Function
 from pymeter.utils import aes_util as aes_cryptor
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class AES128CBC(Function):
@@ -23,19 +21,19 @@ class AES128CBC(Function):
         self.iv = None
 
     def execute(self):
-        log.debug(f'start execute function:[ {self.REF_KEY} ]')
+        logger.debug(f'start execute function:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
         key = self.key.execute().strip()
         iv = self.iv.execute().strip() or None if self.iv else None
 
         result = aes_cryptor.encrypt(plaintext, key, size='128', mode='CBC', iv=iv, encoding='base64')
-        log.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
+        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
 
         return result
 
     def set_parameters(self, params: list):
-        log.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
+        logger.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
 
         # 校验函数参数个数
         self.check_parameter_min(params, 2)

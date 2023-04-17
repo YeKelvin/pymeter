@@ -8,10 +8,6 @@ from typing import Dict
 from pymeter.engine.traverser import ConvertToString
 from pymeter.engine.traverser import TreeSearcher
 from pymeter.tools.exceptions import UnsupportedOperationException
-from pymeter.utils.log_util import get_logger
-
-
-log = get_logger(__name__)
 
 
 class HashTree(dict):
