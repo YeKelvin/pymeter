@@ -5,7 +5,6 @@
 # @Author  : Kelvin.Ye
 from collections import deque
 from typing import Optional
-from typing import Union
 
 from loguru import logger
 
@@ -120,7 +119,7 @@ class GenericController(Controller, TestCompilerHelper):
 
         next_sampler = None
         try:
-            current_element = self.get_current_element()  # type: Union[Sampler, Controller, None]
+            current_element = self.get_current_element()  # type: Sampler | Controller
             if current_element is None:
                 next_sampler = self.next_is_null()
             else:

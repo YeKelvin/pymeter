@@ -6,6 +6,7 @@
 import time
 
 from loguru import logger
+from loguru._logger import context as logurucontext
 
 from pymeter.engine import script_server
 from pymeter.engine.standard_engine import StandardEngine
@@ -20,7 +21,6 @@ class Runner:
     def start(
             script: str or list,
             throw_ex: bool = False,
-            trace_id: str = None,
             extra: dict = None,
             plugins=None
     ) -> None:
@@ -29,7 +29,6 @@ class Runner:
         Args:
             script:    脚本
             throw_ex:  是否抛出异常
-            trace_id:  日志ID
             extra:     外部扩展，用于传递外部对象
             plugins:   插件
 
@@ -44,21 +43,26 @@ class Runner:
             handler_id = logger.add(
                 SocketIOHandler(extra.get('sio'), extra.get('sid')),
                 level='INFO',
-                format='[{time:%Y-%m-%d  %H:%M:%S.%f}] [{level}] [{module}:{line}] {message}'
+                format='[{time:%Y-%m-%d %H:%M:%S.%f}] [{level}] [{module:<16}] {message}'
             )
 
-        # 注入traceid
-        with logger.contextualize(traceid=trace_id):
-            # noinspection PyBroadException
-            try:
-                logger.debug(f'script:\n{to_json(script)}')
-                Runner.run(script, extra)
-            except Exception:
-                logger.exception()
-                if throw_ex:
-                    raise
-            finally:
-                logger.remove(handler_id)
+        # log注入traceid和sid
+        logurucontext.set({
+            **logurucontext.get(),
+            'traceid': extra.get('traceid'),
+            'sid': extra.get('sid')
+        })
+
+        # noinspection PyBroadException
+        try:
+            logger.debug(f'script:\n{to_json(script)}')
+            Runner.run(script, extra)
+        except Exception:
+            logger.exception()
+            if throw_ex:
+                raise
+        finally:
+            logger.remove(handler_id)
 
     @staticmethod
     def run(script: str, extra=None) -> None:
@@ -72,11 +76,14 @@ class Runner:
         logger.debug(f'hashtree:\n{hashtree}')
 
         # 将脚本配置到执行引擎中
-        engine = StandardEngine(props={
-            'START.MS': int(now * 1000),
-            'START.YMD': ymd,
-            'START.HMS': hms
-        })
+        engine = StandardEngine(
+            extra=extra,
+            props={
+                'START.MS': int(now * 1000),
+                'START.YMD': ymd,
+                'START.HMS': hms
+            }
+        )
         engine.configure(hashtree)
 
         # 开始执行测试

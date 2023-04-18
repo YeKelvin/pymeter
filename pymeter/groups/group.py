@@ -12,6 +12,7 @@ from typing import Optional
 import gevent
 from gevent import Greenlet
 from loguru import logger
+from loguru._logger import context as logurucontext
 
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.controls.controller import Controller
@@ -322,6 +323,13 @@ class Coroutine(Greenlet):
         context.variables = self.variables
         context.variables.put(self.LAST_SAMPLE_OK, True)
 
+        # log注入traceid和sid
+        logurucontext.set({
+            **logurucontext.get(),
+            'traceid': self.engine.extra.get('traceid'),
+            'sid': self.engine.extra.get('sid')
+        })
+
         # 编译 TestGroup 的子代节点
         logger.debug('start to compile TestGroup nodes')
         self.group_tree.traverse(self.compiler)
@@ -340,7 +348,6 @@ class Coroutine(Greenlet):
     def _run(self, *args, **kwargs):
         """执行协程的入口"""
         context = ContextService.get_context()
-
         # noinspection PyBroadException
         try:
             self.init_run(context)
@@ -389,7 +396,7 @@ class Coroutine(Greenlet):
             1、ContextService 统计协程数
             2、遍历执行 TestGroupListener
         """
-        ContextService.incr_number_of_coroutines()
+        ContextService.incr_number_of_threads()
         logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestGroupListener to start')
         for listener in self.group_listeners:
             listener.group_started()
@@ -403,7 +410,7 @@ class Coroutine(Greenlet):
         logger.debug(f'coroutine:[ {self.coroutine_name} ] notify all TestGroupListener to finish')
         for listener in self.group_listeners:
             listener.group_finished()
-        ContextService.decr_number_of_coroutines()
+        ContextService.decr_number_of_threads()
 
     def __control_loop_by_logical_action(self, sampler: Sampler, context: CoroutineContext) -> None:
         # 重试失败的 Sampler

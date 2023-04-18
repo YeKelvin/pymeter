@@ -15,7 +15,11 @@ class CoroutineContext:
 
     @property
     def properties(self):
-        return self.engine.properties if self.engine else None
+        return getattr(self.engine, 'properties', {})
+
+    @property
+    def extra(self):
+        return getattr(self.engine, 'extra', {})
 
     def __init__(self):
         self.variables = Variables()
@@ -72,7 +76,7 @@ class ContextService:
     def start_test(cls):
         engine_ctx = cls.get_context().engine.context
         if engine_ctx.test_start == 0:
-            engine_ctx.number_of_active_coroutine = 0
+            engine_ctx.number_of_threads_actived = 0
             engine_ctx.test_start = time_util.timestamp_now()
             cls.get_context().properties.put('TESTSTART.MS', engine_ctx.test_start)
 
@@ -82,27 +86,27 @@ class ContextService:
         engine_ctx.test_start = 0
 
     @classmethod
-    def incr_number_of_coroutines(cls):
+    def incr_number_of_threads(cls):
         """增加活动线程的数量"""
         engine_ctx = cls.get_context().engine.context
-        engine_ctx.number_of_active_coroutine += 1
-        engine_ctx.number_of_coroutines_started += 1
+        engine_ctx.number_of_threads_actived += 1
+        engine_ctx.number_of_threads_started += 1
 
     @classmethod
-    def decr_number_of_coroutines(cls):
+    def decr_number_of_threads(cls):
         """减少活动线程的数量"""
         engine_ctx = cls.get_context().engine.context
-        engine_ctx.number_of_active_coroutine -= 1
-        engine_ctx.number_of_coroutines_finished += 1
+        engine_ctx.number_of_threads_actived -= 1
+        engine_ctx.number_of_threads_finished += 1
 
     @classmethod
-    def add_total_coroutines(cls, group_number):
+    def add_total_threads(cls, group_number):
         engine_ctx = cls.get_context().engine.context
         engine_ctx.total_threads += group_number
 
     @classmethod
-    def clear_total_coroutines(cls):
+    def clear_total_threads(cls):
         engine_ctx = cls.get_context().engine.context
         engine_ctx.total_threads = 0
-        engine_ctx.number_of_coroutines_started = 0
-        engine_ctx.number_of_coroutines_finished = 0
+        engine_ctx.number_of_threads_started = 0
+        engine_ctx.number_of_threads_finished = 0

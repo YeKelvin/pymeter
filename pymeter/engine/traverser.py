@@ -115,6 +115,10 @@ class SearchByClass(HashTreeTraverser):
         self.subtrees = {}
         self.search_class = search_class
 
+    @property
+    def count(self):
+        return len(self.objects_of_class)
+
     def get_search_result(self) -> list:
         return self.objects_of_class
 
