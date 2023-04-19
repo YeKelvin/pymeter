@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : property.py
 # @Time    : 2020/2/16 14:16
 # @Author  : Kelvin.Ye

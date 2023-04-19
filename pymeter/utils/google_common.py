@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : google_common.py
 # @Time    : 2021-08-17 19:03:54
 # @Author  : Kelvin.Ye

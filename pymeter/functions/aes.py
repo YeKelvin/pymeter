@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : aes.py
 # @Time    : 2022/10/12 18:21
 # @Author  : Kelvin.Ye

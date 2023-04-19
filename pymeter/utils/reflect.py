@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : reflect
 # @Time    : 2020/1/20 16:48
 # @Author  : Kelvin.Ye

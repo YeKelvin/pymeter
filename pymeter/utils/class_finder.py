@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : class_finder
 # @Time    : 2020/1/20 15:17
 # @Author  : Kelvin.Ye

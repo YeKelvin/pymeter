@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : phone_number_prefix.py
 # @Time    : 2020/2/21 11:16
 # @Author  : Kelvin.Ye

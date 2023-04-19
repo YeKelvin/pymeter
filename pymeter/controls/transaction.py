@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : transaction.py
 # @Time    : 2021-08-24 23:23:12
 # @Author  : Kelvin.Ye

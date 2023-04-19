@@ -1,9 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : http_service.py
 # @Time    : 2020/2/15 15:05
 # @Author  : Kelvin.Ye
-from flask import Flask, make_response, request
+from flask import Flask
+from flask import make_response
+from flask import request
+
 
 app = Flask(__name__)
 

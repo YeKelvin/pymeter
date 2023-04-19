@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : http_constants.py
 # @Time    : 2020/2/13 17:35
 # @Author  : Kelvin.Ye

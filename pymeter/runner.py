@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : runner.py
 # @Time    : 2020/2/12 11:46
 # @Author  : Kelvin.Ye
@@ -31,8 +30,6 @@ class Runner:
             throw_ex:  是否抛出异常
             extra:     外部扩展，用于传递外部对象
             plugins:   插件
-
-        Returns:
 
         """
         # 校验 script脚本不能为空

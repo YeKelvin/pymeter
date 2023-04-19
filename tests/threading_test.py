@@ -1,12 +1,13 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : threading_test.py.py
 # @Time    : 2021/10/20 17:35
 # @Author  : Kelvin.Ye
 import threading
+from threading import local
+
 import gevent
 
-from threading import local
+
 # from gevent.local import local
 
 thread_local = local()

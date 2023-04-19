@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : while_controller.py
 # @Time    : 2021-08-26 18:08:15
 # @Author  : Kelvin.Ye

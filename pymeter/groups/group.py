@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : group.py
 # @Time    : 2020/2/13 12:58
 # @Author  : Kelvin.Ye

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : ssh_util.py
 # @Time    : 2020/2/21 11:26
 # @Author  : Kelvin.Ye

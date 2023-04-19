@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : str_reader
 # @Time    : 2020/1/20 9:36
 # @Author  : Kelvin.Ye

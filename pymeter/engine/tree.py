@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : hash_tree
 # @Time    : 2020/2/24 14:54
 # @Author  : Kelvin.Ye

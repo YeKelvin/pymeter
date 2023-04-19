@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : str_util_test
 # @Time    : 2020/1/19 10:55
 # @Author  : Kelvin.Ye

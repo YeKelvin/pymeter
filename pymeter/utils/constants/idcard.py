@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : idcard.py
 # @Time    : 2020/2/21 10:50
 # @Author  : Kelvin.Ye

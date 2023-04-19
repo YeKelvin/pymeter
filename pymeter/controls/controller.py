@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : controller.py
 # @Time    : 2020/2/28 16:01
 # @Author  : Kelvin.Ye

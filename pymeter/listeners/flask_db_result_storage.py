@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : flask_db_result_storage.py
 # @Time    : 2021-09-09 21:17:33
 # @Author  : Kelvin.Ye

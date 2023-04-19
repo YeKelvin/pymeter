@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : python_assertion.py
 # @Time    : 2020/2/17 16:39
 # @Author  : Kelvin.Ye

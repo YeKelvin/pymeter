@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : pytest_demo.py
 # @Time    : 2019/9/18 19:15
 # @Author  : Kelvin.Ye

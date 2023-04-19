@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : google_auth.py
 # @Time    : 2021-08-17 18:58:12
 # @Author  : Kelvin.Ye

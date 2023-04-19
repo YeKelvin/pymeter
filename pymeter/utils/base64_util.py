@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : base64_util.py
 # @Time    : 2022/10/13 09:20
 # @Author  : Kelvin.Ye

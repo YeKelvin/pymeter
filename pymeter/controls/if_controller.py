@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : if_controller.py
 # @Time    : 2020/2/29 10:49
 # @Author  : Kelvin.Ye

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : design_patterns.py
 # @Time    : 2019/10/16 11:55
 # @Author  : Kelvin.Ye

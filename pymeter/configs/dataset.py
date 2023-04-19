@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : dataset.py
 # @Time    : 2021-08-02 17:28:54
 # @Author  : Kelvin.Ye

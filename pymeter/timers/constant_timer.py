@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : constant_timer.py
 # @Time    : 2021/10/14 19:02
 # @Author  : Kelvin.Ye

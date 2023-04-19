@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : json_path_post_processor.py
 # @Time    : 2022/9/27 10:56
 # @Author  : Kelvin.Ye

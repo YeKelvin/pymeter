@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : flask_db_iteration_storage.py
 # @Time    : 2022/1/28 16:17
 # @Author  : Kelvin.Ye

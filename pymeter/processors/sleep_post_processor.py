@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : sleep_post_processor.py
 # @Time    : 2022/10/17 17:05
 # @Author  : Kelvin.Ye

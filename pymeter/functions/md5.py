@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : md5.py
 # @Time    : 2021-08-17 17:37:04
 # @Author  : Kelvin.Ye

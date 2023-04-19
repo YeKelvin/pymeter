@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : interface.py
 # @Time    : 2020/2/26 11:25
 # @Author  : Kelvin.Ye

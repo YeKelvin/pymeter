@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : hex.py
 # @Time    : 2022/10/13 17:19
 # @Author  : Kelvin.Ye

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : tree_test
 # @Time    : 2020/3/11 11:29
 # @Author  : Kelvin.Ye

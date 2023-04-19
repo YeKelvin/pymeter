@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : http_sampler.py
 # @Time    : 2020/2/13 16:14
 # @Author  : Kelvin.Ye

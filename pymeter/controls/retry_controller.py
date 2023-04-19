@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : retry_controller.py
 # @Time    : 2021/11/29 11:25
 # @Author  : Kelvin.Ye

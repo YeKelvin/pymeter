@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : script_test
 # @Time    : 2020/2/25 15:17
 # @Author  : Kelvin.Ye

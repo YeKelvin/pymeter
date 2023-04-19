@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : generic_controller
 # @Time    : 2020/2/28 17:25
 # @Author  : Kelvin.Ye

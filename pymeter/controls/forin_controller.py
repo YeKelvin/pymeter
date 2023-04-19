@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : forin_controller.py
 # @Time    : 2021/11/12 14:42
 # @Author  : Kelvin.Ye

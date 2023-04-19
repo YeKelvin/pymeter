@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : gateway_sign.py
 # @Time    : 2021-08-17 19:31:29
 # @Author  : Kelvin.Ye

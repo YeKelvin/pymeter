@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : flask_sio_result_collector.py
 # @Time    : 2021/10/15 16:44
 # @Author  : Kelvin.Ye

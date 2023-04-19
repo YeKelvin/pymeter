@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : arguments.py
 # @Time    : 2021-07-05 13:44:20
 # @Author  : Kelvin.Ye

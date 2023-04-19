@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : gevent_test.py
 # @Time    : 2020/2/23 14:12
 # @Author  : Kelvin.Ye
@@ -8,6 +7,7 @@ from datetime import datetime
 import gevent
 from gevent import Greenlet
 from gevent.local import local
+
 
 coroutine_local = local()
 

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : time_util
 # @Time    : 2020/3/9 15:20
 # @Author  : Kelvin.Ye

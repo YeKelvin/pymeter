@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : advanced.py
 # @Time    : 2021-09-08 11:06:50
 # @Author  : Kelvin.Ye

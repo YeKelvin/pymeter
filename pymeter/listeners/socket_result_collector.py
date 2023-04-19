@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : socket_result_collector.py
 # @Time    : 2021/2/9 11:48
 # @Author  : Kelvin.Ye

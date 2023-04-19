@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : random_util.py
 # @Time    : 2021-08-17 19:21:59
 # @Author  : Kelvin.Ye

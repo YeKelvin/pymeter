@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : httpconfigs.py
 # @Time    : 2020/2/17 15:41
 # @Author  : Kelvin.Ye

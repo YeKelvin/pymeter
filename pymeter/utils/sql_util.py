@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : sql_util.py
 # @Time    : 2020/2/21 11:21
 # @Author  : Kelvin.Ye

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin python3
 # @File    : result_collector.py
 # @Time    : 2020/2/18 17:20
 # @Author  : Kelvin.Ye
