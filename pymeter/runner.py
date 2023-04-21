@@ -40,7 +40,7 @@ class Runner:
             handler_id = logger.add(
                 SocketIOHandler(extra.get('sio'), extra.get('sid')),
                 level='INFO',
-                format='[{time:%Y-%m-%d %H:%M:%S.%f}] [{level}] [{module:<16}] {message}'
+                format='[{time:%Y-%m-%d %H:%M:%S.%f}] [{level}] {message}'
             )
 
         # log注入traceid和sid
@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # file = 'transaction-http-session-manager.json'
     file = 'debug.json'
 
-    with open(os.path.join('../scripts', file), 'r', encoding='utf-8') as f:
+    with open(os.path.join('../scripts', file), encoding='utf-8') as f:
         debug_script = ''.join(f.readlines())
         # cProfile.run('Runner.start(script)', filename='profile.out')
         Runner.start(debug_script)
