@@ -21,23 +21,29 @@ class Runner:
             script: str or list,
             throw_ex: bool = False,
             extra: dict = None,
-            plugins=None
     ) -> None:
-        """执行脚本的入口
+        """执行脚本
 
         Args:
             script:    脚本
             throw_ex:  是否抛出异常
             extra:     外部扩展，用于传递外部对象
-            plugins:   插件
 
+        Retruns:
+            None
         """
         # 校验 script脚本不能为空
         if not script:
             raise InvalidScriptException('脚本不允许为空')
 
+        # 初始化extra
+        if not extra:
+            extra = {}
+
+        # 配置socket日志
+        socket_logger_id = None
         if 'sio' in extra and 'sid' in extra:
-            handler_id = logger.add(
+            socket_logger_id = logger.add(
                 SocketIOHandler(extra.get('sio'), extra.get('sid')),
                 level='INFO',
                 format='[{time:%Y-%m-%d %H:%M:%S.%f}] [{level}] {message}'
@@ -55,11 +61,12 @@ class Runner:
             logger.debug(f'script:\n{to_json(script)}')
             Runner.run(script, extra)
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')
             if throw_ex:
                 raise
         finally:
-            logger.remove(handler_id)
+            if socket_logger_id:
+                logger.remove(socket_logger_id)
 
     @staticmethod
     def run(script: str, extra=None) -> None:
@@ -92,11 +99,12 @@ if __name__ == '__main__':
     import os
     import sys
 
+    fmt = '<green>[{time:%Y-%m-%d %H:%M:%S.%f}]</green> <level>[{level}] [{module}:{function}:{line}] {message}</level>'
     logger.add(
         sys.stdout,
         level='DEBUG',
         colorize=True,
-        format='<green>[{time:%Y-%m-%d %H:%M:%S.%f}]</green> <level>[{level}] [{module}:{function}:{line}] {message}</level>'
+        format=fmt
     )
 
     # file = 'http-sampler.json'

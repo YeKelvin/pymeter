@@ -20,7 +20,7 @@ class EngineException(Exception):
     ...
 
 
-class ScriptParseException(Exception):
+class ScriptParseError(Exception):
     ...
 
 
@@ -44,7 +44,7 @@ class ProjectBaseDirectoryNotFoundException(Exception):
     ...
 
 
-class UnsupportedOperationException(Exception):
+class UnsupportedOperationError(Exception):
     ...
 
 

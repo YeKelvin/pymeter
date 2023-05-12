@@ -274,8 +274,8 @@ class StandardEngine(Greenlet):
             group_name = group.name
 
             # 把 TestCollection 子代节点（非 TestGroup 节点）添加至 TestGroup
-            group_tree = group_searcher.get_subtree(group)
-            group_tree.add_key_and_subkeys(group, collection_component_list)
+            group_tree = group_searcher.get(group)
+            group_tree.add_key(group).add_keys(collection_component_list)
             logger.info(f'启动 #线程组# ，名称:[ {group_name} ]，线程数:[ {number_groups} ]')
 
             # 存储当前 TestGroup，用于后续管理线程（启动、停止或循环）

@@ -121,7 +121,7 @@ class SearchByClass(HashTreeTraverser):
     def get_search_result(self) -> list:
         return self.objects_of_class
 
-    def get_subtree(self, node: object):
+    def get(self, node: object):
         return self.subtrees.get(node)
 
     def add_node(self, node, subtree) -> None:

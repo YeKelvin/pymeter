@@ -3,7 +3,6 @@
 # @Time    : 2020/2/20 21:13
 # @Author  : Kelvin.Ye
 import importlib
-import os
 from typing import Iterable
 from typing import List
 from typing import Tuple
@@ -13,11 +12,11 @@ from loguru import logger
 from pymeter.elements.element import TestElement
 from pymeter.engine.tree import HashTree
 from pymeter.engine.values import ValueReplacer
-from pymeter.tools.exceptions import ScriptParseException
+from pymeter.tools.exceptions import ScriptParseError
 from pymeter.utils import json_util
 
 
-__MODULE_PATH__ = {
+MODULES = {
     # 测试集合
     'TestCollection': 'pymeter.engine.collection',
 
@@ -76,52 +75,50 @@ __MODULE_PATH__ = {
 }
 
 
-def load_tree(source: str) -> HashTree:
-    """读取脚本并返回脚本的HashTree对象"""
+def load_tree(source) -> HashTree:
+    """加载脚本"""
     logger.info('开始加载脚本')
 
     script = __loads_script__(source)
     nodes = __parse_node__(script)
+
     if not nodes:
-        raise ScriptParseException('脚本为空或脚本已被禁用')
-    root_tree = HashTree()
+        raise ScriptParseError('脚本为空或脚本已禁用')
+
+    root = HashTree()
     for node, hash_tree in nodes:
-        root_tree.put(node, hash_tree)
-    return root_tree
+        root.put(node, hash_tree)
+    return root
 
 
 def __loads_script__(source) -> List[dict]:
-    """
-    反序列化脚本
-    TODO: 待优化，增加sourceType，支持object，json，yaml
-    """
-    script = []
+    """反序列化脚本"""
     if isinstance(source, list):
-        script = source
-    elif isinstance(source, str):
-        # noinspection PyBroadException
-        try:
-            script = json_util.from_json(source)
-        except Exception:
-            if os.path.exists(source):
-                with open(source, 'r', encoding='utf-8') as f:
-                    json = ''.join(f.readlines())
-                    script = json_util.from_json(json)
-            else:
-                raise
+        return source
+
+    if not isinstance(source, str):
+        raise ScriptParseError('不支持的脚本类型')
+
+    script = json_util.from_json(source)
+    if not isinstance(script, list):
+        raise ScriptParseError('不支持的脚本类型')
+
     return script
 
 
 def __parse_node__(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
-    # 校验节点是否有必须的属性
-    __check__(script)
+    if not script:
+        raise ScriptParseError('脚本解析失败，当前节点为空')
+
     nodes = []
     for item in script:
-        # 过滤enabled=False的节点(已禁用的节点)
+        # 校验节点是否有必须的属性
+        __check_attributes__(item)
+        # 过滤已禁用的节点
         if not item.get('enabled'):
             continue
         # 实例化节点
-        node = __get_node__(item)
+        node = __init_node__(item)
         # 存在子节点时递归解析
         if children := item.get('children', None):
             if child_nodes := __parse_node__(children):
@@ -134,21 +131,15 @@ def __parse_node__(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
     return nodes
 
 
-def __check__(script: Iterable[dict]) -> None:
-    if not script:
-        raise ScriptParseException('脚本解析失败，当前节点为空')
-
-    for item in script:
-        if 'name' not in item:
-            raise ScriptParseException(f'解析异常，节点缺少 name 属性，节点:[ {item} ]')
-        if 'remark' not in item:
-            raise ScriptParseException(f'解析异常，节点缺少 remark 属性，节点:[ {item["name"]} ]')
-        if 'class' not in item:
-            raise ScriptParseException(f'解析异常，节点缺少 class 属性，节点:[ {item["name"]} ]')
-        if 'enabled' not in item:
-            raise ScriptParseException(f'解析异常，节点缺少 enabled 属性，节点:[ {item["name"]} ]')
-        if 'property' not in item:
-            raise ScriptParseException(f'解析异常，节点缺少 property 属性，节点:[ {item["name"]} ]')
+def __check_attributes__(item: dict) -> None:
+    if 'name' not in item:
+        raise ScriptParseError(f'节点:[ {item} ] 解析失败，节点缺少 name 属性，')
+    if 'class' not in item:
+        raise ScriptParseError(f'节点:[ {item["name"]} ] 解析失败，节点缺少 class 属性')
+    if 'enabled' not in item:
+        raise ScriptParseError(f'节点:[ {item["name"]} ] 解析失败，节点缺少 enabled 属性')
+    if 'property' not in item:
+        raise ScriptParseError(f'节点:[ {item["name"]} ] 解析失败，节点缺少 property 属性')
 
 
 def __set_replaced_property__(element: TestElement, key: str, value: any) -> None:
@@ -156,7 +147,7 @@ def __set_replaced_property__(element: TestElement, key: str, value: any) -> Non
         element.add_property(key, ValueReplacer.replace_values(key, value))
 
 
-def __get_node__(script: dict) -> TestElement:
+def __init_node__(script: dict) -> TestElement:
     """根据元素的class属性实例化为对象"""
     # 获取节点的类型
     class_name = script.get('class')
@@ -191,7 +182,7 @@ def __set_properties__(node, props):
 
 def __set_object_property__(node, key, value: dict):
     if 'class' in value:
-        propnode = __get_node__(value)
+        propnode = __init_node__(value)
         node.set_property(key, propnode)
     else:
         node.set_property(key, value)
@@ -201,26 +192,18 @@ def __set_collection_property__(node, key, value: list):
     collection = []
     for item in value:
         if isinstance(item, dict) and 'class' in item:
-            propnode = __get_node__(item)
+            propnode = __init_node__(item)
             collection.append(propnode)
         else:
             collection.append(item)
     node.set_property(key, collection)
 
 
-def __get_class_type__(name: str) -> type:
-    """根据类名获取类
-
-    Args:
-        name: 类名
-
-    Returns:
-        type
-
-    """
-    module_path = __MODULE_PATH__.get(name)
+def __get_class_type__(classname: str) -> type:
+    """根据类名获取类"""
+    module_path = MODULES.get(classname)
     if not module_path:
-        raise ScriptParseException(f'节点类型不存在，类型名称:[ {name} ] ')
+        raise ScriptParseError(f'类名:[ {classname} ] 节点类型不存在')
 
     module = importlib.import_module(module_path)
-    return getattr(module, name)
+    return getattr(module, classname)
