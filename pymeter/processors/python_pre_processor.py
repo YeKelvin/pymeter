@@ -53,4 +53,4 @@ class PythonPreProcessor(PreProcessor):
                 sampler=ctx.current_sampler
             )
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')

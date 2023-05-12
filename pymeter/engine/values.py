@@ -64,7 +64,7 @@ class CompoundVariable:
                     results.append(item)
         except Exception as e:
             results.append(str(e))
-            logger.exception()
+            logger.exception('Exception Occurred')
         finally:
             results_str = ''.join(results)
 

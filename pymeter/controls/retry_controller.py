@@ -88,7 +88,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
             return nsampler
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')
 
     def next_is_null(self):
         """@override"""

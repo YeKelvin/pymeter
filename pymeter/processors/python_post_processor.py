@@ -53,4 +53,4 @@ class PythonPostProcessor(PostProcessor):
                 result=ctx.previous_result
             )
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')

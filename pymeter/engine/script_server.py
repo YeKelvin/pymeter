@@ -77,8 +77,6 @@ MODULES = {
 
 def load_tree(source) -> HashTree:
     """加载脚本"""
-    logger.info('开始加载脚本')
-
     script = __loads_script__(source)
     nodes = __parse_node__(script)
 

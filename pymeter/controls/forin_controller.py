@@ -136,7 +136,7 @@ class ForInController(GenericController, IteratingController):
 
             return nsampler
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')
         finally:
             self.update_iteration_index(self.name, self._loop_count)
 

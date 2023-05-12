@@ -58,5 +58,5 @@ class IfController(GenericController):
         try:
             return eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')
             return False

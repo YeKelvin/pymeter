@@ -121,7 +121,7 @@ class WhileController(GenericController, IteratingController):
             # 获取下一个 sampler
             return super().next()
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')
         finally:
             self.update_iteration_index(self.name, self.iter_count)
 
@@ -156,5 +156,5 @@ class WhileController(GenericController, IteratingController):
         try:
             return eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')
             return False

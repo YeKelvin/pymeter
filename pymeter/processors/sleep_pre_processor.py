@@ -25,4 +25,4 @@ class SleepPreProcessor(PreProcessor):
             logger.debug(f'元素:[{self.name}] 前置等待 {self.delay} ms')
             gevent.sleep(float(self.delay) / 1000)
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')

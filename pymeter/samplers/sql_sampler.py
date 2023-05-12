@@ -108,7 +108,7 @@ class SQLSampler(Sampler):
         except Exception as e:
             result.success = False
             result.response_data = e
-            logger.exception()
+            logger.exception('Exception Occurred')
         finally:
             timeout.close()
             result.sample_end()

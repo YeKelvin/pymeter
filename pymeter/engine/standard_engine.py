@@ -63,7 +63,7 @@ class StandardEngine(Greenlet):
         collections = searcher.get_search_result()
 
         if len(collections) == 0:
-            raise EngineException('集合数量少于1，请确保至少存在一个集合')
+            raise EngineException('集合不允许为空')
 
         self.collection = collections[0]
         self.serialized = self.collection.serialized
@@ -71,33 +71,40 @@ class StandardEngine(Greenlet):
         self.tree = tree
 
     def run_test(self) -> None:
-        """执行脚本，这里主要做异常捕获"""
+        """运行脚本，这里主要做异常捕获"""
         try:
-            self.start()
+            self.start()  # _run()
             self.join()  # 等待主线程结束
-        except EngineException:
-            logger.exception()
+        except EngineException as e:
+            logger.error(e)
+        except Exception:
+            logger.exception('Exception Occurred')
 
     def _run(self, *args, **kwargs) -> None:
-        """脚本执行主体"""
+        """脚本运行主体"""
+        logger.info('开始运行脚本')
+
         # log注入traceid和sid
         logurucontext.set({
             **logurucontext.get(),
             'traceid': self.extra.get('traceid'),
             'sid': self.extra.get('sid')
         })
-        logger.info('开始执行脚本')
+
+        # 标记运行状态
         self.running = True
 
+        # 上下文存储当前引擎
         ContextService.get_context().engine = self
+        # 上下文标记开始运行
         ContextService.start_test()
 
         # 查找 TestCollectionListener 对象
-        test_listener_searcher = SearchByClass(TestCollectionListener)
-        self.tree.traverse(test_listener_searcher)
+        collection_listener_searcher = SearchByClass(TestCollectionListener)
+        self.tree.traverse(collection_listener_searcher)
 
         # 遍历执行 TestCollectionListener
-        self._notify_test_listeners_of_start(test_listener_searcher)
+        self._notify_collection_listeners_of_start(collection_listener_searcher)
 
         # 存储 TestCollection 子代节点(非 TestGroup 节点)
         collection_component_list = self.tree.index(0).list()
@@ -124,10 +131,10 @@ class StandardEngine(Greenlet):
         group_total += self._process_teardown_group(teardown_group_searcher, collection_component_list)
 
         if group_total == 0:
-            logger.warning('集合下找不到 #线程组# 或已被禁用')
+            logger.warning('集合不存在 #线程组# 或已禁用')
 
         # 遍历执行 TestCollectionListener
-        self._notify_test_listeners_of_end(test_listener_searcher)
+        self._notify_collection_listeners_of_end(collection_listener_searcher)
 
         # DEBUG时输出结果
         if logger.level == logging.DEBUG:
@@ -135,7 +142,7 @@ class StandardEngine(Greenlet):
             self.tree.traverse(result_collector_searcher)
             result_collectors = result_collector_searcher.get_search_result()
             for result_collector in result_collectors:
-                logger.debug(f'resultCollector:\n{result_collector.__dict__}')
+                logger.debug(f'取样结果:\n{result_collector.__dict__}')
 
         # 测试结束
         self.active = False
@@ -266,7 +273,8 @@ class StandardEngine(Greenlet):
             group_searcher:             SearchByClass[TestGroup]
             collection_component_list:  TestCollection 子代节点（非 TestGroup 节点）
 
-        Returns: None
+        Returns:
+            None
 
         """
         try:
@@ -282,7 +290,7 @@ class StandardEngine(Greenlet):
             self.groups.append(group)
             group.start(group_count, group_tree, self)
         except StopTestException:
-            logger.exception()  # TODO: 这里需要打印堆栈吗
+            logger.info('停止运行')
 
     def _wait_groups_stopped(self) -> None:
         """等待所有线程执行完成"""
@@ -290,7 +298,7 @@ class StandardEngine(Greenlet):
             group.wait_groups_stopped()
 
     @staticmethod
-    def _notify_test_listeners_of_start(searcher: SearchByClass) -> None:
+    def _notify_collection_listeners_of_start(searcher: SearchByClass) -> None:
         """遍历调用 TestCollectionListener
 
         Args:
@@ -299,13 +307,13 @@ class StandardEngine(Greenlet):
         Returns: None
 
         """
-        logger.debug('notify all TestCollectionListener to start')
+        logger.debug('遍历触发 TestCollectionListener 的开始事件')
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.collection_started()
 
     @staticmethod
-    def _notify_test_listeners_of_end(searcher: SearchByClass) -> None:
+    def _notify_collection_listeners_of_end(searcher: SearchByClass) -> None:
         """遍历调用 TestCollectionListener
 
         Args:
@@ -314,7 +322,7 @@ class StandardEngine(Greenlet):
         Returns: None
 
         """
-        logger.debug('notify all TestCollectionListener to end')
+        logger.debug('遍历触发 TestCollectionListener 的结束事件')
         listeners = searcher.get_search_result()
         for listener in listeners:
             listener.collection_ended()

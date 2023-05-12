@@ -32,7 +32,7 @@ class Runner:
         Retruns:
             None
         """
-        # 校验 script脚本不能为空
+        # 校验脚本不能为空
         if not script:
             raise InvalidScriptException('脚本不允许为空')
 
@@ -58,7 +58,7 @@ class Runner:
 
         # noinspection PyBroadException
         try:
-            logger.debug(f'script:\n{to_json(script)}')
+            logger.debug(f'脚本:\n{to_json(script)}')
             Runner.run(script, extra)
         except Exception:
             logger.exception('Exception Occurred')
@@ -76,8 +76,10 @@ class Runner:
         hms = time.strftime('%H:%M:%S', time.localtime(now))
 
         # 加载脚本
+        logger.info('开始加载脚本')
         hashtree = script_server.load_tree(script)
-        logger.debug(f'hashtree:\n{hashtree}')
+        logger.info('脚本加载完成')
+        logger.debug(f'脚本HashTree结构:\n{hashtree}')
 
         # 将脚本配置到执行引擎中
         engine = StandardEngine(

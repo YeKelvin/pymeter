@@ -74,7 +74,7 @@ class JsonPathPostProcessor(PostProcessor):
                 ctx.variables.put(varname, self.default_value)
                 logger.info(f'响应结果为空，赋予默认值，变量名[ {varname} ]，变量值:[ {self.default_value} ]')
         except Exception:
-            logger.exception()
+            logger.exception('Exception Occurred')
             # 设置默认值
             if self.default_value:
                 ctx.variables.put(jsonpath, self.default_value)
