@@ -54,6 +54,5 @@ class IteratingController(LoopIterationListener, metaclass=ABCMeta):
         raise NotImplementedError
 
     def update_iteration_index(self, name, iter_count) -> None:
-        variables = ContextService.get_context().variables
-        if variables:
+        if variables := ContextService.get_context().variables:
             variables.put(f'{self.PREFIX}.{name}.{self.SUFFIX}', iter_count)

@@ -66,7 +66,7 @@ class GenericController(Controller, TestCompilerHelper):
     @done.setter
     def done(self, val: bool):
         """@override"""
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     @property
@@ -110,7 +110,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next(self) -> Optional[Sampler]:
         """获取控制器的下一个子代元素"""
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] getting next')
         self.fire_iter_events()
 
         if self.done:
@@ -127,9 +127,9 @@ class GenericController(Controller, TestCompilerHelper):
                 else:
                     next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
-            logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is null')
+            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] next is null')
 
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ {next_sampler} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] next:[ {next_sampler} ]')
         return next_sampler
 
     def fire_iter_events(self):
@@ -138,7 +138,7 @@ class GenericController(Controller, TestCompilerHelper):
             self.first = False
 
     def fire_iteration_start(self):
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
         for listener in self.iteration_listeners:
             listener.iteration_start(self, self.iter_count)
 
@@ -161,7 +161,7 @@ class GenericController(Controller, TestCompilerHelper):
     def next_is_controller(self, controller: Controller) -> Sampler:
         """下一个元素是控制器时的处理方法"""
         # 获取子代控制器的下一个取样器
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next is controller')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] next is controller')
         sampler = controller.next()
         # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:
@@ -182,7 +182,7 @@ class GenericController(Controller, TestCompilerHelper):
             self.increment_current()
 
     def add_element(self, child):
-        # logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add element:[ {child} ]')
+        # logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] add element:[ {child} ]')
         self.sub_elements.append(child)
 
     def add_test_element(self, child):
@@ -203,7 +203,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def add_iteration_listener(self, listener: LoopIterationListener):
         # logger.debug(
-        #     f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] add iteration listener:[ {listener} ]'
+        #     f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] add iteration listener:[ {listener} ]'
         # )
         self.iteration_listeners.appendleft(listener)
 

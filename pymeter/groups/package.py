@@ -59,7 +59,7 @@ class SamplePackage:
         self.sampler.running_version = running
 
     def recover_running_version(self) -> None:
-        logger.debug(f'package:[ {self.sampler} ] recover running')
+        logger.debug(f'取样包:[ {self.sampler} ] 恢复运行版本')
         for el in self.configs:
             el.recover_running_version()
         for el in self.pre_processors:

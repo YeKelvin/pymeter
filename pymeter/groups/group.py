@@ -436,7 +436,7 @@ class Coroutine(Greenlet):
 
         # 错误时中断当前控制器循环
         elif self.group.on_error_break_current_loop:
-            logger.debug(f'线程:[ {self.coroutine_name} ] 最后一次请求失败，终止当前循环')
+            logger.debug(f'线程:[ {self.coroutine_name} ] 最后一次请求失败，中止当前循环')
             self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__break_on_current_loop)
 
         # 错误时停止线程
@@ -599,7 +599,7 @@ class Coroutine(Greenlet):
             result.sample_name = f'{result.sample_name} {retryflag}' if retryflag else result.sample_name
 
         # 遍历执行 SampleListener
-        logger.debug(f'线程:[ {self.coroutine_name} ] notify all SampleListener to occurred')
+        logger.debug(f'线程:[ {self.coroutine_name} ] 遍历触发 SampleListener 的发生事件')
         sample_listeners = self.__get_sample_listeners(package, transaction_package, transaction_sampler)
         for listener in sample_listeners:
             listener.sample_occurred(result)
@@ -672,12 +672,12 @@ class Coroutine(Greenlet):
         #  Notify listeners with the transaction sample result
         if not isinstance(parent, TransactionSampler):
             # 遍历执行 SampleListener
-            logger.debug(f'线程:[ {self.coroutine_name} ] notify all SampleListener to occurred')
+            logger.debug(f'线程:[ {self.coroutine_name} ] 遍历触发 SampleListener 的发生事件')
             for listener in transaction_package.listeners:
                 listener.sample_occurred(result)
 
         # 遍历执行 TransactionListener
-        logger.debug(f'线程:[ {self.coroutine_name} ] notify all TransactionListener to end')
+        logger.debug(f'线程:[ {self.coroutine_name} ] 遍历触发 TransactionListener 的结束事件')
         for listener in transaction_package.trans_listeners:
             listener.transaction_ended()
 
@@ -691,8 +691,10 @@ class Coroutine(Greenlet):
             self.__process_assertion(assertion, result)
 
         logger.debug(
-            f'线程:[ {self.coroutine_name} ] 取样器:[ {result.sample_name} ] success:[ {result.success} ] '
-            'set LAST_SAMPLE_OK'
+            f'线程:[ {self.coroutine_name} ]'
+            f'取样器:[ {result.sample_name} ] '
+            f'成功:[ {result.success} ] '
+            '设置变量 LAST_SAMPLE_OK'
         )
         context.variables.put(self.LAST_SAMPLE_OK, result.success)
 

@@ -90,7 +90,8 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
 
     @property
     def url(self) -> str:
-        """
+        """数据库连接串
+
         cx-Oracle: oracle+cx_oracle
 
         mysqlclient: mysql+mysqldb
@@ -103,6 +104,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
         pyodbc: mssql+pyodbc
         pymssql: mssql+pymssql
         """
+        # sourcery skip: use-fstring-for-formatting
         url = '{}+{}://{}:{}@{}:{}/{}'.format(
             self.database_type,
             self.driver,
@@ -134,10 +136,10 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
 
     def collection_ended(self) -> None:
         """@override"""
-        logger.debug(f'database:[ {self.database_type}/{self.database} ] close engine')
+        logger.debug(f'数据库:[ {self.name} ] 关闭数据库')
         self.engine.dispose()
 
     def connect(self) -> Engine:
         url = self.url
-        logger.debug(f'connect database engine:[ {self.url} ]')
+        logger.debug(f'数据库:[ {self.name} ] 连接串:[ {self.url} ] 连接数据库')
         return create_engine(url, connect_args={'connect_timeout': self.connect_timeout})

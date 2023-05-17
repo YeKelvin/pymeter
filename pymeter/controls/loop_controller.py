@@ -45,7 +45,7 @@ class LoopController(GenericController, IteratingController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 已完成:[ {val} ]')
         self.reset_break_loop()
         self._done = val
 
@@ -54,16 +54,18 @@ class LoopController(GenericController, IteratingController):
         # noinspection PyBroadException
         try:
             if self.end_of_loop():
-                logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] getting next')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个')
                 if not self.continue_forever:
                     self.done = True
                 self.reset_break_loop()
-                logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] next:[ None ]')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个:[ None ]')
                 return None
 
             if self.first:
                 controller_name = f'控制器:[ {self.name} ]' if self.name else ''
-                logger.info(f'线程:[ {self.ctx.coroutine_name} ] {controller_name} 开始第 {self._loop_count + 1} 次迭代')
+                logger.info(
+                    f'线程:[ {self.ctx.coroutine_name} ] {controller_name} 开始第 {self._loop_count + 1} 次迭代'
+                )
 
             return super().next()
         except Exception:
@@ -107,11 +109,11 @@ class LoopController(GenericController, IteratingController):
             self._break_loop = False
 
     def start_next_loop(self):
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] start next loop')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个循环')
         self.re_initialize()
 
     def break_loop(self):
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] break loop')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 中止循环')
         self._break_loop = True
         self.first = True
         self.reset_current()

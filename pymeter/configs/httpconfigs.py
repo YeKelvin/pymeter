@@ -235,15 +235,15 @@ class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListene
         return self.get_property_as_bool(self.CLEAR_EACH_ITERATION)
 
     def group_started(self) -> None:
-        logger.debug('open new http session')
+        logger.debug('创建 HTTP 会话')
         self.session = httpx.Client()
 
     def group_finished(self) -> None:
-        logger.debug(f'close http session:[ {self.session} ]')
+        logger.debug('关闭 HTTP 会话')
         self.session.close()
 
     def test_iteration_start(self, controller, iter: int) -> None:
         if self.clear_each_iteration and iter > 1:
-            logger.debug(f'close and open new http session in iteration:[ {iter} ]')
+            logger.debug(f'迭代:[ {iter} ] 重置 HTTP 会话')
             self.session.close()
             self.session = httpx.Client()

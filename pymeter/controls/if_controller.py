@@ -24,7 +24,7 @@ class IfController(GenericController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 已完成:[ {val} ]')
         self._done = val
 
     def next(self):
@@ -34,10 +34,10 @@ class IfController(GenericController):
         # For subsequent calls, we are inside the IfControllerGroup,
         # so then we just pass the control to the next item inside the if control
         cnd = self.condition.strip()
-        logger.debug(f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition:[ {cnd} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] if条件:[ {cnd} ]')
         result = self.evaluate(cnd) if self.first else True
         logger.debug(
-            f'coroutine:[ {self.ctx.coroutine_name} ] controller:[ {self.name} ] if condition result:[ {result} ]')
+            f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] if结果:[ {result} ]')
         if result is True:
             return super().next()
 

@@ -32,10 +32,10 @@ class TransactionHTTPSessionManager(SessionManager, TransactionConfig, Transacti
 
     def transaction_started(self) -> None:
         """@override"""
-        logger.debug('open new transaction http session')
+        logger.debug('创建事务 HTTP 会话')
         self.session = httpx.Client()
 
     def transaction_ended(self) -> None:
         """@override"""
-        logger.debug(f'close transaction http session:[ {self.session} ]')
+        logger.debug('关闭事务 HTTP 会话')
         self.session.close()
