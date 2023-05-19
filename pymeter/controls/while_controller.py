@@ -114,10 +114,10 @@ class WhileController(GenericController, IteratingController):
 
             # 如果第一次进入时条件为假，则完全跳过控制器
             if self.first and self.end_of_loop(False):
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
                 self.reset_break_loop()
                 self.reset_loop_count()
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个:[ None ]')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
                 return None
 
             # 获取下一个 sampler

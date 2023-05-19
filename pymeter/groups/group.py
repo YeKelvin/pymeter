@@ -141,9 +141,9 @@ class TestGroup(Controller, TestCompilerHelper):
         """启动 TestGroup
 
         Args:
-            group_number:   group 的序号
-            group_tree:     group 的 HashTree
-            engine:         Engine 对象
+            group_number:   worker编号
+            group_tree:     worker的HashTree对象
+            engine:         测试引擎
 
         Returns: None
 
@@ -251,15 +251,15 @@ class TestGroup(Controller, TestCompilerHelper):
         """创建一个线程
 
         Args:
-            coroutine_number:   线程的序号
-            engine:             Engine对象
-            context:            当前线程的 CoroutineContext 对象
+            coroutine_number:   线程编号
+            engine:             测试引擎
+            context:            线程上下文
 
         Returns:
             Coroutine
 
         """
-        coroutine_name = f'{self.name} g{self.group_number}-c{coroutine_number + 1}'
+        coroutine_name = f'{self.name} w{self.group_number}-t{coroutine_number + 1}'
         coroutine = Coroutine(self.__clone_group_tree())
         coroutine.initial_context(context)
         coroutine.engine = engine
@@ -286,9 +286,9 @@ class Coroutine(Greenlet):
         super().__init__(*args, **kwargs)
         self.engine = None
         self.running = True
-        self.group = None  # type: Optional[TestGroup]
+        self.group = None                                   # type: Optional[TestGroup]
         self.group_tree = group_tree
-        self.group_main_controller = group_tree.list()[0]  # type: Controller
+        self.group_main_controller = group_tree.list()[0]   # type: Controller
         self.coroutine_name = None
         self.coroutine_number = None
         self.compiler = TestCompiler(self.group_tree)
@@ -321,9 +321,9 @@ class Coroutine(Greenlet):
         """
         context.engine = self.engine
         context.group = self.group
-        context.coroutine = self
         context.coroutine_number = self.coroutine_number
         context.coroutine_name = self.coroutine_name
+        context.coroutine = self
         context.variables = self.variables
         context.variables.put(self.LAST_SAMPLE_OK, True)
 
@@ -336,6 +336,7 @@ class Coroutine(Greenlet):
 
         # 编译 TestGroup 的子代节点
         logger.debug('开始编译TestGroup节点')
+        logger.debug(f'TestGroup的HashTree结构:\n{self.group_tree}')
         self.group_tree.traverse(self.compiler)
         logger.debug('TestGroup节点编译完成')
 
@@ -475,7 +476,7 @@ class Coroutine(Greenlet):
         # if an error occurs in a Sample (child of TransactionController)
         # then we still need to report the Transaction in error (and create the sample result)
         if isinstance(sampler, TransactionSampler) and sampler.done:
-            transaction_package = self.compiler.configure_transaction_sampler(sampler)
+            transaction_package = self.compiler.configure_trans_sampler(sampler)
             self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
 
     def is_retrying_sampler(self, sampler: Sampler):
@@ -506,7 +507,7 @@ class Coroutine(Greenlet):
 
         if isinstance(current, TransactionSampler):
             transaction_sampler = current
-            transaction_package = self.compiler.configure_transaction_sampler(transaction_sampler)
+            transaction_package = self.compiler.configure_trans_sampler(transaction_sampler)
 
             # 检查事务是否已完成
             if current.done:
@@ -579,7 +580,7 @@ class Coroutine(Greenlet):
             result = self.__do_sampling(sampler, context, package.listeners)
 
         if not result:
-            self.compiler.done(package)
+            package.done()
             return
 
         # 设置为上一个结果
@@ -604,7 +605,7 @@ class Coroutine(Greenlet):
         for listener in sample_listeners:
             listener.sample_occurred(result)
 
-        self.compiler.done(package)
+        package.done()
 
         # Add the result as subsample of transaction if we are in a transaction
         if transaction_sampler:
@@ -628,16 +629,16 @@ class Coroutine(Greenlet):
         sampler.context = context
 
         # 遍历执行 SampleListener
-        logger.debug(f'线程:[ {self.coroutine_name} ] notify all SampleListener to start')
+        logger.debug(f'线程:[ {self.coroutine_name} ] 遍历触发 SampleListener 的开始事件')
         for listener in listeners:
             listener.sample_started(sampler)
 
         result = None
         # noinspection PyBroadException
         try:
-            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler} ] doing sample')
+            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler} ] 开始取样')
             result = sampler.sample()
-            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler} ] sample done')
+            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler} ] 取样完成')
         except Exception as e:
             logger.exception('Exception Occurred')
             if not result:
@@ -646,7 +647,7 @@ class Coroutine(Greenlet):
             result.response_data = e
         finally:
             # 遍历执行 SampleListener
-            logger.debug(f'线程:[ {self.coroutine_name} ] notify all SampleListener to end')
+            logger.debug(f'线程:[ {self.coroutine_name} ] 遍历触发 SampleListener 的结束事件')
             for listener in listeners:
                 listener.sample_ended(result)
 
@@ -682,7 +683,7 @@ class Coroutine(Greenlet):
             listener.transaction_ended()
 
         # 标记事务已完成
-        self.compiler.done(transaction_package)
+        transaction_package.done()
         return result
 
     def __check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext) -> None:
@@ -693,8 +694,7 @@ class Coroutine(Greenlet):
         logger.debug(
             f'线程:[ {self.coroutine_name} ]'
             f'取样器:[ {result.sample_name} ] '
-            f'成功:[ {result.success} ] '
-            '设置变量 LAST_SAMPLE_OK'
+            f'设置变量 LAST_SAMPLE_OK={result.success}'
         )
         context.variables.put(self.LAST_SAMPLE_OK, result.success)
 

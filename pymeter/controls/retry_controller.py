@@ -53,7 +53,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
     @done.setter
     def done(self, val: bool):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 已完成:[ {val} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 设置 done={val}')
         self.reset_break_retry()
         self._done = val
 

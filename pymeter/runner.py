@@ -4,6 +4,7 @@
 # @Author  : Kelvin.Ye
 import time
 
+import orjson
 from loguru import logger
 from loguru._logger import context as logurucontext
 
@@ -97,26 +98,37 @@ class Runner:
 
 
 if __name__ == '__main__':
-    # import cProfile
-    import os
+    import pathlib
     import sys
 
+    # 项目根目录
+    rootpath = pathlib.Path(__file__).parent.parent.absolute()
+    # 清空日志文件
+    logpath = rootpath.joinpath('debug.log').absolute()
+    if logpath.exists():
+        logpath.unlink()
+
+    # 日志配置
     fmt = '<green>[{time:%Y-%m-%d %H:%M:%S.%f}]</green> <level>[{level}] [{module}:{function}:{line}] {message}</level>'
+    logger.remove()
     logger.add(
         sys.stdout,
         level='DEBUG',
         colorize=True,
         format=fmt
     )
+    logger.add(
+        'debug.log',
+        level='DEBUG',
+        diagnose=True,
+        backtrace=True,
+        format=fmt
+    )
 
-    # file = 'http-sampler.json'
-    # file = 'while-controller.json'
-    # file = 'http-session-manager.json'
-    # file = 'transaction-listener.json'
-    # file = 'transaction-http-session-manager.json'
-    file = 'debug.json'
-
-    with open(os.path.join('../scripts', file), encoding='utf-8') as f:
-        debug_script = ''.join(f.readlines())
+    # 读取脚本运行
+    with open(rootpath.joinpath('scripts', 'debug.json')) as f:
+        # import cProfile
         # cProfile.run('Runner.start(script)', filename='profile.out')
-        Runner.start(debug_script)
+        script = ''.join(f.readlines())
+        obj = [orjson.loads(script)]
+        Runner.start(obj)

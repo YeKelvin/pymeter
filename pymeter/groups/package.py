@@ -2,6 +2,7 @@
 # @File    : sample_package
 # @Time    : 2020/2/27 15:41
 # @Author  : Kelvin.Ye
+from ast import boolop
 from typing import Sequence
 
 from loguru import logger
@@ -40,8 +41,11 @@ class SamplePackage:
 
         self.sampler = None
 
-    def set_running_version(self, running) -> None:
-        logger.debug(f'package:[ {self.sampler} ] set running:[ {running} ]')
+    def done(self):
+        self.recover_running_version()
+
+    def set_running_version(self, running: bool) -> None:
+        logger.debug(f'取样包:[ {self.sampler} ] 设置 running={running}')
         for el in self.configs:
             el.running_version = running
         for el in self.pre_processors:

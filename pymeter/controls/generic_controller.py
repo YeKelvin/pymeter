@@ -110,7 +110,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     def next(self) -> Optional[Sampler]:
         """获取控制器的下一个子代元素"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] getting next')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
         self.fire_iter_events()
 
         if self.done:
@@ -127,9 +127,9 @@ class GenericController(Controller, TestCompilerHelper):
                 else:
                     next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
-            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] next is null')
+            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
 
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] next:[ {next_sampler} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个:[ {next_sampler} ]')
         return next_sampler
 
     def fire_iter_events(self):
@@ -138,7 +138,7 @@ class GenericController(Controller, TestCompilerHelper):
             self.first = False
 
     def fire_iteration_start(self):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] notify all LoopIterationListener to start')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 遍历触发 LoopIterationListener 的开始事件')
         for listener in self.iteration_listeners:
             listener.iteration_start(self, self.iter_count)
 
@@ -186,7 +186,7 @@ class GenericController(Controller, TestCompilerHelper):
         self.sub_elements.append(child)
 
     def add_test_element(self, child):
-        if isinstance(child, Controller) or isinstance(child, Sampler):
+        if isinstance(child, (Controller, Sampler)):
             self.add_element(child)
 
     def add_test_element_once(self, child) -> bool:

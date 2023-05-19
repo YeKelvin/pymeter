@@ -45,11 +45,11 @@ class StandardEngine(Greenlet):
         self.running = False
         self.active = False
         self.tree = None
-        self.serialized = True  # 标识 TestGroup 是否顺序运行
-        self.groups = []  # 储存已启动的 TestGroup
+        self.serialized = True          # 是否顺序运行
+        self.groups = []                # 储存已启动的worker
         self.context = EngineContext()
         self.properties = Properties()
-        self.collection = None  # type: TestCollection
+        self.collection = None          # type: TestCollection
         self.extra = kwargs.get('extra', {})
 
         if props := kwargs.get('props', None):
@@ -109,6 +109,7 @@ class StandardEngine(Greenlet):
         # 存储 TestCollection 子代节点(非 TestGroup 节点)
         collection_component_list = self.tree.index(0).list()
         self._remove_groups(collection_component_list)  # 删除 TestGroup 节点
+        self._add_level(collection_component_list)      # 添加层级
 
         # 查找 SetupGroup / TestGroup / TearDownGroup 对象
         setup_group_searcher = SearchByClass(SetupGroup)
@@ -147,6 +148,7 @@ class StandardEngine(Greenlet):
         # 测试结束
         self.active = False
         ContextService.end_test()
+        logger.info('脚本运行完成')
 
     def _process_setup_group(self, setup_group_searcher, collection_component_list):
         if not setup_group_searcher.count:
@@ -160,12 +162,12 @@ class StandardEngine(Greenlet):
                 setup_group: SetupGroup = next(setup_group_iter)
                 group_count += 1
                 group_name = setup_group.name
-                logger.info(f'初始化第 {group_count} 个 #前置线程组# ，名称:[ {group_name} ]')
+                logger.info(f'名称:[ {group_name} ] 初始化第 {group_count} 个 #前置线程组#')
                 self._start_test_group(setup_group, group_count, setup_group_searcher, collection_component_list)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    logger.info(f'等待当前 #前置线程组# 执行完成，名称:[ {group_name} ]')
+                    logger.info(f'名称:[ {group_name} ] 等待当前 #前置线程组# 执行完成')
                     setup_group.wait_groups_stopped()
             except StopIteration:
                 logger.info('所有 #前置线程组# 已启动')
@@ -192,12 +194,12 @@ class StandardEngine(Greenlet):
                     continue
                 group_count += 1
                 group_name = test_group.name
-                logger.info(f'初始化第 {group_count} 个 #线程组# ，名称:[ {group_name} ]')
+                logger.info(f'名称:[ {group_name} ] 初始化第 {group_count} 个 #线程组#')
                 self._start_test_group(test_group, group_count, test_group_searcher, collection_component_list)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    logger.info(f'等待当前 #线程组# 执行完成，名称:[ {group_name} ]')
+                    logger.info(f'名称:[ {group_name} ] 等待当前 #线程组# 执行完成')
                     test_group.wait_groups_stopped()
             except StopIteration:
                 logger.info('所有 #线程组# 已启动')
@@ -228,12 +230,12 @@ class StandardEngine(Greenlet):
                 teardown_group: TearDownGroup = next(teardown_group_iter)
                 group_count += 1
                 group_name = teardown_group.name
-                logger.info(f'初始化第 {group_count} 个 #后置线程组# ，名称:[ {group_name} ]')
+                logger.info(f'名称:[ {group_name} ] 初始化第 {group_count} 个 #后置线程组#')
                 self._start_test_group(teardown_group, group_count, teardown_group_searcher, collection_component_list)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.serialized:
-                    logger.info(f'等待当前 #后置线程组# 完成，名称:[ {group_name} ]')
+                    logger.info(f'名称:[ {group_name} ] 等待当前 #后置线程组# 完成')
                     teardown_group.wait_groups_stopped()
             except StopIteration:
                 logger.info('所有 #后置线程组# 已启动')
@@ -281,10 +283,10 @@ class StandardEngine(Greenlet):
             number_groups = group.number_groups
             group_name = group.name
 
-            # 把 TestCollection 子代节点（非 TestGroup 节点）添加至 TestGroup
+            # 将 Collection 层的组件节点（非 TestGroup 节点）添加至 TestGroup
             group_tree = group_searcher.get(group)
             group_tree.add_key(group).add_keys(collection_component_list)
-            logger.info(f'启动 #线程组# ，名称:[ {group_name} ]，线程数:[ {number_groups} ]')
+            logger.info(f'名称:[ {group_name} ] 线程数:[ {number_groups} ] 启动 #线程组#')
 
             # 存储当前 TestGroup，用于后续管理线程（启动、停止或循环）
             self.groups.append(group)
@@ -341,3 +343,8 @@ class StandardEngine(Greenlet):
         for node in elements[:]:
             if isinstance(node, TestGroup) or not isinstance(node, TestElement):
                 elements.remove(node)
+
+    @staticmethod
+    def _add_level(elements: list) -> None:
+        for node in elements:
+            node.level = 1

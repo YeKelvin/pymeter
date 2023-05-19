@@ -45,7 +45,7 @@ class LoopController(GenericController, IteratingController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 已完成:[ {val} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 设置 done={val}')
         self.reset_break_loop()
         self._done = val
 
@@ -54,11 +54,11 @@ class LoopController(GenericController, IteratingController):
         # noinspection PyBroadException
         try:
             if self.end_of_loop():
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
                 if not self.continue_forever:
                     self.done = True
                 self.reset_break_loop()
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个:[ None ]')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
                 return None
 
             if self.first:

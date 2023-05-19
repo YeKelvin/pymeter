@@ -120,11 +120,11 @@ class ForInController(GenericController, IteratingController):
                 self.initial_forin()
 
             if self.end_of_loop():
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
                 self.reset_break_loop()
                 self.re_initialize()
                 self.reset_break_loop()
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个:[ None ]')
+                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
                 return None
 
             nsampler = super().next()

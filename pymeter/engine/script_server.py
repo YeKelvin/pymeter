@@ -7,8 +7,6 @@ from typing import Iterable
 from typing import List
 from typing import Tuple
 
-from loguru import logger
-
 from pymeter.elements.element import TestElement
 from pymeter.engine.tree import HashTree
 from pymeter.engine.values import ValueReplacer
@@ -131,6 +129,7 @@ def __parse_node__(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
 
 def __check_attributes__(item: dict) -> None:
     if 'name' not in item:
+        item.pop('children')  # 无需打印children内容
         raise ScriptParseError(f'节点:[ {item} ] 解析失败，节点缺少 name 属性，')
     if 'class' not in item:
         raise ScriptParseError(f'节点:[ {item["name"]} ] 解析失败，节点缺少 class 属性')
@@ -149,7 +148,6 @@ def __init_node__(script: dict) -> TestElement:
     """根据元素的class属性实例化为对象"""
     # 获取节点的类型
     class_name = script.get('class')
-    logger.debug(f'node class:[ {class_name} ]')
 
     # 根据类型名称获取type对象
     class_type = __get_class_type__(class_name)

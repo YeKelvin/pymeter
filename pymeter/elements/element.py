@@ -4,10 +4,10 @@
 # @Author  : Kelvin.Ye
 from collections import deque
 from copy import deepcopy
-from typing import Deque
-from typing import Dict
+from typing import Deque  # noqa
+from typing import Dict  # noqa
 from typing import Iterable
-from typing import Optional
+from typing import Optional  # noqa
 
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import CollectionProperty
@@ -28,10 +28,11 @@ class TestElement:
     REMARK = 'TestElement__remark'
 
     def __init__(self, name: str = None):
-        self.properties = {}  # type: Dict[str, PyMeterProperty]
-        self.temporary_properties = None  # type: Optional[Deque]
-        self.context = None
         self._running_version = False
+        self.level = None
+        self.context = None
+        self.properties = {}                # type: Dict[str, PyMeterProperty]
+        self.temporary_properties = None    # type: Optional[Deque]
         if name:
             self.set_property(self.NAME, name)
 
@@ -57,13 +58,11 @@ class TestElement:
 
     @running_version.setter
     def running_version(self, running):
-        # logger.debug(f'set running version:[ {running} ] in TestElement:[ {self} ]')
         self._running_version = running
         for prop in self.property_iterator():
             prop.running_version = running
 
     def recover_running_version(self) -> None:
-        # logger.debug(f'recover running version in TestElement:[ {self} ]')
         for prop in list(self.properties.values()):
             if self.is_temporary(prop):
                 self.remove_property(prop.name)

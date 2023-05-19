@@ -24,7 +24,7 @@ class IfController(GenericController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 已完成:[ {val} ]')
+        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 设置 done={val}')
         self._done = val
 
     def next(self):
