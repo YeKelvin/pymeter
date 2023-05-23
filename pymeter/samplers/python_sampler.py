@@ -16,6 +16,9 @@ from pymeter.tools.python_code_snippets import INDENT
 
 class PythonSampler(Sampler):
 
+    # 元素配置
+    CONFIG: Final = 'PythonSampler__config'
+
     # 请求类型
     REQUEST_TYPE: Final = 'PYTHON'
 

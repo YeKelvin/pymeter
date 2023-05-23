@@ -6,7 +6,7 @@ import importlib
 from typing import Final
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestGroupListener
@@ -18,7 +18,7 @@ from pymeter.utils.time_util import timestamp_to_strftime
 
 
 class FlaskSIOResultCollector(
-    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoCoroutineClone
+    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoThreadClone
 ):
 
     # 消息接收方的 sid

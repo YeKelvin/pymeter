@@ -6,12 +6,12 @@ from loguru import logger
 
 from pymeter.configs.arguments import Arguments
 from pymeter.engine.interface import NoConfigMerge
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.groups.context import ContextService
 
 
-class VariableDataset(Arguments, TestCollectionListener, NoConfigMerge, NoCoroutineClone):
+class VariableDataset(Arguments, TestCollectionListener, NoConfigMerge, NoThreadClone):
 
     def collection_started(self) -> None:
         """@override"""

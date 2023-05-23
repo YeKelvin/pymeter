@@ -26,10 +26,10 @@ mysql-connector-python = "8.0.33"
 psycopg2-binary = "2.9.6"
 pyodbc = "4.0.39"
 sshtunnel = "0.4.0"
-pycryptodome = "3.17"
+pycryptodome = "3.18.0"
 python-engineio = "4.4.1"
 python-socketio = "5.8.0"
-httpx = "0.24.0"
+httpx = "0.24.1"
 pytypes = "1.0b10"
 ulid-py = "1.1.0"
 bidict = "0.22.1"
@@ -71,6 +71,8 @@ ignore = [
     "D104",
     "D105",
     "D107",
+    "D205",
+    "D212",
     "D403",
     "D415"
 ]

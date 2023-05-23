@@ -10,12 +10,11 @@ from typing import Iterable
 from typing import Optional  # noqa
 
 from pymeter.elements.property import BasicProperty
-from pymeter.elements.property import CollectionProperty
-from pymeter.elements.property import DictProperty
-from pymeter.elements.property import ElementProperty
 from pymeter.elements.property import MultiProperty
 from pymeter.elements.property import NoneProperty
+from pymeter.elements.property import ObjectProperty
 from pymeter.elements.property import PyMeterProperty
+from pymeter.elements.property import TestElementProperty
 from pymeter.tools.exceptions import InvalidPropertyException
 
 
@@ -26,6 +25,9 @@ class TestElement:
 
     # 组件备注
     REMARK = 'TestElement__remark'
+
+    # 组件配置
+    CONFIG = 'TestElement__config'
 
     def __init__(self, name: str = None):
         self._running_version = False
@@ -74,7 +76,7 @@ class TestElement:
 
     def set_property(self, key: str, value: any) -> None:
         if not key:
-            raise InvalidPropertyException('key cannot be None')
+            raise InvalidPropertyException('键名不能为空')
 
         if self.running_version and not isinstance(prop := self.get_property(key), NoneProperty):
             prop.value = value
@@ -82,16 +84,13 @@ class TestElement:
 
         if (self.running_version and isinstance(self.get_property(key), NoneProperty)) or (not self.running_version):
             if isinstance(value, TestElement):
-                self.add_property(key, ElementProperty(key, value))
-            elif isinstance(value, list):
-                self.add_property(key, CollectionProperty(key, value))
-            elif isinstance(value, dict):
-                self.add_property(key, DictProperty(key, value))
+                self.add_property(key, TestElementProperty(key, value))
+            elif isinstance(value, object):
+                self.add_property(key, ObjectProperty(key, value))
             elif value is None:
                 self.add_property(key, NoneProperty(key))
             else:
                 self.add_property(key, BasicProperty(key, value))
-            return
 
     def add_property(self, key: str, prop: PyMeterProperty) -> None:
         if self.running_version:
@@ -146,9 +145,10 @@ class TestElement:
 
     def clone(self) -> 'TestElement':
         """克隆副本，如果子类有 property 以外的属性，请在子类重写该方法"""
-        cloned_element = self.__class__()
+        cloned_element = self.__class__()  # 实例化一个新的对象
+        cloned_element.level = self.level
         cloned_element.properties = deepcopy(self.properties)
-        cloned_element.running_version = deepcopy(self.running_version)
+        cloned_element.running_version = self.running_version
         return cloned_element
 
     def clear(self) -> None:
@@ -166,10 +166,10 @@ class TestElement:
             self.temporary_properties = deque()
 
         self.temporary_properties.append(prop)
-        # 虽然 ElementProperty 正在实现 MultiProperty，但它的工作方式不同。
+        # 虽然 TestElementProperty 正在实现 MultiProperty，但它的工作方式不同。
         # 它不会像 MultiProperty 那样一一合并内部属性。
         # 因此我们不能将 TestElementProperty 的封闭属性标记为临时。
-        if isinstance(prop, MultiProperty) and not isinstance(prop, ElementProperty):
+        if isinstance(prop, MultiProperty) and not isinstance(prop, TestElementProperty):
             for prop in prop.iterator():
                 self.set_temporary(prop)
 

@@ -8,7 +8,7 @@ from typing import Final
 from loguru import logger
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestGroupListener
@@ -19,7 +19,7 @@ from pymeter.utils.time_util import timestamp_now
 from pymeter.utils.time_util import timestmp_to_utc8_datetime
 
 
-class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListener, SampleListener, NoCoroutineClone):
+class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListener, SampleListener, NoThreadClone):
 
     # 测试报告编号
     REPORT_NO: Final = 'FlaskDBResultStorage__report_no'

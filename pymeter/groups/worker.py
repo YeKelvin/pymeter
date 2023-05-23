@@ -1,14 +1,14 @@
 #!/usr/bin python3
-# @File    : sampler.py
-# @Time    : 2020/1/24 23:47
+# @File    : worker.py
+# @Time    : 2023-05-22 15:02:22
 # @Author  : Kelvin.Ye
-from pymeter.elements.element import TestElement
+from pymeter.controls.controller import Controller
 
 
-class Sampler(TestElement):
+class Worker(Controller):
 
     # 元素配置
-    CONFIG = 'Sampler__config'
+    CONFIG = 'Worker__config'
 
     @property
     def config(self):
@@ -23,6 +23,3 @@ class Sampler(TestElement):
         }
         _config_ = self.get_property(self.CONFIG).get_obj()
         return _config_ or default
-
-    def sample(self):
-        raise NotImplementedError

@@ -14,19 +14,33 @@ from pymeter.controls.transaction import TransactionController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import ConfigElement
 from pymeter.elements.element import TestElement
+from pymeter.engine.component import Component
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import NoConfigMerge
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCompilerHelper
 from pymeter.engine.interface import TransactionConfig
 from pymeter.engine.interface import TransactionListener
 from pymeter.groups.package import SamplePackage
+from pymeter.groups.worker import Worker
 from pymeter.processors.post import PostProcessor
 from pymeter.processors.pre import PreProcessor
 from pymeter.samplers.sampler import Sampler
 from pymeter.timers.timer import Timer
 
+
+# 调试日志开关
+DEBUG = False
+
+
+def pretty_output_stack(list):
+    output = ['[', '\n']
+    index = ' ' * 4
+    for i in list:
+        output.extend((index, str(i), ',\n'))
+    output.append(']')
+    return ''.join(output)
 
 class HashTreeTraverser:
 
@@ -127,7 +141,7 @@ class SearchByClass(HashTreeTraverser):
         """@override"""
         if isinstance(node, self.search_class):
             self.objects_of_class.append(node)
-            from pymeter.engine.tree import HashTree
+            from pymeter.engine.hashtree import HashTree
             tree = HashTree()
             tree.put(node, subtree)
             self.subtrees[node] = tree
@@ -142,10 +156,10 @@ class SearchByClass(HashTreeTraverser):
 
 
 class TreeCloner(HashTreeTraverser):
-    """克隆 HashTree，默认情况下跳过实现 NoCoroutineClone 的节点"""
+    """克隆 HashTree，默认情况下跳过实现 NoThreadClone 的节点"""
 
     def __init__(self, enable_no_clone: bool = True):
-        from pymeter.engine.tree import HashTree
+        from pymeter.engine.hashtree import HashTree
         self.new_tree = HashTree()
         self.tree_path = []
         self.enable_no_clone = enable_no_clone
@@ -155,7 +169,7 @@ class TreeCloner(HashTreeTraverser):
 
     def add_node(self, node, subtree) -> None:
         """@override"""
-        clone = not (self.enable_no_clone and isinstance(node, NoCoroutineClone))
+        clone = not (self.enable_no_clone and isinstance(node, NoThreadClone))
         cloned_node = node.clone() if isinstance(node, TestElement) and clone else node
         self.new_tree.add_key_by_treepath(self.tree_path, cloned_node)
         self.tree_path.append(cloned_node)
@@ -174,6 +188,7 @@ class TestCompiler(HashTreeTraverser):
 
     def __init__(self, tree):
         self.stack = deque()
+        self.config = None
         self.hashtree = tree
         self.sample_packages: Dict[Sampler, SamplePackage] = {}
         self.trans_packages: Dict[TransactionController, SamplePackage] = {}
@@ -192,31 +207,45 @@ class TestCompiler(HashTreeTraverser):
 
     def add_node(self, node, subtree) -> None:
         """@override"""
-        logger.debug(f'添加节点: {node}')
+        if DEBUG:
+            logger.debug(f'添加节点: {node}')
         self.stack.append(node)
 
     def subtract_node(self) -> None:
         """@override"""
-        logger.debug('回溯节点')
-        logger.debug(f'堆栈大小:[ {len(self.stack)} ] 堆栈:[ {self.stack} ]')
-
         child = self.stack[-1]
-        logger.debug(f'子节点:[ {child} ]')
+        if DEBUG:
+            logger.debug('回溯节点')
+            logger.debug(f'堆栈大小:[ {len(self.stack)} ] 堆栈:[ {pretty_output_stack(self.stack)} ]')
+            logger.debug(f'子节点:[ {child} ]')
 
         # 如果子节点为LoopIterationListener则将其添加至路径上所有的父控制器中
         self.track_iteration_listeners(child)
 
+        # 配置取样包
         if isinstance(child, Sampler):
             self.save_sample_package(child)
         elif isinstance(child, TransactionController):
             self.save_trans_package(child)
 
+        # 移除最后一个节点（当前child）
         self.stack.pop()
         if len(self.stack) == 0:
             return
 
         parent = self.stack[-1]
-        logger.debug(f'父节点:[ {parent} ]')
+        if DEBUG:
+            logger.debug(f'父节点:[ {parent} ]')
+
+        # 添加节点层级
+        if child.level is None and not isinstance(child, (Controller, Sampler)):
+            if isinstance(parent, Worker):
+                child.level = 2
+            elif isinstance(parent, Controller):
+                child.level = 3
+            else: # Sampler
+                child.level = 4
+
         duplicate = False
         if isinstance(parent, Controller) and isinstance(child, (Sampler, Controller)):
             if isinstance(parent, TestCompilerHelper):
@@ -242,7 +271,13 @@ class TestCompiler(HashTreeTraverser):
             if isinstance(item, Controller):
                 item.add_iteration_listener(child)
 
-    def save_sample_package(self, sampler):
+    def save_sample_package(self, sampler):  # sourcery skip: low-code-quality
+        component_config = Component.merged_config(sampler.config.get('components'), self.config)
+        include_type = component_config.get(Component.INCLUDE_TYPE)
+        include_level = component_config.get(Component.INCLUDE_LEVEL)
+        exclude_type = component_config.get(Component.EXCLUDE_TYPE)
+        exclude_level = component_config.get(Component.EXCLUDE_LEVEL)
+
         configs = []
         controllers = []
         listeners = []
@@ -252,6 +287,8 @@ class TestCompiler(HashTreeTraverser):
         posts = deque()
         assertions = deque()
 
+        if DEBUG:
+            logger.debug(f'取样器:[ {sampler} ] 开始配置取样包')
         for i in range(len(self.stack) - 1, -1, -1):  # 倒序遍历
             maybe_controller = self.stack[i]
             if isinstance(maybe_controller, Controller):
@@ -259,7 +296,10 @@ class TestCompiler(HashTreeTraverser):
             inner_pres = []
             inner_posts = []
             inner_assertions = []
-            for item in self.hashtree.list_by_treepath([self.stack[x] for x in range(i + 1)]):
+            treepath = self.hashtree.list_by_treepath([self.stack[x] for x in range(i + 1)])
+            if DEBUG:
+                logger.debug(f'当前索引:[ {i} ] 树路径:[ {pretty_output_stack(treepath)} ]')
+            for item in treepath:
                 if isinstance(item, ConfigElement) and not isinstance(item, TransactionConfig):
                     configs.append(item)
                 if isinstance(item, SampleListener):
@@ -267,21 +307,85 @@ class TestCompiler(HashTreeTraverser):
                 if isinstance(item, Timer):
                     timers.append(item)
                 if isinstance(item, Assertion):
-                    inner_assertions.append(item)
+                    # 根据配置包含或排除组件
+                    allowed = True
+                    if include_type and 3 not in include_type:
+                        allowed = False
+                    if include_level and item.level not in include_level:
+                        allowed = False
+                    if exclude_type and 3 in exclude_type:
+                        allowed = False
+                    if exclude_level and item.level not in exclude_level:
+                        allowed = False
+                    if allowed:
+                        inner_assertions.append(item)
                 if isinstance(item, PostProcessor):
-                    inner_posts.append(item)
+                    # 根据配置包含或排除组件
+                    allowed = True
+                    if include_type and 2 not in include_type:
+                        allowed = False
+                    if include_level and item.level not in include_level:
+                        allowed = False
+                    if exclude_type and 2 in exclude_type:
+                        allowed = False
+                    if exclude_level and item.level in exclude_level:
+                        allowed = False
+                    if allowed:
+                        inner_posts.append(item)
                 if isinstance(item, PreProcessor):
-                    inner_pres.append(item)
+                    # 根据配置包含或排除组件
+                    allowed = True
+                    if include_type and 1 not in include_type:
+                        allowed = False
+                    if include_level and item.level not in include_level:
+                        allowed = False
+                    if exclude_type and 1 in exclude_type:
+                        allowed = False
+                    if exclude_level and item.level in exclude_level:
+                        allowed = False
+                    if allowed:
+                        inner_pres.append(item)
+
             assertions.extendleft(inner_assertions[::-1])
             posts.extendleft(inner_posts[::-1])
             pres.extendleft(inner_pres[::-1])
 
-        package = SamplePackage(configs, listeners, trans_listeners, timers, assertions, posts, pres, controllers)
+        # 根据配置排序
+        sorted_pres = sorted(
+            pres,
+            key=lambda x:x.level,
+            reverse=component_config.get(Component.REVERSE_PRE)
+        )
+        sorted_posts = sorted(
+            posts,
+            key=lambda x:x.level,
+            reverse=component_config.get(Component.REVERSE_POST)
+        )
+        sorted_assertions = sorted(
+            assertions,
+            key=lambda x:x.level,
+            reverse=component_config.get(Component.REVERSE_ASSERT)
+        )
+        # 遍历执行
+
+        if DEBUG:
+            logger.debug(f'取样器:[ {sampler} ] 取样包配置完成')
+
+        package = SamplePackage(
+            configs,
+            listeners,
+            trans_listeners,
+            timers,
+            sorted_assertions,
+            sorted_posts,
+            sorted_pres,
+            controllers
+        )
         package.sampler = sampler
         package.set_running_version(True)
         self.sample_packages[sampler] = package
 
-    def save_trans_package(self, trans_controller: TransactionController):
+    def save_trans_package(self, trans_controller: TransactionController):  # sourcery skip: low-code-quality
         configs = []
         controllers = []
         listeners = []
@@ -293,11 +397,16 @@ class TestCompiler(HashTreeTraverser):
         trans_configs = []
         trans_samplers = []
 
+        if DEBUG:
+            logger.debug(f'事务:[ {trans_controller} ] 开始配置取样包')
         for i in range(direct_level := len(self.stack) - 1, -1, -1):
             maybe_controller = self.stack[i]
             if isinstance(maybe_controller, Controller):
                 controllers.append(maybe_controller)
-            for item in self.hashtree.list_by_treepath([self.stack[x] for x in range(i + 1)]):
+            treepath = self.hashtree.list_by_treepath([self.stack[x] for x in range(i + 1)])
+            if DEBUG:
+                logger.debug(f'当前索引:[ {i} ] 树路径:[ {pretty_output_stack(treepath)} ]')
+            for item in treepath:
                 if isinstance(item, SampleListener):
                     listeners.append(item)
                 if isinstance(item, Assertion):
@@ -311,6 +420,8 @@ class TestCompiler(HashTreeTraverser):
                     # 临时存储 Transaction 直系取样器
                     if isinstance(item, Sampler):
                         trans_samplers.append(item)
+        if DEBUG:
+            logger.debug(f'事务:[ {trans_controller} ] 取样包配置完成')
 
         for sampler in trans_samplers:
             sampler_package = self.sample_packages.get(sampler)

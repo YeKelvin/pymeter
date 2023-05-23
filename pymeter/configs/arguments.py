@@ -6,7 +6,7 @@ from typing import List
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
-from pymeter.elements.property import ElementProperty
+from pymeter.elements.property import TestElementProperty
 
 
 class Argument(TestElement):
@@ -88,7 +88,7 @@ class Arguments(ConfigTestElement):
         return self.get_property(self.ARGUMENTS).get_obj()
 
     def add_argument(self, arg: Argument):
-        prop = ElementProperty(arg.name, arg)
+        prop = TestElementProperty(arg.name, arg)
         if self.running_version:
             self.set_temporary(prop)
         self.arguments.append(arg)

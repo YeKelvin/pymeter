@@ -3,7 +3,7 @@
 # @Time    : 2020/2/18 17:20
 # @Author  : Kelvin.Ye
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestGroupListener
@@ -13,7 +13,7 @@ from pymeter.utils import time_util
 
 
 class ResultCollector(
-    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoCoroutineClone
+    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoThreadClone
 ):
 
     def __init__(self):

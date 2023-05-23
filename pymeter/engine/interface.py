@@ -76,7 +76,7 @@ class NoConfigMerge:
     ...
 
 
-class NoCoroutineClone:
+class NoThreadClone:
     ...
 
 

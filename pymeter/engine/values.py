@@ -12,7 +12,23 @@ from pymeter.functions import Function
 from pymeter.groups.context import ContextService
 from pymeter.tools.exceptions import InvalidVariableException
 from pymeter.utils.class_finder import ClassFinder
-from pymeter.utils.str_reader import StringReader
+
+
+class StringReader:
+
+    def __init__(self, string: str):
+        self.raw = string
+        self.__iter: iter = string.__iter__()
+
+    @property
+    def next(self) -> str or None:
+        try:
+            return self.__iter.__next__()
+        except StopIteration:
+            return None
+
+    def reset(self) -> None:
+        self.__iter = self.raw.__iter__()
 
 
 class CompoundVariable:
@@ -82,7 +98,7 @@ class CompoundVariable:
             return
 
         # 编译参数
-        self.compiled_components = FunctionParser.compile_str(parameters)
+        self.compiled_components = FunctionParser.compile_string(parameters)
 
         if len(self.compiled_components) > 1 or not isinstance(self.compiled_components[0], str):
             logger.debug('function in compiled string')
@@ -112,8 +128,7 @@ class CompoundVariable:
 
         classes = ClassFinder.find_subclasses(Function)
         for clazz in classes.values():
-            reference_key = clazz.REF_KEY
-            if reference_key:
+            if reference_key := clazz.REF_KEY:
                 cls.functions[reference_key] = clazz
 
 
@@ -143,7 +158,7 @@ class SimpleVariable:
 class FunctionParser:
 
     @staticmethod
-    def compile_str(source: str) -> List:
+    def compile_string(source: str) -> List:
         reader = StringReader(source)
         result = []
         buffer = []
@@ -183,7 +198,7 @@ class FunctionParser:
         if len(buffer) > 0:
             result.append(''.join(buffer))
 
-        if len(result) == 0:
+        if not result:
             result.append('')
 
         return result
@@ -233,7 +248,7 @@ class FunctionParser:
         return str_buffer
 
     @staticmethod
-    def __parse_params(reader: StringReader) -> List[CompoundVariable]:
+    def __parse_params(reader: StringReader) -> List[CompoundVariable]: # sourcery skip: low-code-quality
         result = []
         buffer = []
         previous = ''
@@ -260,7 +275,7 @@ class FunctionParser:
                 result.append(param)
             elif current == ')' and function_recursion == 0 and parent_recursion == 0:
                 # 检测 function name，防止生成空字符串作为参数
-                if len(buffer) == 0 and len(result) == 0:
+                if not buffer and not result:
                     return result
                 # 正常退出
                 param_str = ''.join(buffer)

@@ -6,14 +6,14 @@ import importlib
 from typing import Final
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 
 
-class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListener, NoCoroutineClone):
+class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListener, NoThreadClone):
 
     # 执行记录编号
     EXECUTION_NO: Final = 'FlaskDBIterationStorage__execution_no'

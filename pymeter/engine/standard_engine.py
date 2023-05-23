@@ -8,11 +8,11 @@ from gevent import Greenlet
 from loguru import logger
 from loguru._logger import context as logurucontext
 
+from pymeter.collections.collection import TestCollection
 from pymeter.elements.element import TestElement
-from pymeter.engine.collection import TestCollection
+from pymeter.engine.hashtree import HashTree
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.traverser import SearchByClass
-from pymeter.engine.tree import HashTree
 from pymeter.groups.context import ContextService
 from pymeter.groups.group import SetupGroup
 from pymeter.groups.group import TearDownGroup
@@ -49,11 +49,9 @@ class StandardEngine(Greenlet):
         self.groups = []                # 储存已启动的worker
         self.context = EngineContext()
         self.properties = Properties()
-        self.collection = None          # type: TestCollection
+        self.collection = None
         self.extra = kwargs.get('extra', {})
-
-        if props := kwargs.get('props', None):
-            self.properties.update(props)
+        self.properties.update(kwargs.get('props', {}))
 
     def configure(self, tree: HashTree) -> None:
         """将脚本配置到执行引擎中"""
@@ -65,7 +63,7 @@ class StandardEngine(Greenlet):
         if len(collections) == 0:
             raise EngineException('集合不允许为空')
 
-        self.collection = collections[0]
+        self.collection: TestCollection = collections[0]
         self.serialized = self.collection.serialized
         self.active = True
         self.tree = tree
@@ -94,8 +92,10 @@ class StandardEngine(Greenlet):
         # 标记运行状态
         self.running = True
 
-        # 上下文存储当前引擎
-        ContextService.get_context().engine = self
+        # 上下文存储引擎和全局变量
+        ctx = ContextService.get_context()
+        ctx.engine = self
+        ctx.variables.update(self.properties)
         # 上下文标记开始运行
         ContextService.start_test()
 
@@ -347,4 +347,5 @@ class StandardEngine(Greenlet):
     @staticmethod
     def _add_level(elements: list) -> None:
         for node in elements:
-            node.level = 1
+            if node.level is None:
+                node.level = 1

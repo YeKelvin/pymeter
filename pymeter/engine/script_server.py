@@ -8,7 +8,9 @@ from typing import List
 from typing import Tuple
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.tree import HashTree
+from pymeter.elements.property import CollectionProperty
+from pymeter.elements.property import DictProperty
+from pymeter.engine.hashtree import HashTree
 from pymeter.engine.values import ValueReplacer
 from pymeter.tools.exceptions import ScriptParseError
 from pymeter.utils import json_util
@@ -16,7 +18,7 @@ from pymeter.utils import json_util
 
 MODULES = {
     # 测试集合
-    'TestCollection': 'pymeter.engine.collection',
+    'TestCollection': 'pymeter.collections.collection',
 
     # 测试分组
     'SetupGroup': 'pymeter.groups.group',
@@ -144,22 +146,21 @@ def __set_replaced_property__(element: TestElement, key: str, value: any) -> Non
         element.add_property(key, ValueReplacer.replace_values(key, value))
 
 
-def __init_node__(script: dict) -> TestElement:
+def __init_node__(item: dict) -> TestElement:
     """根据元素的class属性实例化为对象"""
-    # 获取节点的类型
-    class_name = script.get('class')
-
-    # 根据类型名称获取type对象
+    # 节点类名
+    class_name = item.get('class')
+    # 节点类型
     class_type = __get_class_type__(class_name)
-
     # 实例化节点
     node = class_type()
-    __set_replaced_property__(node, TestElement.NAME, script.get('name'))
-    __set_replaced_property__(node, TestElement.REMARK, script.get('remark'))
-
     # 设置节点的属性
-    __set_properties__(node, script.get('property'))
-
+    __set_replaced_property__(node, TestElement.NAME, item.get('name'))
+    __set_replaced_property__(node, TestElement.REMARK, item.get('remark'))
+    __set_properties__(node, item.get('property'))
+    # 设置节点层级
+    if (level := item.get('level')) is not None:
+        node.level = level
     return node
 
 
@@ -171,28 +172,34 @@ def __set_properties__(node, props):
         if isinstance(value, str):
             __set_replaced_property__(node, key, value)
         elif isinstance(value, dict):
-            __set_object_property__(node, key, value)
+            __set_dict_property__(node, key, value)
         elif isinstance(value, list):
             __set_collection_property__(node, key, value)
 
 
-def __set_object_property__(node, key, value: dict):
+def __set_dict_property__(node, key, value: dict):
     if 'class' in value:
-        propnode = __init_node__(value)
-        node.set_property(key, propnode)
+        element = __init_node__(value)
+        node.set_property(key, element)
+    elif elements := {
+        _key_: __init_node__(_value_)
+        for _key_, _value_ in value.items()
+        if 'class' in value
+    }:
+        node.add_property(key, DictProperty(key, elements))
     else:
         node.set_property(key, value)
 
 
 def __set_collection_property__(node, key, value: list):
-    collection = []
-    for item in value:
-        if isinstance(item, dict) and 'class' in item:
-            propnode = __init_node__(item)
-            collection.append(propnode)
-        else:
-            collection.append(item)
-    node.set_property(key, collection)
+    if elements := [
+        __init_node__(item)
+        for item in value
+        if isinstance(item, dict) and 'class' in item
+    ]:
+        node.add_property(key, CollectionProperty(key, elements))
+    else:
+        node.set_property(key, value)
 
 
 def __get_class_type__(classname: str) -> type:

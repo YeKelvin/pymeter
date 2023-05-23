@@ -5,8 +5,8 @@
 import os
 
 from pymeter import config as CONFIG
+from pymeter.collections.collection import TestCollection
 from pymeter.engine import script_server
-from pymeter.engine.collection import TestCollection
 from pymeter.engine.traverser import SearchByClass
 
 

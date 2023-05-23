@@ -19,6 +19,9 @@ from pymeter.samplers.sampler import Sampler
 
 class HTTPSampler(Sampler):
 
+    # 元素配置
+    CONFIG: Final = 'HTTPSampler__config'
+
     # 请求类型
     REQUEST_TYPE: Final = 'HTTP'
 

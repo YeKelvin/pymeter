@@ -7,10 +7,10 @@ from pymeter.engine.values import FunctionParser
 
 class FunctionParserTest:
 
-    def test_compile_str(self):
+    def test_compile_string(self):
         parser = FunctionParser()
         source = '{"keyAA":"valueAA","keyBB":"${__random(1, 10)}"}'
-        result = parser.compile_str(source)
+        result = parser.compile_string(source)
         print(result)
         print(type(result))
 

@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : hash_tree
+# @File    : hashtree
 # @Time    : 2020/2/24 14:54
 # @Author  : Kelvin.Ye
 from typing import Dict

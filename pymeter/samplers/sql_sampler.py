@@ -18,6 +18,9 @@ from pymeter.samplers.sampler import Sampler
 
 class SQLSampler(Sampler):
 
+    # 元素配置
+    CONFIG: Final = 'SQLSampler__config'
+
     # 请求类型
     REQUEST_TYPE: Final = 'SQL'
 

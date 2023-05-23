@@ -14,12 +14,14 @@ from loguru import logger
 from loguru._logger import context as logurucontext
 
 from pymeter.assertions.assertion import AssertionResult
-from pymeter.controls.controller import Controller
+from pymeter.controls.controller import Controller  # noqa
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.loop_controller import LoopController
 from pymeter.controls.retry_controller import RetryController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
+from pymeter.engine.component import Component
+from pymeter.engine.hashtree import HashTree
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCompilerHelper
@@ -29,11 +31,11 @@ from pymeter.engine.traverser import FindTestElementsUpToRoot
 from pymeter.engine.traverser import SearchByClass
 from pymeter.engine.traverser import TestCompiler
 from pymeter.engine.traverser import TreeCloner
-from pymeter.engine.tree import HashTree
 from pymeter.groups.context import ContextService
 from pymeter.groups.context import CoroutineContext
 from pymeter.groups.package import SamplePackage
 from pymeter.groups.variables import Variables
+from pymeter.groups.worker import Worker
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.tools.exceptions import StopTestException
@@ -67,7 +69,10 @@ class LogicalAction(Enum):
     STOP_TEST_NOW = 'stop_test_now'
 
 
-class TestGroup(Controller, TestCompilerHelper):
+class TestGroup(Worker, TestCompilerHelper):
+
+    # 元素配置
+    CONFIG = 'TestGroup__config'
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR = 'TestGroup__on_sample_error'
@@ -266,6 +271,10 @@ class TestGroup(Controller, TestCompilerHelper):
         coroutine.group = self
         coroutine.coroutine_number = coroutine_number
         coroutine.coroutine_name = coroutine_name
+        coroutine.compile_config = Component.initial_config(
+            coroutine.engine.collection.config.get('components'),
+            coroutine.group.config.get('components')
+        )
         return coroutine
 
     def __clone_group_tree(self) -> HashTree:
@@ -291,6 +300,7 @@ class Coroutine(Greenlet):
         self.group_main_controller = group_tree.list()[0]   # type: Controller
         self.coroutine_name = None
         self.coroutine_number = None
+        self.compile_config = None
         self.compiler = TestCompiler(self.group_tree)
         self.variables = Variables()
         self.start_time = 0
@@ -336,9 +346,11 @@ class Coroutine(Greenlet):
 
         # 编译 TestGroup 的子代节点
         logger.debug('开始编译TestGroup节点')
-        logger.debug(f'TestGroup的HashTree结构:\n{self.group_tree}')
+        # logger.debug(f'TestGroup的HashTree结构:\n{self.group_tree}')
+        self.compiler.config = self.compile_config
         self.group_tree.traverse(self.compiler)
         logger.debug('TestGroup节点编译完成')
+        # logger.debug(f'TestGroup的HashTree结构:\n{self.group_tree}')
 
         # 初始化 TestGroup 控制器
         self.group_main_controller.initialize()
@@ -374,6 +386,7 @@ class Coroutine(Greenlet):
                     else:
                         sampler = self.group_main_controller.next()  # 获取下一个 Sampler
 
+                # 如果主控制器标记已完成，则结束迭代
                 if self.group_main_controller.done:
                     self.running = False
                     logger.info(f'线程:[ {self.coroutine_name} ] 已停止运行，结束迭代')
@@ -477,7 +490,7 @@ class Coroutine(Greenlet):
         # then we still need to report the Transaction in error (and create the sample result)
         if isinstance(sampler, TransactionSampler) and sampler.done:
             transaction_package = self.compiler.configure_trans_sampler(sampler)
-            self.__do_end_transaction_sampler(sampler, None, transaction_package, context)
+            self.__do_end_transaction_sampler(sampler, transaction_package, None, context)
 
     def is_retrying_sampler(self, sampler: Sampler):
         return (
@@ -513,8 +526,8 @@ class Coroutine(Greenlet):
             if current.done:
                 transaction_result = self.__do_end_transaction_sampler(
                     transaction_sampler,
-                    parent,
                     transaction_package,
+                    parent,
                     context
                 )
                 # 事务已完成，Sampler 无需继续执行
@@ -549,8 +562,8 @@ class Coroutine(Greenlet):
         ):
             transaction_result = self.__do_end_transaction_sampler(
                 transaction_sampler,
-                parent,
                 transaction_package,
+                parent,
                 context
             )
 
@@ -564,7 +577,7 @@ class Coroutine(Greenlet):
             context: CoroutineContext
     ) -> None:
         """执行取样器"""
-        # 上下文标记当前sampler
+        # 上下文存储当前sampler
         context.set_current_sampler(sampler)
         # 获取sampler对应的package
         package = self.compiler.configure_sampler(sampler)
@@ -656,12 +669,12 @@ class Coroutine(Greenlet):
     def __do_end_transaction_sampler(
             self,
             transaction_sampler: TransactionSampler,
-            parent: Optional[Sampler],
             transaction_package: SamplePackage,
+            parent: Optional[Sampler],
             context: CoroutineContext
     ) -> SampleResult:
         logger.debug(
-            f'线程:[ {self.coroutine_name} ] transaction:[ {transaction_sampler} ] parent:[ {parent} ] ending'
+            f'线程:[ {self.coroutine_name} ] 事务:[ {transaction_sampler} ] 父元素:[ {parent} ] 结束事务'
         )
 
         # Get the transaction sample result
@@ -685,45 +698,6 @@ class Coroutine(Greenlet):
         # 标记事务已完成
         transaction_package.done()
         return result
-
-    def __check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext) -> None:
-        """断言 Sampler 结果"""
-        for assertion in assertions:
-            self.__process_assertion(assertion, result)
-
-        logger.debug(
-            f'线程:[ {self.coroutine_name} ]'
-            f'取样器:[ {result.sample_name} ] '
-            f'设置变量 LAST_SAMPLE_OK={result.success}'
-        )
-        context.variables.put(self.LAST_SAMPLE_OK, result.success)
-
-    def __process_assertion(self, assertion, sample_result: SampleResult) -> None:
-        """执行断言"""
-        assertion_result = None
-        try:
-            assertion_result = assertion.get_result(sample_result)
-        except AssertionError as e:
-            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sample_result.sample_name} ] 断言器: {e}')
-            assertion_result = AssertionResult(sample_result.sample_name)
-            assertion_result.failure = True
-            assertion_result.message = str(e)
-        except RuntimeError as e:
-            logger.error(f'线程:[ {self.coroutine_name} ] 取样器:[ {sample_result.sample_name} ] 断言器: {e}')
-            assertion_result = AssertionResult(sample_result.sample_name)
-            assertion_result.error = True
-            assertion_result.message = str(e)
-        except Exception as e:
-            logger.error(f'线程:[ {self.coroutine_name} ] 取样器:[ {sample_result.sample_name} ] 断言器: {e}')
-            logger.exception('Exception Occurred')
-            assertion_result = AssertionResult(sample_result.sample_name)
-            assertion_result.error = True
-            assertion_result.message = e
-        finally:
-            sample_result.success = (
-                sample_result.success and not assertion_result.error and not assertion_result.failure
-            )
-            sample_result.assertions.append(assertion_result)
 
     def __run_timers(self, timers: list):
         total_delay = 0
@@ -844,6 +818,45 @@ class Coroutine(Greenlet):
             logger.debug(f'线程:[ {self.coroutine_name} ] 后置处理器:[ {post_processor.name} ] 正在运行中')
             post_processor.process()
 
+    def __check_assertions(self, assertions: list, result: SampleResult, context: CoroutineContext) -> None:
+        """断言取样结果"""
+        for assertion in assertions:
+            logger.debug(f'线程:[ {self.coroutine_name} ] 断言器:[ {assertion.name} ] 正在运行中')
+            self.__process_assertion(assertion, result)
+
+        logger.debug(
+            f'线程:[ {self.coroutine_name} ] 取样器:[ {result.sample_name} ] 设置变量 LAST_SAMPLE_OK={result.success}'
+        )
+        # 存储取样结果
+        context.variables.put(self.LAST_SAMPLE_OK, result.success)
+
+    def __process_assertion(self, assertion, sample_result: SampleResult) -> None:
+        """执行断言"""
+        assertion_result = None
+        try:
+            assertion_result = assertion.get_result(sample_result)
+        except AssertionError as e:
+            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sample_result.sample_name} ] 断言器: {e}')
+            assertion_result = AssertionResult(sample_result.sample_name)
+            assertion_result.failure = True
+            assertion_result.message = str(e)
+        except RuntimeError as e:
+            logger.error(f'线程:[ {self.coroutine_name} ] 取样器:[ {sample_result.sample_name} ] 断言器: {e}')
+            assertion_result = AssertionResult(sample_result.sample_name)
+            assertion_result.error = True
+            assertion_result.message = str(e)
+        except Exception as e:
+            logger.error(f'线程:[ {self.coroutine_name} ] 取样器:[ {sample_result.sample_name} ] 断言器: {e}')
+            logger.exception('Exception Occurred')
+            assertion_result = AssertionResult(sample_result.sample_name)
+            assertion_result.error = True
+            assertion_result.message = e
+        finally:
+            sample_result.success = (
+                sample_result.success and not assertion_result.error and not assertion_result.failure
+            )
+            sample_result.assertions.append(assertion_result)
+
     class IterationListener(LoopIterationListener):
         """Coroutine 内部类，用于在 TestGroup 迭代开始时触发所有实现类的开始动作"""
 
@@ -855,6 +868,9 @@ class Coroutine(Greenlet):
 
 
 class SetupGroup(TestGroup):
+
+    # 元素配置
+    CONFIG: Final = 'SetupGroup__config'
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR: Final = 'SetupGroup__on_sample_error'
@@ -870,6 +886,9 @@ class SetupGroup(TestGroup):
 
 
 class TearDownGroup(TestGroup):
+
+    # 元素配置
+    CONFIG: Final = 'TearDownGroup__config'
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR: Final = 'TearDownGroup__on_sample_error'

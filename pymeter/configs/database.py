@@ -10,12 +10,12 @@ from sqlalchemy.engine import Engine
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.engine.interface import NoConfigMerge
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.groups.context import ContextService
 
 
-class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, NoCoroutineClone):
+class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, NoThreadClone):
 
     # 变量名称
     VARIABLE_NAME: Final = 'DatabaseEngine__variable_name'

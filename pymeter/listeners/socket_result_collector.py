@@ -9,7 +9,7 @@ import socketio
 from loguru import logger
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoCoroutineClone
+from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestGroupListener
@@ -20,7 +20,7 @@ from pymeter.utils.json_util import from_json
 
 
 class SocketResultCollector(
-    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoCoroutineClone
+    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoThreadClone
 ):
     # 连接地址
     URL: Final = 'SocketResultCollector__url'

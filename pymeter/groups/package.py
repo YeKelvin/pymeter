@@ -2,7 +2,6 @@
 # @File    : sample_package
 # @Time    : 2020/2/27 15:41
 # @Author  : Kelvin.Ye
-from ast import boolop
 from typing import Sequence
 
 from loguru import logger

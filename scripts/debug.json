@@ -1,0 +1,238 @@
+{
+    "name": "组件顺序",
+    "remark": "",
+    "class": "TestCollection",
+    "enabled": true,
+    "property": {
+        "TestCollection__serialize_groups": "true",
+        "TestCollection__delay": "0",
+        "TestCollection__config": {
+            "components": {
+                "reverse": [1]
+            }
+        }
+    },
+    "children": [
+        {
+            "name": "前置-空间-python-111",
+            "remark": null,
+            "class": "PythonPreProcessor",
+            "enabled": true,
+            "property": {
+                "PythonPreProcessor__script": "log.info('空间级前置处理器-111')"
+            },
+            "children": [],
+            "level": 0
+        },
+        {
+            "name": "前置-集合-python-222",
+            "remark": null,
+            "class": "PythonPreProcessor",
+            "enabled": true,
+            "property": {
+                "PythonPreProcessor__script": "log.info('集合级前置处理器-222')"
+            },
+            "children": []
+        },
+        {
+            "name": "后置-空间-python-111",
+            "remark": null,
+            "class": "PythonPostProcessor",
+            "enabled": true,
+            "property": {
+                "PythonPostProcessor__script": "log.info('空间级后置处理器-111')"
+            },
+            "children": [],
+            "level": 0
+        },
+        {
+            "name": "后置-集合-python-222",
+            "remark": null,
+            "class": "PythonPostProcessor",
+            "enabled": true,
+            "property": {
+                "PythonPostProcessor__script": "log.info('集合级后置处理器-222')"
+            },
+            "children": []
+        },
+        {
+            "name": "断言-空间-python-111",
+            "remark": null,
+            "class": "PythonAssertion",
+            "enabled": true,
+            "property": {
+                "PythonAssertion__script": "log.info('空间级断言处理器-111')"
+            },
+            "children": [],
+            "level": 0
+        },
+        {
+            "name": "断言-集合-python-222",
+            "remark": null,
+            "class": "PythonAssertion",
+            "enabled": true,
+            "property": {
+                "PythonAssertion__script": "log.info('集合级断言处理器-222')"
+            },
+            "children": []
+        },
+        {
+            "name": "工作线程1",
+            "remark": "",
+            "class": "TestGroup",
+            "enabled": true,
+            "property": {
+                "TestGroup__on_sample_error": "start_next_coroutine",
+                "TestGroup__number_groups": "1",
+                "TestGroup__start_interval": "",
+                "TestGroup__main_controller": {
+                    "class": "LoopController",
+                    "property": {
+                        "LoopController__loops": "1",
+                        "LoopController__continue_forever": false
+                    }
+                },
+                "TestGroup__config": {
+                    "components": {
+                        "include": {"type": [1], "level": []},
+                        "exclude": {"type": [], "level": []},
+                        "reverse": [2]
+                    }
+                }
+            },
+            "children": [
+                {
+                    "name": "前置-线程-python-111",
+                    "remark": null,
+                    "class": "PythonPreProcessor",
+                    "enabled": true,
+                    "property": {
+                        "PythonPreProcessor__script": "log.info('线程级前置处理器-111')"
+                    },
+                    "children": []
+                },
+                {
+                    "name": "前置-线程-python-222",
+                    "remark": null,
+                    "class": "PythonPreProcessor",
+                    "enabled": true,
+                    "property": {
+                        "PythonPreProcessor__script": "log.info('线程级前置处理器-222')"
+                    },
+                    "children": []
+                },
+                {
+                    "name": "后置-线程-python-111",
+                    "remark": null,
+                    "class": "PythonPostProcessor",
+                    "enabled": true,
+                    "property": {
+                        "PythonPostProcessor__script": "log.info('线程级后置处理器-111')"
+                    },
+                    "children": []
+                },
+                {
+                    "name": "后置-线程-python-222",
+                    "remark": null,
+                    "class": "PythonPostProcessor",
+                    "enabled": true,
+                    "property": {
+                        "PythonPostProcessor__script": "log.info('线程级后置处理器-222')"
+                    },
+                    "children": []
+                },
+                {
+                    "name": "断言-线程-python-111",
+                    "remark": null,
+                    "class": "PythonAssertion",
+                    "enabled": true,
+                    "property": {
+                        "PythonAssertion__script": "log.info('线程级断言处理器-111')"
+                    },
+                    "children": []
+                },
+                {
+                    "name": "断言-线程-python-222",
+                    "remark": null,
+                    "class": "PythonAssertion",
+                    "enabled": true,
+                    "property": {
+                        "PythonAssertion__script": "log.info('线程级断言处理器-222')"
+                    },
+                    "children": []
+                },
+                {
+                    "name": "取样器1",
+                    "remark": "",
+                    "class": "HTTPSampler",
+                    "enabled": true,
+                    "property": {
+                        "HTTPSampler__url": "https://httpbin.org/post",
+                        "HTTPSampler__method": "POST",
+                        "HTTPSampler__headers": {
+                            "class": "HTTPHeaderManager",
+                            "property": {
+                                "HeaderManager__headers": [
+                                    {
+                                        "class": "HTTPHeader",
+                                        "enabled": true,
+                                        "property": {
+                                            "Header__name": "content-type",
+                                            "Header__value": "application/json"
+                                        }
+                                    }
+                                ]
+                            }
+                        },
+                        "HTTPSampler__params": null,
+                        "HTTPSampler__data": "{}",
+                        "HTTPSampler__files": "",
+                        "HTTPSampler__encoding": "",
+                        "HTTPSampler__allow_redirects": "false",
+                        "HTTPSampler__connect_timeout": "",
+                        "HTTPSampler__response_timeout": "",
+                        "HTTPSampler__config": {
+                            "components": {
+                                "include": {"type": [], "level": []},
+                                "exclude": {"type": [], "level": []},
+                                "reverse": [3]
+                            }
+                        }
+                    },
+                    "children": [
+                        {
+                            "name": "前置-取样-python-1",
+                            "remark": null,
+                            "class": "PythonPreProcessor",
+                            "enabled": true,
+                            "property": {
+                                "PythonPreProcessor__script": "log.info('前置-取样-python-1')"
+                            },
+                            "children": []
+                        },
+                        {
+                            "name": "后置-取样-python-1",
+                            "remark": null,
+                            "class": "PythonPostProcessor",
+                            "enabled": true,
+                            "property": {
+                                "PythonPostProcessor__script": "log.info('后置-取样-python-1')"
+                            },
+                            "children": []
+                        },
+                        {
+                            "name": "断言-取样-python-1",
+                            "remark": null,
+                            "class": "PythonAssertion",
+                            "enabled": true,
+                            "property": {
+                                "PythonAssertion__script": "log.info('断言-取样-python-1')"
+                            },
+                            "children": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

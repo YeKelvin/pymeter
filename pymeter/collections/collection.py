@@ -1,14 +1,16 @@
 #!/usr/bin python3
-# @File    : sampler.py
-# @Time    : 2020/1/24 23:47
+# @File    : collection.py
+# @Time    : 2020/2/24 15:35
 # @Author  : Kelvin.Ye
+from typing import Final
+
 from pymeter.elements.element import TestElement
 
 
-class Sampler(TestElement):
+class Collection(TestElement):
 
     # 元素配置
-    CONFIG = 'Sampler__config'
+    CONFIG = 'Collection__config'
 
     @property
     def config(self):
@@ -24,5 +26,22 @@ class Sampler(TestElement):
         _config_ = self.get_property(self.CONFIG).get_obj()
         return _config_ or default
 
-    def sample(self):
-        raise NotImplementedError
+
+class TestCollection(Collection):
+
+    # 元素配置
+    CONFIG: Final = 'TestCollection__config'
+
+    # 是否顺序执行 TestGroup
+    SERIALIZE_GROUPS: Final = 'TestCollection__serialize_groups'
+
+    # 延迟启动 TestGroup ，单位ms
+    DELAY: Final = 'TestCollection__delay'
+
+    @property
+    def serialized(self):
+        return self.get_property_as_bool(self.SERIALIZE_GROUPS)
+
+    @property
+    def delay(self):
+        return self.get_property_as_int(self.DELAY)
