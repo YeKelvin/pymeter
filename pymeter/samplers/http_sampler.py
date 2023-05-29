@@ -8,6 +8,7 @@ from typing import Optional
 
 import httpx
 from httpx import Response
+from loguru import logger
 
 from pymeter.configs.arguments import Arguments
 from pymeter.configs.httpconfigs import HTTPHeaderManager
@@ -18,9 +19,6 @@ from pymeter.samplers.sampler import Sampler
 
 
 class HTTPSampler(Sampler):
-
-    # 元素配置
-    CONFIG: Final = 'HTTPSampler__config'
 
     # 请求类型
     REQUEST_TYPE: Final = 'HTTP'
@@ -54,6 +52,9 @@ class HTTPSampler(Sampler):
 
     # 等待响应超时时间
     RESPONSE_TIMEOUT: Final = 'HTTPSampler__response_timeout'
+
+    # 运行策略
+    RUNNING_STRATEGY: Final = 'HTTPSampler__running_strategy'
 
     @property
     def url(self) -> str:
@@ -125,7 +126,7 @@ class HTTPSampler(Sampler):
         super().__init__(name=name)
         self.session_manager = None
 
-    def sample(self) -> SampleResult:
+    def sample(self) -> SampleResult:  # sourcery skip: extract-method
         result = SampleResult()
         result.sample_name = self.name
         result.sample_remark = self.remark
@@ -151,6 +152,9 @@ class HTTPSampler(Sampler):
                 follow_redirects=self.allow_redirects
             )
             res.encoding = self.encoding
+
+            logger.debug(f'HTTP REQUEST: {self.method} {res.url}\n{res.request.content.decode(self.encoding)}')
+            logger.debug(f'HTTP RESPONSE: {res.text}')
 
             result.request_headers = self.decode_headers(dict(res.request.headers))
             result.request_data = self.get_payload(res)

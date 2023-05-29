@@ -24,6 +24,10 @@ class ScriptParseError(Exception):
     ...
 
 
+class NodeParseError(Exception):
+    ...
+
+
 class NextIsNullException(Exception):
     ...
 

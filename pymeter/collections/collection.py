@@ -9,28 +9,40 @@ from pymeter.elements.element import TestElement
 
 class Collection(TestElement):
 
-    # 元素配置
-    CONFIG = 'Collection__config'
+    # 运行策略
+    RUNNING_STRATEGY = 'Collection__running_strategy'
 
     @property
-    def config(self):
+    def running_strategy(self):
         default = {
-            'components': {
-                # 类型: [1前置，2后置，3断言]，级别: [0空间，1集合，2工作线程，3控制器]
-                'include': {"type": [], "level": []},
-                'exclude': {"type": [], "level": []},
-                # 倒序执行: [1前置，2后置，3断言]
-                'reverse': []
-            }
+            # 筛选
+            # logic: [AND, OR]
+            # keyword: [TYPE, LEVEL]
+            # operator: [EQUAL, NOT_EQUAL, IN, NOT_IN]
+            # value:
+            #   TYPE: [PRE, POST, ASSERT]
+            #   LEVEL: [WORKSPACE, COLLECTION, WORKER, CONTROLLER, SAMPLER]
+            # {
+            #     "filter": {
+            #         "logic": "",
+            #         "rules": [
+            #             {"keyword": "", "operator": "", "value": ""},    # condition
+            #             {"logic": "", "rules": []}                       # group
+            #         ]
+            #     }
+            # }
+            'filter': [],
+            # 倒序执行: [1:前置，2:后置，3:断言]
+            'reverse': []
         }
-        _config_ = self.get_property(self.CONFIG).get_obj()
-        return _config_ or default
+        strategy = self.get_property(self.RUNNING_STRATEGY).get_obj()
+        return strategy or default
 
 
 class TestCollection(Collection):
 
-    # 元素配置
-    CONFIG: Final = 'TestCollection__config'
+    # 运行策略
+    RUNNING_STRATEGY: Final = 'TestCollection__running_strategy'
 
     # 是否顺序执行 TestGroup
     SERIALIZE_GROUPS: Final = 'TestCollection__serialize_groups'

@@ -26,9 +26,6 @@ class TestElement:
     # 组件备注
     REMARK = 'TestElement__remark'
 
-    # 组件配置
-    CONFIG = 'TestElement__config'
-
     def __init__(self, name: str = None):
         self._running_version = False
         self.level = None
@@ -190,11 +187,11 @@ class TestElement:
 
 class ConfigElement:
 
-    def add_config_element(self, config: 'ConfigElement'):
+    def add_config_element(self, el: 'ConfigElement'):
         raise NotImplementedError
 
 
 class ConfigTestElement(ConfigElement, TestElement):
 
-    def add_config_element(self, config: ConfigElement):
+    def add_config_element(self, el: ConfigElement):
         raise NotImplementedError

@@ -2,6 +2,8 @@
 # @File    : assertion.py
 # @Time    : 2020/2/17 16:38
 # @Author  : Kelvin.Ye
+from typing import Final
+
 from pymeter.elements.element import TestElement
 from pymeter.samplers.sample_result import SampleResult
 
@@ -29,6 +31,8 @@ class AssertionResult:
 
 
 class Assertion(TestElement):
+
+    TYPE: Final = 'ASSERT'
 
     def get_result(self, result: SampleResult) -> AssertionResult:
         raise NotImplementedError

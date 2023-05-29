@@ -18,9 +18,6 @@ from pymeter.samplers.sampler import Sampler
 
 class SQLSampler(Sampler):
 
-    # 元素配置
-    CONFIG: Final = 'SQLSampler__config'
-
     # 请求类型
     REQUEST_TYPE: Final = 'SQL'
 
@@ -38,6 +35,9 @@ class SQLSampler(Sampler):
 
     # 超时时间
     QUERY_TIMEOUT: Final = 'SQLSampler__query_timeout'
+
+    # 运行策略
+    RUNNING_STRATEGY: Final = 'SQLSampler__running_strategy'
 
     # 查询语句正则表达式
     SELECT_PATTERN = re.compile(r'(select)(.|\n)+(from)(.|\n)*', re.IGNORECASE)

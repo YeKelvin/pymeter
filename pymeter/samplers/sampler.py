@@ -7,22 +7,12 @@ from pymeter.elements.element import TestElement
 
 class Sampler(TestElement):
 
-    # 元素配置
-    CONFIG = 'Sampler__config'
+    # 运行策略
+    RUNNING_STRATEGY = 'Sampler__running_strategy'
 
     @property
-    def config(self):
-        default = {
-            'components': {
-                # 类型: [1前置，2后置，3断言]，级别: [0空间，1集合，2工作线程，3控制器]
-                'include': {"type": [], "level": []},
-                'exclude': {"type": [], "level": []},
-                # 倒序执行: [1前置，2后置，3断言]
-                'reverse': []
-            }
-        }
-        _config_ = self.get_property(self.CONFIG).get_obj()
-        return _config_ or default
+    def running_strategy(self):
+        return self.get_property(self.RUNNING_STRATEGY).get_obj()
 
     def sample(self):
         raise NotImplementedError

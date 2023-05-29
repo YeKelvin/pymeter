@@ -14,7 +14,6 @@ from pymeter.controls.transaction import TransactionController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import ConfigElement
 from pymeter.elements.element import TestElement
-from pymeter.engine.component import Component
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoThreadClone
@@ -28,6 +27,7 @@ from pymeter.processors.post import PostProcessor
 from pymeter.processors.pre import PreProcessor
 from pymeter.samplers.sampler import Sampler
 from pymeter.timers.timer import Timer
+from pymeter.tools.logical_operator import calculate_condition
 
 
 # 调试日志开关
@@ -188,7 +188,7 @@ class TestCompiler(HashTreeTraverser):
 
     def __init__(self, tree):
         self.stack = deque()
-        self.config = None
+        self.strategy = None
         self.hashtree = tree
         self.sample_packages: Dict[Sampler, SamplePackage] = {}
         self.trans_packages: Dict[TransactionController, SamplePackage] = {}
@@ -272,11 +272,9 @@ class TestCompiler(HashTreeTraverser):
                 item.add_iteration_listener(child)
 
     def save_sample_package(self, sampler):  # sourcery skip: low-code-quality
-        component_config = Component.merged_config(sampler.config.get('components'), self.config)
-        include_type = component_config.get(Component.INCLUDE_TYPE)
-        include_level = component_config.get(Component.INCLUDE_LEVEL)
-        exclude_type = component_config.get(Component.EXCLUDE_TYPE)
-        exclude_level = component_config.get(Component.EXCLUDE_LEVEL)
+        strategy = sampler.running_strategy or self.strategy
+        filter_rule = strategy.get('filter')
+        reverse_order = strategy.get('reverse', [])
 
         configs = []
         controllers = []
@@ -306,67 +304,21 @@ class TestCompiler(HashTreeTraverser):
                     listeners.append(item)
                 if isinstance(item, Timer):
                     timers.append(item)
-                if isinstance(item, Assertion):
-                    # 根据配置包含或排除组件
-                    allowed = True
-                    if include_type and 3 not in include_type:
-                        allowed = False
-                    if include_level and item.level not in include_level:
-                        allowed = False
-                    if exclude_type and 3 in exclude_type:
-                        allowed = False
-                    if exclude_level and item.level not in exclude_level:
-                        allowed = False
-                    if allowed:
-                        inner_assertions.append(item)
-                if isinstance(item, PostProcessor):
-                    # 根据配置包含或排除组件
-                    allowed = True
-                    if include_type and 2 not in include_type:
-                        allowed = False
-                    if include_level and item.level not in include_level:
-                        allowed = False
-                    if exclude_type and 2 in exclude_type:
-                        allowed = False
-                    if exclude_level and item.level in exclude_level:
-                        allowed = False
-                    if allowed:
-                        inner_posts.append(item)
-                if isinstance(item, PreProcessor):
-                    # 根据配置包含或排除组件
-                    allowed = True
-                    if include_type and 1 not in include_type:
-                        allowed = False
-                    if include_level and item.level not in include_level:
-                        allowed = False
-                    if exclude_type and 1 in exclude_type:
-                        allowed = False
-                    if exclude_level and item.level in exclude_level:
-                        allowed = False
-                    if allowed:
-                        inner_pres.append(item)
+                if isinstance(item, Assertion) and not self.is_filtered_component(item, filter_rule):
+                    inner_assertions.append(item)
+                if isinstance(item, PostProcessor) and not self.is_filtered_component(item, filter_rule):
+                    inner_posts.append(item)
+                if isinstance(item, PreProcessor) and not self.is_filtered_component(item, filter_rule):
+                    inner_pres.append(item)
 
             assertions.extendleft(inner_assertions[::-1])
             posts.extendleft(inner_posts[::-1])
             pres.extendleft(inner_pres[::-1])
 
         # 根据配置排序
-        sorted_pres = sorted(
-            pres,
-            key=lambda x:x.level,
-            reverse=component_config.get(Component.REVERSE_PRE)
-        )
-        sorted_posts = sorted(
-            posts,
-            key=lambda x:x.level,
-            reverse=component_config.get(Component.REVERSE_POST)
-        )
-        sorted_assertions = sorted(
-            assertions,
-            key=lambda x:x.level,
-            reverse=component_config.get(Component.REVERSE_ASSERT)
-        )
-        # 遍历执行
+        sorted_pres = sorted(pres, key=lambda x:x.level, reverse=('PRE' in reverse_order))
+        sorted_posts = sorted(posts, key=lambda x:x.level, reverse=('POST' in reverse_order))
+        sorted_assertions = sorted(assertions, key=lambda x:x.level, reverse=('ASSERT' in reverse_order))
 
         if DEBUG:
             logger.debug(f'取样器:[ {sampler} ] 取样包配置完成')
@@ -437,6 +389,15 @@ class TestCompiler(HashTreeTraverser):
         for config in configs:
             if not isinstance(config, NoConfigMerge):
                 sampler.add_test_element(config)
+
+    def is_filtered_component(self, node: TestElement, filter_rule: dict):
+        if not filter_rule:
+            return False
+
+        return not calculate_condition(rule=filter_rule, data = {
+            'TYPE': node.TYPE,
+            'LEVEL': node.level
+        })
 
 
 class FindTestElementsUpToRoot(HashTreeTraverser):

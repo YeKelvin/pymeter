@@ -16,14 +16,14 @@ from pymeter.tools.python_code_snippets import INDENT
 
 class PythonSampler(Sampler):
 
-    # 元素配置
-    CONFIG: Final = 'PythonSampler__config'
-
     # 请求类型
     REQUEST_TYPE: Final = 'PYTHON'
 
     # 脚本内容
     SCRIPT: Final = 'PythonSampler__script'
+
+    # 运行策略
+    RUNNING_STRATEGY: Final = 'PythonSampler__running_strategy'
 
     @property
     def script(self) -> str:

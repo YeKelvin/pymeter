@@ -20,7 +20,6 @@ from pymeter.controls.loop_controller import LoopController
 from pymeter.controls.retry_controller import RetryController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
-from pymeter.engine.component import Component
 from pymeter.engine.hashtree import HashTree
 from pymeter.engine.interface import LoopIterationListener
 from pymeter.engine.interface import SampleListener
@@ -51,7 +50,7 @@ class LogicalAction(Enum):
     CONTINUE = 'continue'
 
     # 错误时开始下一个线程控制器的循环
-    START_NEXT_ITERATION_OF_COROUTINE = 'start_next_coroutine'
+    START_NEXT_ITERATION_OF_THREAD = 'start_next_coroutine'
 
     # 错误时开始下一个当前控制器（线程控制器或子代控制器）的循环
     START_NEXT_ITERATION_OF_CURRENT_LOOP = 'start_next_current_loop'
@@ -71,8 +70,8 @@ class LogicalAction(Enum):
 
 class TestGroup(Worker, TestCompilerHelper):
 
-    # 元素配置
-    CONFIG = 'TestGroup__config'
+    # 运行策略
+    RUNNING_STRATEGY = 'TestGroup__running_strategy'
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR = 'TestGroup__on_sample_error'
@@ -110,8 +109,8 @@ class TestGroup(Worker, TestCompilerHelper):
         return self.on_sample_error == LogicalAction.CONTINUE.value
 
     @property
-    def on_error_start_next_coroutine(self) -> bool:
-        return self.on_sample_error == LogicalAction.START_NEXT_ITERATION_OF_COROUTINE.value
+    def on_error_start_next_thread(self) -> bool:
+        return self.on_sample_error == LogicalAction.START_NEXT_ITERATION_OF_THREAD.value
 
     @property
     def on_error_start_next_current_loop(self) -> bool:
@@ -271,9 +270,8 @@ class TestGroup(Worker, TestCompilerHelper):
         coroutine.group = self
         coroutine.coroutine_number = coroutine_number
         coroutine.coroutine_name = coroutine_name
-        coroutine.compile_config = Component.initial_config(
-            coroutine.engine.collection.config.get('components'),
-            coroutine.group.config.get('components')
+        coroutine.compile_strategy = (
+            coroutine.group.running_strategy or coroutine.engine.collection.running_strategy
         )
         return coroutine
 
@@ -300,7 +298,7 @@ class Coroutine(Greenlet):
         self.group_main_controller = group_tree.list()[0]   # type: Controller
         self.coroutine_name = None
         self.coroutine_number = None
-        self.compile_config = None
+        self.compile_strategy = None
         self.compiler = TestCompiler(self.group_tree)
         self.variables = Variables()
         self.start_time = 0
@@ -347,7 +345,7 @@ class Coroutine(Greenlet):
         # 编译 TestGroup 的子代节点
         logger.debug('开始编译TestGroup节点')
         # logger.debug(f'TestGroup的HashTree结构:\n{self.group_tree}')
-        self.compiler.config = self.compile_config
+        self.compiler.strategy = self.compile_strategy
         self.group_tree.traverse(self.compiler)
         logger.debug('TestGroup节点编译完成')
         # logger.debug(f'TestGroup的HashTree结构:\n{self.group_tree}')
@@ -439,7 +437,7 @@ class Coroutine(Greenlet):
             self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_retry)
 
         # 错误时开始下一个 TestGroup 循环
-        elif self.group.on_error_start_next_coroutine:
+        elif self.group.on_error_start_next_thread:
             logger.debug(f'线程:[ {self.coroutine_name} ] 最后一次请求失败，开始下一个主循环')
             self.__trigger_loop_logical_action_on_parent_controllers(sampler, context, self.__continue_on_main_loop)
 
@@ -869,8 +867,8 @@ class Coroutine(Greenlet):
 
 class SetupGroup(TestGroup):
 
-    # 元素配置
-    CONFIG: Final = 'SetupGroup__config'
+    # 运行策略
+    RUNNING_STRATEGY: Final = 'SetupGroup__running_strategy'
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR: Final = 'SetupGroup__on_sample_error'
@@ -887,8 +885,8 @@ class SetupGroup(TestGroup):
 
 class TearDownGroup(TestGroup):
 
-    # 元素配置
-    CONFIG: Final = 'TearDownGroup__config'
+    # 运行策略
+    RUNNING_STRATEGY: Final = 'TearDownGroup__running_strategy'
 
     # Sampler 失败时的处理动作，枚举 LogicalAction
     ON_SAMPLE_ERROR: Final = 'TearDownGroup__on_sample_error'
