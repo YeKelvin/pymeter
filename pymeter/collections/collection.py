@@ -17,7 +17,7 @@ class Collection(TestElement):
         default = {
             # 筛选
             # logic: [AND, OR]
-            # keyword: [TYPE, LEVEL]
+            # field: [TYPE, LEVEL]
             # operator: [EQUAL, NOT_EQUAL, IN, NOT_IN]
             # value:
             #   TYPE: [PRE, POST, ASSERT]
@@ -26,7 +26,7 @@ class Collection(TestElement):
             #     "filter": {
             #         "logic": "",
             #         "rules": [
-            #             {"keyword": "", "operator": "", "value": ""},    # condition
+            #             {"field": "", "operator": "", "value": ""},    # condition
             #             {"logic": "", "rules": []}                       # group
             #         ]
             #     }

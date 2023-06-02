@@ -394,10 +394,13 @@ class TestCompiler(HashTreeTraverser):
         if not filter_rule:
             return False
 
-        return not calculate_condition(rule=filter_rule, data = {
-            'TYPE': node.TYPE,
-            'LEVEL': node.level
-        })
+        return not calculate_condition(
+            rule=filter_rule,
+            actual_values = {
+                'TYPE': node.TYPE,
+                'LEVEL': str(node.level)
+            }
+        )
 
 
 class FindTestElementsUpToRoot(HashTreeTraverser):

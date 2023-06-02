@@ -187,7 +187,7 @@
                             "filter": {
                                 "logic": "AND",
                                 "rules": [
-                                    {"keyword": "TYPE", "operator": "IN", "value": ["PRE", "POST", "ASSERT"]}
+                                    {"field": "TYPE", "operator": "IN", "value": ["PRE", "POST", "ASSERT"]}
                                 ]
                             },
                             "reverse": ["ASSERT"]

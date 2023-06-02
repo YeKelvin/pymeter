@@ -177,7 +177,7 @@ class StandardEngine(Greenlet):
         self._wait_groups_stopped()
         self.groups.clear()  # The groups have all completed now
         ContextService.clear_total_threads()
-        logger.info('所有 #前置线程组# 执行完成')
+        logger.info('所有 #前置线程组# 已执行完成')
         return group_count
 
     def _process_test_group(self, test_group_searcher, collection_component_list):
@@ -215,7 +215,7 @@ class StandardEngine(Greenlet):
         self._wait_groups_stopped()
         self.groups.clear()  # The groups have all completed now
         ContextService.clear_total_threads()
-        logger.info('所有 #线程组# 执行完成')
+        logger.info('所有 #线程组# 已执行完成')
         return group_count
 
     def _process_teardown_group(self, teardown_group_searcher, collection_component_list):
@@ -245,7 +245,7 @@ class StandardEngine(Greenlet):
         self._wait_groups_stopped()
         self.groups.clear()  # The groups have all completed now
         ContextService.clear_total_threads()
-        logger.info('所有 #后置线程组# 执行完成')
+        logger.info('所有 #后置线程组# 已执行完成')
         return group_count
 
     def stop_test(self):

@@ -18,7 +18,7 @@ default = true
 [tool.poetry.dependencies]
 python = "^3.8"
 jsonpath = "0.82"
-orjson = "3.8.14"
+orjson = "3.9.0"
 xmltodict = "0.13.0"
 sqlalchemy = "1.4.47"
 cx-Oracle = "8.3.0"

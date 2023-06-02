@@ -263,7 +263,7 @@ class TestGroup(Worker, TestCompilerHelper):
             Coroutine
 
         """
-        coroutine_name = f'{self.name} w{self.group_number}-t{coroutine_number + 1}'
+        coroutine_name = f'{self.name} @ w{self.group_number}t{coroutine_number + 1}'
         coroutine = Coroutine(self.__clone_group_tree())
         coroutine.initial_context(context)
         coroutine.engine = engine
@@ -401,7 +401,7 @@ class Coroutine(Greenlet):
         except Exception:
             logger.exception('Exception Occurred')
         finally:
-            logger.info(f'线程:[ {self.coroutine_name} ] 执行完成')
+            logger.info(f'线程:[ {self.coroutine_name} ] 已执行完成')
             self.__coroutine_finished()  # 遍历执行 TestGroupListener
             context.clear()
             ContextService.remove_context()
@@ -647,9 +647,9 @@ class Coroutine(Greenlet):
         result = None
         # noinspection PyBroadException
         try:
-            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler} ] 开始取样')
+            logger.info(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler.name} ] 开始取样')
             result = sampler.sample()
-            logger.debug(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler} ] 取样完成')
+            logger.info(f'线程:[ {self.coroutine_name} ] 取样器:[ {sampler.name} ] 取样完成')
         except Exception as e:
             logger.exception('Exception Occurred')
             if not result:

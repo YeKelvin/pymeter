@@ -5,43 +5,44 @@
 from loguru import logger
 
 
-def logical_calculate(rules: list, logic: str, data: dict) -> bool:
+def logical_calculate(rules: list, logic: str, actual_values: dict) -> bool:
     if not rules:
         return True
 
     if logic == 'AND':
         logger.debug(f'逻辑与运算，规则: {rules}')
-        return all(calculate_condition(rule, data) for rule in rules)
+        return all(calculate_condition(rule, actual_values) for rule in rules)
     elif logic == 'OR':
         logger.debug(f'逻辑或运算，规则: {rules}')
-        return any(calculate_condition(rule, data) for rule in rules)
+        return any(calculate_condition(rule, actual_values) for rule in rules)
     else:
         raise KeyError(f'运算符:[ {logic} ] 不支持的逻辑运算符')
 
 
-def calculate_condition(rule: dict, data: dict) -> bool:
+def calculate_condition(rule: dict, actual_values: dict) -> bool:
     if 'logic' in rule:
-        return logical_calculate(rule['rules'], rule['logic'], data)
+        return logical_calculate(rule['rules'], rule['logic'], actual_values)
 
-    keyword = rule['keyword']
-    exists = keyword in data
+    field = rule['field']
+    exists = field in actual_values
     if not exists:
-        logger.debug(f'关键字:[ {keyword} ] 未提供关键字数据')
+        logger.debug(f'域:[ {field} ] 未提供域数据')
         return False
 
     operator = rule['operator']
     value = rule['value']
+
     result = None
     if operator == 'EQUAL':
-        result = data[keyword] == value
+        result = actual_values[field] == value
     elif operator == 'NOT_EQUAL':
-        result = data[keyword] != value
+        result = actual_values[field] != value
     elif operator == 'IN':
-        result = data[keyword] in value
+        result = actual_values[field] in value
     elif operator == 'NOT_IN':
-        result = data[keyword] not in value
+        result = actual_values[field] not in value
     else:
         raise KeyError(f'运算符:[ {operator} ] 不支持的逻辑运算符')
 
-    logger.debug(f'逻辑运算，规则: {rule}，结果: {result}')
+    logger.debug(f'逻辑运算，规则: {rule}，实际值: {actual_values}, 结果: {result}')
     return result
