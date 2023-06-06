@@ -4,7 +4,7 @@
     "class": "TestCollection",
     "enabled": true,
     "property": {
-        "TestCollection__serialize_groups": "true",
+        "TestCollection__serialize_workers": "true",
         "TestCollection__delay": "0",
         "TestCollection__running_strategy": {
             "reverse": ["PRE"]
@@ -77,20 +77,20 @@
         {
             "name": "工作线程1",
             "remark": "",
-            "class": "TestGroup",
+            "class": "TestWorker",
             "enabled": true,
             "property": {
-                "TestGroup__on_sample_error": "start_next_coroutine",
-                "TestGroup__number_groups": "1",
-                "TestGroup__start_interval": "",
-                "TestGroup__main_controller": {
+                "TestWorker__on_sample_error": "start_next_thread",
+                "TestWorker__number_of_threads": "1",
+                "TestWorker__start_interval": "",
+                "TestWorker__main_controller": {
                     "class": "LoopController",
                     "property": {
                         "LoopController__loops": "1",
                         "LoopController__continue_forever": false
                     }
                 },
-                "TestGroup__running_strategy": null
+                "TestWorker__running_strategy": null
             },
             "children": [
                 {
@@ -180,7 +180,7 @@
                         "HTTPSampler__data": "{}",
                         "HTTPSampler__files": "",
                         "HTTPSampler__encoding": "",
-                        "HTTPSampler__allow_redirects": "false",
+                        "HTTPSampler__follow_redirects": "false",
                         "HTTPSampler__connect_timeout": "",
                         "HTTPSampler__response_timeout": "",
                         "HTTPSampler__running_strategy": {

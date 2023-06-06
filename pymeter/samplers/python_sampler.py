@@ -7,11 +7,11 @@ from typing import Final
 
 from loguru import logger
 
-from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
 from pymeter.tools.python_code_snippets import INDENT
+from pymeter.workers.context import ContextService
 
 
 class PythonSampler(Sampler):

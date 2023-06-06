@@ -26,8 +26,8 @@ class Collection(TestElement):
             #     "filter": {
             #         "logic": "",
             #         "rules": [
-            #             {"field": "", "operator": "", "value": ""},    # condition
-            #             {"logic": "", "rules": []}                       # group
+            #             {"field": "", "operator": "", "value": ""},  # condition
+            #             {"logic": "", "rules": []}                   # group
             #         ]
             #     }
             # }
@@ -44,15 +44,15 @@ class TestCollection(Collection):
     # 运行策略
     RUNNING_STRATEGY: Final = 'TestCollection__running_strategy'
 
-    # 是否顺序执行 TestGroup
-    SERIALIZE_GROUPS: Final = 'TestCollection__serialize_groups'
+    # 是否串行执行 worker
+    SERIALIZE_WORKERS: Final = 'TestCollection__serialize_workers'
 
-    # 延迟启动 TestGroup ，单位ms
+    # 延迟启动 worker ，单位ms
     DELAY: Final = 'TestCollection__delay'
 
     @property
     def serialized(self):
-        return self.get_property_as_bool(self.SERIALIZE_GROUPS)
+        return self.get_property_as_bool(self.SERIALIZE_WORKERS)
 
     @property
     def delay(self):

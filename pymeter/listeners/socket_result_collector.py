@@ -12,15 +12,21 @@ from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
-from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
-from pymeter.groups.context import ContextService
+from pymeter.engine.interface import TestWorkerListener
+from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils import time_util
 from pymeter.utils.json_util import from_json
+from pymeter.workers.context import ContextService
 
 
 class SocketResultCollector(
-    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoThreadClone
+    TestElement,
+    TestCollectionListener,
+    TestWorkerListener,
+    TestIterationListener,
+    SampleListener,
+    NoThreadClone
 ):
     # 连接地址
     URL: Final = 'SocketResultCollector__url'
@@ -58,20 +64,20 @@ class SocketResultCollector(
         return self.get_property_as_str(self.TARGET_SID)
 
     @property
-    def group_id(self) -> str:
-        return id(ContextService.get_context().group)
+    def worker_id(self):
+        return id(ContextService.get_context().worker)
 
     @property
-    def group_name(self):
-        return ContextService.get_context().group.name
+    def worker_name(self):
+        return ContextService.get_context().worker.name
 
     def __init__(self):
         TestElement.__init__(self)
 
-        self.reportName = None
-        self.startTime = 0
-        self.endTime = 0
         debug = logger.level <= logging.DEBUG
+        self.report_name = None
+        self.start_time = 0
+        self.end_time = 0
         self.sio = socketio.Client(logger=debug, engineio_logger=debug)
 
     def __socket_connect(self):
@@ -99,18 +105,18 @@ class SocketResultCollector(
         self.sio.emit(self.event_name, data)
 
     def collection_started(self) -> None:
-        self.startTime = time_util.timestamp_now()
+        self.start_time = time_util.timestamp_now()
         self.__socket_connect()
 
     def collection_ended(self) -> None:
-        self.endTime = time_util.timestamp_now()
+        self.end_time = time_util.timestamp_now()
         self.__socket_disconnect()
 
-    def group_started(self) -> None:
+    def worker_started(self) -> None:
         self.__emit_to_target({
-            'group': {
-                'groupId': self.group_id,
-                'groupName': self.group_name,
+            'worker': {
+                'workerId': self.worker_id,
+                'workerName': self.worker_name,
                 'startTime': time_util.strftime_now(),
                 'endTime': 0,
                 'elapsedTime': 0,
@@ -120,26 +126,22 @@ class SocketResultCollector(
             }
         })
 
-    def group_finished(self) -> None:
+    def worker_finished(self) -> None:
         self.__emit_to_target({
-            'groupId': self.group_id,
-            'group': {
+            'workerId': self.worker_id,
+            'worker': {
                 'endTime': time_util.strftime_now(),
                 'elapsedTime': 0,
                 'running': False
             }
         })
 
-    def sample_occurred(self, result) -> None:
+    def sample_occurred(self, result: SampleResult) -> None:
         if not result:
             return
 
-        group_id = self.__group_id
-
-        group_id = self.group_id
-
         self.__emit_to_target({
-            'groupId': group_id,
+            'workerId': self.worker_id,
             'sampler': {
                 'samplerId': id(result),
                 'samplerName': result.sample_name,
@@ -163,7 +165,7 @@ class SocketResultCollector(
         })
 
         if not result.success:
-            self.__emit_to_target({'groupId': group_id, 'group': {'success': False}})
+            self.__emit_to_target({'workerId': self.worker_id, 'worker': {'success': False}})
 
     def sample_started(self, sample) -> None:
         ...

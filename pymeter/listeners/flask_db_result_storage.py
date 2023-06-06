@@ -5,21 +5,19 @@
 import importlib
 from typing import Final
 
-from loguru import logger
-
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
-from pymeter.engine.interface import TestGroupListener
-from pymeter.groups.context import ContextService
+from pymeter.engine.interface import TestWorkerListener
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.json_util import to_json
 from pymeter.utils.time_util import timestamp_now
 from pymeter.utils.time_util import timestmp_to_utc8_datetime
+from pymeter.workers.context import ContextService
 
 
-class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListener, SampleListener, NoThreadClone):
+class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListener, SampleListener, NoThreadClone):
 
     # 测试报告编号
     REPORT_NO: Final = 'FlaskDBResultStorage__report_no'
@@ -44,12 +42,12 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
         return id(self.collection)
 
     @property
-    def group(self):
-        return ContextService.get_context().group
+    def worker(self):
+        return ContextService.get_context().worker
 
     @property
-    def group_id(self):
-        return id(self.group)
+    def worker_id(self):
+        return id(self.worker)
 
     @property
     def last_sample_ok(self) -> bool:
@@ -57,14 +55,14 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
 
     def __init__(self):
         TestElement.__init__(self)
-        self.flask_instance = getattr(importlib.import_module('app'), '__app__')
-        self.table_model = importlib.import_module('app.script.model')
-        self.TTestCollectionResult = self.table_model.TTestCollectionResult  # noqa
-        self.TTestGroupResult = self.table_model.TTestGroupResult  # noqa
-        self.TTestSamplerResult = self.table_model.TTestSamplerResult  # noqa
         self.success: bool = True
         self.collection_start_time = 0
         self.collection_end_time = 0
+        self.flask_instance = getattr(importlib.import_module('app'), '__app__')
+        self.table_model = importlib.import_module('app.modules.script.model')
+        self.TTestCollectionResult = getattr(self.table_model, 'TTestCollectionResult')
+        self.TTestWorkerResult = getattr(self.table_model, 'TTestWorkerResult')
+        self.TTestSamplerResult = getattr(self.table_model, 'TTestSamplerResult')
 
     def collection_started(self) -> None:
         """@override"""
@@ -80,26 +78,26 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
         # 更新 Collection 数据
         self.update_test_collection_result()
 
-    def group_started(self) -> None:
+    def worker_started(self) -> None:
         """@override"""
-        # 记录 Group 开始时间
-        self.group.start_time = timestamp_now()
-        self.group.success = True
-        # 插入 Group 数据至数据库
-        self.insert_test_group_result()
+        # 记录 Worker 开始时间
+        setattr(self.worker, 'start_time', timestamp_now())
+        setattr(self.worker, 'success', True)
+        # 插入 Worker 数据至数据库
+        self.insert_test_worker_result()
 
-    def group_finished(self) -> None:
+    def worker_finished(self) -> None:
         """@override"""
-        # 记录 Group 结束时间
-        self.group.end_time = timestamp_now()
-        # 更新 Group 数据
-        self.update_test_group_result()
+        # 记录 Worker 结束时间
+        setattr(self.worker, 'end_time', timestamp_now())
+        # 更新 Worker 数据
+        self.update_test_worker_result()
 
     def sample_occurred(self, result: SampleResult) -> None:
         """@override"""
-        # 最后一个 Sample 失败时，同步更新 Group/Collection 的结果也为失败
+        # 最后一个 Sample 失败时，同步更新 Worker/Collection 的结果也为失败
         if not self.last_sample_ok:
-            self.group.success = False
+            setattr(self.worker, 'success', False)
             self.success = False
         # 递归插入 Sampler 和 SubSampler 数据至数据库
         self.sampler_occurred_with_subresults(result)
@@ -120,7 +118,6 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
         pass
 
     def insert_test_collection_result(self):
-        logger.debug('insert collection result')
         with self.flask_instance.app_context():
             self.TTestCollectionResult.insert(
                 REPORT_NO=self.report_no,
@@ -135,16 +132,15 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
                 record=False
             )
 
-    def insert_test_group_result(self):
-        logger.debug('insert group result')
+    def insert_test_worker_result(self):
         with self.flask_instance.app_context():
-            self.TTestGroupResult.insert(
+            self.TTestWorkerResult.insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
-                GROUP_ID=self.group_id,
-                GROUP_NAME=self.group.name,
-                GROUP_REMARK=self.group.remark,
-                START_TIME=timestmp_to_utc8_datetime(self.group.start_time),
+                WORKER_ID=self.worker_id,
+                WORKER_NAME=self.worker.name,
+                WORKER_REMARK=self.worker.remark,
+                START_TIME=timestmp_to_utc8_datetime(self.worker.start_time),
                 SUCCESS=True,
                 CREATED_BY='PyMeter',
                 UPDATED_BY='PyMeter',
@@ -152,18 +148,20 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
             )
 
     def insert_test_sampler_result(self, result: SampleResult):
-        logger.debug('insert sampler result')
         failed_assertion_data = None
         if result.assertions:
-            assertions = [assertion for assertion in result.assertions if assertion.failure or assertion.error]
-            if len(assertions) > 0:
+            if assertions := [
+                assertion
+                for assertion in result.assertions
+                if assertion.failure or assertion.error
+            ]:
                 failed_assertion_data = assertions[0].message
 
         with self.flask_instance.app_context():
             self.TTestSamplerResult.insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
-                GROUP_ID=self.group_id,
+                WORKER_ID=self.worker_id,
                 PARENT_ID=id(result.parent) if result.parent else None,
                 SAMPLER_ID=id(result),
                 SAMPLER_NAME=result.sample_name,
@@ -175,25 +173,25 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
                 RETRYING=result.retrying,
                 REQUEST_URL=result.request_url,
                 REQUEST_HEADERS=(
-                    to_json(result.request_headers)
-                    if not isinstance(result.request_headers, str)
-                    else result.request_headers
+                    result.request_headers
+                    if isinstance(result.request_headers, str)
+                    else to_json(result.request_headers)
                 ),
                 REQUEST_DATA=(
-                    to_json(result.request_data)
-                    if not isinstance(result.request_data, str)
-                    else result.request_data
+                    result.request_data
+                    if isinstance(result.request_data, str)
+                    else to_json(result.request_data)
                 ),
                 RESPONSE_CODE=str(result.response_code),
                 RESPONSE_HEADERS=(
-                    to_json(result.response_headers)
-                    if not isinstance(result.response_headers, str)
-                    else result.response_headers
+                    result.response_headers
+                    if isinstance(result.response_headers, str)
+                    else to_json(result.response_headers)
                 ),
                 RESPONSE_DATA=(
-                    to_json(result.response_data)
-                    if not isinstance(result.response_data, str)
-                    else result.response_data
+                    result.response_data
+                    if isinstance(result.response_data, str)
+                    else to_json(result.response_data)
                 ),
                 FAILED_ASSERTION=failed_assertion_data,
                 CREATED_BY='PyMeter',
@@ -202,7 +200,6 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
             )
 
     def update_test_collection_result(self):
-        logger.debug('update collection result')
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
         with self.flask_instance.app_context():
             self.TTestCollectionResult.filter_by(COLLECTION_ID=str(self.collection_id)).update({
@@ -212,13 +209,15 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestGroupListene
                 'UPDATED_BY': 'PyMeter'
             })
 
-    def update_test_group_result(self):
-        logger.debug('update group result')
-        elapsed_time = int(self.group.end_time * 1000) - int(self.group.start_time * 1000)
+    def update_test_worker_result(self):
+        worker_success = getattr(self.worker, 'success')
+        worker_start_time = getattr(self.worker, 'start_time')
+        worker_end_time = getattr(self.worker, 'end_time')
+        elapsed_time = int(worker_end_time * 1000) - int(worker_start_time * 1000)
         with self.flask_instance.app_context():
-            self.TTestGroupResult.filter_by(GROUP_ID=str(self.group_id)).update({
-                'END_TIME': timestmp_to_utc8_datetime(self.group.end_time),
+            self.TTestWorkerResult.filter_by(WORKER_ID=str(self.worker_id)).update({
+                'END_TIME': timestmp_to_utc8_datetime(worker_end_time),
                 'ELAPSED_TIME': elapsed_time,
-                'SUCCESS': self.group.success,
+                'SUCCESS': worker_success,
                 'UPDATED_BY': 'PyMeter'
             })

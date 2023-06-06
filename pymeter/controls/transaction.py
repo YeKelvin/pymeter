@@ -23,16 +23,16 @@ class TransactionController(GenericController):
     def next_with_transaction_sampler(self):
         # Check if transaction is done
         if self.transaction_sampler and self.transaction_sampler.done:
-            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
+            logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
             # This transaction is done
             self.transaction_sampler = None
-            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 事务:[ {self.name} ] 事务结束')
-            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
+            logger.debug(f'线程:[ {self.ctx.thread_name} ] 事务:[ {self.name} ] 事务结束')
+            logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为空')
             return None
 
         # Check if it is the start of a new transaction
         if self.first:  # must be the start of the subtree
-            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 事务:[ {self.name} ] 开始事务')
+            logger.debug(f'线程:[ {self.ctx.thread_name} ] 事务:[ {self.name} ] 开始事务')
             self.transaction_sampler = TransactionSampler(self, self.name)
 
         # Sample the children of the transaction
@@ -47,7 +47,7 @@ class TransactionController(GenericController):
 
     def next_is_controller(self, controller: Controller):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为控制器')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为控制器')
         sampler = controller.next()
         # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:
@@ -117,7 +117,7 @@ class TransactionSampler(Sampler):
         self.total_time += result.elapsed_time - int(result.idle_time * 1000)
 
     def set_done(self):
-        logger.debug(f'线程:[ {self.controller.ctx.coroutine_name} ] 事务:[ {self.controller.name} ] 完成事务')
+        logger.debug(f'线程:[ {self.controller.ctx.thread_name} ] 事务:[ {self.controller.name} ] 完成事务')
         self.done = True
         self.result.elapsed_time = self.total_time
         if self.result.success:

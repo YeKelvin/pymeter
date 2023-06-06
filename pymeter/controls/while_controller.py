@@ -57,7 +57,7 @@ class WhileController(GenericController, IteratingController):
             return True
 
         cnd = self.condition.strip()
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] while条件:[ {cnd} ]')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while条件:[ {cnd} ]')
         result = False
 
         # 如果条件为空，在循环结束时只检查上一个 Sampler 的结果
@@ -66,12 +66,12 @@ class WhileController(GenericController, IteratingController):
         else:
             if self.max_loop_count and (self.iter_count > self.max_loop_count):
                 logger.info(
-                    f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]'
+                    f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]'
                 )
                 result = False
             elif self.timeout and (elapsed := int(time.time() * 1000) - int(self._start_time * 1000)) > self.timeout:
                 logger.info(
-                    f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] '
+                    f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] '
                     f'循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ] '
                     '循环超时，停止 while 循环 ] '
                 )
@@ -79,10 +79,10 @@ class WhileController(GenericController, IteratingController):
             else:
                 result = self.evaluate(cnd)  # 如果 next() 被调用，条件可能为空
 
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] while结果:[ {result} ]')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while结果:[ {result} ]')
 
         if result and self.delay:
-            logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]')
+            logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]')
             gevent.sleep(float(self.delay / 1000))
 
         return not result
@@ -114,10 +114,10 @@ class WhileController(GenericController, IteratingController):
 
             # 如果第一次进入时条件为假，则完全跳过控制器
             if self.first and self.end_of_loop(False):
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
+                logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
                 self.reset_break_loop()
                 self.reset_loop_count()
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
+                logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为空')
                 return None
 
             # 获取下一个 sampler
@@ -132,7 +132,7 @@ class WhileController(GenericController, IteratingController):
 
     def start_next_loop(self):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始下一个循环')
         self.re_initialize()
 
     def reset_break_loop(self):
@@ -141,7 +141,7 @@ class WhileController(GenericController, IteratingController):
 
     def break_loop(self):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 中止循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 中止循环')
         self._break_loop = True
         self.first = True
         self.reset_current()

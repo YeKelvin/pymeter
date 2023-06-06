@@ -20,10 +20,10 @@ MODULES = {
     # 测试集合
     'TestCollection': 'pymeter.collections.collection',
 
-    # 测试分组
-    'SetupGroup': 'pymeter.groups.group',
-    'TestGroup': 'pymeter.groups.group',
-    'TearDownGroup': 'pymeter.groups.group',
+    # 工作线程
+    'SetupWorker': 'pymeter.workers.setup_worker',
+    'TestWorker': 'pymeter.workers.test_worker',
+    'TearDownWorker': 'pymeter.workers.teardown_worker',
 
     # 配置器
     'Argument': 'pymeter.configs.arguments',

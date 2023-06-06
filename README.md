@@ -7,16 +7,17 @@
 ```text
 pymeter/
     |-pymeter/
-        |-assertions
-        |-configs
-        |-controls
-        |-elements
         |-engine
-        |-functions
-        |-groups
-        |-listeners
-        |-processors
+        |-elements
+        |-collections
+        |-workers
+        |-controls
         |-samplers
+        |-configs
+        |-processors
+        |-assertions
+        |-listeners
+        |-functions
         |-timers
         |-tools
         |-utils

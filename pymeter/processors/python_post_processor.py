@@ -6,10 +6,10 @@ from typing import Final
 
 from loguru import logger
 
-from pymeter.groups.context import ContextService
 from pymeter.processors.post import PostProcessor
 from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
 from pymeter.tools.python_code_snippets import INDENT
+from pymeter.workers.context import ContextService
 
 
 class PythonPostProcessor(PostProcessor):

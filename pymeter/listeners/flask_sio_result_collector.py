@@ -9,16 +9,16 @@ from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
-from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
-from pymeter.groups.context import ContextService
+from pymeter.engine.interface import TestWorkerListener
 from pymeter.utils import time_util
 from pymeter.utils.time_util import timestamp_now
 from pymeter.utils.time_util import timestamp_to_strftime
+from pymeter.workers.context import ContextService
 
 
 class FlaskSIOResultCollector(
-    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoThreadClone
+    TestElement, TestCollectionListener, TestWorkerListener, SampleListener, TestIterationListener, NoThreadClone
 ):
 
     # 消息接收方的 sid
@@ -41,12 +41,12 @@ class FlaskSIOResultCollector(
         return self.get_property_as_str(self.RESULT_NAME)
 
     @property
-    def group(self):
-        return ContextService.get_context().group
+    def worker(self):
+        return ContextService.get_context().worker
 
     @property
-    def group_id(self):
-        return str(id(self.group))
+    def worker_id(self):
+        return str(id(self.worker))
 
     @property
     def last_sample_ok(self) -> bool:
@@ -55,17 +55,17 @@ class FlaskSIOResultCollector(
     def __init__(self):
         TestElement.__init__(self)
 
+        self.collection_start_time = 0
+        self.collection_end_time = 0
+
         self.flask_sio = None
         self.flask_sio_instance_module = 'app.extension'
         self.flask_sio_instance_name = 'socketio'
 
         self.namespace = '/'
         self.result_summary_event = 'pymeter_result_summary'
-        self.result_group_event = 'pymeter_group_result'
+        self.result_worker_event = 'pymeter_worker_result'
         self.result_sampler_event = 'pymeter_sampler_result'
-
-        self.collection_start_time = 0
-        self.collection_end_time = 0
 
     def init_flask_sio(self):
         module = importlib.import_module(self.flask_sio_instance_module)
@@ -104,16 +104,16 @@ class FlaskSIOResultCollector(
             }
         })
 
-    def group_started(self) -> None:
+    def worker_started(self) -> None:
         """@override"""
-        self.group.start_time = timestamp_now()
-        self.group.success = True
-        self.emit(self.result_group_event, {
+        setattr(self.worker, 'start_time', timestamp_now())
+        setattr(self.worker, 'success', True)
+        self.emit(self.result_worker_event, {
             'resultId': self.result_id,
-            'groupId': self.group_id,
-            'group': {
-                'id': self.group_id,
-                'name': self.group.name,
+            'workerId': self.worker_id,
+            'worker': {
+                'id': self.worker_id,
+                'name': self.worker.name,
                 'startTime': time_util.strftime_now(),
                 'endTime': 0,
                 'elapsedTime': 0,
@@ -123,28 +123,32 @@ class FlaskSIOResultCollector(
             }
         })
 
-    def group_finished(self) -> None:
+    def worker_finished(self) -> None:
         """@override"""
-        self.group.end_time = timestamp_now()
-        self.emit(self.result_group_event, {
+        setattr(self.worker, 'end_time', timestamp_now())
+        worker_success = getattr(self.worker, 'success')
+        worker_start_time = getattr(self.worker, 'start_time')
+        worker_end_time = getattr(self.worker, 'end_time')
+        worker_elapsed_time = int(worker_end_time * 1000) - int(worker_start_time * 1000)
+        self.emit(self.result_worker_event, {
             'resultId': self.result_id,
-            'groupId': self.group_id,
-            'group': {
+            'workerId': self.worker_id,
+            'worker': {
                 'endTime': time_util.strftime_now(),
-                'elapsedTime': int(self.group.end_time * 1000) - int(self.group.start_time * 1000),
+                'elapsedTime': worker_elapsed_time,
                 'running': False,
-                'success': self.group.success
+                'success': worker_success
             }
         })
 
     def sample_occurred(self, result) -> None:
         """@override"""
-        # 最后一个 Sample 失败时，同步更新 Group 的结果也为失败
+        # 最后一个 Sample 失败时，同步更新 Worker 的结果也为失败
         if not self.last_sample_ok:
-            self.group.success = False
+            setattr(self.worker, 'success', False)
         self.emit(self.result_sampler_event, {
             'resultId': self.result_id,
-            'groupId': self.group_id,
+            'workerId': self.worker_id,
             'sampler': sample_result_to_dict(result)
         })
 

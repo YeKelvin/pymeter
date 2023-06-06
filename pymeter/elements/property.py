@@ -8,7 +8,7 @@ from typing import List
 
 from loguru import logger
 
-from pymeter.groups.context import ContextService
+from pymeter.workers.context import ContextService
 
 
 class PyMeterProperty:

@@ -32,7 +32,7 @@ class NextIsNullException(Exception):
     ...
 
 
-class StopTestGroupException(Exception):
+class StopTestWorkerException(Exception):
     ...
 
 

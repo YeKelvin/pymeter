@@ -8,10 +8,10 @@ from loguru import logger
 
 from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
-from pymeter.groups.context import ContextService
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
 from pymeter.tools.python_code_snippets import INDENT
+from pymeter.workers.context import ContextService
 
 
 class PythonAssertion(Assertion):

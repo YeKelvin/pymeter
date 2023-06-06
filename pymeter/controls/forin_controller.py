@@ -58,7 +58,7 @@ class ForInController(GenericController, IteratingController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] set done:[ {val} ]')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] set done:[ {val} ]')
         self._done = val
 
     def __init__(self):
@@ -120,17 +120,17 @@ class ForInController(GenericController, IteratingController):
                 self.initial_forin()
 
             if self.end_of_loop():
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
+                logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
                 self.reset_break_loop()
                 self.re_initialize()
                 self.reset_break_loop()
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
+                logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为空')
                 return None
 
             nsampler = super().next()
             if nsampler and self.delay:
                 logger.debug(
-                    f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]'
+                    f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]'
                 )
                 gevent.sleep(float(self.delay / 1000))
 
@@ -177,12 +177,12 @@ class ForInController(GenericController, IteratingController):
 
     def start_next_loop(self):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始下一个循环')
         self.re_initialize()
 
     def break_loop(self):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 中止循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 中止循环')
         self._break_loop = True
         self.first = True
         self.reset_current()

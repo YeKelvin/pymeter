@@ -6,10 +6,10 @@ from typing import Final
 
 from loguru import logger
 
-from pymeter.groups.context import ContextService
 from pymeter.processors.post import PostProcessor
 from pymeter.utils.json_util import json_path
 from pymeter.utils.json_util import to_json
+from pymeter.workers.context import ContextService
 
 
 class JsonPathPostProcessor(PostProcessor):

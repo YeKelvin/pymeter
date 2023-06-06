@@ -53,7 +53,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
     @done.setter
     def done(self, val: bool):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 设置 done={val}')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 设置 done={val}')
         self.reset_break_retry()
         self._done = val
 
@@ -75,7 +75,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
                 # 延迟重试（间隔）
                 if not self.first and self.intervals:
                     logger.debug(
-                        f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 延迟 {self.intervals}ms 重试'
+                        f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 延迟 {self.intervals}ms 重试'
                     )
                     gevent.sleep(float(self.intervals / 1000))
 
@@ -94,7 +94,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
         self.re_initialize()
         if self.last_sample_ok:
             logger.debug(
-                f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 取样器取样成功, 停止重试'
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 取样器取样成功, 停止重试'
             )
             self.done = True
             return None
@@ -130,12 +130,12 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
 
     def start_next_loop(self):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始下一个循环')
         self.re_initialize()
 
     def break_loop(self):
         """@override"""
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 中止循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 中止循环')
         self._break_retry = True
         self.first = True
         self.reset_current()

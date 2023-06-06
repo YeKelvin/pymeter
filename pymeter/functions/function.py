@@ -2,8 +2,8 @@
 # @File    : function.py
 # @Time    : 2020/1/19 17:05
 # @Author  : Kelvin.Ye
-from pymeter.groups.context import ContextService
 from pymeter.tools.exceptions import InvalidVariableException
+from pymeter.workers.context import ContextService
 
 
 class Function:

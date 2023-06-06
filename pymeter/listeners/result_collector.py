@@ -6,56 +6,64 @@ from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
-from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
-from pymeter.groups.context import ContextService
-from pymeter.utils import time_util
+from pymeter.engine.interface import TestWorkerListener
+from pymeter.samplers.sample_result import SampleResult
+from pymeter.utils.time_util import strftime_now
+from pymeter.utils.time_util import timestamp_now
+from pymeter.utils.time_util import timestamp_to_strftime
+from pymeter.workers.context import ContextService
 
 
 class ResultCollector(
-    TestElement, TestCollectionListener, TestGroupListener, SampleListener, TestIterationListener, NoThreadClone
+    TestElement,
+    TestCollectionListener,
+    TestWorkerListener,
+    TestIterationListener,
+    SampleListener,
+    NoThreadClone
 ):
 
     def __init__(self):
         TestElement.__init__(self)
-        self.reportName = None
-        self.startTime = 0
-        self.endTime = 0
-        self.groups = {}
+        self.report_name = None
+        self.start_time = 0
+        self.end_time = 0
+        self.workers = {}
 
     @property
-    def group_id(self) -> str:
-        return id(ContextService.get_context().group)
+    def worker_id(self) -> str:
+        return id(ContextService.get_context().worker)
 
     @property
-    def group(self):
-        return ContextService.get_context().group
+    def worker(self):
+        return ContextService.get_context().worker
 
     def collection_started(self) -> None:
-        self.startTime = time_util.timestamp_now()
+        self.start_time = timestamp_now()
 
     def collection_ended(self) -> None:
-        self.endTime = time_util.timestamp_now()
+        self.end_time = timestamp_now()
 
-    def group_started(self) -> None:
-        self.groups[self.group_id] = {
-            'groupId': self.group_id,
-            'groupName': self.group.name,
-            'startTime': time_util.strftime_now(),
+    def worker_started(self) -> None:
+        self.workers[self.worker_id] = {
+            'workerId': self.worker_id,
+            'workerName': self.worker.name,
+            'startTime': strftime_now(),
             'endTime': 0,
             'elapsedTime': 0,
             'success': True,
             'samplers': []
         }
 
-    def group_finished(self) -> None:
-        self.groups[self.group_id]['endTime'] = time_util.strftime_now()
+    def worker_finished(self) -> None:
+        self.workers[self.worker_id]['endTime'] = strftime_now()
 
-    def sample_occurred(self, result) -> None:
+    def sample_occurred(self, result: SampleResult) -> None:
         if not result:
             return
 
-        self.groups[self.group_id]['samplers'].append({
+        self.workers[self.worker_id]['samplers'].append({
             'samplerId': id(result),
             'samplerName': result.sample_name,
             'samplerRemark': result.sample_remark,
@@ -69,15 +77,15 @@ class ResultCollector(
             'requestSize': result.request_size,
             'responseSize': result.response_size,
             'success': result.success,
-            'startTime': time_util.timestamp_to_strftime(result.start_time),
-            'endTime': time_util.timestamp_to_strftime(result.end_time),
+            'startTime': timestamp_to_strftime(result.start_time),
+            'endTime': timestamp_to_strftime(result.end_time),
             'elapsedTime': result.elapsed_time,
             'assertions': [str(assertion) for assertion in result.assertions],
             'subResults': [sub.serialization for sub in result.sub_results]
         })
 
         if not result.success:
-            self.groups[self.group_id]['success'] = False
+            self.workers[self.worker_id]['success'] = False
 
     def sample_started(self, sample) -> None:
         ...

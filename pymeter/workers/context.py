@@ -2,40 +2,38 @@
 # @File    : context
 # @Time    : 2019/3/15 9:39
 # @Author  : Kelvin.Ye
-from threading import local as ThreadLocal
-
 from gevent.local import local as CoroutineLocal
 
-from pymeter.groups.variables import Variables
 from pymeter.utils import time_util
+from pymeter.workers.variables import Variables
 
 
-class CoroutineContext:
+class ThreadContext:
 
     @property
-    def properties(self):
+    def properties(self) -> dict:
         return getattr(self.engine, 'properties', {})
 
     @property
-    def extra(self):
+    def extra(self) -> dict:
         return getattr(self.engine, 'extra', {})
 
     def __init__(self):
         self.variables = Variables()
         self.engine = None
-        self.group = None
-        self.coroutine = None
-        self.coroutine_number = None
-        self.coroutine_name = None
+        self.worker = None
+        self.thread = None
+        self.thread_number = None
+        self.thread_name = None
         self.current_sampler = None
         self.previous_sampler = None
         self.previous_result = None
 
     def clear(self):
         self.variables = None
-        self.group = None
-        self.coroutine = None
-        self.coroutine_number = None
+        self.worker = None
+        self.thread = None
+        self.thread_number = None
         self.current_sampler = None
         self.previous_sampler = None
         self.previous_result = None
@@ -50,26 +48,22 @@ class CoroutineContext:
 
 class ContextService:
 
-    # 线程本地变量
-    thread_local = ThreadLocal()
-
-    # 协程本地变量
-    coroutine_local = CoroutineLocal()
+    local = CoroutineLocal()
 
     @classmethod
-    def get_context(cls) -> CoroutineContext:
-        if not hasattr(cls.coroutine_local, 'coroutine_context'):
-            setattr(cls.coroutine_local, 'coroutine_context', CoroutineContext())
-        return cls.coroutine_local.coroutine_context
+    def get_context(cls) -> ThreadContext:
+        if not hasattr(cls.local, 'thread_context'):
+            setattr(cls.local, 'thread_context', ThreadContext())
+        return cls.local.thread_context
 
     @classmethod
     def remove_context(cls) -> None:
-        if hasattr(cls.coroutine_local, 'coroutine_context'):
-            del cls.coroutine_local.coroutine_context
+        if hasattr(cls.local, 'thread_context'):
+            del cls.local.thread_context
 
     @classmethod
     def replace_context(cls, ctx) -> None:
-        setattr(cls.coroutine_local, 'coroutine_context', ctx)
+        setattr(cls.local, 'thread_context', ctx)
 
     @classmethod
     def start_test(cls):
@@ -99,9 +93,9 @@ class ContextService:
         engine_ctx.number_of_threads_finished += 1
 
     @classmethod
-    def add_total_threads(cls, group_number):
+    def add_total_threads(cls, worker_number):
         engine_ctx = cls.get_context().engine.context
-        engine_ctx.total_threads += group_number
+        engine_ctx.total_threads += worker_number
 
     @classmethod
     def clear_total_threads(cls):

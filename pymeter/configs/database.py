@@ -12,7 +12,7 @@ from pymeter.elements.element import ConfigTestElement
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import TestCollectionListener
-from pymeter.groups.context import ContextService
+from pymeter.workers.context import ContextService
 
 
 class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, NoThreadClone):

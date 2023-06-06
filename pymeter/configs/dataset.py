@@ -8,7 +8,7 @@ from pymeter.configs.arguments import Arguments
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import TestCollectionListener
-from pymeter.groups.context import ContextService
+from pymeter.workers.context import ContextService
 
 
 class VariableDataset(Arguments, TestCollectionListener, NoConfigMerge, NoThreadClone):

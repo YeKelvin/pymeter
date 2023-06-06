@@ -10,7 +10,7 @@ from pymeter.configs.httpconfigs import SessionManager
 from pymeter.engine.interface import NoConfigMerge
 from pymeter.engine.interface import TransactionConfig
 from pymeter.engine.interface import TransactionListener
-from pymeter.groups.context import ContextService
+from pymeter.workers.context import ContextService
 
 
 class TransactionParameter(Arguments, TransactionConfig, NoConfigMerge, TransactionListener):

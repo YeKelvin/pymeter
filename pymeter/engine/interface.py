@@ -15,14 +15,14 @@ class TestCollectionListener:
         raise NotImplementedError
 
 
-class TestGroupListener:
+class TestWorkerListener:
 
-    def group_started(self) -> None:
-        """在 TestGroup 开始前调用"""
+    def worker_started(self) -> None:
+        """在 TestWorker 开始前调用"""
         raise NotImplementedError
 
-    def group_finished(self) -> None:
-        """在 TestGroup 结束后调用"""
+    def worker_finished(self) -> None:
+        """在 TestWorker 结束后调用"""
         raise NotImplementedError
 
 
@@ -44,7 +44,7 @@ class SampleListener:
 class TestIterationListener:
 
     def test_iteration_start(self, controller, iter: int) -> None:
-        """在 TestGroup 迭代开始前调用"""
+        """在 TestWorker 迭代开始前调用"""
         raise NotImplementedError
 
 

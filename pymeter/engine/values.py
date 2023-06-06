@@ -9,9 +9,9 @@ from loguru import logger
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import FunctionProperty
 from pymeter.functions import Function
-from pymeter.groups.context import ContextService
 from pymeter.tools.exceptions import InvalidVariableException
 from pymeter.utils.class_finder import ClassFinder
+from pymeter.workers.context import ContextService
 
 
 class StringReader:

@@ -44,8 +44,8 @@ class HTTPSampler(Sampler):
     # 请求内容编码
     ENCODING: Final = 'HTTPSampler__encoding'
 
-    # 允许重定向
-    ALLOW_REDIRECTS: Final = 'HTTPSampler__allow_redirects'
+    # 跟随重定向
+    FOLLOW_REDIRECTS: Final = 'HTTPSampler__follow_redirects'
 
     # 请求连接超时时间
     CONNECT_TIMEOUT: Final = 'HTTPSampler__connect_timeout'
@@ -111,8 +111,8 @@ class HTTPSampler(Sampler):
         return self.get_property_as_str(self.ENCODING) or 'utf-8'
 
     @property
-    def allow_redirects(self) -> bool:
-        return self.get_property_as_bool(self.ALLOW_REDIRECTS)
+    def follow_redirects(self) -> bool:
+        return self.get_property_as_bool(self.FOLLOW_REDIRECTS)
 
     @property
     def connect_timeout(self) -> float:
@@ -149,27 +149,27 @@ class HTTPSampler(Sampler):
                 files=self.files,
                 cookies=None,
                 timeout=self.get_timeout(),
-                follow_redirects=self.allow_redirects
+                follow_redirects=self.follow_redirects
             )
             res.encoding = self.encoding
 
             logger.debug(f'HTTP REQUEST: {self.method} {res.url}\n{res.request.content.decode(self.encoding)}')
             logger.debug(f'HTTP RESPONSE: {res.text}')
 
-            result.request_headers = self.decode_headers(dict(res.request.headers))
             result.request_data = self.get_payload(res)
+            result.request_headers = self.decode_headers(dict(res.request.headers))
+            result.response_data = res.text or res.status_code
             result.response_code = res.status_code
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
             result.response_headers = dict(res.headers)
             result.response_cookies = dict(res.cookies)
-            result.response_data = res.text or res.status_code
         except Exception:
-            result.success = False
             result.error = True
-            result.request_headers = result.request_headers or self.headers
+            result.success = False
             result.request_data = result.request_data or self.get_payload_on_error()
-            result.response_message = 'PyMeterException'
+            result.request_headers = result.request_headers or self.headers
             result.response_data = traceback.format_exc()
+            result.response_message = 'PyMeterException'
         finally:
             result.sample_end()
 

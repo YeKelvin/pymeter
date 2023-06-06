@@ -45,7 +45,7 @@ class LoopController(GenericController, IteratingController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 设置 done={val}')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 设置 done={val}')
         self.reset_break_loop()
         self._done = val
 
@@ -54,17 +54,17 @@ class LoopController(GenericController, IteratingController):
         # noinspection PyBroadException
         try:
             if self.end_of_loop():
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
+                logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
                 if not self.continue_forever:
                     self.done = True
                 self.reset_break_loop()
-                logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 下一个为空')
+                logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为空')
                 return None
 
             if self.first:
                 controller_name = f'控制器:[ {self.name} ] ' if self.name else ''
                 logger.info(
-                    f'线程:[ {self.ctx.coroutine_name} ] {controller_name}开始第 {self._loop_count + 1} 次迭代'
+                    f'线程:[ {self.ctx.thread_name} ] {controller_name}开始第 {self._loop_count + 1} 次迭代'
                 )
 
             return super().next()
@@ -109,11 +109,11 @@ class LoopController(GenericController, IteratingController):
             self._break_loop = False
 
     def start_next_loop(self):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 开始下一个循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始下一个循环')
         self.re_initialize()
 
     def break_loop(self):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 中止循环')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 中止循环')
         self._break_loop = True
         self.first = True
         self.reset_current()

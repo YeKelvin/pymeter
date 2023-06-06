@@ -10,8 +10,8 @@ from loguru import logger
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import TestGroupListener
 from pymeter.engine.interface import TestIterationListener
+from pymeter.engine.interface import TestWorkerListener
 from pymeter.tools.exceptions import HttpCookieDuplicateException
 from pymeter.tools.exceptions import HttpHeaderDuplicateException
 
@@ -224,7 +224,7 @@ class SessionManager(ConfigTestElement):
         self.session = None  # type: httpx.Client
 
 
-class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListener):
+class HTTPSessionManager(SessionManager, TestWorkerListener, TestIterationListener):
 
     COOKIES = 'HTTPSessionManager__cookies'
 
@@ -234,11 +234,11 @@ class HTTPSessionManager(SessionManager, TestGroupListener, TestIterationListene
     def clear_each_iteration(self) -> bool:
         return self.get_property_as_bool(self.CLEAR_EACH_ITERATION)
 
-    def group_started(self) -> None:
+    def worker_started(self) -> None:
         logger.debug('创建 HTTP 会话')
         self.session = httpx.Client()
 
-    def group_finished(self) -> None:
+    def worker_finished(self) -> None:
         logger.debug('关闭 HTTP 会话')
         self.session.close()
 

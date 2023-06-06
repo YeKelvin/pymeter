@@ -21,13 +21,13 @@ from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCompilerHelper
 from pymeter.engine.interface import TransactionConfig
 from pymeter.engine.interface import TransactionListener
-from pymeter.groups.package import SamplePackage
-from pymeter.groups.worker import Worker
 from pymeter.processors.post import PostProcessor
 from pymeter.processors.pre import PreProcessor
 from pymeter.samplers.sampler import Sampler
 from pymeter.timers.timer import Timer
 from pymeter.tools.logical_operator import calculate_condition
+from pymeter.workers.package import SamplePackage
+from pymeter.workers.worker import Worker
 
 
 # 调试日志开关

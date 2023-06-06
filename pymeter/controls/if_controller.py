@@ -24,20 +24,20 @@ class IfController(GenericController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] 设置 done={val}')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 设置 done={val}')
         self._done = val
 
     def next(self):
         """@override"""
         # We should only evaluate the condition if it is the first
         # time ( first "iteration" ) we are called.
-        # For subsequent calls, we are inside the IfControllerGroup,
+        # For subsequent calls, we are inside the IfController,
         # so then we just pass the control to the next item inside the if control
         cnd = self.condition.strip()
-        logger.debug(f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] if条件:[ {cnd} ]')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] if条件:[ {cnd} ]')
         result = self.evaluate(cnd) if self.first else True
         logger.debug(
-            f'线程:[ {self.ctx.coroutine_name} ] 控制器:[ {self.name} ] if结果:[ {result} ]')
+            f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] if结果:[ {result} ]')
         if result is True:
             return super().next()
 
