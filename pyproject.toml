@@ -42,6 +42,7 @@ tabulate = "0.9.0"
 gevent = "22.10.2"
 uvloop = "0.17.0"
 loguru = "0.7.0"
+arrow = "1.2.3"
 
 [tool.poetry.group.dev.dependencies]
 flask = "*"

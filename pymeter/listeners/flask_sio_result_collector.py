@@ -5,13 +5,16 @@
 import importlib
 from typing import Final
 
+import arrow
+from dateutil import tz
+
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import NoThreadClone
 from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.engine.interface import TestWorkerListener
-from pymeter.utils import time_util
+from pymeter.utils.time_util import strftime_now
 from pymeter.utils.time_util import timestamp_now
 from pymeter.utils.time_util import timestamp_to_strftime
 from pymeter.workers.context import ContextService
@@ -74,6 +77,9 @@ class FlaskSIOResultCollector(
     def emit(self, name, data):
         self.flask_sio.emit(name, data, namespace=self.namespace, to=self.sid)
 
+    def get_collection_elapsed_time(self):
+        return int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
+
     def collection_started(self) -> None:
         """@override"""
         self.collection_start_time = timestamp_now()
@@ -83,7 +89,7 @@ class FlaskSIOResultCollector(
             'result': {
                 'id': self.result_id,
                 'name': self.result_name,
-                'startTime': timestamp_to_strftime(self.collection_start_time),
+                'startTime': to_strftime(self.collection_start_time),
                 'endTime': 0,
                 'elapsedTime': 0,
                 'loading': False,
@@ -98,8 +104,8 @@ class FlaskSIOResultCollector(
         self.emit(self.result_summary_event, {
             'resultId': self.result_id,
             'result': {
-                'endTime': timestamp_to_strftime(self.collection_end_time),
-                'elapsedTime': int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000),
+                'endTime': to_strftime(self.collection_end_time),
+                'elapsedTime': self.get_collection_elapsed_time(),
                 'running': False
             }
         })
@@ -114,7 +120,7 @@ class FlaskSIOResultCollector(
             'worker': {
                 'id': self.worker_id,
                 'name': self.worker.name,
-                'startTime': time_util.strftime_now(),
+                'startTime': strftime_now(),
                 'endTime': 0,
                 'elapsedTime': 0,
                 'running': True,
@@ -134,7 +140,7 @@ class FlaskSIOResultCollector(
             'resultId': self.result_id,
             'workerId': self.worker_id,
             'worker': {
-                'endTime': time_util.strftime_now(),
+                'endTime': strftime_now(),
                 'elapsedTime': worker_elapsed_time,
                 'running': False,
                 'success': worker_success
@@ -180,18 +186,20 @@ def sample_result_to_dict(result):
         'responseSize': result.response_size,
         'success': result.success,
         'retrying': result.retrying,
-        'startTime': time_util.timestamp_to_strftime(result.start_time),
-        'endTime': time_util.timestamp_to_strftime(result.end_time),
+        'startTime': timestamp_to_strftime(result.start_time),
+        'endTime': timestamp_to_strftime(result.end_time),
         'elapsedTime': result.elapsed_time,
-        'failedAssertion': failed_assertion(result.assertions),
+        'failedAssertion': next(
+        (
+            {'message': assertion.message}
+            for assertion in result.assertions
+            if assertion.failure or assertion.error
+        ),
+        None,
+    ),
         'children': [sample_result_to_dict(sub) for sub in result.sub_results]
     }
 
 
-def failed_assertion(assertions):
-    for assertion in assertions:
-        if assertion.failure or assertion.error:
-            return {
-                'message': assertion.message
-            }
-    return None
+def to_strftime(timestamp):
+    return arrow.Arrow.fromtimestamp(timestamp, tzinfo=tz.gettz('Asia/Shanghai')).format('HH:mm:ss.SSS')
