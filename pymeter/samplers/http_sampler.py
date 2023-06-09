@@ -140,7 +140,7 @@ class HTTPSampler(Sampler):
             else:
                 impl = httpx
 
-            res = impl.request(
+            res: Response = impl.request(
                 method=self.method,
                 url=self.url,
                 headers=self.encoded_headers,
@@ -163,6 +163,8 @@ class HTTPSampler(Sampler):
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
             result.response_headers = dict(res.headers)
             result.response_cookies = dict(res.cookies)
+            # http响应码400以上为错误
+            result.success = res.status_code < 400
         except Exception:
             result.error = True
             result.success = False
