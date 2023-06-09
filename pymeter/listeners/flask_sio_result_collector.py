@@ -16,7 +16,6 @@ from pymeter.engine.interface import TestIterationListener
 from pymeter.engine.interface import TestWorkerListener
 from pymeter.utils.time_util import strftime_now
 from pymeter.utils.time_util import timestamp_now
-from pymeter.utils.time_util import timestamp_to_strftime
 from pymeter.workers.context import ContextService
 
 
@@ -186,8 +185,8 @@ def sample_result_to_dict(result):
         'responseSize': result.response_size,
         'success': result.success,
         'retrying': result.retrying,
-        'startTime': timestamp_to_strftime(result.start_time),
-        'endTime': timestamp_to_strftime(result.end_time),
+        'startTime': to_strftime(result.start_time),
+        'endTime': to_strftime(result.end_time),
         'elapsedTime': result.elapsed_time,
         'failedAssertion': next(
         (
