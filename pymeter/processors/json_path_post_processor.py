@@ -14,6 +14,9 @@ from pymeter.workers.context import ContextService
 
 class JsonPathPostProcessor(PostProcessor):
 
+    # 变量作用域
+    VARIABLE_SCOPE ='JsonPathPostProcessor__variable_scope'
+
     # 变量名称
     VARIABLE_NAME: Final = 'JsonPathPostProcessor__variable_name'
 
@@ -25,6 +28,15 @@ class JsonPathPostProcessor(PostProcessor):
 
     # 默认值
     DEFAULT_VALUE: Final = 'JsonPathPostProcessor__default_value'
+
+    @property
+    def variable_scope(self):
+        """变量作用域
+
+        LOCAL:  局部变量
+        GLOBAL: 全局变量
+        """
+        return self.get_property_as_str(self.VARIABLE_SCOPE, 'LOCAL')
 
     @property
     def variable_name(self):
@@ -61,24 +73,21 @@ class JsonPathPostProcessor(PostProcessor):
             if response_data := ctx.previous_result.response_data:
                 # 将提取值放入变量
                 actualvalue = self.extract(response_data, jsonpath)
-                ctx.variables.put(varname, actualvalue)
                 if actualvalue is not None:
                     logger.info(f'提取成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
                 else:
-                    logger.info(
-                        f'提取失败，请检查jsonpath是否正确，'
-                        f'jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]'
-                    )
+                    logger.info(f'提取失败，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
+                self.put(varname, actualvalue)
             # 设置默认值
             elif self.default_value:
-                ctx.variables.put(varname, self.default_value)
                 logger.info(f'响应结果为空，赋予默认值，变量名[ {varname} ]，变量值:[ {self.default_value} ]')
+                self.put(varname, self.default_value)
         except Exception:
             logger.exception('Exception Occurred')
             # 设置默认值
             if self.default_value:
-                ctx.variables.put(jsonpath, self.default_value)
                 logger.info(f'提取异常，赋予默认值，变量名[ {jsonpath} ]，变量值:[ {self.default_value} ]')
+                self.put(jsonpath, self.default_value)
 
     def extract(self, json, jsonpath):
         """提取jsonpath"""
@@ -92,3 +101,11 @@ class JsonPathPostProcessor(PostProcessor):
             return 'true' if value else 'false'
 
         return 'null' if value is None else value
+
+    def put(self, ctx, key, value):
+        if self.variable_scope == 'LOCAL':
+            ctx.variables.put(key, value)
+        elif self.variable_scope == 'GLOBAL':
+            ctx.properties.put(key, value)
+        else:
+            raise ValueError('作用域错误')
