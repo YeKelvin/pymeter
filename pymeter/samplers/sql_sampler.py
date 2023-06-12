@@ -122,11 +122,11 @@ class SQLSampler(Sampler):
     def get_statement(self):
         """获取sql表达式，如果是select语句则添加限制"""
         stmt = self.statement
-        if self.SELECT_PATTERN.search(stmt):
-            stmt = self.add_limit(stmt)
-        else:
-            stmt = stmt.strip()
-        return stmt
+        return (
+            self.add_limit(stmt)
+            if self.SELECT_PATTERN.search(stmt)
+            else stmt.strip()
+        )
 
     def add_limit(self, stmt):
         """添加查询结果数限制，防止大数据结果集"""
@@ -168,7 +168,7 @@ class SQLSampler(Sampler):
                 sql.pop()
                 pre = ch
                 continue
-            if ch == '/' and pre == '*' and multi_line_comment and not single_quotes and not double_quotes:  # match '*/'
+            if ch == '/' and pre == '*' and multi_line_comment and not single_quotes and not double_quotes: # match '*/'
                 multi_line_comment = False
                 pre = ch
                 continue

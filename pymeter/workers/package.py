@@ -2,7 +2,7 @@
 # @File    : sample_package
 # @Time    : 2020/2/27 15:41
 # @Author  : Kelvin.Ye
-from typing import Sequence
+from typing import List
 
 from loguru import logger
 
@@ -20,25 +20,25 @@ class SamplePackage:
 
     def __init__(
         self,
-        configs: Sequence[ConfigElement] = None,
-        listeners: Sequence[SampleListener] = None,
-        trans_listeners: Sequence[TransactionListener] = None,
-        timers: Sequence[Timer] = None,
-        assertions: Sequence[Assertion] = None,
-        post_processors: Sequence[PostProcessor] = None,
-        pre_processors: Sequence[PreProcessor] = None,
-        controllers: Sequence[Controller] = None
+        configs: List[ConfigElement],
+        controllers: List[Controller],
+        listeners: List[SampleListener],
+        trans_listeners: List[TransactionListener],
+        pre_processors: List[PreProcessor],
+        post_processors: List[PostProcessor],
+        assertions: List[Assertion],
+        timers: List[Timer]
     ):
-        self.configs = configs if configs is not None else []
-        self.listeners = listeners if listeners is not None else []
-        self.trans_listeners = trans_listeners if trans_listeners is not None else []
-        self.timers = timers if timers is not None else []
-        self.assertions = assertions if assertions is not None else []
-        self.post_processors = post_processors if post_processors is not None else []
-        self.pre_processors = pre_processors if pre_processors is not None else []
-        self.controllers = controllers if controllers is not None else []
-
         self.sampler = None
+        self.configs = configs
+        self.controllers = controllers
+        self.listeners = listeners
+        self.trans_listeners = trans_listeners
+        self.pre_processors = pre_processors
+        self.post_processors = post_processors
+        self.assertions = assertions
+        self.timers = timers
+
 
     def done(self):
         self.recover_running_version()

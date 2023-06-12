@@ -276,14 +276,14 @@ class TestCompiler(HashTreeTraverser):
         filter_rule = strategy.get('filter')
         reverse_order = strategy.get('reverse', [])
 
-        configs = []
-        controllers = []
-        listeners = []
-        trans_listeners = []
-        timers = []
+        configs = deque()
+        controllers = deque()
+        listeners = deque()
+        trans_listeners = deque()
         pres = deque()
         posts = deque()
         assertions = deque()
+        timers = deque()
 
         if DEBUG:
             logger.debug(f'取样器:[ {sampler} ] 开始配置取样包')
@@ -291,9 +291,9 @@ class TestCompiler(HashTreeTraverser):
             maybe_controller = self.stack[i]
             if isinstance(maybe_controller, Controller):
                 controllers.append(maybe_controller)
-            inner_pres = []
-            inner_posts = []
-            inner_assertions = []
+            temp_pres = deque()
+            temp_posts = deque()
+            temp_assertions = deque()
             treepath = self.hashtree.list_by_treepath([self.stack[x] for x in range(i + 1)])
             if DEBUG:
                 logger.debug(f'当前索引:[ {i} ] 树路径:[ {pretty_output_stack(treepath)} ]')
@@ -302,18 +302,18 @@ class TestCompiler(HashTreeTraverser):
                     configs.append(item)
                 if isinstance(item, SampleListener):
                     listeners.append(item)
+                if isinstance(item, PreProcessor) and not self.is_filtered_component(item, filter_rule):
+                    temp_pres.append(item)
+                if isinstance(item, PostProcessor) and not self.is_filtered_component(item, filter_rule):
+                    temp_posts.append(item)
+                if isinstance(item, Assertion) and not self.is_filtered_component(item, filter_rule):
+                    temp_assertions.append(item)
                 if isinstance(item, Timer):
                     timers.append(item)
-                if isinstance(item, Assertion) and not self.is_filtered_component(item, filter_rule):
-                    inner_assertions.append(item)
-                if isinstance(item, PostProcessor) and not self.is_filtered_component(item, filter_rule):
-                    inner_posts.append(item)
-                if isinstance(item, PreProcessor) and not self.is_filtered_component(item, filter_rule):
-                    inner_pres.append(item)
 
-            assertions.extendleft(inner_assertions[::-1])
-            posts.extendleft(inner_posts[::-1])
-            pres.extendleft(inner_pres[::-1])
+            pres.extendleft(list(temp_pres)[::-1])
+            posts.extendleft(list(temp_posts)[::-1])
+            assertions.extendleft(list(temp_assertions)[::-1])
 
         # 根据配置排序
         sorted_pres = sorted(pres, key=lambda x:x.level, reverse=('PRE' in reverse_order))
@@ -324,30 +324,30 @@ class TestCompiler(HashTreeTraverser):
             logger.debug(f'取样器:[ {sampler} ] 取样包配置完成')
 
         package = SamplePackage(
-            configs,
-            listeners,
-            trans_listeners,
-            timers,
-            sorted_assertions,
-            sorted_posts,
-            sorted_pres,
-            controllers
+            list(configs),
+            list(controllers),
+            list(listeners),
+            list(trans_listeners),
+            list(sorted_pres),
+            list(sorted_posts),
+            list(sorted_assertions),
+            list(timers)
         )
         package.sampler = sampler
         package.set_running_version(True)
         self.sample_packages[sampler] = package
 
     def save_trans_package(self, trans_controller: TransactionController):  # sourcery skip: low-code-quality
-        configs = []
-        controllers = []
-        listeners = []
-        trans_listeners = []
-        timers = []
-        pres = []
-        posts = []
-        assertions = []
-        trans_configs = []
-        trans_samplers = []
+        configs = deque()
+        controllers = deque()
+        listeners = deque()
+        trans_listeners = deque()
+        pres = deque()
+        posts = deque()
+        assertions = deque()
+        timers = deque()
+        trans_configs = deque()
+        trans_samplers = deque()
 
         if DEBUG:
             logger.debug(f'事务:[ {trans_controller} ] 开始配置取样包')
@@ -377,9 +377,21 @@ class TestCompiler(HashTreeTraverser):
 
         for sampler in trans_samplers:
             sampler_package = self.sample_packages.get(sampler)
-            sampler_package.configs.extendleft(trans_configs)
+            temp_config = deque()
+            temp_config.extend(sampler_package.configs)
+            temp_config.extendleft(trans_configs)
+            sampler_package.configs = temp_config
 
-        package = SamplePackage(configs, listeners, trans_listeners, timers, assertions, posts, pres, controllers)
+        package = SamplePackage(
+            list(configs),
+            list(controllers),
+            list(listeners),
+            list(trans_listeners),
+            list(pres),
+            list(posts),
+            list(assertions),
+            list(timers)
+        )
         package.sampler = TransactionSampler(trans_controller, trans_controller.name)
         package.set_running_version(True)
         self.trans_packages[trans_controller] = package

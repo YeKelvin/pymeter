@@ -337,14 +337,13 @@ class Coroutine(Greenlet):
     def _run(self, *args, **kwargs):
         """执行线程的入口"""
         context = ContextService.get_context()
+        self.init_run(context)
         # noinspection PyBroadException
         try:
-            self.init_run(context)
-
             while self.running:
                 # 获取下一个Sampler
                 sampler = self.worker_main_controller.next()
-
+                # 循环处理Sampler
                 while self.running and sampler:
                     logger.debug(f'线程:[ {self.thread_name} ] 当前取样器:[ {sampler} ]')
                     # 处理Sampler
@@ -356,13 +355,11 @@ class Coroutine(Greenlet):
                         self.next_continue = True
                         sampler = None
                     else:
-                        sampler = self.worker_main_controller.next()  # 获取下一个 Sampler
-
+                        sampler = self.worker_main_controller.next()  # 获取下一个 Sample
                 # 如果主控制器标记已完成，则结束迭代
                 if self.worker_main_controller.done:
                     self.running = False
                     logger.info(f'线程:[ {self.thread_name} ] 已停止运行，结束迭代')
-
         except StopTestWorkerException:
             logger.debug(f'线程:[ {self.thread_name} ] 捕获:[ StopTestWorkerException ] 停止主线程')
             self.stop_worker()
