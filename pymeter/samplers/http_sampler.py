@@ -125,6 +125,7 @@ class HTTPSampler(Sampler):
     def __init__(self, name: str = None):
         super().__init__(name=name)
         self.session_manager = None
+        self.content_type = None
 
     def sample(self) -> SampleResult:  # sourcery skip: extract-method
         result = SampleResult()
@@ -145,7 +146,7 @@ class HTTPSampler(Sampler):
                 url=self.url,
                 headers=self.encoded_headers,
                 params=self.query_params,
-                data=self.get_body_data(),
+                data=self.get_body(),
                 files=self.files,
                 cookies=None,
                 timeout=self.get_timeout(),
@@ -177,8 +178,8 @@ class HTTPSampler(Sampler):
 
         return result
 
-    def get_body_data(self):
-        if self.is_x_www_form_urlencoded():
+    def get_body(self):
+        if self.is_www_form_urlencoded():
             return self.urlencode(self.form_params)
         elif data := self.data:
             return data.encode(encoding=self.encoding)
@@ -218,7 +219,7 @@ class HTTPSampler(Sampler):
                 query = f'{query}{name}={value}&'
             url = f'{url}?{query[:-1]}'
 
-        if self.is_x_www_form_urlencoded() and (form_params := self.form_params):
+        if self.is_www_form_urlencoded() and (form_params := self.form_params):
             payload = f'{url}\n\n{self.method} DATA:\n'
             for name, value in form_params.items():
                 payload = f'{payload}{name}={value}&'
@@ -244,13 +245,14 @@ class HTTPSampler(Sampler):
     def set_session_manager(self, manager: SessionManager):
         self.session_manager = manager
 
-    def is_x_www_form_urlencoded(self):
-        headers = self.headers
-        return (
-            headers  # noqa
-            and 'content-type' in headers  # noqa
-            and headers['content-type'].lower() == 'application/x-www-form-urlencoded'  # noqa
-        )
+    def get_content_type(self):
+        if not self.content_type:
+            if ct := self.headers.get('content-type'):
+                self.content_type = ct.lower()
+        return self.content_type
+
+    def is_www_form_urlencoded(self):
+        return 'x-www-form-urlencoded' in self.get_content_type()
 
     def urlencode(self, params: dict):
         payload = []

@@ -7,8 +7,7 @@
 class ClassFinder:
     @staticmethod
     def find_subclasses(clazz, inner=False):
-        """获取 clazz的所有子类
-        """
+        """获取 clazz的所有子类"""
         subclasses = {}
         for subclass in clazz.__subclasses__():
             if subclass.__name__ not in subclasses:

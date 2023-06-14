@@ -7,7 +7,7 @@ from typing import Final
 from loguru import logger
 
 from pymeter.functions.function import Function
-from pymeter.utils.google_common import GoogleAuthenticate
+from pymeter.utils.google_util import GoogleAuthenticate
 
 
 class GoogleAuth(Function):

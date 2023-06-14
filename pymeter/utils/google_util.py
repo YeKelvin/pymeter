@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : google_common.py
+# @File    : google_util.py
 # @Time    : 2021-08-17 19:03:54
 # @Author  : Kelvin.Ye
 import base64
@@ -19,8 +19,7 @@ class GoogleAuthenticate:
         h = hmac.new(key, msg, hashlib.sha1).digest()
         o = ord(chr(h[19])) & 15
         h = (struct.unpack('>I', h[o:o + 4])[0] & 0x7fffffff) % 1000000
-        code = '%06d' % h
-        return code
+        return '%06d' % h
 
 
 if __name__ == '__main__':
