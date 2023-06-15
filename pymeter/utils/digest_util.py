@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : encryption_util.py
+# @File    : digest_util.py
 # @Time    : 2023-06-14 15:44:41
 # @Author  : Kelvin.Ye
 import hashlib
