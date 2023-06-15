@@ -178,7 +178,7 @@ class HTTPSampler(Sampler):
 
         return result
 
-    def get_body(self):
+    def get_body(self) -> bytes:
         if self.is_www_form_urlencoded():
             return self.urlencode(self.form_params)
         elif data := self.data:
@@ -252,7 +252,8 @@ class HTTPSampler(Sampler):
         return self.content_type
 
     def is_www_form_urlencoded(self):
-        return 'x-www-form-urlencoded' in self.get_content_type()
+        content_type = self.get_content_type()
+        return 'x-www-form-urlencoded' in content_type if content_type else False
 
     def urlencode(self, params: dict):
         payload = []
