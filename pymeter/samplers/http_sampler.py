@@ -2,7 +2,6 @@
 # @File    : http_sampler.py
 # @Time    : 2020/2/13 16:14
 # @Author  : Kelvin.Ye
-import traceback
 from typing import Final
 from typing import Optional
 
@@ -157,21 +156,23 @@ class HTTPSampler(Sampler):
             logger.debug(f'HTTP REQUEST: {self.method} {res.url}\n{res.request.content.decode(self.encoding)}')
             logger.debug(f'HTTP RESPONSE: {res.text}')
 
+            # http响应码400以上为错误
+            result.success = res.status_code < 400
             result.request_data = self.get_payload(res)
             result.request_headers = self.decode_headers(dict(res.request.headers))
-            result.response_data = res.text or res.status_code
+            result.response_data = res.text or str(res.status_code)
             result.response_code = res.status_code
             result.response_message = HTTP_STATUS_CODE.get(res.status_code)
             result.response_headers = dict(res.headers)
             result.response_cookies = dict(res.cookies)
-            # http响应码400以上为错误
-            result.success = res.status_code < 400
-        except Exception:
+        except Exception as err:
+            logger.exception('Exception Occurred')
             result.error = True
             result.success = False
             result.request_data = result.request_data or self.get_payload_on_error()
             result.request_headers = result.request_headers or self.headers
-            result.response_data = traceback.format_exc()
+            result.response_data = str(err)
+            result.response_code = 500
             result.response_message = 'PyMeterException'
         finally:
             result.sample_end()
