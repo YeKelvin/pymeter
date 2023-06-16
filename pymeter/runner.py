@@ -47,7 +47,7 @@ class Runner:
             socket_logger_id = logger.add(
                 SocketIOHandler(extra.get('sio'), extra.get('sid')),
                 level='INFO',
-                format='[{time:%Y-%m-%d %H:%M:%S.%f}] [{level}] {message}'
+                format='[{time:%H:%M:%S.%f}] [{level}] {message}'
             )
 
         # log注入traceid和sid
