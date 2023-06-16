@@ -189,13 +189,13 @@ def sample_result_to_dict(result):
         'endTime': to_strftime(result.end_time),
         'elapsedTime': result.elapsed_time,
         'failedAssertion': next(
-        (
-            {'message': assertion.message}
-            for assertion in result.assertions
-            if assertion.failure or assertion.error
+            (
+                {'message': assertion.message}
+                for assertion in result.assertions
+                if assertion.failure or assertion.error
+            ),
+            None,
         ),
-        None,
-    ),
         'children': [sample_result_to_dict(sub) for sub in result.sub_results]
     }
 

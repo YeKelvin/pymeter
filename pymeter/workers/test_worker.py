@@ -819,7 +819,7 @@ class Coroutine(Greenlet):
             logger.exception('Exception Occurred')
             assertion_result = AssertionResult(sample_result.sample_name)
             assertion_result.error = True
-            assertion_result.message = e
+            assertion_result.message = str(e)
         finally:
             sample_result.success = (
                 sample_result.success and not assertion_result.error and not assertion_result.failure
