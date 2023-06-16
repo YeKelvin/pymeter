@@ -5,6 +5,7 @@
 from typing import Final
 
 from loguru import logger
+from orjson import JSONDecodeError
 
 from pymeter.processors.post import PostProcessor
 from pymeter.utils.json_util import json_path
@@ -91,7 +92,10 @@ class JsonPathPostProcessor(PostProcessor):
 
     def extract(self, json, jsonpath):
         """提取jsonpath"""
-        value = json_path(json, jsonpath, self.list_random)
+        try:
+            value = json_path(json, jsonpath, self.list_random)
+        except JSONDecodeError:
+            value = ''
 
         if isinstance(value, (dict, list)):
             return to_json(value)
@@ -100,7 +104,7 @@ class JsonPathPostProcessor(PostProcessor):
         if isinstance(value, bool):
             return 'true' if value else 'false'
 
-        return 'null' if value is None else value
+        return value if value is not None else 'null'
 
     def put(self, ctx, key, value):
         if self.variable_scope == 'LOCAL':

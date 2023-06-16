@@ -5,6 +5,8 @@
 from decimal import Decimal
 from typing import Final
 
+from orjson import JSONDecodeError
+
 from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.elements.element import TestElement
@@ -64,10 +66,10 @@ class JsonPathAssertion(Assertion, TestElement):
 
         # JsonPath表达式
         jsonpath = self.jsonpath
-        # 期望值
-        expected_value = self.expected_value
         # 判断类型
         operator = self.operator
+        # 期望值
+        expected_value = self.expected_value
 
         if not jsonpath:
             return self.fail(result, 'JsonPath表达式为空，请修改后重试')
@@ -83,7 +85,7 @@ class JsonPathAssertion(Assertion, TestElement):
         exists = True
         try:
             actual_value = json_path(response_data, jsonpath, throw=True)
-        except JsonpathExtractException:
+        except (JsonpathExtractException, JSONDecodeError):
             exists = False
 
         # 等于
