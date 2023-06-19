@@ -18,7 +18,7 @@ class Time(Function):
         self.format = None
 
     def execute(self):
-        logger.debug(f'start execute function:[ {self.REF_KEY} ]')
+        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
 
         timestamp = time.time()
 
@@ -34,9 +34,7 @@ class Time(Function):
         return result
 
     def set_parameters(self, params: list):
-        logger.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
-
-        # 校验函数参数个数
+        # 校验函数实参数量
         self.check_parameter_min(params, 0)
         self.check_parameter_max(params, 1)
         # 提取参数

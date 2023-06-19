@@ -58,3 +58,7 @@ class HttpHeaderDuplicateException(Exception):
 
 class HttpCookieDuplicateException(Exception):
     ...
+
+
+class FunctionExecutionError(Exception):
+    ...

@@ -618,9 +618,9 @@ class Coroutine(Greenlet):
         result = None
         # noinspection PyBroadException
         try:
-            logger.info(f'线程:[ {self.thread_name} ] 取样器:[ {sampler.name} ] 开始取样')
+            logger.info(f'线程:[ {self.thread_name} ] 取样器:[ {sampler.name} ] 开始请求')
             result = sampler.sample()
-            logger.info(f'线程:[ {self.thread_name} ] 取样器:[ {sampler.name} ] 取样完成')
+            logger.info(f'线程:[ {self.thread_name} ] 取样器:[ {sampler.name} ] 请求结束')
         except Exception as e:
             logger.exception('Exception Occurred')
             if not result:

@@ -21,7 +21,7 @@ class RSA(Function):
         self.public_key = None
 
     def execute(self):
-        logger.debug(f'start execute function:[ {self.REF_KEY} ]')
+        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
         public_key = self.public_key.execute().strip()
@@ -38,9 +38,7 @@ class RSA(Function):
         return result
 
     def set_parameters(self, params: list):
-        logger.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
-
-        # 校验函数参数个数
+        # 校验函数实参数量
         self.check_parameter_count(params, 2)
         # 提取参数
         self.plaintext = params[0]

@@ -18,15 +18,13 @@ class Eval(Function):
         self.parameter = None
 
     def execute(self):
-        logger.debug(f'start execute function:[ {self.REF_KEY} ]')
+        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
         parameter = self.parameter.execute().strip()
         # TODO: 待优化，解决循环引用
         return values.CompoundVariable(parameter).execute().strip()
 
     def set_parameters(self, params: list):
-        logger.debug(f'{self.REF_KEY} start to set parameters')
-
-        # 校验函数参数个数
+        # 校验函数实参数量
         self.check_parameter_count(params, 1)
         # 提取参数
         self.parameter = params[0]

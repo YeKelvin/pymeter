@@ -18,7 +18,7 @@ class GatewaySign(Function):
     REF_KEY: Final = '__GatewaySign'
 
     def execute(self):
-        logger.debug(f'start execute function:[ {self.REF_KEY} ]')
+        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
 
         # 获取当前 HttpSampler 对象
         http_sampler = self.current_sampler
@@ -27,13 +27,7 @@ class GatewaySign(Function):
             return 'error'
 
         data = http_sampler.data
-        if data:
-            # 反序列化 body
-            data = from_json(http_sampler.data)
-        else:
-            # body 为空时初始化一个空 dict
-            data = {}
-
+        data = from_json(http_sampler.data) if data else {}
         # 从 headers 中提取 requestTm 和 deviceId
         header_manager = http_sampler.header_manager
         request_tm_header = header_manager.get_header('requestTm')
@@ -62,9 +56,7 @@ class GatewaySign(Function):
         return self.sign(data)
 
     def set_parameters(self, params: list):
-        logger.debug(f'start to set function parameters:[ {self.REF_KEY} ]')
-
-        # 校验函数参数个数
+        # 校验函数实参数量
         self.check_parameter_count(params, 0)
 
     def sign(self, data: dict):

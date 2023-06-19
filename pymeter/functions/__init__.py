@@ -18,6 +18,17 @@ from .google_auth import GoogleAuth  # noqa
 # 功能相关
 from .eval import Eval  # noqa
 
+# 伪造数据
+from .fake_data import FakeData  # noqa
+from .fake_address import FakeAddress  # noqa
+from .fake_bban import FakeBBan  # noqa
+from .fake_email import FakeEmail  # noqa
+from .fake_name import FakeName  # noqa
+from .fake_paragraph import FakeParagraph  # noqa
+from .fake_phone_number import FakePhoneNumber  # noqa
+from .fake_sentence import FakeSentence  # noqa
+from .fake_text import FakeText  # noqa
+
 # 随机数相关
 from .random_choice import RandomChoice  # noqa
 from .random_int import RandomInt  # noqa
