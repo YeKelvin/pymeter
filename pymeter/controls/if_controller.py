@@ -24,7 +24,6 @@ class IfController(GenericController):
 
     @done.setter
     def done(self, val: bool):
-        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 设置 done={val}')
         self._done = val
 
     def next(self):

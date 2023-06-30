@@ -7,17 +7,17 @@
         "TestCollection__serialize_workers": "true",
         "TestCollection__delay": "0",
         "TestCollection__running_strategy": {
-            "reverse": ["PRE"]
+            "reverse": ["PREV"]
         }
     },
     "children": [
         {
             "name": "前置-空间-python-111",
             "remark": null,
-            "class": "PythonPreProcessor",
+            "class": "PythonPrevProcessor",
             "enabled": true,
             "property": {
-                "PythonPreProcessor__script": "log.info('空间级前置处理器-111')"
+                "PythonPrevProcessor__script": "log.info('空间级前置处理器-111')"
             },
             "children": [],
             "level": 0
@@ -25,10 +25,10 @@
         {
             "name": "前置-集合-python-222",
             "remark": null,
-            "class": "PythonPreProcessor",
+            "class": "PythonPrevProcessor",
             "enabled": true,
             "property": {
-                "PythonPreProcessor__script": "log.info('集合级前置处理器-222')"
+                "PythonPrevProcessor__script": "log.info('集合级前置处理器-222')"
             },
             "children": []
         },
@@ -96,20 +96,20 @@
                 {
                     "name": "前置-线程-python-111",
                     "remark": null,
-                    "class": "PythonPreProcessor",
+                    "class": "PythonPrevProcessor",
                     "enabled": true,
                     "property": {
-                        "PythonPreProcessor__script": "log.info('线程级前置处理器-111')"
+                        "PythonPrevProcessor__script": "log.info('线程级前置处理器-111')"
                     },
                     "children": []
                 },
                 {
                     "name": "前置-线程-python-222",
                     "remark": null,
-                    "class": "PythonPreProcessor",
+                    "class": "PythonPrevProcessor",
                     "enabled": true,
                     "property": {
-                        "PythonPreProcessor__script": "log.info('线程级前置处理器-222')"
+                        "PythonPrevProcessor__script": "log.info('线程级前置处理器-222')"
                     },
                     "children": []
                 },
@@ -187,7 +187,7 @@
                             "filter": {
                                 "logic": "AND",
                                 "rules": [
-                                    {"field": "TYPE", "operator": "IN", "value": ["PRE", "POST", "ASSERT"]}
+                                    {"field": "TYPE", "operator": "IN", "value": ["PREV", "POST", "ASSERT"]}
                                 ]
                             },
                             "reverse": ["ASSERT"]
@@ -197,10 +197,10 @@
                         {
                             "name": "前置-取样-python-1",
                             "remark": null,
-                            "class": "PythonPreProcessor",
+                            "class": "PythonPrevProcessor",
                             "enabled": true,
                             "property": {
-                                "PythonPreProcessor__script": "log.info('前置-取样-python-1')"
+                                "PythonPrevProcessor__script": "log.info('前置-取样-python-1')"
                             },
                             "children": []
                         },

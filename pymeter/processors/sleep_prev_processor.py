@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : sleep_pre_processor.py
+# @File    : sleep_prev_processor.py
 # @Time    : 2022/10/17 17:06
 # @Author  : Kelvin.Ye
 from typing import Final
@@ -7,13 +7,13 @@ from typing import Final
 import gevent
 from loguru import logger
 
-from pymeter.processors.pre import PreProcessor
+from pymeter.processors.prev import PrevProcessor
 
 
-class SleepPreProcessor(PreProcessor):
+class SleepPrevProcessor(PrevProcessor):
 
     # 延迟时间，单位ms
-    DELAY: Final = 'SleepPreProcessor__delay'
+    DELAY: Final = 'SleepPrevProcessor__delay'
 
     @property
     def delay(self):

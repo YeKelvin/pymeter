@@ -320,7 +320,7 @@ class FunctionProperty(PyMeterProperty):
             self.test_iteration = -1
 
         if iteration > self.test_iteration or self.cache_value is None:
-            logger.debug(f'属性:[ {self.name} ] 执行函数中')
+            logger.debug(f'元素属性:[ {self.name} ] 执行函数')
             self.test_iteration = iteration
             self.cache_value = self.function.execute()
 

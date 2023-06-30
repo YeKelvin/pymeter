@@ -8,7 +8,7 @@ from pymeter.elements.element import TestElement
 class Sampler(TestElement):
 
     # 运行策略
-    RUNNING_STRATEGY = 'Sampler__running_strategy'
+    RUNNING_STRATEGY = None
 
     @property
     def running_strategy(self):

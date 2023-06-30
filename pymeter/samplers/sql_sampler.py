@@ -145,7 +145,7 @@ class SQLSampler(Sampler):
     def remove_comments(stmt) -> str:
         """删除表达式中的注释部分"""
         sql = deque()
-        pre = ''
+        prev = ''
         single_quotes = False
         double_quotes = False
         single_line_comment = False
@@ -153,32 +153,32 @@ class SQLSampler(Sampler):
         for ch in stmt:
             if ch == '#' and not single_quotes and not double_quotes:  # match '#'
                 single_line_comment = True
-                pre = ch
+                prev = ch
                 continue
-            if ch == ' ' and pre == '-' and sql[-1] == '-' and not single_quotes and not double_quotes:  # match '-- '
+            if ch == ' ' and prev == '-' and sql[-1] == '-' and not single_quotes and not double_quotes:  # match '-- '
                 single_line_comment = True
                 sql.pop()
                 sql.pop()
-                pre = ch
+                prev = ch
                 continue
             if ch == '\n' and single_line_comment and not single_quotes and not double_quotes:
                 single_line_comment = False
-            if ch == '*' and pre == '/' and not single_quotes and not double_quotes:  # match '/*'
+            if ch == '*' and prev == '/' and not single_quotes and not double_quotes:  # match '/*'
                 multi_line_comment = True
                 sql.pop()
-                pre = ch
+                prev = ch
                 continue
-            if ch == '/' and pre == '*' and multi_line_comment and not single_quotes and not double_quotes: # match '*/'
+            if ch == '/' and prev == '*' and multi_line_comment and not single_quotes and not double_quotes: # match '*/'
                 multi_line_comment = False
-                pre = ch
+                prev = ch
                 continue
             if single_line_comment or multi_line_comment:
-                pre = ch
+                prev = ch
                 continue
-            if ch == "'" and pre != '\\':
+            if ch == "'" and prev != '\\':
                 single_quotes = not single_quotes
-            if ch == '"' and pre != '\\':
+            if ch == '"' and prev != '\\':
                 double_quotes = not double_quotes
             sql.append(ch)
-            pre = ch
+            prev = ch
         return ''.join(sql).strip()

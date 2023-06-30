@@ -22,7 +22,7 @@ from pymeter.engine.interface import TestCompilerHelper
 from pymeter.engine.interface import TransactionConfig
 from pymeter.engine.interface import TransactionListener
 from pymeter.processors.post import PostProcessor
-from pymeter.processors.pre import PreProcessor
+from pymeter.processors.prev import PrevProcessor
 from pymeter.samplers.sampler import Sampler
 from pymeter.timers.timer import Timer
 from pymeter.tools.logical_operator import calculate_condition
@@ -280,7 +280,7 @@ class TestCompiler(HashTreeTraverser):
         controllers = deque()
         listeners = deque()
         trans_listeners = deque()
-        pres = deque()
+        prevs = deque()
         posts = deque()
         assertions = deque()
         timers = deque()
@@ -291,7 +291,7 @@ class TestCompiler(HashTreeTraverser):
             maybe_controller = self.stack[i]
             if isinstance(maybe_controller, Controller):
                 controllers.append(maybe_controller)
-            temp_pres = deque()
+            temp_prevs = deque()
             temp_posts = deque()
             temp_assertions = deque()
             treepath = self.hashtree.list_by_treepath([self.stack[x] for x in range(i + 1)])
@@ -302,8 +302,8 @@ class TestCompiler(HashTreeTraverser):
                     configs.append(item)
                 if isinstance(item, SampleListener):
                     listeners.append(item)
-                if isinstance(item, PreProcessor) and not self.is_filtered_component(item, filter_rule):
-                    temp_pres.append(item)
+                if isinstance(item, PrevProcessor) and not self.is_filtered_component(item, filter_rule):
+                    temp_prevs.append(item)
                 if isinstance(item, PostProcessor) and not self.is_filtered_component(item, filter_rule):
                     temp_posts.append(item)
                 if isinstance(item, Assertion) and not self.is_filtered_component(item, filter_rule):
@@ -311,12 +311,12 @@ class TestCompiler(HashTreeTraverser):
                 if isinstance(item, Timer):
                     timers.append(item)
 
-            pres.extendleft(list(temp_pres)[::-1])
+            prevs.extendleft(list(temp_prevs)[::-1])
             posts.extendleft(list(temp_posts)[::-1])
             assertions.extendleft(list(temp_assertions)[::-1])
 
         # 根据配置排序
-        sorted_pres = sorted(pres, key=lambda x:x.level, reverse=('PRE' in reverse_order))
+        sorted_prevs = sorted(prevs, key=lambda x:x.level, reverse=('PREV' in reverse_order))
         sorted_posts = sorted(posts, key=lambda x:x.level, reverse=('POST' in reverse_order))
         sorted_assertions = sorted(assertions, key=lambda x:x.level, reverse=('ASSERT' in reverse_order))
 
@@ -325,10 +325,10 @@ class TestCompiler(HashTreeTraverser):
 
         package = SamplePackage(
             list(configs),
-            list(controllers),
             list(listeners),
+            list(controllers),
             list(trans_listeners),
-            list(sorted_pres),
+            list(sorted_prevs),
             list(sorted_posts),
             list(sorted_assertions),
             list(timers)
@@ -342,7 +342,7 @@ class TestCompiler(HashTreeTraverser):
         controllers = deque()
         listeners = deque()
         trans_listeners = deque()
-        pres = deque()
+        prevs = deque()
         posts = deque()
         assertions = deque()
         timers = deque()
@@ -384,10 +384,10 @@ class TestCompiler(HashTreeTraverser):
 
         package = SamplePackage(
             list(configs),
-            list(controllers),
             list(listeners),
+            list(controllers),
             list(trans_listeners),
-            list(pres),
+            list(prevs),
             list(posts),
             list(assertions),
             list(timers)

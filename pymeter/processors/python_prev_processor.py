@@ -1,21 +1,21 @@
 #!/usr/bin python3
-# @File    : python_pre.py
+# @File    : python_prev_processor.py
 # @Time    : 2020/2/17 16:29
 # @Author  : Kelvin.Ye
 from typing import Final
 
 from loguru import logger
 
-from pymeter.processors.pre import PreProcessor
+from pymeter.processors.prev import PrevProcessor
 from pymeter.tools.python_code_snippets import DEFAULT_LOCAL_IMPORT_MODULE
 from pymeter.tools.python_code_snippets import INDENT
 from pymeter.workers.context import ContextService
 
 
-class PythonPreProcessor(PreProcessor):
+class PythonPrevProcessor(PrevProcessor):
 
     # 脚本内容
-    SCRIPT: Final = 'PythonPreProcessor__script'
+    SCRIPT: Final = 'PythonPrevProcessor__script'
 
     @property
     def script(self) -> str:

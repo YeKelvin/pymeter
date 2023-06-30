@@ -2,26 +2,26 @@
 # @File    : collection.py
 # @Time    : 2020/2/24 15:35
 # @Author  : Kelvin.Ye
-from typing import Final
-
 from pymeter.elements.element import TestElement
 
 
 class Collection(TestElement):
 
     # 运行策略
-    RUNNING_STRATEGY = 'Collection__running_strategy'
+    RUNNING_STRATEGY = None
 
     @property
     def running_strategy(self):
+        # 默认策略
         default = {
             # 筛选
             # logic: [AND, OR]
-            # field: [TYPE, LEVEL]
             # operator: [EQUAL, NOT_EQUAL, IN, NOT_IN]
+            # field: [TYPE, LEVEL]
             # value:
-            #   TYPE: [PRE, POST, ASSERT]
+            #   TYPE: [PREV, POST, ASSERT]
             #   LEVEL: [WORKSPACE, COLLECTION, WORKER, CONTROLLER, SAMPLER]
+            # e.g.:
             # {
             #     "filter": {
             #         "logic": "",
@@ -32,28 +32,7 @@ class Collection(TestElement):
             #     }
             # }
             'filter': [],
-            # 倒序执行: [1:前置，2:后置，3:断言]
+            # 倒序执行: [PREV, POST, ASSERT]
             'reverse': []
         }
-        strategy = self.get_property(self.RUNNING_STRATEGY).get_obj()
-        return strategy or default
-
-
-class TestCollection(Collection):
-
-    # 运行策略
-    RUNNING_STRATEGY: Final = 'TestCollection__running_strategy'
-
-    # 是否串行执行 worker
-    SERIALIZE_WORKERS: Final = 'TestCollection__serialize_workers'
-
-    # 延迟启动 worker ，单位ms
-    DELAY: Final = 'TestCollection__delay'
-
-    @property
-    def serialized(self):
-        return self.get_property_as_bool(self.SERIALIZE_WORKERS)
-
-    @property
-    def delay(self):
-        return self.get_property_as_int(self.DELAY)
+        return self.get_property(self.RUNNING_STRATEGY).get_obj() or default

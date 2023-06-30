@@ -57,7 +57,7 @@ class CompoundVariable:
         """执行函数"""
         # 非动态函数时，优先返回结果缓存
         if not self.dynamic and self.permanent_results:
-            logger.debug('return cache results')
+            logger.debug('返回结果缓存')
             return self.permanent_results
 
         if not self.compiled_components:
@@ -70,11 +70,11 @@ class CompoundVariable:
             for item in self.compiled_components:
                 if isinstance(item, Function):
                     result = item.execute()
-                    logger.debug(f'function:[ {item.REF_KEY} ] result:[ {result} ]')
+                    logger.debug(f'函数:[ {item.REF_KEY} ] 执行结果:[ {result} ]')
                     results.append(result)
                 elif isinstance(item, SimpleVariable):
                     value = str(item.value)
-                    logger.debug(f'variable:[ {item.name} ] actual-value:[ {value} ]')
+                    logger.debug(f'变量:[ {item.name} ] 实际值:[ {value} ]')
                     results.append(value)
                 else:
                     results.append(item)
@@ -84,9 +84,9 @@ class CompoundVariable:
         finally:
             results_str = ''.join(results)
 
-        # 非动态函数时，缓存函数结果
+        # 非动态函数时，缓存执行结果
         if not self.dynamic:
-            logger.debug('non-dynamic functions, cache function execution results')
+            logger.debug('非动态函数, 缓存执行结果')
             self.permanent_results = results_str
 
         return results_str

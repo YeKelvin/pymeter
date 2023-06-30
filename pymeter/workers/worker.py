@@ -37,7 +37,7 @@ class LogicalAction(Enum):
 class Worker(Controller):
 
     # 运行策略
-    RUNNING_STRATEGY = 'Worker__running_strategy'
+    RUNNING_STRATEGY = None
 
     @property
     def running_strategy(self):

@@ -23,16 +23,3 @@ class ElementLevel(Enum):
 
     # 4取样器
     SAMPLER = 4
-
-
-@unique
-class ComponentType(Enum):
-
-    # 1前置
-    PRE_PROCESSOR = 1
-
-    # 2后置
-    POST_PROCESSOR = 2
-
-    # 3断言
-    ASSERTION = 3

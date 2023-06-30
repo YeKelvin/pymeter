@@ -552,7 +552,7 @@ class Coroutine(Greenlet):
         package = self.compiler.configure_sampler(sampler)
 
         # 执行前置处理器
-        self.__run_pre_processors(package.pre_processors)
+        self.__run_prev_processors(package.prev_processors)
         # 执行时间控制器
         self.__run_timers(package.timers)
 
@@ -775,11 +775,11 @@ class Coroutine(Greenlet):
         if self.engine:
             self.engine.stop_test_now()
 
-    def __run_pre_processors(self, pre_processors: list) -> None:
+    def __run_prev_processors(self, prev_processors: list) -> None:
         """执行前置处理器"""
-        for pre_processor in pre_processors:
-            logger.debug(f'线程:[ {self.thread_name} ] 前置处理器:[ {pre_processor.name} ] 正在运行中')
-            pre_processor.process()
+        for prev_processor in prev_processors:
+            logger.debug(f'线程:[ {self.thread_name} ] 前置处理器:[ {prev_processor.name} ] 正在运行中')
+            prev_processor.process()
 
     def __run_post_processors(self, post_processors: list) -> None:
         """执行后置处理器"""

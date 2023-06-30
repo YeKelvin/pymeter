@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : json_path_post_processor.py
+# @File    : jsonpath_post_processor.py
 # @Time    : 2022/9/27 10:56
 # @Author  : Kelvin.Ye
 from typing import Final
@@ -75,19 +75,19 @@ class JsonPathPostProcessor(PostProcessor):
                 # 将提取值放入变量
                 actualvalue = self.extract(response_data, jsonpath)
                 if actualvalue is not None:
-                    logger.info(f'提取成功，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
+                    logger.info(f'Json提取成功\n表达式:[ {jsonpath} ]\n变量名:[ {varname} ]\n变量值:[ {actualvalue} ]')
                 else:
-                    logger.info(f'提取失败，jsonpath:[ {jsonpath} ]，变量名[ {varname} ]，变量值:[ {actualvalue} ]')
+                    logger.info(f'Json提取失败\n表达式:[ {jsonpath} ]\n变量名:[ {varname} ]\n变量值:[ {actualvalue} ]')
                 self.put(ctx, varname, actualvalue)
             # 设置默认值
             elif self.default_value:
-                logger.info(f'响应结果为空，赋予默认值，变量名[ {varname} ]，变量值:[ {self.default_value} ]')
+                logger.info(f'Json提取为空，赋予默认值\n变量名:[ {varname} ]\n变量值:[ {self.default_value} ]')
                 self.put(ctx, varname, self.default_value)
         except Exception:
             logger.exception('Exception Occurred')
             # 设置默认值
             if self.default_value:
-                logger.info(f'提取异常，赋予默认值，变量名[ {jsonpath} ]，变量值:[ {self.default_value} ]')
+                logger.info(f'Json提取异常，赋予默认值\n变量名:[ {jsonpath} ]\n变量值:[ {self.default_value} ]')
                 self.put(ctx, jsonpath, self.default_value)
 
     def extract(self, json, jsonpath):

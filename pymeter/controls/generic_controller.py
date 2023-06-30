@@ -161,7 +161,7 @@ class GenericController(Controller, TestCompilerHelper):
     def next_is_controller(self, controller: Controller) -> Sampler:
         """下一个元素是控制器时的处理方法"""
         # 获取子代控制器的下一个取样器
-        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] next is controller')
+        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为控制器')
         sampler = controller.next()
         # 子代控制器的下一个取样器为空时重新获取父控制器的下一个取样器
         if sampler is None:

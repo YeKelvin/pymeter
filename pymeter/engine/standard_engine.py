@@ -9,7 +9,7 @@ from gevent import Greenlet
 from loguru import logger
 from loguru._logger import context as logurucontext
 
-from pymeter.collections.collection import TestCollection
+from pymeter.collections.test_collection import TestCollection
 from pymeter.elements.element import TestElement
 from pymeter.engine.hashtree import HashTree
 from pymeter.engine.interface import TestCollectionListener

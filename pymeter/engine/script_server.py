@@ -13,12 +13,12 @@ from pymeter.elements.property import DictProperty
 from pymeter.engine.hashtree import HashTree
 from pymeter.engine.values import ValueReplacer
 from pymeter.tools.exceptions import ScriptParseError
-from pymeter.utils import json_util
+from pymeter.utils.json_util import from_json
 
 
 MODULES = {
     # 测试集合
-    'TestCollection': 'pymeter.collections.collection',
+    'TestCollection': 'pymeter.collections.test_collection',
 
     # 工作线程
     'SetupWorker': 'pymeter.workers.setup_worker',
@@ -34,43 +34,43 @@ MODULES = {
     'HTTPCookieManager': 'pymeter.configs.httpconfigs',
     'HTTPSessionManager': 'pymeter.configs.httpconfigs',
     'VariableDataset': 'pymeter.configs.dataset',
-    'TransactionHTTPSessionManager': 'pymeter.configs.transactions',
     'TransactionParameter': 'pymeter.configs.transactions',
+    'TransactionHTTPSessionManager': 'pymeter.configs.transactions',
 
     # 逻辑控制器
     'IfController': 'pymeter.controls.if_controller',
-    'ForInController': 'pymeter.controls.forin_controller',
     'LoopController': 'pymeter.controls.loop_controller',
+    'WhileController': 'pymeter.controls.while_controller',
+    'ForeachController': 'pymeter.controls.foreach_controller',
     'RetryController': 'pymeter.controls.retry_controller',
     'TransactionController': 'pymeter.controls.transaction',
-    'WhileController': 'pymeter.controls.while_controller',
 
     # 时间控制器
     'ConstantTimer': 'pymeter.timers.constant_timer',
 
     # 取样器
+    'SQLSampler': 'pymeter.samplers.sql_sampler',
     'HTTPSampler': 'pymeter.samplers.http_sampler',
     'PythonSampler': 'pymeter.samplers.python_sampler',
-    'SQLSampler': 'pymeter.samplers.sql_sampler',
 
     # 前置处理器
-    'PythonPreProcessor': 'pymeter.processors.python_pre_processor',
-    'SleepPreProcessor': 'pymeter.processors.sleep_pre_processor',
+    'SleepPrevProcessor': 'pymeter.processors.sleep_prev_processor',
+    'PythonPrevProcessor': 'pymeter.processors.python_prev_processor',
 
     # 后置处理器
-    'PythonPostProcessor': 'pymeter.processors.python_post_processor',
-    'JsonPathPostProcessor': 'pymeter.processors.json_path_post_processor',
     'SleepPostProcessor': 'pymeter.processors.sleep_post_processor',
+    'PythonPostProcessor': 'pymeter.processors.python_post_processor',
+    'JsonPathPostProcessor': 'pymeter.processors.jsonpath_post_processor',
 
     # 断言器
     'PythonAssertion': 'pymeter.assertions.python_assertion',
-    'JsonPathAssertion': 'pymeter.assertions.json_path_assertion',
+    'JsonPathAssertion': 'pymeter.assertions.jsonpath_assertion',
 
     # 监听器
-    'FlaskDBIterationStorage': 'pymeter.listeners.flask_db_iteration_storage',
-    'FlaskDBResultStorage': 'pymeter.listeners.flask_db_result_storage',
-    'FlaskSIOResultCollector': 'pymeter.listeners.flask_sio_result_collector',
     'ResultCollector': 'pymeter.listeners.result_collector',
+    'FlaskDBResultStorage': 'pymeter.listeners.flask_db_result_storage',
+    'FlaskDBIterationStorage': 'pymeter.listeners.flask_db_iteration_storage',
+    'FlaskSIOResultCollector': 'pymeter.listeners.flask_sio_result_collector',
     'SocketResultCollector': 'pymeter.listeners.socket_result_collector'
 }
 
@@ -97,7 +97,7 @@ def __loads_script__(source) -> List[dict]:
     if not isinstance(source, str):
         raise ScriptParseError('不支持的脚本类型')
 
-    script = json_util.from_json(source)
+    script = from_json(source)
     if not isinstance(script, list):
         raise ScriptParseError('不支持的脚本类型')
 

@@ -7,10 +7,10 @@ from typing import Final
 import gevent
 from loguru import logger
 
-from pymeter.processors.pre import PreProcessor
+from pymeter.processors.prev import PrevProcessor
 
 
-class SleepPostProcessor(PreProcessor):
+class SleepPostProcessor(PrevProcessor):
 
     # 延迟时间，单位ms
     DELAY: Final = 'SleepPostProcessor__delay'
