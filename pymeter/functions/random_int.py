@@ -19,15 +19,12 @@ class RandomInt(Function):
         self.maximum = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
 
         minimum = int(self.minimum.execute().strip())
         maximum = int(self.maximum.execute().strip())
 
-        result = str(random.randint(minimum, maximum))
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-
-        return result
+        return str(random.randint(minimum, maximum))
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

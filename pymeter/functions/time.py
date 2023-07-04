@@ -18,7 +18,7 @@ class Time(Function):
         self.format = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
 
         timestamp = time.time()
 
@@ -28,10 +28,7 @@ class Time(Function):
             struct_time = time.localtime(timestamp)
             return time.strftime(time_format, struct_time)
 
-        result = str(int(timestamp * 1000))
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-
-        return result
+        return str(int(timestamp * 1000))
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

@@ -21,7 +21,7 @@ class FakeData(Function):
         self.generator_params = []
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
         generator = self.generator.execute().strip()
         locale = self.locale.execute().strip() if self.locale else 'zh_CN'
         params = [param.execute().strip() for param in self.generator_params]

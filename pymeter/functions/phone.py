@@ -19,11 +19,9 @@ class Phone(Function):
         self.operator = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
         operator = self.operator.execute().strip() if self.operator else 'ALL'
-        result = get_phone_number(operator)
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-        return result
+        return get_phone_number(operator)
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

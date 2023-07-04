@@ -15,11 +15,8 @@ class ULID(Function):
     REF_KEY: Final = '__ULID'
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
-
-        result = ulid.new().str
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-        return result
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
+        return ulid.new().str
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

@@ -57,7 +57,7 @@ class CompoundVariable:
         """执行函数"""
         # 非动态函数时，优先返回结果缓存
         if not self.dynamic and self.permanent_results:
-            logger.debug('返回结果缓存')
+            logger.debug('返回缓存结果')
             return self.permanent_results
 
         if not self.compiled_components:
@@ -109,7 +109,7 @@ class CompoundVariable:
 
         for item in self.compiled_components:
             if isinstance(item, (Function, SimpleVariable)):
-                logger.debug('set as dynamic function')
+                logger.debug('设置为动态函数')
                 self.dynamic = True
                 break
 
@@ -139,19 +139,20 @@ class SimpleVariable:
 
     @property
     def variables(self):
-        return ContextService.get_context().variables
+        return ContextService.get_context().variables or {}
 
     @property
     def properties(self):
-        return ContextService.get_context().properties
+        return ContextService.get_context().properties or {}
 
     @property
     def value(self):
         if self.name in self.variables:
             return self.variables.get(self.name)
-        elif self.properties and self.name in self.properties:
+        elif self.name in self.properties:
             return self.properties.get(self.name)
         else:
+            logger.debug(f'变量:[ {self.name} ] 找不到变量，返回原始字符')
             return '${' + self.name + '}'
 
 

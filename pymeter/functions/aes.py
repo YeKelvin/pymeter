@@ -23,7 +23,7 @@ class AES(Function):
         self.encoding = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
         key = self.key.execute().strip()
@@ -32,10 +32,7 @@ class AES(Function):
         iv = self.iv.execute().strip() or None if self.iv else None
         encoding = self.encoding.execute().strip() if self.encoding else 'base64'
 
-        result = aes_cryptor.encrypt(plaintext, key, block_size, mode, iv, encoding)
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-
-        return result
+        return aes_cryptor.encrypt(plaintext, key, block_size, mode, iv, encoding)
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

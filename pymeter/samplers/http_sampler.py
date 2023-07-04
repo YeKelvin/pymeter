@@ -153,8 +153,14 @@ class HTTPSampler(Sampler):
             )
             res.encoding = self.encoding
 
-            logger.debug(f'HTTP REQUEST: {self.method} {res.url}\n{res.request.content.decode(self.encoding)}')
-            logger.debug(f'HTTP RESPONSE: {res.text}')
+            logger.debug(
+                f'HTTP取样器:[ {self.name} ]\n'
+                f'REQUEST: \n'
+                f'{self.method} {res.url}\n'
+                f'{res.request.content.decode(self.encoding)}\n'
+                f'RESPONSE({res.status_code}):\n'
+                f'{res.text}'
+            )
 
             # http响应码400以上为错误
             result.success = res.status_code < 400

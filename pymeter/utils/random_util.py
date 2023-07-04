@@ -30,8 +30,7 @@ def get_number(length: int, prefix: str = '', suffix: str = '') -> str:
 
 
 def get_idcard():
-    """生成随机身份证号码
-    """
+    """生成随机身份证号码"""
     idcard = AREA_CODE[randint(0, len(AREA_CODE))]['code']  # 地区项
     idcard += str(randint(1930, 2018))  # 年份项
     da = date.today() + timedelta(days=randint(1, 366))  # 月份和日期项
@@ -75,8 +74,7 @@ def get_phone_number(operator='ALL'):
 
 
 def get_phone_number_cambodia():
-    """随机生成855可用运营商号段注册号码
-    """
+    """随机生成855可用运营商号段注册号码"""
     phone_list = [
         '11',
         '12',

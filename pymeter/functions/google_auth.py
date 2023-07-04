@@ -18,14 +18,9 @@ class GoogleAuth(Function):
         self.secret_key = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
-
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
         secret_key = self.secret_key.execute().strip()
-
-        result = str(GoogleAuthenticate.get_code(secret_key))
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-
-        return result
+        return str(GoogleAuthenticate.get_code(secret_key))
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

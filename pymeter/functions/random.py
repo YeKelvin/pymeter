@@ -18,17 +18,13 @@ class Random(Function):
         self.length = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
 
         if self.length:
             length = int(self.length.execute().strip())
-            result = ''.join([str(random.randint(0, 9)) for _ in range(length)])
-            logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-            return result
+            return ''.join([str(random.randint(0, 9)) for _ in range(length)])
 
-        result = str(random.random()).replace('0.', '')
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-        return result
+        return str(random.random()).replace('0.', '')
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

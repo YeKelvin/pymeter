@@ -18,7 +18,7 @@ class Eval(Function):
         self.parameter = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
         parameter = self.parameter.execute().strip()
         # TODO: 待优化，解决循环引用
         return values.CompoundVariable(parameter).execute().strip()

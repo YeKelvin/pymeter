@@ -19,15 +19,12 @@ class MD5(Function):
         self.encode = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
 
         plaintext = self.plaintext.execute().strip()
         encode = self.encode.execute().strip() if self.encode else 'UTF-8'
 
-        result = hashlib.md5(plaintext.encode(encoding=encode)).hexdigest()
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-
-        return result
+        return hashlib.md5(plaintext.encode(encoding=encode)).hexdigest()
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

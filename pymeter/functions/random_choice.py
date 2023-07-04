@@ -18,15 +18,12 @@ class RandomChoice(Function):
         self.seq = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
 
         seq = self.seq.execute().strip().split(',')
         seq = [s.strip() for s in seq]
 
-        result = str(random.choice(seq))
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-
-        return result
+        return str(random.choice(seq))
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

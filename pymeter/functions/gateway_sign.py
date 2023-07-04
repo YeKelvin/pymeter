@@ -18,7 +18,7 @@ class GatewaySign(Function):
     REF_KEY: Final = '__GatewaySign'
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
 
         # 获取当前 HttpSampler 对象
         http_sampler = self.current_sampler

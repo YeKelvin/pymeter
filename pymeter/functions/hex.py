@@ -18,14 +18,9 @@ class Hex(Function):
         self.data = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
-
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
         data = self.data.execute().strip()
-
-        result = binascii.b2a_hex(data).decode('utf8')
-        logger.debug(f'function:[ {self.REF_KEY} ] result:[ {result} ]')
-
-        return result
+        return binascii.b2a_hex(data).decode('utf8')
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

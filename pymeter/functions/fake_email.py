@@ -19,7 +19,7 @@ class FakeEmail(Function):
         self.locale = None
 
     def execute(self):
-        logger.debug(f'开始执行函数:[ {self.REF_KEY} ]')
+        logger.debug(f'执行函数:[ {self.REF_KEY} ]')
         locale = self.locale.execute().strip() if self.locale else 'zh_CN'
         return Faker(locale=locale).email()
 
