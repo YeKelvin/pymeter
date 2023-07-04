@@ -150,7 +150,7 @@ class JsonPathAssertion(Assertion, TestElement):
 
         return result
 
-    def fail(self, result, msg=None, actual_value=None, exists=None):
+    def fail(self, result: AssertionResult, msg=None, actual_value=None, exists=None):
         result.failure = True
         result.message = msg or self.get_failure_message(actual_value, exists)
         return result
