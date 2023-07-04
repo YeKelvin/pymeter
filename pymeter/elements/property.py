@@ -298,7 +298,7 @@ class FunctionProperty(PyMeterProperty):
 
     def __init__(self, name: str, function):
         super().__init__(name)
-        self.function = function  # pymeter.engine.values.CompoundVariable
+        self.function = function  # CompoundVariable
         self.cache_value = None
         self.test_iteration = -1
 

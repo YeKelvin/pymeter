@@ -11,7 +11,7 @@ from pymeter.elements.element import TestElement
 from pymeter.elements.property import CollectionProperty
 from pymeter.elements.property import DictProperty
 from pymeter.engine.hashtree import HashTree
-from pymeter.engine.values import ValueReplacer
+from pymeter.engine.replacer import ValueReplacer
 from pymeter.tools.exceptions import ScriptParseError
 from pymeter.utils.json_util import from_json
 

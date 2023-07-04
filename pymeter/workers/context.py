@@ -2,7 +2,7 @@
 # @File    : context
 # @Time    : 2019/3/15 9:39
 # @Author  : Kelvin.Ye
-from gevent.local import local as CoroutineLocal
+from contextvars import ContextVar
 
 from pymeter.utils import time_util
 from pymeter.workers.variables import Variables
@@ -48,25 +48,27 @@ class ThreadContext:
 
 class ContextService:
 
-    local = CoroutineLocal()
+    local = ContextVar('thread-context', default=None)
 
     @classmethod
     def get_context(cls) -> ThreadContext:
-        if not hasattr(cls.local, 'thread_context'):
-            setattr(cls.local, 'thread_context', ThreadContext())
-        return cls.local.thread_context
+        ctx = cls.local.get()
+        if not ctx:
+            ctx = ThreadContext()
+            cls.local.set(ctx)
+        print(f'{id(ctx)=}')
+        return ctx
 
     @classmethod
     def remove_context(cls) -> None:
-        if hasattr(cls.local, 'thread_context'):
-            del cls.local.thread_context
+        cls.local.set(None)
 
     @classmethod
     def replace_context(cls, ctx) -> None:
-        setattr(cls.local, 'thread_context', ctx)
+        cls.local.set(ctx)
 
     @classmethod
-    def start_test(cls):
+    def start_test(cls) -> None:
         engine_ctx = cls.get_context().engine.context
         if engine_ctx.test_start == 0:
             engine_ctx.number_of_threads_actived = 0
@@ -74,7 +76,7 @@ class ContextService:
             cls.get_context().properties.put('TESTSTART.MS', engine_ctx.test_start)
 
     @classmethod
-    def end_test(cls):
+    def end_test(cls) -> None:
         engine_ctx = cls.get_context().engine.context
         engine_ctx.test_start = 0
 
@@ -86,19 +88,19 @@ class ContextService:
         engine_ctx.number_of_threads_started += 1
 
     @classmethod
-    def decr_number_of_threads(cls):
+    def decr_number_of_threads(cls) -> None:
         """减少活动线程的数量"""
         engine_ctx = cls.get_context().engine.context
         engine_ctx.number_of_threads_actived -= 1
         engine_ctx.number_of_threads_finished += 1
 
     @classmethod
-    def add_total_threads(cls, worker_number):
+    def add_total_threads(cls, worker_number) -> None:
         engine_ctx = cls.get_context().engine.context
         engine_ctx.total_threads += worker_number
 
     @classmethod
-    def clear_total_threads(cls):
+    def clear_total_threads(cls) -> None:
         engine_ctx = cls.get_context().engine.context
         engine_ctx.total_threads = 0
         engine_ctx.number_of_threads_started = 0

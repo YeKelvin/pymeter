@@ -2,7 +2,7 @@
 # @File    : function_parser_test.py
 # @Time    : 2021/5/30 17:23
 # @Author  : Kelvin.Ye
-from pymeter.engine.values import FunctionParser
+from pymeter.engine.replacer import FunctionParser
 
 
 class FunctionParserTest:

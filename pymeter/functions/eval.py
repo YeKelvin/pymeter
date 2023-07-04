@@ -6,7 +6,7 @@ from typing import Final
 
 from loguru import logger
 
-from pymeter.engine import values
+from pymeter.engine import replacer
 from pymeter.functions.function import Function
 
 
@@ -21,7 +21,7 @@ class Eval(Function):
         logger.debug(f'执行函数:[ {self.REF_KEY} ]')
         parameter = self.parameter.execute().strip()
         # TODO: 待优化，解决循环引用
-        return values.CompoundVariable(parameter).execute().strip()
+        return replacer.CompoundVariable(parameter).execute().strip()
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

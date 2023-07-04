@@ -11,8 +11,10 @@ from loguru._logger import context as logurucontext
 
 from pymeter.collections.test_collection import TestCollection
 from pymeter.elements.element import TestElement
+from pymeter.engine.context import EngineContext
 from pymeter.engine.hashtree import HashTree
 from pymeter.engine.interface import TestCollectionListener
+from pymeter.engine.properties import Properties
 from pymeter.engine.traverser import SearchByClass
 from pymeter.listeners.result_collector import ResultCollector
 from pymeter.tools.exceptions import EngineException
@@ -21,22 +23,6 @@ from pymeter.workers.context import ContextService
 from pymeter.workers.setup_worker import SetupWorker
 from pymeter.workers.teardown_worker import TearDownWorker
 from pymeter.workers.test_worker import TestWorker
-
-
-class Properties(dict):
-
-    def put(self, key: str, value: any) -> None:
-        self[key] = value
-
-
-class EngineContext:
-
-    def __init__(self):
-        self.test_start = 0
-        self.number_of_threads_actived = 0
-        self.number_of_threads_started = 0
-        self.number_of_threads_finished = 0
-        self.total_threads = 0
 
 
 class StandardEngine(Greenlet):
@@ -50,8 +36,8 @@ class StandardEngine(Greenlet):
         self.serialized = True          # 是否顺序运行
         self.workers = []               # 储存已启动的worker
         self.context = EngineContext()
-        self.properties = Properties()
         self.extra = kwargs.get('extra', {})
+        self.properties = Properties()
         self.properties.update(kwargs.get('props', {}))
 
     def configure(self, tree: HashTree) -> None:

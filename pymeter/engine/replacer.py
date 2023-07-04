@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : values.py
+# @File    : replacer.py
 # @Time    : 2021/5/30 17:11
 # @Author  : Kelvin.Ye
 from typing import List
@@ -14,21 +14,31 @@ from pymeter.utils.class_finder import ClassFinder
 from pymeter.workers.context import ContextService
 
 
-class StringReader:
+class SimpleVariable:
 
-    def __init__(self, string: str):
-        self.raw = string
-        self.__iter: iter = string.__iter__()
+    def __init__(self, name: str = None):
+        self.name = name
 
     @property
-    def next(self) -> str or None:
-        try:
-            return self.__iter.__next__()
-        except StopIteration:
-            return None
+    def variables(self):
+        return ContextService.get_context().variables
 
-    def reset(self) -> None:
-        self.__iter = self.raw.__iter__()
+    @property
+    def properties(self):
+        return ContextService.get_context().properties
+
+    @property
+    def value(self):
+        variables = self.variables or {}
+        properties = self.properties or {}
+
+        if self.name in variables:
+            return variables.get(self.name)
+        elif self.name in properties:
+            return properties.get(self.name)
+        else:
+            logger.debug(f'变量:[ {self.name} ] 找不到变量，返回原始字符')
+            return '${' + self.name + '}'
 
 
 class CompoundVariable:
@@ -61,7 +71,7 @@ class CompoundVariable:
             return self.permanent_results
 
         if not self.compiled_components:
-            logger.debug('compiled component is empty')
+            logger.debug('已编译组件为空')
             return ''
 
         results = []
@@ -101,7 +111,7 @@ class CompoundVariable:
         self.compiled_components = FunctionParser.compile_string(parameters)
 
         if len(self.compiled_components) > 1 or not isinstance(self.compiled_components[0], str):
-            logger.debug('function in compiled string')
+            # logger.debug('已编译字符串中存在函数')
             self.has_function = True
 
         # 在首次执行时进行计算和缓存
@@ -109,7 +119,7 @@ class CompoundVariable:
 
         for item in self.compiled_components:
             if isinstance(item, (Function, SimpleVariable)):
-                logger.debug('设置为动态函数')
+                # logger.debug('设置为动态函数')
                 self.dynamic = True
                 break
 
@@ -132,28 +142,21 @@ class CompoundVariable:
                 cls.functions[reference_key] = clazz
 
 
-class SimpleVariable:
+class StringReader:
 
-    def __init__(self, name: str = None):
-        self.name = name
-
-    @property
-    def variables(self):
-        return ContextService.get_context().variables or {}
+    def __init__(self, string: str):
+        self.raw = string
+        self.__iter: iter = string.__iter__()
 
     @property
-    def properties(self):
-        return ContextService.get_context().properties or {}
+    def next(self) -> str or None:
+        try:
+            return self.__iter.__next__()
+        except StopIteration:
+            return None
 
-    @property
-    def value(self):
-        if self.name in self.variables:
-            return self.variables.get(self.name)
-        elif self.name in self.properties:
-            return self.properties.get(self.name)
-        else:
-            logger.debug(f'变量:[ {self.name} ] 找不到变量，返回原始字符')
-            return '${' + self.name + '}'
+    def reset(self) -> None:
+        self.__iter = self.raw.__iter__()
 
 
 class FunctionParser:
