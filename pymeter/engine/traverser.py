@@ -272,8 +272,8 @@ class TestCompiler(HashTreeTraverser):
                 item.add_iteration_listener(child)
 
     def save_sample_package(self, sampler):  # sourcery skip: low-code-quality
-        strategy = sampler.running_strategy or self.strategy
-        filter_rule = strategy.get('filter')
+        strategy = self.get_merged_strategy(sampler.running_strategy)
+        filter_rule = strategy.get('filter', {})
         reverse_order = strategy.get('reverse', [])
 
         configs = deque()
@@ -395,6 +395,12 @@ class TestCompiler(HashTreeTraverser):
         package.sampler = TransactionSampler(trans_controller, trans_controller.name)
         package.set_running_version(True)
         self.trans_packages[trans_controller] = package
+
+    def get_merged_strategy(self, sampler_strategy):
+        strategy = self.strategy
+        if sampler_strategy and (sampler_strategy.get('filter') or sampler_strategy.get('reverse')):
+            strategy = sampler_strategy
+        return strategy
 
     def configure_with_config_elements(self, sampler: Sampler, configs: list):
         sampler.clear_test_element_children()

@@ -56,7 +56,6 @@ class ContextService:
         if not ctx:
             ctx = ThreadContext()
             cls.local.set(ctx)
-        print(f'{id(ctx)=}')
         return ctx
 
     @classmethod
