@@ -44,10 +44,6 @@ class StopTestNowException(Exception):
     ...
 
 
-class ProjectBaseDirectoryNotFoundException(Exception):
-    ...
-
-
 class UnsupportedOperationError(Exception):
     ...
 
@@ -60,5 +56,5 @@ class HttpCookieDuplicateException(Exception):
     ...
 
 
-class FunctionExecutionError(Exception):
+class FunctionError(Exception):
     ...

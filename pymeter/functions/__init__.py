@@ -19,7 +19,7 @@ from .google_auth import GoogleAuth  # noqa
 from .eval import Eval  # noqa
 
 # 伪造数据
-from .fake_data import FakeData  # noqa
+from .fake import Fake  # noqa
 from .fake_address import FakeAddress  # noqa
 from .fake_bban import FakeBBan  # noqa
 from .fake_email import FakeEmail  # noqa
