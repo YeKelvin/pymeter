@@ -36,33 +36,33 @@ OPERATORS = {
 
 class JsonPathAssertion(Assertion, TestElement):
 
-    # JsonPath 表达式
+    # 表达式
     JSONPATH: Final = 'JsonPathAssertion__jsonpath'
-
-    # 期望值
-    EXPECTED_VALUE: Final = 'JsonPathAssertion__expected_value'
 
     # 操作符
     OPERATOR: Final = 'JsonPathAssertion__operator'
+
+    # 期望值
+    EXPECTED_VALUE: Final = 'JsonPathAssertion__expected_value'
 
     @property
     def jsonpath(self):
         return self.get_property_as_str(self.JSONPATH)
 
     @property
-    def expected_value(self):
-        return self.get_property_as_str(self.EXPECTED_VALUE)
-
-    @property
     def operator(self):
         return self.get_property_as_str(self.OPERATOR)
+
+    @property
+    def expected_value(self):
+        return self.get_property_as_str(self.EXPECTED_VALUE)
 
     def get_result(self, sampler_result: SampleResult) -> AssertionResult:
         result = AssertionResult(self.name)
         response_data = sampler_result.response_data
 
         if not response_data:
-            return self.fail(result, '响应结果为空')
+            return self.fail(result, msg='响应结果为空')
 
         # JsonPath表达式
         jsonpath = self.jsonpath
@@ -72,13 +72,13 @@ class JsonPathAssertion(Assertion, TestElement):
         expected_value = self.expected_value
 
         if not jsonpath:
-            return self.fail(result, 'JsonPath表达式为空，请修改后重试')
+            return self.fail(result, msg='JsonPath不允许为空')
 
         if not operator:
-            return self.fail(result, '判断类型为空，请修改后重试')
+            return self.fail(result, msg='判断类型不允许为空')
 
         if operator not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS'] and not expected_value:
-            return self.fail(result, '期望值为空，请修改后重试')
+            return self.fail(result, msg='期望值不允许为空')
 
         # 获取JsonPath实际值
         actual_value = None
@@ -150,14 +150,15 @@ class JsonPathAssertion(Assertion, TestElement):
 
         return result
 
-    def fail(self, result: AssertionResult, msg=None, actual_value=None, exists=None):
+    def fail(self, result: AssertionResult, actual_value=None, exists=None, msg=None):
         result.failure = True
         result.message = msg or self.get_failure_message(actual_value, exists)
         return result
 
     def get_failure_message(self, actual_value, exists):
+        # TODO: 优化输出
         expected_value_output = (
-            f'JsonPath期望值: {self.expected_value}'
+            f'期望值: {self.expected_value}'
             if self.operator not in ['NULL', 'NOT_NULL', 'BLANK', 'NOT_BLANK', 'EXISTS', 'NOT_EXISTS']
             else ''
         )
@@ -169,7 +170,7 @@ class JsonPathAssertion(Assertion, TestElement):
             f'元素名称: {self.name}\n'
             f'断言结果: 失败\n'
             f'判断类型: {OPERATORS.get(self.operator)}\n'
-            f'JsonPath表达式: {self.jsonpath}\n'
-            f'JsonPath实际值: {actual_value}\n'
+            f'表达式: {self.jsonpath}\n'
+            f'实际值: {actual_value}\n'
             f'{expected_value_output}'
         )
