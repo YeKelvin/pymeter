@@ -80,22 +80,22 @@ class HTTPSampler(Sampler):
         return headers
 
     @property
-    def query_params_manager(self) -> Optional[Arguments]:
+    def query_manager(self) -> Optional[Arguments]:
         return self.get_property(self.PARAMS).get_obj()
 
     @property
     def query_params(self) -> dict:
-        pm = self.query_params_manager
-        return pm.to_dict() if pm else {}
+        querys = self.query_manager
+        return querys.to_dict() if querys else {}
 
     @property
-    def form_params_manager(self) -> Optional[Arguments]:
+    def form_manager(self) -> Optional[Arguments]:
         return self.get_property(self.DATA).get_obj()
 
     @property
     def form_params(self) -> dict:
-        fm = self.form_params_manager
-        return fm.to_dict() if fm else {}
+        forms = self.form_manager
+        return forms.to_dict() if forms else {}
 
     @property
     def data(self) -> str:
