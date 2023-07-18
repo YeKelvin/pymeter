@@ -6,6 +6,7 @@ from typing import List
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
+from pymeter.elements.property import CollectionProperty
 from pymeter.elements.property import TestElementProperty
 
 
@@ -81,7 +82,7 @@ class Arguments(ConfigTestElement):
 
     def __init__(self):
         super().__init__()
-        self.add_property(self.ARGUMENTS, [])
+        self.add_property(self.ARGUMENTS, CollectionProperty(self.ARGUMENTS))
 
     @property
     def arguments(self) -> List[Argument]:

@@ -10,6 +10,7 @@ from loguru import logger
 
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
+from pymeter.elements.property import CollectionProperty
 from pymeter.engine.interface import TestIterationListener
 from pymeter.engine.interface import TestWorkerListener
 from pymeter.tools.exceptions import HttpCookieDuplicateException
@@ -57,7 +58,7 @@ class HTTPHeaderManager(ConfigTestElement):
 
     def __init__(self):
         super().__init__()
-        self.set_property(self.HEADERS, [])
+        self.set_property(self.HEADERS, CollectionProperty(self.HEADERS))
 
     @property
     def headers_as_list(self) -> List[HTTPHeader]:
@@ -88,10 +89,14 @@ class HTTPHeaderManager(ConfigTestElement):
         return merged_manager
 
     def get_header(self, name: str) -> Optional[HTTPHeader]:
-        for header in self.headers_as_list:
-            if header.name.lower() == name.lower():
-                return header
-        return None
+        return next(
+            (
+                header
+                for header in self.headers_as_list
+                if header.name.lower() == name.lower()
+            ),
+            None,
+        )
 
     def has_header(self, name: str) -> bool:
         return any(
@@ -100,12 +105,22 @@ class HTTPHeaderManager(ConfigTestElement):
 
     def add_header(self, name: str, value: str) -> None:
         if self.has_header(name):
-            raise HttpHeaderDuplicateException(f'header:[ {name} ] 已存在')
+            raise HttpHeaderDuplicateException(f'请求头:[ {name} ] 已存在')
 
         header = HTTPHeader()
         header.name = name
         header.value = value
         self.headers_as_list.append(header)
+
+    def set_header(self, name: str, value: str) -> None:
+        if header := self.get_header(name):
+            header.name = name
+            header.value = value
+        else:
+            header = HTTPHeader()
+            header.name = name
+            header.value = value
+            self.headers_as_list.append(header)
 
 
 class HTTPCookie(TestElement):
@@ -164,7 +179,7 @@ class HTTPCookieManager(ConfigTestElement):
 
     def __init__(self):
         super().__init__()
-        self.set_property(self.COOKIES, [])
+        self.set_property(self.COOKIES, CollectionProperty(self.COOKIES))
 
     @property
     def cookies_as_list(self) -> List[HTTPCookie]:
@@ -195,10 +210,14 @@ class HTTPCookieManager(ConfigTestElement):
         return merged_manager
 
     def get_cookie(self, name: str) -> Optional[HTTPCookie]:
-        for cookie in self.cookies_as_list:
-            if cookie.name.lower() == name.lower():
-                return cookie
-        return None
+        return next(
+            (
+                cookie
+                for cookie in self.cookies_as_list
+                if cookie.name.lower() == name.lower()
+            ),
+            None,
+        )
 
     def has_cookie(self, name: str) -> bool:
         return any(
@@ -207,7 +226,7 @@ class HTTPCookieManager(ConfigTestElement):
 
     def add_cookie(self, name: str, value: str, domain: str = None, path: str = None) -> None:
         if self.has_cookie(name):
-            raise HttpCookieDuplicateException(f'cookie:[ {name} ] 已存在')
+            raise HttpCookieDuplicateException(f'Cookie:[ {name} ] 已存在')
 
         cookie = HTTPCookie()
         cookie.name = name
@@ -215,6 +234,20 @@ class HTTPCookieManager(ConfigTestElement):
         cookie.domain = domain
         cookie.path = path
         self.cookies_as_list.append(cookie)
+
+    def set_cookie(self, name: str, value: str, domain: str = None, path: str = None) -> None:
+        if cookie := self.get_cookie(name):
+            cookie.name = name
+            cookie.value = value
+            cookie.domain = domain
+            cookie.path = path
+        else:
+            cookie = HTTPCookie()
+            cookie.name = name
+            cookie.value = value
+            cookie.domain = domain
+            cookie.path = path
+            self.cookies_as_list.append(cookie)
 
 
 class SessionManager(ConfigTestElement):
