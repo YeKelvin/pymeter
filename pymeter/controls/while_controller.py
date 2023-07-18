@@ -57,7 +57,7 @@ class WhileController(GenericController, IteratingController):
             return True
 
         cnd = self.condition.strip()
-        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while条件:[ {cnd} ]')
+        logger.info(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while条件:[ {cnd} ]')
         result = False
 
         # 如果条件为空，在循环结束时只检查上一个 Sampler 的结果
@@ -73,13 +73,13 @@ class WhileController(GenericController, IteratingController):
                 logger.info(
                     f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] '
                     f'循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ] '
-                    '循环超时，停止 while 循环 ] '
+                    f'循环超时，停止 while 循环'
                 )
                 result = False
             else:
                 result = self.evaluate(cnd)  # 如果 next() 被调用，条件可能为空
 
-        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while结果:[ {result} ]')
+        logger.info(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while结果:[ {result} ]')
 
         if result and self.delay:
             logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]')

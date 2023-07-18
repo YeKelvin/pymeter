@@ -33,9 +33,9 @@ class IfController(GenericController):
         # For subsequent calls, we are inside the IfController,
         # so then we just pass the control to the next item inside the if control
         cnd = self.condition.strip()
-        logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] if条件:[ {cnd} ]')
+        logger.info(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] if条件:[ {cnd} ]')
         result = self.evaluate(cnd) if self.first else True
-        logger.debug(
+        logger.info(
             f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] if结果:[ {result} ]')
         if result is True:
             return super().next()
