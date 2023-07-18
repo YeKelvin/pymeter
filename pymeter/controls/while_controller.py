@@ -56,30 +56,32 @@ class WhileController(GenericController, IteratingController):
         if self._break_loop:
             return True
 
-        cnd = self.condition.strip()
-        logger.info(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while条件:[ {cnd} ]')
+        condition = self.condition.strip()
         result = False
 
         # 如果条件为空，在循环结束时只检查上一个 Sampler 的结果
-        if loop_end and cnd.isspace():
+        if loop_end and condition.isspace():
             result = self.last_sample_ok.lower() == 'false'
+        elif self.max_loop_count and (self.iter_count > self.max_loop_count):
+            logger.info(
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]'
+            )
+            result = False
+        elif self.timeout and (elapsed := int(time.time() * 1000) - int(self._start_time * 1000)) > self.timeout:
+            logger.info(
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] '
+                f'循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ] '
+                f'循环超时，停止 while 循环'
+            )
+            result = False
         else:
-            if self.max_loop_count and (self.iter_count > self.max_loop_count):
-                logger.info(
-                    f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]'
-                )
-                result = False
-            elif self.timeout and (elapsed := int(time.time() * 1000) - int(self._start_time * 1000)) > self.timeout:
-                logger.info(
-                    f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] '
-                    f'循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ] '
-                    f'循环超时，停止 while 循环'
-                )
-                result = False
-            else:
-                result = self.evaluate(cnd)  # 如果 next() 被调用，条件可能为空
+            result = self.evaluate(condition)  # 如果 next() 被调用，条件可能为空
 
-        logger.info(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while结果:[ {result} ]')
+        logger.info(
+            f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] WHILE逻辑运算\n'
+            f'while条件: {condition}\n'
+            f'while结果: {result}'
+        )
 
         if result and self.delay:
             logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]')

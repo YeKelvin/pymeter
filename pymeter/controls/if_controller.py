@@ -32,15 +32,22 @@ class IfController(GenericController):
         # time ( first "iteration" ) we are called.
         # For subsequent calls, we are inside the IfController,
         # so then we just pass the control to the next item inside the if control
-        cnd = self.condition.strip()
-        logger.info(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] if条件:[ {cnd} ]')
-        result = self.evaluate(cnd) if self.first else True
+        if not self.first:
+            self.initialize_sub_controllers()
+            return self.next_is_null()
+
+        # 逻辑运算
+        condition = self.condition.strip()
+        result = self.evaluate(condition) if self.first else True
         logger.info(
-            f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] if结果:[ {result} ]')
+            f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] IF逻辑运算\n'
+            f'if条件: {condition}\n'
+            f'if结果: {result}'
+        )
         if result is True:
             return super().next()
 
-        # If-test is false, need to re-initialize indexes
+        # if-result is false, need to re-initialize indexes
         try:
             self.initialize_sub_controllers()
             return self.next_is_null()
@@ -52,10 +59,10 @@ class IfController(GenericController):
         super().trigger_end_of_loop()
 
     @staticmethod
-    def evaluate(cnd: str):
+    def evaluate(condition: str):
         # noinspection PyBroadException
         try:
-            return eval(cnd.replace('\r', '').replace('\n', '').replace('\t', ''))
+            return eval(condition.replace('\r', '').replace('\n', '').replace('\t', ''))
         except Exception:
             logger.exception('Exception Occurred')
             return False

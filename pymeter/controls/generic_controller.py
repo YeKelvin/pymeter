@@ -47,7 +47,7 @@ class GenericController(Controller, TestCompilerHelper):
 
     @property
     def iter_count(self) -> int:
-        """只读，增长由 increment_iter_count() 控制"""
+        """只读，写由 increment_iter_count 函数控制"""
         return self._iter_count
 
     @property
@@ -121,11 +121,10 @@ class GenericController(Controller, TestCompilerHelper):
             current_element = self.get_current_element()  # type: Sampler | Controller
             if current_element is None:
                 next_sampler = self.next_is_null()
+            elif isinstance(current_element, Sampler):
+                next_sampler = self.next_is_sampler(current_element)
             else:
-                if isinstance(current_element, Sampler):
-                    next_sampler = self.next_is_sampler(current_element)
-                else:
-                    next_sampler = self.next_is_controller(current_element)
+                next_sampler = self.next_is_controller(current_element)
         except NextIsNullException:
             logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为空')
 
@@ -182,7 +181,6 @@ class GenericController(Controller, TestCompilerHelper):
             self.increment_current()
 
     def add_element(self, child):
-        # logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] add element:[ {child} ]')
         self.sub_elements.append(child)
 
     def add_test_element(self, child):
@@ -202,9 +200,6 @@ class GenericController(Controller, TestCompilerHelper):
         self.sub_elements.remove(self.sub_elements[self.current])
 
     def add_iteration_listener(self, listener: LoopIterationListener):
-        # logger.debug(
-        #     f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] add iteration listener:[ {listener} ]'
-        # )
         self.iteration_listeners.appendleft(listener)
 
     def remove_iteration_listener(self, listener: LoopIterationListener):
