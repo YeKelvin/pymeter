@@ -32,18 +32,13 @@ class IfController(GenericController):
         # time ( first "iteration" ) we are called.
         # For subsequent calls, we are inside the IfController,
         # so then we just pass the control to the next item inside the if control
+
+        # 非首次时表示if运算为true，获取下一个
         if not self.first:
-            self.initialize_sub_controllers()
-            return self.next_is_null()
+            return super().next()
 
         # 逻辑运算
-        condition = self.condition.strip()
-        result = self.evaluate(condition) if self.first else True
-        logger.info(
-            f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] IF逻辑运算\n'
-            f'if条件: {condition}\n'
-            f'if结果: {result}'
-        )
+        result = self.evaluate()
         if result is True:
             return super().next()
 
@@ -58,11 +53,20 @@ class IfController(GenericController):
         super().initialize_sub_controllers()
         super().trigger_end_of_loop()
 
-    @staticmethod
-    def evaluate(condition: str):
-        # noinspection PyBroadException
+    def evaluate(self):
         try:
-            return eval(condition.replace('\r', '').replace('\n', '').replace('\t', ''))
+            condition = (
+                self.condition
+                .strip()
+                .replace('\r', '').replace('\n', '').replace('\t', '')
+            )
+            result = eval(condition)
+            logger.info(
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] IF逻辑运算\n'
+                f'if条件: {condition}\n'
+                f'if结果: {result}'
+            )
+            return result
         except Exception:
             logger.exception('Exception Occurred')
             return False

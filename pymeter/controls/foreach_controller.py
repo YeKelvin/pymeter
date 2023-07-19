@@ -117,7 +117,7 @@ class ForeachController(GenericController, IteratingController):
             nsampler = super().next()
             if nsampler and self.delay:
                 logger.debug(
-                    f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]'
+                    f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 间隔:[ {self.delay}ms ]'
                 )
                 gevent.sleep(float(self.delay / 1000))
 

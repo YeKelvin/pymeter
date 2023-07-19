@@ -63,19 +63,19 @@ class WhileController(GenericController, IteratingController):
         if loop_end and condition.isspace():
             result = self.last_sample_ok.lower() == 'false'
         elif self.max_loop_count and (self.iter_count > self.max_loop_count):
-            logger.info(
-                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 停止循环:[ while 超过最大循环次数 ]'
-            )
+            logger.info(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 超过最大循环次数，停止while循环')
             result = False
         elif self.timeout and (elapsed := int(time.time() * 1000) - int(self._start_time * 1000)) > self.timeout:
             logger.info(
                 f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] '
-                f'循环耗时:[ {elapsed}ms ] 超时时间:[ {self.timeout}ms ] '
-                f'循环超时，停止 while 循环'
+                f'循环耗时:[ {elapsed}ms ] 已超时，停止while循环'
             )
             result = False
         else:
             result = self.evaluate(condition)  # 如果 next() 被调用，条件可能为空
+
+        if not isinstance(result, bool):
+            result = bool(result)
 
         logger.info(
             f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] WHILE逻辑运算\n'
@@ -84,9 +84,10 @@ class WhileController(GenericController, IteratingController):
         )
 
         if result and self.delay:
-            logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 延迟:[ {self.delay}ms ]')
+            logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 间隔:[ {self.delay}ms ]')
             gevent.sleep(float(self.delay / 1000))
 
+        # 此方法为是否结束循环，所以对while结果要取反
         return not result
 
     def next_is_null(self):
