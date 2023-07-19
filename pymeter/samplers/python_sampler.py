@@ -54,12 +54,11 @@ class PythonSampler(Sampler):
             params = {'self': self}
             exec(self.raw_function, params, params)
             ctx = ContextService.get_context()
-            props = ctx.properties
             if res := self.dynamic_function(  # noqa
                 log=logger,
                 ctx=ctx,
                 vars=ctx.variables,
-                props=props,
+                props=ctx.properties,
                 prev=ctx.previous_result,
                 result=result
             ):

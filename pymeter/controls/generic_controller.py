@@ -97,9 +97,9 @@ class GenericController(Controller, TestCompilerHelper):
 
     def re_initialize(self):
         """重新初始化控制器（在控制器最后一个子代元素执行完成之后调用）"""
-        self.reset_current()
-        self.increment_iter_count()
         self.first = True
+        self.increment_iter_count()
+        self.reset_current()
         self.recover_running_version()
 
     def increment_current(self):

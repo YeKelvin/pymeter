@@ -57,7 +57,6 @@ class Runner:
             'sid': extra.get('sid')
         })
 
-        # noinspection PyBroadException
         try:
             logger.debug(f'脚本:\n{to_json(script)}')
             Runner.run(script, extra)

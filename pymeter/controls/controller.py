@@ -7,8 +7,8 @@ from abc import abstractmethod
 
 from pymeter.elements.element import TestElement
 from pymeter.engine.interface import LoopIterationListener
-from pymeter.workers.context import ContextService
 from pymeter.samplers.sampler import Sampler
+from pymeter.workers.context import ContextService
 
 
 class Controller(TestElement):

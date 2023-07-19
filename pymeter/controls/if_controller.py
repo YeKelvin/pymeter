@@ -8,6 +8,7 @@ from loguru import logger
 
 from pymeter.controls.generic_controller import GenericController
 from pymeter.tools.exceptions import NextIsNullException
+from pymeter.workers.context import ContextService
 
 
 class IfController(GenericController):
@@ -55,12 +56,9 @@ class IfController(GenericController):
 
     def evaluate(self):
         try:
-            condition = (
-                self.condition
-                .strip()
-                .replace('\r', '').replace('\n', '').replace('\t', '')
-            )
-            result = eval(condition)
+            ctx = ContextService.get_context()
+            condition = self.condition.strip()
+            result = eval(condition, None, {'vars': ctx.variables, 'props': ctx.properties})
             logger.info(
                 f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] IF逻辑运算\n'
                 f'if条件: {condition}\n'
