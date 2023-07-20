@@ -49,10 +49,15 @@ class ForeachController(GenericController, IteratingController):
 
         try:
             item = self._iter[self._loop_count]
+            logger.info(
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 第 {self._loop_count + 1} 次遍历\n'
+                f'当前迭代项:{item}'
+            )
             if self._target_size > 1 and isinstance(item, Iterable) :
                 for i, target in enumerate(self._target):
                     self.ctx.variables.put(target, item[i])
             else:
+                target = self._target[0]
                 self.ctx.variables.put(self._target[0], item)
         except Exception:
             logger.exception('Exception Occurred')
@@ -82,7 +87,7 @@ class ForeachController(GenericController, IteratingController):
         for i, key in enumerate(self._target):
             self._target[i] = key.strip()
 
-        # 获取迭代对象或反序列化对象
+        # 获取迭代对象
         if self.object_type == 'OBJECT':
             self._iter = self.ctx.variables.get(self.foreach_iter) or self.ctx.properties.get(self.foreach_iter)
         elif self.object_type == 'CUSTOM':
@@ -95,9 +100,15 @@ class ForeachController(GenericController, IteratingController):
         if isinstance(self._iter, str):
             self.exec_iter(self._iter)
 
-        # 判断 in 对象是否为可迭代的对象
+        # 判断是否为可迭代的对象
         if not isinstance(self._iter, Iterable):
             logger.error(f'迭代对象:[ {self._iter} ] 不是可迭代的对象，停止遍历')
+            self.done = True
+            return
+
+        iter_size = len(self._iter)
+        if iter_size == 0:
+            logger.error(f'迭代对象:[ {self._iter} ] 迭代对象为空，停止遍历')
             self.done = True
             return
 
@@ -105,8 +116,13 @@ class ForeachController(GenericController, IteratingController):
         if isinstance(self._iter, dict):
             self._iter = list(self._iter.items())
 
+        logger.info(
+            f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始FOREACH遍历\n'
+            f'迭代数据:{self._iter}'
+        )
+
         # 存储最后一个索引
-        self._end_index = len(self._iter)
+        self._end_index = iter_size
 
     def exec_iter(self, stmt):
         exec(f'self._iter = ( {stmt} )', None, {'self': self})
