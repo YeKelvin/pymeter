@@ -47,12 +47,16 @@ class ForeachController(GenericController, IteratingController):
         if self._loop_count >= self._end_index:
             return True
 
-        item = self._iter[self._loop_count]
-        if isinstance(item, Iterable):
-            for i, val in enumerate(item):
-                self.ctx.variables.put(self._target[i], val)
-        else:
-            self.ctx.variables.put(self._target[0], item)
+        try:
+            item = self._iter[self._loop_count]
+            if self._target_size > 1 and isinstance(item, Iterable) :
+                for i, target in enumerate(self._target):
+                    self.ctx.variables.put(target, item[i])
+            else:
+                self.ctx.variables.put(self._target[0], item)
+        except Exception:
+            logger.exception('Exception Occurred')
+            return True
 
         return self._done
 
@@ -65,12 +69,14 @@ class ForeachController(GenericController, IteratingController):
         self._loop_count: int = 0
         self._break_loop: bool = False
         self._target = None
+        self._target_size = None
         self._iter = None
         self._end_index = 0
 
     def init_foreach(self):
         # 分割目标变量
         self._target = self.foreach_target.split(',')
+        self._target_size = len(self._target)
 
         # 移除目标变量首尾的空格
         for i, key in enumerate(self._target):
