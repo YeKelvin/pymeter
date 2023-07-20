@@ -10,24 +10,29 @@ from loguru import logger
 
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
-from pymeter.utils.json_util import from_json
 
 
 class ForeachController(GenericController, IteratingController):
 
-    FOR_VARIABLE: Final = 'ForeachController__for_variable'
+    FOREACH_TARGET: Final = 'ForeachController__target'
 
-    IN_STATEMENT: Final = 'ForeachController__in_statement'
+    FOREACH_ITER: Final = 'ForeachController__iter'
+
+    OBJECT_TYPE: Final = 'ForeachController__type'
 
     DELAY: Final = 'ForeachController__delay'
 
     @property
-    def for_variable(self) -> str:
-        return self.get_property_as_str(self.FOR_VARIABLE)
+    def foreach_target(self) -> str:
+        return self.get_property_as_str(self.FOREACH_TARGET)
 
     @property
-    def in_statement(self) -> str:
-        return self.get_property_as_str(self.IN_STATEMENT)
+    def foreach_iter(self) -> str:
+        return self.get_property_as_str(self.FOREACH_ITER)
+
+    @property
+    def object_type(self) -> str:
+        return self.get_property_as_str(self.OBJECT_TYPE)
 
     @property
     def delay(self) -> int:
@@ -42,11 +47,12 @@ class ForeachController(GenericController, IteratingController):
         if self._loop_count >= self._end_index:
             return True
 
-        if isinstance(self._iterable_object, dict) and self._forvar_length == 2:
-            for i in range(self._forvar_length):
-                self.ctx.variables.put(self._forvar_list[i], self._iterable_object[self._loop_count][i])
+        item = self._iter[self._loop_count]
+        if isinstance(item, Iterable):
+            for i, val in enumerate(item):
+                self.ctx.variables.put(self._target[i], val)
         else:
-            self.ctx.variables.put(self._forvar_list[0], self._iterable_object[self._loop_count])
+            self.ctx.variables.put(self._target[0], item)
 
         return self._done
 
@@ -58,46 +64,46 @@ class ForeachController(GenericController, IteratingController):
         super().__init__()
         self._loop_count: int = 0
         self._break_loop: bool = False
-        self._forvar_list = None
-        self._forvar_length = 0
-        self._iterable_object = None
+        self._target = None
+        self._iter = None
         self._end_index = 0
 
-    def initial_forin(self):
-        # 分割迭代变量
-        self._forvar_list = self.for_variable.split(',')
-        self._forvar_length = len(self._forvar_list)
-        # 判断迭代变量的个数
-        if self._forvar_length > 2:
-            logger.error(f'for变量:[ {self.for_variable} ] 个数不合法，终止遍历')
-            self.done = True
-            return
-        # 移除迭代变量首尾的空格
-        for i, key in enumerate(self._forvar_list):
-            self._forvar_list[i] = key.strip()
+    def init_foreach(self):
+        # 分割目标变量
+        self._target = self.foreach_target.split(',')
+
+        # 移除目标变量首尾的空格
+        for i, key in enumerate(self._target):
+            self._target[i] = key.strip()
 
         # 获取迭代对象或反序列化对象
-        self._iterable_object = self.ctx.variables.get(self.in_statement) or self.ctx.properties.get(self.in_statement)
-        if isinstance(self._iterable_object, str):
-            self._iterable_object = from_json(self._iterable_object)
-        if self._iterable_object is None:
-            self._iterable_object = from_json(self.in_statement)
-
-        # 判断 in 对象是否为可迭代的对象
-        if not isinstance(self._iterable_object, Iterable):
-            logger.error(f'in对象:[ {self.in_statement} ] 不是可迭代的对象，终止遍历')
+        if self.object_type == 'OBJECT':
+            self._iter = self.ctx.variables.get(self.foreach_iter) or self.ctx.properties.get(self.foreach_iter)
+        elif self.object_type == 'CUSTOM':
+            self.exec_iter(self.foreach_iter)
+        else:
+            logger.error(f'对象类型:[ {self.object_type} ] 不支持的对象类型')
             self.done = True
             return
 
-        # 判断迭代变量的个数决定使用 dict.values() 还是 items()
-        if isinstance(self._iterable_object, dict):
-            if self._forvar_length == 1:
-                self._iterable_object = list(self._iterable_object.values())
-            else:
-                self._iterable_object = list(self._iterable_object.items())
+        if isinstance(self._iter, str):
+            self.exec_iter(self._iter)
 
-        # 计算最后一个索引
-        self._end_index = len(self._iterable_object)
+        # 判断 in 对象是否为可迭代的对象
+        if not isinstance(self._iter, Iterable):
+            logger.error(f'迭代对象:[ {self._iter} ] 不是可迭代的对象，停止遍历')
+            self.done = True
+            return
+
+        # 字典处理
+        if isinstance(self._iter, dict):
+            self._iter = list(self._iter.items())
+
+        # 存储最后一个索引
+        self._end_index = len(self._iter)
+
+    def exec_iter(self, stmt):
+        exec(f'self._iter = ( {stmt} )', None, {'self': self})
 
     def next(self):
         """@override"""
@@ -105,12 +111,12 @@ class ForeachController(GenericController, IteratingController):
         # noinspection PyBroadException
         try:
             if self.first:
-                self.initial_forin()
+                self.init_foreach()
 
             if self.end_of_loop():
                 logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
-                self.reset_break_loop()
                 self.re_initialize()
+                self.reset_break_loop()
                 logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 下一个为空')
                 return None
 
