@@ -43,7 +43,7 @@ gevent = "23.7.0"
 uvloop = "0.17.0"
 loguru = "0.7.0"
 arrow = "1.2.3"
-faker = "19.1.0"
+faker = "19.2.0"
 
 [tool.poetry.group.dev.dependencies]
 flask = "*"
