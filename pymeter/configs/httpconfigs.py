@@ -8,6 +8,7 @@ from typing import Optional
 import httpx
 from loguru import logger
 
+from pymeter.configs.arguments import Argument
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
 from pymeter.elements.property import CollectionProperty
@@ -26,7 +27,7 @@ class HTTPHeader(TestElement):
     HEADER_VALUE = 'Header__value'
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.get_property_as_str(self.HEADER_NAME)
 
     @name.setter
@@ -34,7 +35,7 @@ class HTTPHeader(TestElement):
         self.set_property(self.HEADER_NAME, value)
 
     @property
-    def value(self):
+    def value(self) -> str:
         return self.get_property_as_str(self.HEADER_VALUE)
 
     @value.setter
@@ -121,6 +122,13 @@ class HTTPHeaderManager(ConfigTestElement):
             header.name = name
             header.value = value
             self.headers_as_list.append(header)
+
+    def remove_header(self, name: str) -> None:
+        logger.error(f'{self.get_header(name)=}')
+        if header := self.get_header(name):
+            logger.error('remove_header')
+            self.headers_as_list.remove(header)
+        logger.error(f'{self.headers_as_list=}')
 
 
 class HTTPCookie(TestElement):
@@ -280,3 +288,57 @@ class HTTPSessionManager(SessionManager, TestWorkerListener, TestIterationListen
             logger.debug(f'迭代:[ {iter} ] 重置 HTTP 会话')
             self.session.close()
             self.session = httpx.Client()
+
+
+class HTTPArgument(Argument):
+    pass
+
+
+class HTTPFileArgument(Argument):
+
+    # 参数类型
+    ARGUMENT_TYPE = 'Argument__argtype'
+
+    # 媒体类型
+    ARGUMENT_MIME_TYPE = 'Argument__mimetype'
+
+    def __init__(
+            self,
+            name: str = None,
+            value: str = None,
+            argtype: str = None,
+            mimetype: str = None,
+            desc: str = None,
+            symbol: str = '='
+    ):
+        super().__init__(name, value, desc, symbol)
+        self.argtype = argtype
+        self.mimetype = mimetype
+
+    @property
+    def argtype(self):
+        return self.get_property_as_str(self.ARGUMENT_TYPE)
+
+    @argtype.setter
+    def argtype(self, value):
+        self.set_property(self.ARGUMENT_TYPE, value)
+
+    @property
+    def mimetype(self):
+        return self.get_property_as_str(self.ARGUMENT_MIME_TYPE)
+
+    @mimetype.setter
+    def mimetype(self, value):
+        self.set_property(self.ARGUMENT_MIME_TYPE, value)
+
+    def __str__(self):
+        symbol = self.symbol
+        return (
+            '{\n'
+            f'  "name"{symbol} "{self.name}",\n'
+            f'  "value"{symbol} "{self.value}",\n'
+            f'  "argtype"{symbol} "{self.argtype}"\n'
+            f'  "mimetype"{symbol} "{self.mimetype}",\n'
+            f'  "desc"{symbol} "{self.desc}"\n'
+            '}'
+        )

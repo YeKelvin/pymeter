@@ -14,6 +14,7 @@ from pymeter.engine.interface import SampleListener
 from pymeter.engine.interface import TestCollectionListener
 from pymeter.engine.interface import TestIterationListener
 from pymeter.engine.interface import TestWorkerListener
+from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.time_util import strftime_now
 from pymeter.utils.time_util import timestamp_now
 from pymeter.workers.context import ContextService
@@ -169,15 +170,17 @@ class FlaskSIOResultCollector(
         ...
 
 
-def sample_result_to_dict(result):
+def sample_result_to_dict(result: SampleResult):
     return {
         'id': str(id(result)),
         'name': result.sample_name,
         'remark': result.sample_remark,
-        'url': result.request_url,
-        'request': result.request_data,
+        'requestUrl': result.request_url,
+        'requestData': result.request_data,
+        'requestDecoded': result.request_decoded,
         'requestHeaders': result.request_headers,
-        'response': result.response_data,
+        'responseData': result.response_data,
+        'responseDecoded': result.response_decoded,
         'responseHeaders': result.response_headers,
         'responseCode': result.response_code,
         'responseMessage': result.response_message,
@@ -196,7 +199,7 @@ def sample_result_to_dict(result):
             ),
             None,
         ),
-        'children': [sample_result_to_dict(sub) for sub in result.sub_results]
+        'children': [sample_result_to_dict(sub) for sub in result.subresults]
     }
 
 

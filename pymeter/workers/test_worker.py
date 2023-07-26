@@ -620,12 +620,12 @@ class Coroutine(Greenlet):
         try:
             logger.info(f'线程:[ {self.thread_name} ] 取样器:[ {sampler.name} ] 开始请求')
             result = sampler.sample()
-        except Exception as e:
+        except Exception as err:
             logger.exception('Exception Occurred')
             if not result:
                 result = SampleResult()
                 result.sample_name = sampler.name
-            result.response_data = e
+            result.response_data = str(err)
         finally:
             # 遍历执行 SampleListener
             logger.debug(f'线程:[ {self.thread_name} ] 遍历触发 SampleListener 的结束事件')

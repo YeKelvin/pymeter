@@ -22,14 +22,14 @@ class Argument(TestElement):
     ARGUMENT_DESCRIPTION = 'Argument__desc'
 
     # 参数元数据，其实就是输出str时用来连接name和value的符号，e.g. name=value
-    ARGUMENT_CONNECTOR = 'Argument__connector'
+    ARGUMENT_SYMBOL = 'Argument__symbol'
 
-    def __init__(self, name: str = None, value: str = None, desc: str = None, connector: str = '='):
+    def __init__(self, name: str = None, value: str = None, desc: str = None, symbol: str = '='):
         super().__init__()
         self.name = name
         self.value = value
         self.desc = desc
-        self.connector = connector
+        self.symbol = symbol
 
     @property
     def name(self):
@@ -56,22 +56,23 @@ class Argument(TestElement):
         self.set_property(self.ARGUMENT_DESCRIPTION, value)
 
     @property
-    def connector(self):
-        return self.get_property_as_str(self.ARGUMENT_CONNECTOR)
+    def symbol(self):
+        return self.get_property_as_str(self.ARGUMENT_SYMBOL)
 
-    @connector.setter
-    def connector(self, value):
-        self.set_property(self.ARGUMENT_CONNECTOR, value)
+    @symbol.setter
+    def symbol(self, value):
+        self.set_property(self.ARGUMENT_SYMBOL, value)
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
+        symbol = self.symbol
         return (
-            '{'
-            f'  "name"{self.connector}"{self.name}", '
-            f'  "value"{self.connector}"{self.value}", '
-            f'  "desc"{self.connector}"{self.desc}"'
+            '{\n'
+            f'  "name"{symbol} "{self.name}",\n'
+            f'  "value"{symbol} "{self.value}",\n'
+            f'  "desc"{symbol} "{self.desc}"\n'
             '}'
         )
 
@@ -99,6 +100,9 @@ class Arguments(ConfigTestElement):
 
     def to_dict(self) -> dict:
         return {arg.name: arg.value for arg in self.arguments}
+
+    def to_list(self) -> List[Argument]:
+        return self.arguments
 
     def clear(self):
         self.arguments.clear()

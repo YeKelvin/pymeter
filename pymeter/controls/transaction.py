@@ -111,7 +111,7 @@ class TransactionSampler(Sampler):
             self.no_failing_samples += 1
 
         # Add the sub result to the transaction result
-        self.result.add_sub_result(result)
+        self.result.add_subresult(result)
 
         # Add current time to total for later use (exclude pause time)
         self.total_time += result.elapsed_time - int(result.idle_time * 1000)

@@ -105,8 +105,8 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
     def sampler_occurred_with_subresults(self, result: SampleResult):
         # 插入 Sampler 数据至数据库
         self.insert_test_sampler_result(result)
-        if result.sub_results:
-            for sub in result.sub_results:
+        if result.subresults:
+            for sub in result.subresults:
                 self.sampler_occurred_with_subresults(sub)
 
     def sample_started(self, sample) -> None:
@@ -182,6 +182,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                     if isinstance(result.request_data, str)
                     else to_json(result.request_data)
                 ),
+                REQUEST_DECODED=result.request_decoded,
                 RESPONSE_CODE=str(result.response_code),
                 RESPONSE_HEADERS=(
                     result.response_headers
@@ -193,6 +194,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                     if isinstance(result.response_data, str)
                     else to_json(result.response_data)
                 ),
+                RESPONSE_DECODED=result.response_decoded,
                 FAILED_ASSERTION=failed_assertion_data,
                 CREATED_BY='PyMeter',
                 UPDATED_BY='PyMeter',

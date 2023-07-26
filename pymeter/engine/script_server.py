@@ -26,16 +26,18 @@ MODULES = {
     'TearDownWorker': 'pymeter.workers.teardown_worker',
 
     # 配置器
-    'Argument': 'pymeter.configs.arguments',
     'Arguments': 'pymeter.configs.arguments',
-    'DatabaseEngine': 'pymeter.configs.database',
+    'Argument': 'pymeter.configs.arguments',
+    'HTTPArgument': 'pymeter.configs.httpconfigs',
+    'HTTPFileArgument': 'pymeter.configs.httpconfigs',
     'HTTPHeader': 'pymeter.configs.httpconfigs',
     'HTTPHeaderManager': 'pymeter.configs.httpconfigs',
     'HTTPCookieManager': 'pymeter.configs.httpconfigs',
     'HTTPSessionManager': 'pymeter.configs.httpconfigs',
-    'VariableDataset': 'pymeter.configs.dataset',
     'TransactionParameter': 'pymeter.configs.transactions',
     'TransactionHTTPSessionManager': 'pymeter.configs.transactions',
+    'VariableDataset': 'pymeter.configs.dataset',
+    'DatabaseEngine': 'pymeter.configs.database',
 
     # 逻辑控制器
     'IfController': 'pymeter.controls.if_controller',

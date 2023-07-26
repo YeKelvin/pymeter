@@ -81,7 +81,7 @@ class ResultCollector(
             'endTime': timestamp_to_strftime(result.end_time),
             'elapsedTime': result.elapsed_time,
             'assertions': [str(assertion) for assertion in result.assertions],
-            'subResults': [sub.serialization for sub in result.sub_results]
+            'subResults': [sub.to_dict() for sub in result.subresults]
         })
 
         if not result.success:
