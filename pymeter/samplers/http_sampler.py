@@ -180,7 +180,7 @@ class HTTPSampler(Sampler):
 
             result.success = res.is_success
             result.request_data = self.get_payload(res)
-            result.request_decoded = self.get_parsed_payload()
+            result.request_decoded = self.get_decoded_payload()
             result.request_headers = self.decode_each(dict(res.request.headers))
             result.response_data = rescontent or str(res.status_code)
             result.response_code = res.status_code
@@ -192,7 +192,7 @@ class HTTPSampler(Sampler):
             result.error = True
             result.success = False
             result.request_data = result.request_data
-            result.request_decoded = self.get_parsed_payload()
+            result.request_decoded = self.get_decoded_payload()
             result.request_headers = result.request_headers or self.headers
             result.response_data = str(err)
             result.response_code = 500
@@ -247,20 +247,20 @@ class HTTPSampler(Sampler):
 
         return url + payload
 
-    def get_parsed_payload(self):
+    def get_decoded_payload(self):
         url = f'{self.method} {self.url}'
 
         if querys := self.querys:
             data = [f'{name}={value}' for name, value in querys.items()]
-            return url + '\n\nQUERY DATA:\n' + '\n'.join(data)
+            return url + '\n\nDECODED DATA:\n' + '\n'.join(data)
 
         if forms := self.forms:
             data = [f'{name}={value}' for name, value in forms.items()]
-            return url + '\n\nFORM DATA:\n' + '\n'.join(data)
+            return url + '\n\nDECODED DATA:\n' + '\n'.join(data)
 
         if files := self.files:
             data = [f'{name}={value}' for name, value in files.items()]
-            return url + '\n\nFORM DATA:\n' + '\n'.join(data)
+            return url + '\n\nDECODED DATA:\n' + '\n'.join(data)
 
     def add_test_element(self, el) -> None:
         """@override"""
