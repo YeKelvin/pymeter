@@ -252,15 +252,15 @@ class HTTPSampler(Sampler):
 
         if querys := self.querys:
             data = [f'{name}={value}' for name, value in querys.items()]
-            return url + '\n\nDECODED DATA:\n' + '\n'.join(data)
+            return f'{url}\n\n{self.method} DATA:\n' + '\n'.join(data)
 
         if forms := self.forms:
             data = [f'{name}={value}' for name, value in forms.items()]
-            return url + '\n\nDECODED DATA:\n' + '\n'.join(data)
+            return f'{url}\n\n{self.method} DATA:\n' + '\n'.join(data)
 
         if files := self.files:
             data = [f'{name}={value}' for name, value in files.items()]
-            return url + '\n\nDECODED DATA:\n' + '\n'.join(data)
+            return f'{url}\n\n{self.method} DATA:\n' + '\n'.join(data)
 
     def add_test_element(self, el) -> None:
         """@override"""
