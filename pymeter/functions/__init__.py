@@ -25,7 +25,7 @@ from .fake_bban import FakeBBan  # noqa
 from .fake_email import FakeEmail  # noqa
 from .fake_name import FakeName  # noqa
 from .fake_paragraph import FakeParagraph  # noqa
-from .fake_phone_number import FakePhoneNumber  # noqa
+from .fake_phone import FakePhone  # noqa
 from .fake_sentence import FakeSentence  # noqa
 from .fake_text import FakeText  # noqa
 
@@ -38,5 +38,3 @@ from .ulid import ULID  # noqa
 
 # 时间相关
 from .time import Time  # noqa
-
-from .gateway_sign import GatewaySign  # noqa

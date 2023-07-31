@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : fake_phone_number.py
+# @File    : fake_phone.py
 # @Time    : 2023-06-19 15:00:06
 # @Author  : Kelvin.Ye
 from typing import Final
@@ -10,10 +10,10 @@ from loguru import logger
 from pymeter.functions.function import Function
 
 
-class FakePhoneNumber(Function):
+class FakePhone(Function):
     """伪造一个手机号"""
 
-    REF_KEY: Final = '__FakePhoneNumber'
+    REF_KEY: Final = '__fake_phone'
 
     def __init__(self):
         self.locale = None

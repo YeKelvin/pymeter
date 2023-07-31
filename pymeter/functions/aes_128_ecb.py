@@ -12,7 +12,7 @@ from pymeter.utils import aes_util as aes_cryptor
 
 class AES128ECB(Function):
 
-    REF_KEY: Final = '__AES128ECB'
+    REF_KEY: Final = '__aes_128_ecb'
 
     def __init__(self):
         self.plaintext = None

@@ -12,7 +12,7 @@ from pymeter.utils.random_util import get_phone_number
 
 class Phone(Function):
 
-    REF_KEY: Final = '__Phone'
+    REF_KEY: Final = '__phone'
 
     def __init__(self):
         # 通讯运营商，默认ALL，可选 CMCC | CUCC | TELECOM

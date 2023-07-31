@@ -12,7 +12,7 @@ from pymeter.utils import aes_util as aes_cryptor
 
 class AES(Function):
 
-    REF_KEY: Final = '__AES'
+    REF_KEY: Final = '__aes'
 
     def __init__(self):
         self.plaintext = None

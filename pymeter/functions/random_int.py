@@ -12,7 +12,7 @@ from pymeter.functions.function import Function
 
 class RandomInt(Function):
 
-    REF_KEY: Final = '__RandomInt'
+    REF_KEY: Final = '__random_int'
 
     def __init__(self):
         self.minimum = None

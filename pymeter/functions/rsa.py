@@ -12,7 +12,7 @@ from pymeter.utils import rsa_util as rsa_cryptor
 
 class RSA(Function):
 
-    REF_KEY: Final = '__RSA'
+    REF_KEY: Final = '__rsa'
     PUBLIC_KEY_PREFIX = '-----BEGIN RSA PUBLIC KEY-----\n'
     PUBLIC_KEY_SUFFIX = '\n-----END RSA PUBLIC KEY-----'
 

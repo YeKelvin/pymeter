@@ -12,7 +12,7 @@ from pymeter.functions.function import Function
 
 class Eval(Function):
 
-    REF_KEY: Final = '__Eval'
+    REF_KEY: Final = '__eval'
 
     def __init__(self):
         self.parameter = None

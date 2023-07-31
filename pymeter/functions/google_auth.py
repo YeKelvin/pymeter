@@ -12,7 +12,7 @@ from pymeter.utils.google_util import GoogleAuthenticate
 
 class GoogleAuth(Function):
 
-    REF_KEY: Final = '__GoogleAuth'
+    REF_KEY: Final = '__google_auth'
 
     def __init__(self):
         self.secret_key = None

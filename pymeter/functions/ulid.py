@@ -12,7 +12,7 @@ from pymeter.functions.function import Function
 
 class ULID(Function):
 
-    REF_KEY: Final = '__ULID'
+    REF_KEY: Final = '__ulid'
 
     def execute(self):
         logger.debug(f'执行函数:[ {self.REF_KEY} ]')

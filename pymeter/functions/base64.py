@@ -12,7 +12,7 @@ from pymeter.utils import base64_util
 
 class Base64(Function):
 
-    REF_KEY: Final = '__Base64'
+    REF_KEY: Final = '__base64'
 
     def __init__(self):
         self.data = None

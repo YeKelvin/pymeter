@@ -8,7 +8,7 @@ from pymeter.workers.context import ContextService
 
 class Function:
 
-    REF_KEY = '__referenceKey'
+    REF_KEY = '__reference_key'
 
     @property
     def variables(self):

@@ -12,7 +12,7 @@ from pymeter.functions.function import Function
 
 class MD5(Function):
 
-    REF_KEY: Final = '__MD5'
+    REF_KEY: Final = '__md5'
 
     def __init__(self):
         self.plaintext = None

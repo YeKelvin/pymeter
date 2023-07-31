@@ -12,7 +12,7 @@ from pymeter.functions.function import Function
 
 class Fake(Function):
 
-    REF_KEY: Final = '__Fake'
+    REF_KEY: Final = '__fake'
 
     def __init__(self):
         self.provider = None

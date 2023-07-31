@@ -12,7 +12,7 @@ from pymeter.functions.function import Function
 
 class Hex(Function):
 
-    REF_KEY: Final = '__Hex'
+    REF_KEY: Final = '__hex'
 
     def __init__(self):
         self.data = None

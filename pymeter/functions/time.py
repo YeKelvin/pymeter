@@ -12,7 +12,7 @@ from pymeter.functions.function import Function
 
 class Time(Function):
 
-    REF_KEY: Final = '__Time'
+    REF_KEY: Final = '__time'
 
     def __init__(self):
         self.format = None

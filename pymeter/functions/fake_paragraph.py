@@ -13,7 +13,7 @@ from pymeter.functions.function import Function
 class FakeParagraph(Function):
     """伪造一个段落"""
 
-    REF_KEY: Final = '__FakeParagraph'
+    REF_KEY: Final = '__fake_paragraph'
 
     def __init__(self):
         self.locale = None
