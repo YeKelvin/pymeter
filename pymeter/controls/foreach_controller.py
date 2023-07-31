@@ -89,7 +89,7 @@ class ForeachController(GenericController, IteratingController):
 
         # 获取迭代对象
         if self.object_type == 'OBJECT':
-            self._iter = self.ctx.variables.get(self.foreach_iter) or self.ctx.properties.get(self.foreach_iter)
+            self._iter = self.ctx.variables.get(self.foreach_iter, self.ctx.properties.get(self.foreach_iter))
         elif self.object_type == 'CUSTOM':
             self.exec_iter(self.foreach_iter)
         else:
@@ -97,6 +97,11 @@ class ForeachController(GenericController, IteratingController):
                 f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 对象类型:[ {self.object_type} ] '
                 f'不支持的对象类型'
             )
+            self.done = True
+            return
+
+        if self._iter is None:
+            logger.error(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 迭代对象为None，停止遍历')
             self.done = True
             return
 
