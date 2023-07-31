@@ -79,7 +79,7 @@ class HTTPSampler(Sampler):
     @property
     def querys(self) -> dict:
         args = self.query_manager
-        return args.to_dict() if args else {}
+        return args.to_dict() if isinstance(args, Arguments) else {}
 
     @property
     def form_manager(self) -> Optional[Arguments]:
@@ -88,7 +88,7 @@ class HTTPSampler(Sampler):
     @property
     def forms(self) -> dict:
         args = self.form_manager
-        return args.to_dict() if args else {}
+        return args.to_dict() if isinstance(args, Arguments) else {}
 
     @property
     def file_manager(self) -> Optional[Arguments]:
@@ -97,7 +97,7 @@ class HTTPSampler(Sampler):
     @property
     def files(self) -> List[HTTPFileArgument]:
         args = self.file_manager
-        return args.to_list() if args else []
+        return args.to_list() if isinstance(args, Arguments) else []
 
     @property
     def data(self) -> str:
@@ -123,6 +123,7 @@ class HTTPSampler(Sampler):
         super().__init__(name=name)
         self.session_manager = None
         self.content_type = None
+        self.decoded_payload = None
 
     def initialize(self):
         header_manager = self.header_manager
@@ -159,7 +160,7 @@ class HTTPSampler(Sampler):
                 method=self.method,
                 url=self.url,
                 headers=self.encoded_each(self.headers),
-                params=self.querys,
+                params=self.get_query_params(),
                 data=self.get_body_data(),
                 files=self.get_form_data(),
                 cookies=None,
@@ -180,7 +181,7 @@ class HTTPSampler(Sampler):
 
             result.success = res.is_success
             result.request_data = self.get_payload(res)
-            result.request_decoded = self.get_decoded_payload()
+            result.request_decoded = self.decoded_payload
             result.request_headers = self.decode_each(dict(res.request.headers))
             result.response_data = rescontent or str(res.status_code)
             result.response_code = res.status_code
@@ -191,9 +192,6 @@ class HTTPSampler(Sampler):
             logger.exception('Exception Occurred')
             result.error = True
             result.success = False
-            result.request_data = result.request_data
-            result.request_decoded = self.get_decoded_payload()
-            result.request_headers = result.request_headers or self.headers
             result.response_data = str(err)
             result.response_code = 500
             result.response_message = 'PyMeterException'
@@ -202,14 +200,33 @@ class HTTPSampler(Sampler):
 
         return result
 
+    def get_query_params(self) -> dict:
+        querys = self.querys
+        if querys:
+            decoded = [f'{name}={value}' for name, value in querys.items()]
+            self.decoded_payload = (
+                f'{self.method} {self.url}\n\n{self.method} DATA:\n' +'\n'.join(decoded)
+            )
+        return querys
+
     def get_body_data(self) -> bytes:
         if self.content_type:
             if 'x-www-form-urlencoded' in self.content_type:
-                return self.urlencode(self.forms)
+                return self.get_form_urlencoded()
             if 'multipart/form-data' in self.content_type:
                 return None
 
         return data.encode(encoding=self.encoding) if (data := self.data) else None
+
+    def get_form_urlencoded(self) -> bytes:
+        forms = self.forms
+        if forms:
+            decoded = [f'{name}={value}' for name, value in forms.items()]
+            self.decoded_payload = (
+                f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(decoded)
+            )
+        return self.urlencode(forms)
+
 
     def get_form_data(self) -> dict:
         # sourcery skip: dict-comprehension, remove-redundant-pass
@@ -220,12 +237,17 @@ class HTTPSampler(Sampler):
             return None
 
         files = {}
+        decoded = []
         for item in self.files:
             if item.argtype == 'text':
                 files[item.name] = (None, item.value.encode(encoding=self.encoding))
+                decoded.append(f'{item.name}={item.value}')
             else:
                 # 暂时不支持文件
                 pass
+        if decoded:
+            self.decoded_payload = f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(decoded)
+
         return files
 
     def get_timeout(self) -> Optional[tuple]:
@@ -235,7 +257,7 @@ class HTTPSampler(Sampler):
             else None
         )
 
-    def get_payload(self, res: Response):
+    def get_payload(self, res: Response) -> str:
         # res.url 是转码后的值，如果包含中文，就看不懂了，因为这里是为了展示数据
         req = res.request
         url = f'{req.method} {req.url}'
@@ -246,21 +268,6 @@ class HTTPSampler(Sampler):
             payload = f'\n\n{req.method} DATA:\n{body}'
 
         return url + payload
-
-    def get_decoded_payload(self):
-        if querys := self.querys:
-            data = [f'{name}={value}' for name, value in querys.items()]
-            return f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(data)
-
-        if forms := self.forms:
-            data = [f'{name}={value}' for name, value in forms.items()]
-            return f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(data)
-
-        if files := self.files:
-            data = [f'{name}={value}' for name, value in files.items()]
-            return f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(data)
-
-        return None
 
     def add_test_element(self, el) -> None:
         """@override"""
