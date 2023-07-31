@@ -123,9 +123,13 @@ class HTTPSampler(Sampler):
         super().__init__(name=name)
         self.session_manager = None
         self.content_type = None
-        self.decoded_payload = None
+        self.payload_decoded = None
 
     def initialize(self):
+        if not self.content_type:
+            self.init_content_type()
+
+    def init_content_type(self):
         header_manager = self.header_manager
         if not header_manager:
             return
@@ -181,7 +185,7 @@ class HTTPSampler(Sampler):
 
             result.success = res.is_success
             result.request_data = self.get_payload(res)
-            result.request_decoded = self.decoded_payload
+            result.request_decoded = self.payload_decoded
             result.request_headers = self.decode_each(dict(res.request.headers))
             result.response_data = rescontent or str(res.status_code)
             result.response_code = res.status_code
@@ -204,7 +208,7 @@ class HTTPSampler(Sampler):
         querys = self.querys
         if querys:
             decoded = [f'{name}={value}' for name, value in querys.items()]
-            self.decoded_payload = (
+            self.payload_decoded = (
                 f'{self.method} {self.url}\n\n{self.method} DATA:\n' +'\n'.join(decoded)
             )
         return querys
@@ -222,7 +226,7 @@ class HTTPSampler(Sampler):
         forms = self.forms
         if forms:
             decoded = [f'{name}={value}' for name, value in forms.items()]
-            self.decoded_payload = (
+            self.payload_decoded = (
                 f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(decoded)
             )
         return self.urlencode(forms)
@@ -246,7 +250,7 @@ class HTTPSampler(Sampler):
                 # 暂时不支持文件
                 pass
         if decoded:
-            self.decoded_payload = f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(decoded)
+            self.payload_decoded = f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(decoded)
 
         return files
 
