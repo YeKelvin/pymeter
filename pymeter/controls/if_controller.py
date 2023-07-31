@@ -62,7 +62,7 @@ class IfController(GenericController):
             logger.info(
                 f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] IF逻辑运算\n'
                 f'if条件: {condition}\n'
-                f'if结果: {result}\n'
+                f'if结果: {result}'
             )
             return result
         except Exception:

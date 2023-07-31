@@ -50,8 +50,8 @@ class ForeachController(GenericController, IteratingController):
         try:
             item = self._iter[self._loop_count]
             logger.info(
-                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 第 {self._loop_count + 1} 次遍历\n'
-                f'当前遍历项:{item}\n'
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始第 {self._loop_count + 1} 次遍历\n'
+                f'foreach当前项:{item}'
             )
             if self._target_size > 1 and isinstance(item, Iterable):
                 for i, target in enumerate(self._target):
@@ -127,7 +127,7 @@ class ForeachController(GenericController, IteratingController):
 
         logger.info(
             f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始FOREACH遍历\n'
-            f'遍历数据:{self._iter}\n'
+            f'foreach数据:{self._iter}'
         )
 
         # 存储最后一个索引
