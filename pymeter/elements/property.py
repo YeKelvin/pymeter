@@ -306,10 +306,10 @@ class FunctionProperty(PyMeterProperty):
     def ctx(self):
         return ContextService.get_context()
 
-    def get_raw(self):
+    def get_raw(self) -> str:
         return self.function.raw_parameters
 
-    def get_str(self):
+    def get_str(self) -> str:
         if not self.running_version:
             logger.debug('非运行状态, 返回函数原始字符串')
             return self.function.raw_parameters
@@ -325,6 +325,12 @@ class FunctionProperty(PyMeterProperty):
             self.cache_value = self.function.execute()
 
         return self.cache_value
+
+    def get_bool(self) -> bool:
+        return self.function.has_function
+
+    def get_obj(self) -> None:
+        return None
 
     def recover_running_version(self, owner) -> None:
         self.cache_value = None

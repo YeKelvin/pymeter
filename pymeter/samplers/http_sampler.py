@@ -222,7 +222,7 @@ class HTTPSampler(Sampler):
         files = {}
         for item in self.files:
             if item.argtype == 'text':
-                files[item.name] = (None, item.value)
+                files[item.name] = (None, item.value.encode(encoding=self.encoding))
             else:
                 # 暂时不支持文件
                 pass
@@ -248,19 +248,19 @@ class HTTPSampler(Sampler):
         return url + payload
 
     def get_decoded_payload(self):
-        url = f'{self.method} {self.url}'
-
         if querys := self.querys:
             data = [f'{name}={value}' for name, value in querys.items()]
-            return f'{url}\n\n{self.method} DATA:\n' + '\n'.join(data)
+            return f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(data)
 
         if forms := self.forms:
             data = [f'{name}={value}' for name, value in forms.items()]
-            return f'{url}\n\n{self.method} DATA:\n' + '\n'.join(data)
+            return f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(data)
 
         if files := self.files:
             data = [f'{name}={value}' for name, value in files.items()]
-            return f'{url}\n\n{self.method} DATA:\n' + '\n'.join(data)
+            return f'{self.method} {self.url}\n\n{self.method} DATA:\n' + '\n'.join(data)
+
+        return None
 
     def add_test_element(self, el) -> None:
         """@override"""

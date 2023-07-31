@@ -22,7 +22,7 @@ def snakecase(name):
 
 
 def camelcase(name):
-    """驼峰命名
+    """小驼峰命名
 
     stringcase.camelcase('foo_bar_baz') # => "fooBarBaz"
     stringcase.camelcase('FooBarBaz') # => "fooBarBaz"
@@ -39,3 +39,8 @@ def camelcase(name):
             lst[i] = lst[i].capitalize()
 
     return ''.join(lst)
+
+
+def pascalcase(name):
+    """大驼峰命名"""
+    ...
