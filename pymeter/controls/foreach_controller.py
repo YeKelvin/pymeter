@@ -51,7 +51,7 @@ class ForeachController(GenericController, IteratingController):
             item = self._iter[self._loop_count]
             logger.info(
                 f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 第 {self._loop_count + 1} 次遍历\n'
-                f'当前遍历项:{item}'
+                f'当前遍历项:{item}\n'
             )
             if self._target_size > 1 and isinstance(item, Iterable):
                 for i, target in enumerate(self._target):
@@ -93,7 +93,10 @@ class ForeachController(GenericController, IteratingController):
         elif self.object_type == 'CUSTOM':
             self.exec_iter(self.foreach_iter)
         else:
-            logger.error(f'对象类型:[ {self.object_type} ] 不支持的对象类型')
+            logger.error(
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 对象类型:[ {self.object_type} ] '
+                f'不支持的对象类型'
+            )
             self.done = True
             return
 
@@ -102,13 +105,19 @@ class ForeachController(GenericController, IteratingController):
 
         # 判断是否为可迭代的对象
         if not isinstance(self._iter, Iterable):
-            logger.error(f'迭代对象:[ {self._iter} ] 不是可迭代的对象，停止遍历')
+            logger.error(
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 迭代对象:[ {self._iter} ] '
+                f'不是可迭代的对象，停止遍历'
+            )
             self.done = True
             return
 
         iter_size = len(self._iter)
         if iter_size == 0:
-            logger.error(f'迭代对象:[ {self._iter} ] 迭代对象为空，停止遍历')
+            logger.error(
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 迭代对象:[ {self._iter} ] '
+                f'迭代对象为空，停止遍历'
+            )
             self.done = True
             return
 
@@ -118,7 +127,7 @@ class ForeachController(GenericController, IteratingController):
 
         logger.info(
             f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 开始FOREACH遍历\n'
-            f'遍历数据:{self._iter}'
+            f'遍历数据:{self._iter}\n'
         )
 
         # 存储最后一个索引

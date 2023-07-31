@@ -90,14 +90,14 @@ class WhileController(GenericController, IteratingController):
             logger.info(
                 f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while超过最大循环次数，停止循环\n'
                 f'最大循环次数:[ {self.max_loop_count} ]\n'
-                f'当前循环次数:[ {self.iter_count + 1} ]'
+                f'当前循环次数:[ {self.iter_count + 1} ]\n'
             )
             result = False
         elif self.timeout and (elapsed := int(time.time() * 1000) - int(self._start_time * 1000)) > self.timeout:
             logger.info(
-                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while已超时，停止循环'
+                f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] while已超时，停止循环\n'
                 f'超时时间:[ {self.timeout}ms ]\n'
-                f'循环耗时:[ {elapsed}ms ]'
+                f'循环耗时:[ {elapsed}ms ]\n'
             )
             result = False
         else:
@@ -175,7 +175,7 @@ class WhileController(GenericController, IteratingController):
                 f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] WHILE逻辑运算\n'
                 f'while次数: 第 {self.iter_count + 1} 次\n'
                 f'while条件: {condition}\n'
-                f'while结果: {result}'
+                f'while结果: {result}\n'
             )
             self._while_result = result
             return result
