@@ -8,7 +8,7 @@ import orjson
 from loguru import logger
 from loguru._logger import context as logurucontext
 
-from pymeter.engine import script_server
+from pymeter.engine import script_service
 from pymeter.engine.standard_engine import StandardEngine
 from pymeter.tools.exceptions import InvalidScriptException
 from pymeter.utils.json_util import to_json
@@ -77,7 +77,7 @@ class Runner:
 
         # 加载脚本
         logger.info('开始加载脚本')
-        hashtree = script_server.load_tree(script)
+        hashtree = script_service.load_tree(script)
         logger.info('脚本加载完成')
         logger.debug(f'脚本HashTree结构:\n{hashtree}')
 

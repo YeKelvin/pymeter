@@ -12,69 +12,9 @@ from pymeter.elements.property import CollectionProperty
 from pymeter.elements.property import DictProperty
 from pymeter.engine.hashtree import HashTree
 from pymeter.engine.replacer import ValueReplacer
+from pymeter.engine.save_service import modules
 from pymeter.tools.exceptions import ScriptParseError
 from pymeter.utils.json_util import from_json
-
-
-MODULES = {
-    # 测试集合
-    'TestCollection': 'pymeter.collections.test_collection',
-
-    # 工作线程
-    'SetupWorker': 'pymeter.workers.setup_worker',
-    'TestWorker': 'pymeter.workers.test_worker',
-    'TearDownWorker': 'pymeter.workers.teardown_worker',
-
-    # 配置器
-    'Arguments': 'pymeter.configs.arguments',
-    'Argument': 'pymeter.configs.arguments',
-    'HTTPArgument': 'pymeter.configs.httpconfigs',
-    'HTTPFileArgument': 'pymeter.configs.httpconfigs',
-    'HTTPHeader': 'pymeter.configs.httpconfigs',
-    'HTTPHeaderManager': 'pymeter.configs.httpconfigs',
-    'HTTPCookieManager': 'pymeter.configs.httpconfigs',
-    'HTTPSessionManager': 'pymeter.configs.httpconfigs',
-    'TransactionParameter': 'pymeter.configs.transactions',
-    'TransactionHTTPSessionManager': 'pymeter.configs.transactions',
-    'VariableDataset': 'pymeter.configs.dataset',
-    'DatabaseEngine': 'pymeter.configs.database',
-
-    # 逻辑控制器
-    'IfController': 'pymeter.controls.if_controller',
-    'LoopController': 'pymeter.controls.loop_controller',
-    'WhileController': 'pymeter.controls.while_controller',
-    'ForeachController': 'pymeter.controls.foreach_controller',
-    'RetryController': 'pymeter.controls.retry_controller',
-    'TransactionController': 'pymeter.controls.transaction',
-
-    # 时间控制器
-    'ConstantTimer': 'pymeter.timers.constant_timer',
-
-    # 取样器
-    'SQLSampler': 'pymeter.samplers.sql_sampler',
-    'HTTPSampler': 'pymeter.samplers.http_sampler',
-    'PythonSampler': 'pymeter.samplers.python_sampler',
-
-    # 前置处理器
-    'SleepPrevProcessor': 'pymeter.processors.sleep_prev_processor',
-    'PythonPrevProcessor': 'pymeter.processors.python_prev_processor',
-
-    # 后置处理器
-    'SleepPostProcessor': 'pymeter.processors.sleep_post_processor',
-    'PythonPostProcessor': 'pymeter.processors.python_post_processor',
-    'JsonPathPostProcessor': 'pymeter.processors.jsonpath_post_processor',
-
-    # 断言器
-    'PythonAssertion': 'pymeter.assertions.python_assertion',
-    'JsonPathAssertion': 'pymeter.assertions.jsonpath_assertion',
-
-    # 监听器
-    'ResultCollector': 'pymeter.listeners.result_collector',
-    'FlaskDBResultStorage': 'pymeter.listeners.flask_db_result_storage',
-    'FlaskDBIterationStorage': 'pymeter.listeners.flask_db_iteration_storage',
-    'FlaskSIOResultCollector': 'pymeter.listeners.flask_sio_result_collector',
-    'SocketResultCollector': 'pymeter.listeners.socket_result_collector'
-}
 
 
 def load_tree(source) -> HashTree:
@@ -206,7 +146,7 @@ def __set_collection_property__(node, key, value: list):
 
 def __get_class_type__(classname: str) -> type:
     """根据类名获取类"""
-    module_path = MODULES.get(classname)
+    module_path = modules.get(classname)
     if not module_path:
         raise ScriptParseError(f'类名:[ {classname} ] 节点类型不存在')
 
