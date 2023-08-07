@@ -48,13 +48,16 @@ class UnsupportedOperationError(Exception):
     ...
 
 
-class HttpHeaderDuplicateException(Exception):
+class HTTPHeaderDuplicateException(Exception):
     ...
 
 
-class HttpCookieDuplicateException(Exception):
+class HTTPCookieDuplicateException(Exception):
     ...
 
 
 class FunctionError(Exception):
+    ...
+
+class UserInterruptedError(Exception):
     ...

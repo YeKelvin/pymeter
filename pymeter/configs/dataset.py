@@ -5,9 +5,9 @@
 from loguru import logger
 
 from pymeter.configs.arguments import Arguments
-from pymeter.engine.interface import NoConfigMerge
-from pymeter.engine.interface import NoThreadClone
-from pymeter.engine.interface import TestCollectionListener
+from pymeter.engines.interface import NoConfigMerge
+from pymeter.engines.interface import NoThreadClone
+from pymeter.engines.interface import TestCollectionListener
 from pymeter.workers.context import ContextService
 
 

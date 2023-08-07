@@ -9,11 +9,11 @@ import arrow
 from dateutil import tz
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoThreadClone
-from pymeter.engine.interface import SampleListener
-from pymeter.engine.interface import TestCollectionListener
-from pymeter.engine.interface import TestIterationListener
-from pymeter.engine.interface import TestWorkerListener
+from pymeter.engines.interface import NoThreadClone
+from pymeter.engines.interface import SampleListener
+from pymeter.engines.interface import TestCollectionListener
+from pymeter.engines.interface import TestIterationListener
+from pymeter.engines.interface import TestWorkerListener
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils.time_util import strftime_now
 from pymeter.utils.time_util import timestamp_now
@@ -24,16 +24,15 @@ class FlaskSIOResultCollector(
     TestElement, TestCollectionListener, TestWorkerListener, SampleListener, TestIterationListener, NoThreadClone
 ):
 
-    # 消息接收方的 sid
-    SID: Final = 'FlaskSIOResultCollector__sid'
+    SOCKET_ID: Final = 'FlaskSIOResultCollector__socket_id'
 
     RESULT_ID: Final = 'FlaskSIOResultCollector__result_id'
 
     RESULT_NAME: Final = 'FlaskSIOResultCollector__result_name'
 
     @property
-    def sid(self):
-        return self.get_property_as_str(self.SID)
+    def socket_id(self):
+        return self.get_property_as_str(self.SOCKET_ID)
 
     @property
     def result_id(self):
@@ -66,16 +65,16 @@ class FlaskSIOResultCollector(
         self.flask_sio_instance_name = 'socketio'
 
         self.namespace = '/'
-        self.result_summary_event = 'pymeter_result_summary'
-        self.result_worker_event = 'pymeter_worker_result'
-        self.result_sampler_event = 'pymeter_sampler_result'
+        self.result_summary_event = 'pymeter:result_summary'
+        self.result_worker_event = 'pymeter:worker_result'
+        self.result_sampler_event = 'pymeter:sampler_result'
 
     def init_flask_sio(self):
         module = importlib.import_module(self.flask_sio_instance_module)
         self.flask_sio = getattr(module, self.flask_sio_instance_name)
 
     def emit(self, name, data):
-        self.flask_sio.emit(name, data, namespace=self.namespace, to=self.sid)
+        self.flask_sio.emit(name, data, namespace=self.namespace, to=self.socket_id)
 
     def get_collection_elapsed_time(self):
         return int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)

@@ -11,7 +11,7 @@ from loguru import logger
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.generic_controller import GenericController
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import LoopIterationListener
+from pymeter.engines.interface import LoopIterationListener
 from pymeter.samplers.sampler import Sampler
 
 

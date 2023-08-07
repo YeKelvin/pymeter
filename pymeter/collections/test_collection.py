@@ -19,7 +19,7 @@ class TestCollection(Collection):
     DELAY: Final = 'TestCollection__delay'
 
     @property
-    def serialized(self):
+    def sequential(self):
         return self.get_property_as_bool(self.SERIALIZE_WORKERS)
 
     @property

@@ -9,9 +9,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 
 from pymeter.elements.element import ConfigTestElement
-from pymeter.engine.interface import NoConfigMerge
-from pymeter.engine.interface import NoThreadClone
-from pymeter.engine.interface import TestCollectionListener
+from pymeter.engines.interface import NoConfigMerge
+from pymeter.engines.interface import NoThreadClone
+from pymeter.engines.interface import TestCollectionListener
 from pymeter.workers.context import ContextService
 
 

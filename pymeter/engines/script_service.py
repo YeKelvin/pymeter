@@ -10,9 +10,9 @@ from typing import Tuple
 from pymeter.elements.element import TestElement
 from pymeter.elements.property import CollectionProperty
 from pymeter.elements.property import DictProperty
-from pymeter.engine.hashtree import HashTree
-from pymeter.engine.replacer import ValueReplacer
-from pymeter.engine.save_service import modules
+from pymeter.engines.hashtree import HashTree
+from pymeter.engines.replacer import ValueReplacer
+from pymeter.engines.save_service import modules
 from pymeter.tools.exceptions import ScriptParseError
 from pymeter.utils.json_util import from_json
 

@@ -17,4 +17,4 @@ class SocketIOHandler(logging.Handler):
     def emit(self, record):
         if record.extra.get('sid') != self.sid:
             return
-        self.sio.emit('pymeter_log', self.format(record) + self.terminator, namespace='/', to=self.sid)
+        self.sio.emit('pymeter:log', self.format(record) + self.terminator, namespace='/', to=self.sid)

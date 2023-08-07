@@ -4,6 +4,8 @@
 # @Author  : Kelvin.Ye
 from contextvars import ContextVar
 
+from loguru._logger import context as logurucontext
+
 from pymeter.utils import time_util
 from pymeter.workers.variables import Variables
 
@@ -25,18 +27,18 @@ class ThreadContext:
         self.thread = None
         self.thread_number = None
         self.thread_name = None
-        self.current_sampler = None
         self.previous_sampler = None
         self.previous_result = None
+        self.current_sampler = None
 
     def clear(self):
         self.variables = None
         self.worker = None
         self.thread = None
         self.thread_number = None
-        self.current_sampler = None
         self.previous_sampler = None
         self.previous_result = None
+        self.current_sampler = None
 
     def set_current_sampler(self, sampler):
         self.previous_sampler = self.current_sampler
@@ -104,3 +106,13 @@ class ContextService:
         engine_ctx.total_threads = 0
         engine_ctx.number_of_threads_started = 0
         engine_ctx.number_of_threads_finished = 0
+
+    @classmethod
+    def init_loguru(cls) -> None:
+        """loguru注入traceid和sid"""
+        engine = cls.get_context().engine
+        logurucontext.set({
+            **logurucontext.get(),
+            'traceid': engine.extra.get('traceid'),
+            'sid': engine.extra.get('sid')
+        })

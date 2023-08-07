@@ -9,7 +9,6 @@ from typing import Optional
 import gevent
 from gevent import Greenlet
 from loguru import logger
-from loguru._logger import context as logurucontext
 
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.controls.controller import Controller  # noqa
@@ -18,21 +17,22 @@ from pymeter.controls.loop_controller import LoopController
 from pymeter.controls.retry_controller import RetryController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import TestElement
-from pymeter.engine.hashtree import HashTree
-from pymeter.engine.interface import LoopIterationListener
-from pymeter.engine.interface import SampleListener
-from pymeter.engine.interface import TestCompilerHelper
-from pymeter.engine.interface import TestIterationListener
-from pymeter.engine.interface import TestWorkerListener
-from pymeter.engine.traverser import FindTestElementsUpToRoot
-from pymeter.engine.traverser import SearchByClass
-from pymeter.engine.traverser import TestCompiler
-from pymeter.engine.traverser import TreeCloner
+from pymeter.engines.hashtree import HashTree
+from pymeter.engines.interface import LoopIterationListener
+from pymeter.engines.interface import SampleListener
+from pymeter.engines.interface import TestCompilerHelper
+from pymeter.engines.interface import TestIterationListener
+from pymeter.engines.interface import TestWorkerListener
+from pymeter.engines.traverser import FindTestElementsUpToRoot
+from pymeter.engines.traverser import SearchByClass
+from pymeter.engines.traverser import TestCompiler
+from pymeter.engines.traverser import TreeCloner
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.tools.exceptions import StopTestException
 from pymeter.tools.exceptions import StopTestNowException
 from pymeter.tools.exceptions import StopTestWorkerException
+from pymeter.tools.exceptions import UserInterruptedError
 from pymeter.workers.context import ContextService
 from pymeter.workers.context import ThreadContext
 from pymeter.workers.package import SamplePackage
@@ -239,7 +239,7 @@ class TestWorker(Worker, TestCompilerHelper):
         """
         thread_name = f'{self.name} @ w{self.worker_number}t{thread_number + 1}'
         coroutine = Coroutine(self.__clone_worker_tree())
-        coroutine.initial_context(context)
+        coroutine.init_context(context)
         coroutine.engine = engine
         coroutine.worker = self
         coroutine.thread_number = thread_number
@@ -289,7 +289,7 @@ class Coroutine(Greenlet):
         self.worker_tree.traverse(test_iteration_listener_searcher)
         self.test_iteration_listeners = test_iteration_listener_searcher.get_search_result()
 
-    def initial_context(self, context: ThreadContext) -> None:
+    def init_context(self, context: ThreadContext) -> None:
         """将父线程（运行 StandardEngine 的线程）的局部变量赋值给子线程的局部变量中"""
         self.variables.update(context.variables)
 
@@ -309,12 +309,8 @@ class Coroutine(Greenlet):
         context.variables = self.variables
         context.variables.put(self.LAST_SAMPLE_OK, True)
 
-        # log注入traceid和sid
-        logurucontext.set({
-            **logurucontext.get(),
-            'traceid': self.engine.extra.get('traceid'),
-            'sid': self.engine.extra.get('sid')
-        })
+        # loguru注入trace_id和socket_id
+        ContextService.init_loguru()
 
         # 编译 TestWorker 的子代节点
         logger.debug('开始编译工作者节点')
@@ -341,6 +337,9 @@ class Coroutine(Greenlet):
         # noinspection PyBroadException
         try:
             while self.running:
+                # 判断用户是否主动中断
+                if self.engine.stop_event.is_set():
+                    raise UserInterruptedError()
                 # 获取下一个Sampler
                 sampler = self.worker_main_controller.next()
                 # 循环处理Sampler
@@ -368,6 +367,9 @@ class Coroutine(Greenlet):
             self.stop_test()
         except StopTestNowException:
             logger.debug(f'线程:[ {self.thread_name} ] 捕获:[ StopTestNowException ] 立即停止测试')
+            self.stop_now()
+        except UserInterruptedError:
+            logger.warning('用户主动中断，立即停止测试')
             self.stop_now()
         except Exception:
             logger.exception('Exception Occurred')

@@ -9,8 +9,8 @@ from loguru import logger
 from pymeter.assertions.assertion import Assertion
 from pymeter.controls.controller import Controller
 from pymeter.elements.element import ConfigElement
-from pymeter.engine.interface import SampleListener
-from pymeter.engine.interface import TransactionListener
+from pymeter.engines.interface import SampleListener
+from pymeter.engines.interface import TransactionListener
 from pymeter.processors.post import PostProcessor
 from pymeter.processors.prev import PrevProcessor
 from pymeter.timers.timer import Timer

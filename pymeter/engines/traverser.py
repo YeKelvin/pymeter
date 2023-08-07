@@ -4,7 +4,9 @@
 # @Author  : Kelvin.Ye
 from collections import deque
 from typing import Dict
+from typing import Generic
 from typing import List
+from typing import TypeVar
 
 from loguru import logger
 
@@ -14,13 +16,13 @@ from pymeter.controls.transaction import TransactionController
 from pymeter.controls.transaction import TransactionSampler
 from pymeter.elements.element import ConfigElement
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import LoopIterationListener
-from pymeter.engine.interface import NoConfigMerge
-from pymeter.engine.interface import NoThreadClone
-from pymeter.engine.interface import SampleListener
-from pymeter.engine.interface import TestCompilerHelper
-from pymeter.engine.interface import TransactionConfig
-from pymeter.engine.interface import TransactionListener
+from pymeter.engines.interface import LoopIterationListener
+from pymeter.engines.interface import NoConfigMerge
+from pymeter.engines.interface import NoThreadClone
+from pymeter.engines.interface import SampleListener
+from pymeter.engines.interface import TestCompilerHelper
+from pymeter.engines.interface import TransactionConfig
+from pymeter.engines.interface import TransactionListener
 from pymeter.processors.post import PostProcessor
 from pymeter.processors.prev import PrevProcessor
 from pymeter.samplers.sampler import Sampler
@@ -32,6 +34,9 @@ from pymeter.workers.worker import Worker
 
 # 调试日志开关
 DEBUG = False
+
+# 定义泛型
+T = TypeVar('T')
 
 
 def pretty_output_stack(list):
@@ -120,18 +125,18 @@ class ConvertToString(HashTreeTraverser):
         return self.__str__()
 
 
-class SearchByClass(HashTreeTraverser):
+class SearchByClass(HashTreeTraverser, Generic[T]):
 
-    def __init__(self, search_class: type):
+    def __init__(self, search_class: T):
         self.objects_of_class = []
         self.subtrees = {}
         self.search_class = search_class
 
     @property
-    def count(self):
+    def count(self) -> int:
         return len(self.objects_of_class)
 
-    def get_search_result(self) -> list:
+    def get_search_result(self) -> List[T]:
         return self.objects_of_class
 
     def get(self, node: object):
@@ -141,7 +146,7 @@ class SearchByClass(HashTreeTraverser):
         """@override"""
         if isinstance(node, self.search_class):
             self.objects_of_class.append(node)
-            from pymeter.engine.hashtree import HashTree
+            from pymeter.engines.hashtree import HashTree
             tree = HashTree()
             tree.put(node, subtree)
             self.subtrees[node] = tree
@@ -159,7 +164,7 @@ class TreeCloner(HashTreeTraverser):
     """克隆 HashTree，默认情况下跳过实现 NoThreadClone 的节点"""
 
     def __init__(self, enable_no_clone: bool = True):
-        from pymeter.engine.hashtree import HashTree
+        from pymeter.engines.hashtree import HashTree
         self.new_tree = HashTree()
         self.tree_path = []
         self.enable_no_clone = enable_no_clone

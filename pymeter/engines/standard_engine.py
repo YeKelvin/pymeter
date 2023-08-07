@@ -5,19 +5,13 @@
 import logging
 from typing import List
 
-from gevent import Greenlet
 from loguru import logger
-from loguru._logger import context as logurucontext
 
-from pymeter.collections.test_collection import TestCollection
 from pymeter.elements.element import TestElement
-from pymeter.engine.context import EngineContext
-from pymeter.engine.hashtree import HashTree
-from pymeter.engine.interface import TestCollectionListener
-from pymeter.engine.properties import Properties
-from pymeter.engine.traverser import SearchByClass
+from pymeter.engines.engine import Engine
+from pymeter.engines.interface import TestCollectionListener
+from pymeter.engines.traverser import SearchByClass
 from pymeter.listeners.result_collector import ResultCollector
-from pymeter.tools.exceptions import EngineException
 from pymeter.tools.exceptions import StopTestException
 from pymeter.workers.context import ContextService
 from pymeter.workers.setup_worker import SetupWorker
@@ -25,76 +19,31 @@ from pymeter.workers.teardown_worker import TearDownWorker
 from pymeter.workers.test_worker import TestWorker
 
 
-class StandardEngine(Greenlet):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.running = False
-        self.active = False
-        self.tree = None
-        self.collection = None
-        self.serialized = True          # 是否顺序运行
-        self.workers = []               # 储存已启动的worker
-        self.context = EngineContext()
-        self.extra = kwargs.get('extra', {})
-        self.properties = Properties()
-        self.properties.update(kwargs.get('props', {}))
-
-    def configure(self, tree: HashTree) -> None:
-        """将脚本配置到执行引擎中"""
-        # 查找脚本顶层列表中的 TestCollection 对象
-        searcher = SearchByClass(TestCollection)
-        tree.traverse(searcher)
-        collections = searcher.get_search_result()
-
-        if len(collections) == 0:
-            raise EngineException('集合不允许为空')
-
-        self.collection: TestCollection = collections[0]
-        self.serialized = self.collection.serialized
-        self.active = True
-        self.tree = tree
-
-    def run_test(self) -> None:
-        """运行脚本，这里主要做异常捕获"""
-        try:
-            self.start()  # _run()
-            self.join()  # 等待主线程结束
-        except EngineException as e:
-            logger.error(e)
-        except Exception:
-            logger.exception('Exception Occurred')
+class StandardEngine(Engine):
 
     def _run(self, *args, **kwargs) -> None:
-        """脚本运行主体"""
+        """运行脚本的主体"""
+        # 测试开始
         logger.info('开始运行脚本')
-
-        # log注入traceid和sid
-        logurucontext.set({
-            **logurucontext.get(),
-            'traceid': self.extra.get('traceid'),
-            'sid': self.extra.get('sid')
-        })
-
-        # 标记运行状态
-        self.running = True
 
         # 上下文存储引擎和全局变量
         ctx = ContextService.get_context()
         ctx.engine = self
         ctx.variables.update(self.properties)
+        # loguru注入trace_id和socket_id
+        ContextService.init_loguru()
         # 上下文标记开始运行
         ContextService.start_test()
 
         # 查找 TestCollectionListener 对象
         collection_listener_searcher = SearchByClass(TestCollectionListener)
-        self.tree.traverse(collection_listener_searcher)
+        self.collection_tree.traverse(collection_listener_searcher)
 
         # 遍历执行 TestCollectionListener
         self._notify_collection_listeners_of_start(collection_listener_searcher)
 
         # 存储 TestCollection 子代节点(非 TestWorker 节点)
-        collection_component_list = self.tree.index(0).list()
+        collection_component_list = self.collection_tree.index(0).list()
         self._remove_workers(collection_component_list)  # 删除 TestWorker 节点
         self._add_level(collection_component_list)       # 添加层级
 
@@ -104,9 +53,9 @@ class StandardEngine(Greenlet):
         teardown_worker_searcher = SearchByClass(TearDownWorker)
 
         # 遍历查找
-        self.tree.traverse(setup_worker_searcher)
-        self.tree.traverse(test_worker_searcher)
-        self.tree.traverse(teardown_worker_searcher)
+        self.collection_tree.traverse(setup_worker_searcher)
+        self.collection_tree.traverse(test_worker_searcher)
+        self.collection_tree.traverse(teardown_worker_searcher)
 
         ContextService.clear_total_threads()
         worker_total = 0
@@ -127,13 +76,12 @@ class StandardEngine(Greenlet):
         # DEBUG时输出结果
         if logger.level == logging.DEBUG:
             result_collector_searcher = SearchByClass(ResultCollector)
-            self.tree.traverse(result_collector_searcher)
+            self.collection_tree.traverse(result_collector_searcher)
             result_collectors = result_collector_searcher.get_search_result()
             for result_collector in result_collectors:
                 logger.debug(f'取样结果:\n{result_collector.__dict__}')
 
         # 测试结束
-        self.active = False
         ContextService.end_test()
         logger.info('脚本运行完成')
 
@@ -153,7 +101,7 @@ class StandardEngine(Greenlet):
                 self._start_worker(setup_worker, worker_count, setup_worker_searcher, collection_component_list)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
-                if self.serialized:
+                if self.sequential:
                     logger.info(f'工作者:[ {worker_name} ] 等待当前 #前置工作者# 执行完成')
                     setup_worker.wait_workers_stopped()
             except StopIteration:
@@ -171,7 +119,7 @@ class StandardEngine(Greenlet):
         if not test_worker_searcher.count:
             return 0
 
-        logger.info(f'开始 #{"串行" if self.serialized else "并行"}# 处理 #工作者#')
+        logger.info(f'开始 #{"串行" if self.sequential else "并行"}# 处理 #工作者#')
         worker_count = 0
         test_worker_iter = iter(test_worker_searcher.get_search_result())
         while self.running:
@@ -185,7 +133,7 @@ class StandardEngine(Greenlet):
                 self._start_worker(test_worker, worker_count, test_worker_searcher, collection_component_list)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
-                if self.serialized:
+                if self.sequential:
                     logger.info(f'工作者:[ {worker_name} ] 等待当前 #工作者# 执行完成')
                     test_worker.wait_workers_stopped()
             except StopIteration:
@@ -195,7 +143,7 @@ class StandardEngine(Greenlet):
         if worker_count > 0:
             if not self.running:
                 logger.info('测试已停止，不再启动剩余的 #工作者# ')
-            if not self.serialized:
+            if not self.sequential:
                 logger.info('等待所有 #工作者# 执行完成')
 
         logger.info('等待所有 #工作者# 执行完成')
@@ -221,7 +169,7 @@ class StandardEngine(Greenlet):
                 self._start_worker(teardown_worker, worker_count, teardown_worker_searcher, collection_component_list)
 
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
-                if self.serialized:
+                if self.sequential:
                     logger.info(f'工作者:[ {worker_name} ] 等待当前 #后置工作者# 完成')
                     teardown_worker.wait_workers_stopped()
             except StopIteration:
@@ -234,18 +182,6 @@ class StandardEngine(Greenlet):
         ContextService.clear_total_threads()
         logger.info('所有 #后置工作者# 已执行完成')
         return worker_count
-
-    def stop_test(self):
-        """停止所有 TestWorker（等待当前已启动的所有的 TestWorker 执行完成且不再执行剩余的 TestWorker）"""
-        self.running = False
-        for worker in self.workers:
-            worker.stop_threads()
-
-    def stop_test_now(self):
-        """立即停止测试（强制中断所有的线程）"""
-        self.running = False
-        for worker in self.workers:
-            worker.kill_workers()
 
     def _start_worker(
         self,

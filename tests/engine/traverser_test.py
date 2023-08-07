@@ -5,8 +5,8 @@
 import pathlib
 
 from pymeter.collections.test_collection import TestCollection
-from pymeter.engine import script_service
-from pymeter.engine.traverser import SearchByClass
+from pymeter.engines import script_service
+from pymeter.engines.traverser import SearchByClass
 
 
 class SearchByClassTest:

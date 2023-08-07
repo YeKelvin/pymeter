@@ -9,11 +9,11 @@ import socketio
 from loguru import logger
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoThreadClone
-from pymeter.engine.interface import SampleListener
-from pymeter.engine.interface import TestCollectionListener
-from pymeter.engine.interface import TestIterationListener
-from pymeter.engine.interface import TestWorkerListener
+from pymeter.engines.interface import NoThreadClone
+from pymeter.engines.interface import SampleListener
+from pymeter.engines.interface import TestCollectionListener
+from pymeter.engines.interface import TestIterationListener
+from pymeter.engines.interface import TestWorkerListener
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.utils import time_util
 from pymeter.utils.json_util import from_json

@@ -6,7 +6,7 @@ from typing import Final
 
 from loguru import logger
 
-from pymeter.engine import replacer
+from pymeter.engines import replacer
 from pymeter.functions.function import Function
 
 

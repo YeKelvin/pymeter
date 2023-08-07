@@ -6,9 +6,9 @@ import importlib
 from typing import Final
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import NoThreadClone
-from pymeter.engine.interface import SampleListener
-from pymeter.engine.interface import TestCollectionListener
+from pymeter.engines.interface import NoThreadClone
+from pymeter.engines.interface import SampleListener
+from pymeter.engines.interface import TestCollectionListener
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.workers.context import ContextService
 

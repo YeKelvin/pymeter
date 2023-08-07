@@ -8,8 +8,8 @@ from typing import Optional
 from loguru import logger
 
 from pymeter.controls.controller import Controller
-from pymeter.engine.interface import LoopIterationListener
-from pymeter.engine.interface import TestCompilerHelper
+from pymeter.engines.interface import LoopIterationListener
+from pymeter.engines.interface import TestCompilerHelper
 from pymeter.samplers.sampler import Sampler
 from pymeter.tools.exceptions import NextIsNullException
 from pymeter.workers.context import ContextService

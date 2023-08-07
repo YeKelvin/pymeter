@@ -16,6 +16,10 @@ def to_json(obj: dict or list) -> str:
     """序列化"""
     return orjson.dumps(obj).decode('utf8')
 
+def to_pretty_json(obj: dict or list) -> str:
+    """序列化"""
+    return orjson.dumps(obj, option=orjson.OPT_INDENT_2).decode('utf8')
+
 
 def from_json(val):
     """反序列化"""

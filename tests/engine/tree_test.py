@@ -2,8 +2,8 @@
 # @File    : tree_test
 # @Time    : 2020/3/11 11:29
 # @Author  : Kelvin.Ye
-from pymeter.engine.hashtree import HashTree
-from pymeter.engine.traverser import HashTreeTraverser
+from pymeter.engines.hashtree import HashTree
+from pymeter.engines.traverser import HashTreeTraverser
 
 
 class TestTraverser(HashTreeTraverser):

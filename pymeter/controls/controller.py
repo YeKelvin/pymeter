@@ -6,7 +6,7 @@ from abc import ABCMeta
 from abc import abstractmethod
 
 from pymeter.elements.element import TestElement
-from pymeter.engine.interface import LoopIterationListener
+from pymeter.engines.interface import LoopIterationListener
 from pymeter.samplers.sampler import Sampler
 from pymeter.workers.context import ContextService
 

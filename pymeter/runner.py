@@ -5,13 +5,14 @@
 import time
 
 import orjson
+from gevent.event import Event
 from loguru import logger
 from loguru._logger import context as logurucontext
 
-from pymeter.engine import script_service
-from pymeter.engine.standard_engine import StandardEngine
+from pymeter.engines import script_service
+from pymeter.engines.standard_engine import StandardEngine
 from pymeter.tools.exceptions import InvalidScriptException
-from pymeter.utils.json_util import to_json
+from pymeter.utils.json_util import to_pretty_json
 from pymeter.utils.log_util import SocketIOHandler
 
 
@@ -20,15 +21,17 @@ class Runner:
     @staticmethod
     def start(
             script: str or list,
-            throw_ex: bool = False,
             extra: dict = None,
+            throw_ex: bool = False,
+            stop_event: Event = None
     ) -> None:
         """执行脚本
 
         Args:
-            script:    脚本
-            throw_ex:  是否抛出异常
-            extra:     外部扩展，用于传递外部对象
+            script:     脚本
+            extra:      外部扩展，用于传递外部对象
+            throw_ex:   是否抛出异常
+            stop_event: 停止信号
 
         Retruns:
             None
@@ -58,8 +61,8 @@ class Runner:
         })
 
         try:
-            logger.debug(f'脚本:\n{to_json(script)}')
-            Runner.run(script, extra)
+            logger.debug(f'脚本:\n{to_pretty_json(script)}')
+            Runner.run(script, extra, stop_event)
         except Exception:
             logger.exception('Exception Occurred')
             if throw_ex:
@@ -69,8 +72,8 @@ class Runner:
                 logger.remove(socket_logger_id)
 
     @staticmethod
-    def run(script: str, extra=None) -> None:
-        """加载并解析脚本，将脚本反序列化为 HashTree对象"""
+    def run(script: str, extra: dict=None, stop_event: Event=None) -> None:
+        # 记录时间
         now = time.time()
         ymd = time.strftime('%Y-%m-%d', time.localtime(now))
         hms = time.strftime('%H:%M:%S', time.localtime(now))
@@ -88,10 +91,11 @@ class Runner:
                 'START.MS': int(now * 1000),
                 'START.YMD': ymd,
                 'START.HMS': hms
-            }
+            },
+            stop_event=stop_event
         )
+        # 配置脚本
         engine.configure(hashtree)
-
         # 开始执行测试
         engine.run_test()
 

@@ -5,8 +5,8 @@
 import os
 
 from pymeter import config as CONFIG
-from pymeter.engine import script_service
-from pymeter.engine.traverser import TreeCloner
+from pymeter.engines import script_service
+from pymeter.engines.traverser import TreeCloner
 
 
 class ScriptServerTest:
