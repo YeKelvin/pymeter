@@ -70,3 +70,6 @@ class Engine(Greenlet):
         self.running = False
         for worker in self.workers:
             worker.kill_workers()
+
+    def is_interrupted(self):
+        return self.stop_event and self.stop_event.is_set()

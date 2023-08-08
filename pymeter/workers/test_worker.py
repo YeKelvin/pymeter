@@ -338,7 +338,7 @@ class Coroutine(Greenlet):
         try:
             while self.running:
                 # 判断用户是否主动中断
-                if self.engine.stop_event.is_set():
+                if self.engine.is_interrupted():
                     raise UserInterruptedError()
                 # 获取下一个Sampler
                 sampler = self.worker_main_controller.next()
