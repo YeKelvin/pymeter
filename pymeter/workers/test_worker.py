@@ -189,7 +189,7 @@ class TestWorker(Worker, TestCompilerHelper):
         else:
             return False
 
-    def wait_workers_stopped(self) -> None:
+    def wait_threads_stopped(self) -> None:
         """等待所有线程停止"""
         for worker in self.workers:
             if not worker.dead:
@@ -201,7 +201,7 @@ class TestWorker(Worker, TestCompilerHelper):
         for worker in self.workers:
             worker.stop_thread()
 
-    def kill_workers(self) -> None:
+    def kill_threads(self) -> None:
         """杀死所有线程"""
         self.running = False
         for worker in self.workers:

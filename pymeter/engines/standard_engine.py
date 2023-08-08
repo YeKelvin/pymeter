@@ -103,7 +103,7 @@ class StandardEngine(Engine):
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.sequential:
                     logger.info(f'工作者:[ {worker_name} ] 等待当前 #前置工作者# 执行完成')
-                    setup_worker.wait_workers_stopped()
+                    setup_worker.wait_threads_stopped()
             except StopIteration:
                 logger.info('所有 #前置工作者# 已启动')
                 break
@@ -135,7 +135,7 @@ class StandardEngine(Engine):
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.sequential:
                     logger.info(f'工作者:[ {worker_name} ] 等待当前 #工作者# 执行完成')
-                    test_worker.wait_workers_stopped()
+                    test_worker.wait_threads_stopped()
             except StopIteration:
                 logger.info('所有 #工作者# 已启动')
                 break
@@ -171,7 +171,7 @@ class StandardEngine(Engine):
                 # 需要顺序执行时，则等待当前线程执行完毕再继续下一个循环
                 if self.sequential:
                     logger.info(f'工作者:[ {worker_name} ] 等待当前 #后置工作者# 完成')
-                    teardown_worker.wait_workers_stopped()
+                    teardown_worker.wait_threads_stopped()
             except StopIteration:
                 logger.info('所有 #后置工作者# 已启动')
                 break
@@ -220,7 +220,7 @@ class StandardEngine(Engine):
     def _wait_workers_stopped(self) -> None:
         """等待所有线程执行完成"""
         for worker in self.workers:
-            worker.wait_workers_stopped()
+            worker.wait_threads_stopped()
 
     @staticmethod
     def _notify_collection_listeners_of_start(searcher: SearchByClass) -> None:

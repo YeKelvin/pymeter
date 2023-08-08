@@ -69,7 +69,7 @@ class Engine(Greenlet):
         """立即停止测试（强制中断所有的线程）"""
         self.running = False
         for worker in self.workers:
-            worker.kill_workers()
+            worker.kill_threads()
 
     def is_interrupted(self):
         return self.stop_event and self.stop_event.is_set()
