@@ -11,7 +11,6 @@ from gevent import Greenlet
 from loguru import logger
 
 from pymeter.assertions.assertion import AssertionResult
-from pymeter.controls.controller import Controller  # noqa
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.loop_controller import LoopController
 from pymeter.controls.retry_controller import RetryController
@@ -270,9 +269,9 @@ class Coroutine(Greenlet):
         self.start_time = 0
         self.end_time = 0
         self.engine = None
-        self.worker = None                                   # type: Optional[TestWorker]
+        self.worker = None
         self.worker_tree = worker_tree
-        self.worker_main_controller = worker_tree.list()[0]   # type: Controller
+        self.worker_main_controller = worker_tree.list()[0]
         self.thread_name = None
         self.thread_number = None
         self.variables = Variables()
@@ -337,16 +336,15 @@ class Coroutine(Greenlet):
         # noinspection PyBroadException
         try:
             while self.running:
-                # 判断用户是否主动中断
-                if self.engine.is_interrupted():
-                    raise UserInterruptedError()
                 # 获取下一个Sampler
                 sampler = self.worker_main_controller.next()
                 # 循环处理Sampler
                 while self.running and sampler:
-                    logger.debug(f'线程:[ {self.thread_name} ] 当前取样器:[ {sampler} ]')
+                    # 判断用户是否主动中断
+                    if self.engine.is_interrupted():
+                        raise UserInterruptedError()
                     # 处理Sampler
-                    self.__process_sampler(sampler, None, context)
+                    self.__process_sampler(sampler, parent=None, context=context)
                     # Sampler失败且非继续执行时，根据 on_sample_error 选项来控制迭代
                     last_sample_ok = context.variables.get(self.LAST_SAMPLE_OK)
                     if not self.next_continue or (not last_sample_ok and self.worker.on_error_continue):
@@ -485,6 +483,8 @@ class Coroutine(Greenlet):
             context: ThreadContext
     ) -> Optional[SampleResult]:
         """执行 Sampler"""
+        logger.debug(f'线程:[ {self.thread_name} ] 当前取样器:[ {current} ]')
+
         transaction_result = None
         transaction_sampler = None
         transaction_package = None
