@@ -21,11 +21,9 @@ class SleepPrevProcessor(PrevProcessor):
         return self.get_property_as_str(self.DELAY)
 
     def process(self) -> None:
+        ctx = ContextService.get_context()
         try:
-            logger.info(
-                f'元素:[{ContextService.get_context().current_sampler.name}] '
-                f'前置等待 {self.delay} ms'
-            )
+            logger.info(f'线程:[ {ctx.thread_name} ] 取样器:[ {ctx.current_sampler.name} ] 前置等待 {self.delay} ms')
             gevent.sleep(float(self.delay) / 1000)
         except Exception:
             logger.exception('Exception Occurred')
