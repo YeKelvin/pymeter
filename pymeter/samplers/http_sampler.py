@@ -3,8 +3,6 @@
 # @Time    : 2020/2/13 16:14
 # @Author  : Kelvin.Ye
 from typing import Final
-from typing import List
-from typing import Optional
 from uuid import uuid4
 
 import httpx
@@ -73,7 +71,7 @@ class HTTPSampler(Sampler):
         return hm.headers_as_dict if hm else {}
 
     @property
-    def query_manager(self) -> Optional[Arguments]:
+    def query_manager(self) -> Arguments:
         return self.get_property(self.PARAMS).get_obj()
 
     @property
@@ -82,7 +80,7 @@ class HTTPSampler(Sampler):
         return args.to_dict() if isinstance(args, Arguments) else {}
 
     @property
-    def form_manager(self) -> Optional[Arguments]:
+    def form_manager(self) -> Arguments:
         return self.get_property(self.DATA).get_obj()
 
     @property
@@ -91,11 +89,11 @@ class HTTPSampler(Sampler):
         return args.to_dict() if isinstance(args, Arguments) else {}
 
     @property
-    def file_manager(self) -> Optional[Arguments]:
+    def file_manager(self) -> Arguments:
         return self.get_property(self.DATA).get_obj()
 
     @property
-    def files(self) -> List[HTTPFileArgument]:
+    def files(self) -> list[HTTPFileArgument]:
         args = self.file_manager
         return args.to_list() if isinstance(args, Arguments) else []
 
@@ -254,7 +252,7 @@ class HTTPSampler(Sampler):
 
         return files
 
-    def get_timeout(self) -> Optional[tuple]:
+    def get_timeout(self) -> tuple:
         return (
             (self.connect_timeout or 0, self.response_timeout or 0)
             if (self.connect_timeout and self.response_timeout)

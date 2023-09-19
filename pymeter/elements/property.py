@@ -2,9 +2,7 @@
 # @File    : property.py
 # @Time    : 2020/2/16 14:16
 # @Author  : Kelvin.Ye
-from typing import Dict
-from typing import Iterable
-from typing import List
+from collections.abc import Iterable
 
 from loguru import logger
 
@@ -177,7 +175,7 @@ class MultiProperty(PyMeterProperty):
 
 class CollectionProperty(MultiProperty):
 
-    def __init__(self, name: str, value: List[PyMeterProperty] = None):
+    def __init__(self, name: str, value: list[PyMeterProperty] = None):
         if value is None:
             value = []
         super().__init__(name, value)
@@ -189,7 +187,7 @@ class CollectionProperty(MultiProperty):
     def get_bool(self) -> bool:
         return bool(self.value)
 
-    def get_obj(self) -> List:
+    def get_obj(self) -> list:
         return self.value
 
     def remove(self, prop) -> None:
@@ -258,7 +256,7 @@ class TestElementProperty(MultiProperty):
 
 class DictProperty(MultiProperty):
 
-    def __init__(self, name: str, value: Dict[str, PyMeterProperty] = None):
+    def __init__(self, name: str, value: dict[str, PyMeterProperty] = None):
         super().__init__(name, value)
         if value is None:
             self.value = {}
@@ -270,7 +268,7 @@ class DictProperty(MultiProperty):
     def get_bool(self) -> bool:
         return bool(self.value)
 
-    def get_obj(self) -> Dict:
+    def get_obj(self) -> dict:
         return self.value
 
     def remove(self, prop) -> None:

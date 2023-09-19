@@ -11,20 +11,17 @@ from pymeter import config as CONFIG
 class Reflect:
     @staticmethod
     def for_name(class_name: str):
-        """根据类名返回类的对象
-        """
+        """根据类名返回类的对象"""
         return getattr(sys.modules[__name__], class_name)
 
     @staticmethod
     def get_name():
-        """获得类的完整路径名字
-        """
+        """获得类的完整路径名字"""
         pass
 
     @staticmethod
     def new_instance():
-        """创建类的实例
-        """
+        """创建类的实例"""
         pass
 
 

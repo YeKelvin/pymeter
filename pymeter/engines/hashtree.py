@@ -2,8 +2,6 @@
 # @File    : hashtree
 # @Time    : 2020/2/24 14:54
 # @Author  : Kelvin.Ye
-from typing import Dict
-
 from pymeter.engines.traverser import ConvertToString
 from pymeter.engines.traverser import TreeSearcher
 
@@ -31,8 +29,8 @@ root_node: hashtree
 
 class HashTree:
 
-    def __init__(self, hashtree: Dict[object, 'HashTree'] = None, node: object = None):
-        self.data: Dict[object, 'HashTree'] = hashtree or {}
+    def __init__(self, hashtree: dict[object, 'HashTree'] = None, node: object = None):
+        self.data: dict[object, 'HashTree'] = hashtree or {}
 
         if node:
             self.data[node] = HashTree()

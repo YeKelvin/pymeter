@@ -122,9 +122,9 @@ class JsonPathPostProcessor(PostProcessor):
         except JSONDecodeError:
             value = ''
 
-        if isinstance(value, (dict, list)):
+        if isinstance(value, dict | list):
             return to_json(value)
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             return str(value)
         if isinstance(value, bool):
             return 'true' if value else 'false'

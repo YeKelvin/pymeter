@@ -33,11 +33,11 @@ class JsonList(list):
 
 
 def transform(value: list or dict):
-    """将 Dict 、List 或 List[dict] 转换为 JsonDict / JsonList """
+    """将 Dict 、List 或 List[dict] 转换为 JsonDict / JsonList"""
     if isinstance(value, list):
         attrs = JsonList()
         for item in value:
-            if isinstance(item, dict) or isinstance(item, list):
+            if isinstance(item, dict | list):
                 attrs.append(transform(item))
             else:
                 attrs.append(item)
@@ -45,10 +45,7 @@ def transform(value: list or dict):
     elif isinstance(value, dict):
         attrs = JsonDict()
         for key, val in value.items():
-            if isinstance(val, dict) or isinstance(val, list):
-                attrs[key] = transform(val)
-            else:
-                attrs[key] = val
+            attrs[key] = transform(val) if isinstance(val, dict | list) else val
         return attrs
     else:
         return value

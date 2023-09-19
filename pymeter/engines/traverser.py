@@ -3,9 +3,7 @@
 # @Time    : 2020/2/25 15:06
 # @Author  : Kelvin.Ye
 from collections import deque
-from typing import Dict
 from typing import Generic
-from typing import List
 from typing import TypeVar
 
 from loguru import logger
@@ -136,7 +134,7 @@ class SearchByClass(HashTreeTraverser, Generic[T]):
     def count(self) -> int:
         return len(self.objects_of_class)
 
-    def get_search_result(self) -> List[T]:
+    def get_search_result(self) -> list[T]:
         return self.objects_of_class
 
     def get(self, node: object):
@@ -195,8 +193,8 @@ class TestCompiler(HashTreeTraverser):
         self.stack = deque()
         self.strategy = None
         self.hashtree = tree
-        self.sample_packages: Dict[Sampler, SamplePackage] = {}
-        self.trans_packages: Dict[TransactionController, SamplePackage] = {}
+        self.sample_packages: dict[Sampler, SamplePackage] = {}
+        self.trans_packages: dict[TransactionController, SamplePackage] = {}
 
     def configure_sampler(self, sampler) -> SamplePackage:
         package = self.sample_packages.get(sampler)
@@ -243,7 +241,7 @@ class TestCompiler(HashTreeTraverser):
             logger.debug(f'父节点:[ {parent} ]')
 
         # 添加节点层级
-        if child.level is None and not isinstance(child, (Controller, Sampler)):
+        if child.level is None and not isinstance(child, Controller | Sampler):
             if isinstance(parent, Worker):
                 child.level = 2
             elif isinstance(parent, Controller):
@@ -252,7 +250,7 @@ class TestCompiler(HashTreeTraverser):
                 child.level = 4
 
         duplicate = False
-        if isinstance(parent, Controller) and isinstance(child, (Sampler, Controller)):
+        if isinstance(parent, Controller) and isinstance(child, Sampler | Controller):
             if isinstance(parent, TestCompilerHelper):
                 duplicate = not parent.add_test_element_once(child)
             else:
@@ -433,7 +431,7 @@ class FindTestElementsUpToRoot(HashTreeTraverser):
         self.node_to_find = node_to_find
         self.stop_recording = False
 
-    def get_controllers_to_root(self) -> List[Controller]:
+    def get_controllers_to_root(self) -> list[Controller]:
         result = []
         stack_copy = self.stack.copy()
         while len(stack_copy) > 0:

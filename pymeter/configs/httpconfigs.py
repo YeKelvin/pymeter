@@ -2,9 +2,6 @@
 # @File    : httpconfigs.py
 # @Time    : 2020/2/17 15:41
 # @Author  : Kelvin.Ye
-from typing import List
-from typing import Optional
-
 import httpx
 from loguru import logger
 
@@ -62,7 +59,7 @@ class HTTPHeaderManager(ConfigTestElement):
         self.set_property(self.HEADERS, CollectionProperty(self.HEADERS))
 
     @property
-    def headers_as_list(self) -> List[HTTPHeader]:
+    def headers_as_list(self) -> list[HTTPHeader]:
         return self.get_property(self.HEADERS).get_obj()
 
     @property
@@ -89,7 +86,7 @@ class HTTPHeaderManager(ConfigTestElement):
 
         return merged_manager
 
-    def get_header(self, name: str) -> Optional[HTTPHeader]:
+    def get_header(self, name: str) -> HTTPHeader:
         return next(
             (
                 header
@@ -190,7 +187,7 @@ class HTTPCookieManager(ConfigTestElement):
         self.set_property(self.COOKIES, CollectionProperty(self.COOKIES))
 
     @property
-    def cookies_as_list(self) -> List[HTTPCookie]:
+    def cookies_as_list(self) -> list[HTTPCookie]:
         return self.get_property(self.COOKIES).get_obj()
 
     @property
@@ -201,8 +198,8 @@ class HTTPCookieManager(ConfigTestElement):
         if not isinstance(el, HTTPCookieManager):
             raise TypeError(f'cannot merge type: {self} with type: {el}')
 
-        merged_manager = self.clone()  # type: HTTPCookieManager
-        new_manager = el  # type: HTTPCookieManager
+        merged_manager = self.clone()   # type: HTTPCookieManager
+        new_manager = el                # type: HTTPCookieManager
 
         for new_cookie in new_manager.cookies_as_list:
             found = False
@@ -217,7 +214,7 @@ class HTTPCookieManager(ConfigTestElement):
 
         return merged_manager
 
-    def get_cookie(self, name: str) -> Optional[HTTPCookie]:
+    def get_cookie(self, name: str) -> HTTPCookie:
         return next(
             (
                 cookie

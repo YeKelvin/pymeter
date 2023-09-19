@@ -3,7 +3,6 @@
 # @Time    : 2020/1/24 23:31
 # @Author  : Kelvin.Ye
 import logging
-from typing import List
 
 from loguru import logger
 
@@ -125,7 +124,7 @@ class StandardEngine(Engine):
         while self.running:
             try:
                 test_worker: TestWorker = next(test_worker_iter)
-                if isinstance(test_worker, (SetupWorker, TearDownWorker)):
+                if isinstance(test_worker, SetupWorker | TearDownWorker):
                     continue
                 worker_count += 1
                 worker_name = test_worker.name
@@ -268,7 +267,7 @@ class StandardEngine(Engine):
                 elements.remove(node)
 
     @staticmethod
-    def _add_level(elements: List[TestElement]) -> None:
+    def _add_level(elements: list[TestElement]) -> None:
         for node in elements:
             if node.level is None:
                 node.level = 1

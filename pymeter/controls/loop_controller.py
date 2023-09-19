@@ -3,7 +3,6 @@
 # @Time    : 2020/2/28 17:16
 # @Author  : Kelvin.Ye
 from typing import Final
-from typing import Optional
 
 from loguru import logger
 
@@ -48,7 +47,7 @@ class LoopController(GenericController, IteratingController):
         self.reset_break_loop()
         self._done = val
 
-    def next(self) -> Optional[Sampler]:
+    def next(self) -> Sampler | None:
         self.update_iteration_index(self.name, self._loop_count)
         # noinspection PyBroadException
         try:

@@ -42,8 +42,7 @@ class TestMethod:
 
 @pytest.mark.parametrize('key_name', ['key_value'])
 def test_parametrize(key_name):
-    """参数化
-    """
+    """参数化"""
     print(key_name)
 
 

@@ -3,7 +3,6 @@
 # @Time    : 2020/2/28 17:25
 # @Author  : Kelvin.Ye
 from collections import deque
-from typing import Optional
 
 from loguru import logger
 
@@ -108,7 +107,7 @@ class GenericController(Controller, TestCompilerHelper):
     def increment_iter_count(self):
         self._iter_count += 1
 
-    def next(self) -> Optional[Sampler]:
+    def next(self) -> Sampler | None:
         """获取控制器的下一个子代元素"""
         logger.debug(f'线程:[ {self.ctx.thread_name} ] 控制器:[ {self.name} ] 获取下一个取样器')
         self.fire_iter_events()
@@ -184,7 +183,7 @@ class GenericController(Controller, TestCompilerHelper):
         self.sub_elements.append(child)
 
     def add_test_element(self, child):
-        if isinstance(child, (Controller, Sampler)):
+        if isinstance(child, Controller | Sampler):
             self.add_element(child)
 
     def add_test_element_once(self, child) -> bool:

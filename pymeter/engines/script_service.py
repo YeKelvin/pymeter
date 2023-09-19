@@ -3,9 +3,7 @@
 # @Time    : 2020/2/20 21:13
 # @Author  : Kelvin.Ye
 import importlib
-from typing import Iterable
-from typing import List
-from typing import Tuple
+from collections.abc import Iterable
 
 from pymeter.elements.element import TestElement
 from pymeter.elements.property import CollectionProperty
@@ -31,7 +29,7 @@ def load_tree(source) -> HashTree:
     return root
 
 
-def __loads_script__(source) -> List[dict]:
+def __loads_script__(source) -> list[dict]:
     """反序列化脚本"""
     if isinstance(source, list):
         return source
@@ -46,7 +44,7 @@ def __loads_script__(source) -> List[dict]:
     return script
 
 
-def __parse_node__(script: Iterable[dict]) -> List[Tuple[object, HashTree]]:
+def __parse_node__(script: Iterable[dict]) -> list[tuple[object, HashTree]]:
     if not script:
         raise ScriptParseError('脚本解析失败，当前节点为空')
 

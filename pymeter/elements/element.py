@@ -3,11 +3,8 @@
 # @Time    : 2020/1/24 23:48
 # @Author  : Kelvin.Ye
 from collections import deque
+from collections.abc import Iterable
 from copy import deepcopy
-from typing import Deque  # noqa
-from typing import Dict  # noqa
-from typing import Iterable
-from typing import Optional  # noqa
 
 from pymeter.elements.property import BasicProperty
 from pymeter.elements.property import MultiProperty
@@ -30,8 +27,8 @@ class TestElement:
         self._running_version = False
         self.level = None
         self.context = None
-        self.properties = {}                # type: Dict[str, PyMeterProperty]
-        self.temporary_properties = None    # type: Optional[Deque]
+        self.properties = {}                # type: dict[str, PyMeterProperty]
+        self.temporary_properties = None    # type: deque
         if name:
             self.set_property(self.NAME, name)
 

@@ -3,7 +3,6 @@
 # @Time    : 2021/11/29 11:25
 # @Author  : Kelvin.Ye
 from typing import Final
-from typing import Optional
 
 import gevent
 from loguru import logger
@@ -60,7 +59,7 @@ class RetryController(GenericController, IteratingController, LoopIterationListe
     def last_sample_ok(self) -> str:
         return self.ctx.variables.get('Coroutine__last_sample_ok')
 
-    def next(self) -> Optional[Sampler]:
+    def next(self) -> Sampler | None:
         # noinspection PyBroadException
         try:
             if self.end_of_retry():

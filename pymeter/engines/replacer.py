@@ -2,8 +2,6 @@
 # @File    : replacer.py
 # @Time    : 2021/5/30 17:11
 # @Author  : Kelvin.Ye
-from typing import List
-
 from loguru import logger
 
 from pymeter.elements.property import BasicProperty
@@ -118,7 +116,7 @@ class CompoundVariable:
         self.permanent_results = None
 
         for item in self.compiled_components:
-            if isinstance(item, (Function, SimpleVariable)):
+            if isinstance(item, Function | SimpleVariable):
                 # logger.debug('设置为动态函数')
                 self.dynamic = True
                 break
@@ -162,7 +160,7 @@ class StringReader:
 class FunctionParser:
 
     @staticmethod
-    def compile_string(source: str) -> List:
+    def compile_string(source: str) -> list:
         reader = StringReader(source)
         result = []
         buffer = []
@@ -252,7 +250,7 @@ class FunctionParser:
         return str_buffer
 
     @staticmethod
-    def __parse_params(reader: StringReader) -> List[CompoundVariable]: # sourcery skip: low-code-quality
+    def __parse_params(reader: StringReader) -> list[CompoundVariable]: # sourcery skip: low-code-quality
         result = []
         buffer = []
         previous = ''

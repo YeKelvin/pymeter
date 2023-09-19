@@ -2,8 +2,6 @@
 # @File    : sample_package
 # @Time    : 2020/2/27 15:41
 # @Author  : Kelvin.Ye
-from typing import List
-
 from loguru import logger
 
 from pymeter.assertions.assertion import Assertion
@@ -20,14 +18,14 @@ class SamplePackage:
 
     def __init__(
         self,
-        configs: List[ConfigElement],
-        listeners: List[SampleListener],
-        controllers: List[Controller],
-        trans_listeners: List[TransactionListener],
-        prev_processors: List[PrevProcessor],
-        post_processors: List[PostProcessor],
-        assertions: List[Assertion],
-        timers: List[Timer]
+        configs: list[ConfigElement],
+        listeners: list[SampleListener],
+        controllers: list[Controller],
+        trans_listeners: list[TransactionListener],
+        prev_processors: list[PrevProcessor],
+        post_processors: list[PostProcessor],
+        assertions: list[Assertion],
+        timers: list[Timer]
     ):
         self.sampler = None
         self.configs = configs

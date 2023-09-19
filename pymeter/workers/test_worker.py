@@ -3,8 +3,6 @@
 # @Time    : 2020/2/13 12:58
 # @Author  : Kelvin.Ye
 from typing import Final
-from typing import List
-from typing import Optional
 
 import gevent
 from gevent import Greenlet
@@ -110,8 +108,8 @@ class TestWorker(Worker, TestCompilerHelper):
         self.running = False
         self.worker_number = None
         self.worker_tree = None
-        self.workers: List[Coroutine] = []
-        self.children: List[TestElement] = []
+        self.workers: list[Coroutine] = []
+        self.children: list[TestElement] = []
 
     def start(self, worker_number, worker_tree, engine) -> None:
         """启动 TestWorker
@@ -479,9 +477,9 @@ class Coroutine(Greenlet):
     def __process_sampler(
             self,
             current: Sampler,
-            parent: Optional[Sampler],
+            parent: Sampler,
             context: ThreadContext
-    ) -> Optional[SampleResult]:
+    ) -> SampleResult:
         """执行 Sampler"""
         logger.debug(f'线程:[ {self.thread_name} ] 当前取样器:[ {current} ]')
 
@@ -640,7 +638,7 @@ class Coroutine(Greenlet):
             self,
             transaction_sampler: TransactionSampler,
             transaction_package: SamplePackage,
-            parent: Optional[Sampler],
+            parent: Sampler,
             context: ThreadContext
     ) -> SampleResult:
         logger.debug(
@@ -682,7 +680,7 @@ class Coroutine(Greenlet):
             sample_package: SamplePackage,
             transaction_package: SamplePackage,
             transaction_sampler: TransactionSampler
-    ) -> List[SampleListener]:
+    ) -> list[SampleListener]:
         sampler_listeners = sample_package.listeners
         # Do not send subsamples to listeners which receive the transaction sample
         if transaction_sampler:

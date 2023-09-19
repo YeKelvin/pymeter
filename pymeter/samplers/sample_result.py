@@ -4,8 +4,6 @@
 # @Author  : Kelvin.Ye
 import time
 import traceback
-from typing import List
-from typing import Optional
 
 from loguru import logger
 
@@ -48,7 +46,7 @@ class SampleResult:
         self.retrying = False
         self.error = False
         self.assertions = []
-        self.subresults: List[SampleResult] = []
+        self.subresults: list[SampleResult] = []
 
         self.request_headers_size = 0
         self.request_data_size = 0
@@ -63,7 +61,7 @@ class SampleResult:
         self.stop_now = False
 
     @property
-    def json(self) -> Optional[str]:
+    def json(self) -> str:
         if self.error:
             return None
 

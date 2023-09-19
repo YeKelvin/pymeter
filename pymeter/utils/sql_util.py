@@ -2,8 +2,6 @@
 # @File    : sql_util.py
 # @Time    : 2020/2/21 11:21
 # @Author  : Kelvin.Ye
-from typing import Tuple
-
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Connection
 from sqlalchemy.engine.result import ResultProxy
@@ -14,7 +12,7 @@ class SQL:
         self.url = url
         self.engine = create_engine(url)
 
-    def execute(self, expression: str) -> Tuple[Connection, ResultProxy]:
+    def execute(self, expression: str) -> tuple[Connection, ResultProxy]:
         """执行 sql
 
         :param expression:  sql

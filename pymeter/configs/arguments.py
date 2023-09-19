@@ -2,8 +2,6 @@
 # @File    : arguments.py
 # @Time    : 2021-07-05 13:44:20
 # @Author  : Kelvin.Ye
-from typing import List
-
 from pymeter.elements.element import ConfigTestElement
 from pymeter.elements.element import TestElement
 from pymeter.elements.property import CollectionProperty
@@ -86,7 +84,7 @@ class Arguments(ConfigTestElement):
         self.add_property(self.ARGUMENTS, CollectionProperty(self.ARGUMENTS))
 
     @property
-    def arguments(self) -> List[Argument]:
+    def arguments(self) -> list[Argument]:
         return self.get_property(self.ARGUMENTS).get_obj()
 
     def add_argument(self, arg: Argument):
@@ -101,7 +99,7 @@ class Arguments(ConfigTestElement):
     def to_dict(self) -> dict:
         return {arg.name: arg.value for arg in self.arguments}
 
-    def to_list(self) -> List[Argument]:
+    def to_list(self) -> list[Argument]:
         return self.arguments
 
     def clear(self):
