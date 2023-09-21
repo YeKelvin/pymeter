@@ -35,9 +35,11 @@ class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListene
 
     def __init__(self):
         TestElement.__init__(self)
+        self.db_instance = getattr(importlib.import_module('app.extension'), 'db')
         self.flask_instance = getattr(importlib.import_module('app'), '__app__')
-        self.table_model = importlib.import_module('app.modules.script.model')
-        self.TTestplanExecutionItems = self.table_model.TTestplanExecutionItems  # noqa
+
+        table_model = importlib.import_module('app.modules.script.model')
+        self.TTestplanExecutionItems = table_model.TTestplanExecutionItems  # noqa
         self.success: bool = True
 
     def collection_started(self) -> None:

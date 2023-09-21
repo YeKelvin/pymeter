@@ -58,11 +58,14 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
         self.success: bool = True
         self.collection_start_time = 0
         self.collection_end_time = 0
+
+        self.db_instance = getattr(importlib.import_module('app.extension'), 'db')
         self.flask_instance = getattr(importlib.import_module('app'), '__app__')
-        self.table_model = importlib.import_module('app.modules.script.model')
-        self.TTestCollectionResult = getattr(self.table_model, 'TTestCollectionResult')
-        self.TTestWorkerResult = getattr(self.table_model, 'TTestWorkerResult')
-        self.TTestSamplerResult = getattr(self.table_model, 'TTestSamplerResult')
+
+        table_model = importlib.import_module('app.modules.script.model')
+        self.TTestCollectionResult = getattr(table_model, 'TTestCollectionResult')
+        self.TTestWorkerResult = getattr(table_model, 'TTestWorkerResult')
+        self.TTestSamplerResult = getattr(table_model, 'TTestSamplerResult')
 
     def collection_started(self) -> None:
         """@override"""
@@ -119,7 +122,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
 
     def insert_test_collection_result(self):
         with self.flask_instance.app_context():
-            self.TTestCollectionResult.insert(
+            self.TTestCollectionResult.no_record_insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_NO=self.collection_no,
                 COLLECTION_ID=self.collection_id,
@@ -128,13 +131,13 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                 START_TIME=timestmp_to_utc8_datetime(self.collection_start_time),
                 SUCCESS=True,
                 CREATED_BY='PyMeter',
-                UPDATED_BY='PyMeter',
-                record=False
+                UPDATED_BY='PyMeter'
             )
+            self.db_instance.session.commit()
 
     def insert_test_worker_result(self):
         with self.flask_instance.app_context():
-            self.TTestWorkerResult.insert(
+            self.TTestWorkerResult.no_record_insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
                 WORKER_ID=self.worker_id,
@@ -143,9 +146,9 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                 START_TIME=timestmp_to_utc8_datetime(self.worker.start_time),
                 SUCCESS=True,
                 CREATED_BY='PyMeter',
-                UPDATED_BY='PyMeter',
-                record=False
+                UPDATED_BY='PyMeter'
             )
+            self.db_instance.session.commit()
 
     def insert_test_sampler_result(self, result: SampleResult):
         failed_assertion_data = None
@@ -158,7 +161,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                 failed_assertion_data = assertions[0].message
 
         with self.flask_instance.app_context():
-            self.TTestSamplerResult.insert(
+            self.TTestSamplerResult.no_record_insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
                 WORKER_ID=self.worker_id,
@@ -197,9 +200,9 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                 RESPONSE_DECODED=result.response_decoded,
                 FAILED_ASSERTION=failed_assertion_data,
                 CREATED_BY='PyMeter',
-                UPDATED_BY='PyMeter',
-                record=False
+                UPDATED_BY='PyMeter'
             )
+            self.db_instance.session.commit()
 
     def update_test_collection_result(self):
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
@@ -210,6 +213,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                 'SUCCESS': self.success,
                 'UPDATED_BY': 'PyMeter'
             })
+            self.db_instance.session.commit()
 
     def update_test_worker_result(self):
         worker_success = getattr(self.worker, 'success')
@@ -223,3 +227,4 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                 'SUCCESS': worker_success,
                 'UPDATED_BY': 'PyMeter'
             })
+            self.db_instance.session.commit()
