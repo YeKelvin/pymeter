@@ -173,7 +173,7 @@ def sample_result_to_dict(result: SampleResult):
     return {
         'id': str(id(result)),
         'name': result.sample_name,
-        'remark': result.sample_remark,
+        'desc': result.sample_desc,
         'requestUrl': result.request_url,
         'requestData': result.request_data,
         'requestDecoded': result.request_decoded,

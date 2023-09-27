@@ -148,7 +148,7 @@ class HTTPSampler(Sampler):
 
         result = SampleResult()
         result.sample_name = self.name
-        result.sample_remark = self.remark
+        result.sample_desc = self.desc
         result.request_url = self.url
         result.sample_start()
 

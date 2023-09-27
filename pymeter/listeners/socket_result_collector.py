@@ -145,11 +145,11 @@ class SocketResultCollector(
             'sampler': {
                 'samplerId': id(result),
                 'samplerName': result.sample_name,
-                'samplerRemark': result.sample_remark,
-                'url': result.request_url,
-                'request': result.request_data,
+                'samplerDesc': result.sample_desc,
+                'requestUrl': result.request_url,
+                'requestData': result.request_data,
                 'requestHeaders': result.request_headers,
-                'response': result.response_data,
+                'responseData': result.response_data,
                 'responseHeaders': result.response_headers,
                 'responseCode': result.response_code,
                 'responseMessage': result.response_message,
@@ -160,7 +160,7 @@ class SocketResultCollector(
                 'endTime': time_util.timestamp_to_strftime(result.end_time),
                 'elapsedTime': result.elapsed_time,
                 'assertions': [str(assertion) for assertion in result.assertions],
-                'subResults': [sub.to_dict() for sub in result.subresults]
+                'subresults': [sub.to_dict() for sub in result.subresults]
             }
         })
 

@@ -21,18 +21,18 @@ class SampleResult:
         self.parent = None
 
         self.sample_name = None
-        self.sample_remark = None
+        self.sample_desc = None
 
         self.request_url = None
-        self.request_headers = None
         self.request_data = None
+        self.request_headers = None
         self.request_decoded = None
 
+        self.response_data = None
         self.response_code = None
         self.response_message = None
         self.response_headers = None
         self.response_cookies = None
-        self.response_data = None
         self.response_decoded = None
 
         self.start_time = 0
@@ -43,18 +43,18 @@ class SampleResult:
         self.connect_time = 0
 
         self.success = True
-        self.retrying = False
         self.error = False
+        self.retrying = False
         self.assertions = []
         self.subresults: list[SampleResult] = []
 
-        self.request_headers_size = 0
-        self.request_data_size = 0
         self.request_size = 0
+        self.request_data_size = 0
+        self.request_header_size = 0
 
-        self.response_headers_size = 0
-        self.response_data_size = 0
         self.response_size = 0
+        self.response_data_size = 0
+        self.response_header_size = 0
 
         self.stop_worker = False
         self.stop_test = False
@@ -79,13 +79,13 @@ class SampleResult:
     def to_dict(self) -> dict:
         return {
             'samplerName': self.sample_name,
-            'samplerRemark': self.sample_remark,
-            'url': self.request_url,
-            'request': self.request_data,
+            'samplerDesc': self.sample_desc,
+            'requestUrl': self.request_url,
+            'requestData': self.request_data,
             'requestParsedData': self.request_data,
             'requestHeaders': self.request_headers,
             'requestSize': self.request_size,
-            'response': self.response_data,
+            'responseData': self.response_data,
             'responseParsedData': self.response_data,
             'responseHeaders': self.response_headers,
             'responseSize': self.response_size,
@@ -96,7 +96,7 @@ class SampleResult:
             'endTime': time_util.timestamp_to_strftime(self.end_time),
             'elapsedTime': self.elapsed_time,
             'assertions': [str(assertion) for assertion in self.assertions],
-            'subResults': [result.to_dict() for result in self.subresults]
+            'subresults': [result.to_dict() for result in self.subresults]
         }
 
     def sample_start(self):
@@ -114,13 +114,13 @@ class SampleResult:
         self.end_time = max(self.end_time, subresult.end_time)
 
         # Include the byte count for the added sample
-        self.request_headers_size = self.request_headers_size + subresult.request_headers_size
-        self.request_data_size = self.request_data_size + subresult.request_data_size
         self.request_size = self.request_size + subresult.request_size
+        self.request_data_size = self.request_data_size + subresult.request_data_size
+        self.request_header_size = self.request_header_size + subresult.request_header_size
 
-        self.response_headers_size = self.response_headers_size + subresult.response_headers_size
-        self.response_data_size = self.response_data_size + subresult.response_data_size
         self.response_size = self.response_size + subresult.response_size
+        self.response_data_size = self.response_data_size + subresult.response_data_size
+        self.response_header_size = self.response_header_size + subresult.response_header_size
 
         self.subresults.append(subresult)
         subresult.parent = self

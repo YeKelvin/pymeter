@@ -66,7 +66,7 @@ class ResultCollector(
         self.workers[self.worker_id]['samplers'].append({
             'samplerId': id(result),
             'samplerName': result.sample_name,
-            'samplerRemark': result.sample_remark,
+            'samplerDesc': result.sample_desc,
             'url': result.request_url,
             'request': result.request_data,
             'requestHeaders': result.request_headers,

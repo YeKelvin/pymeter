@@ -21,7 +21,7 @@ class TestElement:
     NAME = 'TestElement__name'
 
     # 组件备注
-    REMARK = 'TestElement__remark'
+    DESC = 'TestElement__desc'
 
     def __init__(self, name: str = None):
         self._running_version = False
@@ -37,16 +37,16 @@ class TestElement:
         return self.get_property_as_str(self.NAME)
 
     @property
-    def remark(self) -> str:
-        return self.get_property_as_str(self.REMARK)
+    def desc(self) -> str:
+        return self.get_property_as_str(self.DESC)
 
     @name.setter
-    def name(self, name: str) -> None:
-        self.set_property(self.NAME, name)
+    def name(self, val: str) -> None:
+        self.set_property(self.NAME, val)
 
-    @remark.setter
-    def remark(self, remark: str) -> None:
-        self.set_property(self.REMARK, remark)
+    @desc.setter
+    def desc(self, val: str) -> None:
+        self.set_property(self.DESC, val)
 
     @property
     def running_version(self):

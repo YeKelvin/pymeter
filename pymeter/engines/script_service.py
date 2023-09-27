@@ -96,7 +96,7 @@ def __init_node__(item: dict) -> TestElement:
     node = class_type()
     # 设置节点的属性
     __set_replaced_property__(node, TestElement.NAME, item.get('name'))
-    __set_replaced_property__(node, TestElement.REMARK, item.get('remark'))
+    __set_replaced_property__(node, TestElement.DESC, item.get('desc'))
     __set_properties__(node, item.get('property'))
     # 设置节点层级
     if (level := item.get('level')) is not None:
