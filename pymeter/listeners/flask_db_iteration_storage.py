@@ -39,7 +39,7 @@ class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListene
         self.flask_instance = getattr(importlib.import_module('app'), '__app__')
 
         table_model = importlib.import_module('app.modules.script.model')
-        self.TTestplanExecutionItems = table_model.TTestplanExecutionItems  # noqa
+        self.TTestplanExecutionCollection = getattr(table_model, 'TTestplanExecutionCollection')
         self.success: bool = True
 
     def collection_started(self) -> None:
@@ -50,21 +50,21 @@ class FlaskDBIterationStorage(TestElement, TestCollectionListener, SampleListene
         """@override"""
         with self.flask_instance.app_context():
             if self.success:
-                self.TTestplanExecutionItems.filter_by(
+                self.TTestplanExecutionCollection.filter_by(
                     EXECUTION_NO=self.execution_no,
                     COLLECTION_NO=self.collection_no
                 ).update({
-                    'ITERATION_COUNT': self.TTestplanExecutionItems.ITERATION_COUNT + 1,
-                    'SUCCESS_COUNT': self.TTestplanExecutionItems.SUCCESS_COUNT + 1,
+                    'ITERATION_COUNT': self.TTestplanExecutionCollection.ITERATION_COUNT + 1,
+                    'SUCCESS_COUNT': self.TTestplanExecutionCollection.SUCCESS_COUNT + 1,
                     'UPDATED_BY': 'PyMeter'
                 })
             else:
-                self.TTestplanExecutionItems.filter_by(
+                self.TTestplanExecutionCollection.filter_by(
                     EXECUTION_NO=self.execution_no,
                     COLLECTION_NO=self.collection_no
                 ).update({
-                    'ITERATION_COUNT': self.TTestplanExecutionItems.ITERATION_COUNT + 1,
-                    'FAILURE_COUNT': self.TTestplanExecutionItems.FAILURE_COUNT + 1,
+                    'ITERATION_COUNT': self.TTestplanExecutionCollection.ITERATION_COUNT + 1,
+                    'FAILURE_COUNT': self.TTestplanExecutionCollection.FAILURE_COUNT + 1,
                     'UPDATED_BY': 'PyMeter'
                 })
 
