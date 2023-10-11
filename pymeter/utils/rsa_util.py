@@ -8,7 +8,7 @@ from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
 
-def encrypt_by_public_key(plaintext, public_key):
+def encrypt_by_public_key(plaintext: str, public_key: str | bytes) -> str:
     """
     通过RSA公钥加密
 
@@ -19,7 +19,7 @@ def encrypt_by_public_key(plaintext, public_key):
     """
     rsakey = RSA.importKey(public_key)
     cipher = PKCS1_v1_5.new(rsakey)
-    return base64.b64encode(cipher.encrypt(plaintext.encode(encoding='UTF-8')))
+    return base64.b64encode(cipher.encrypt(plaintext.encode())).decode()
 
 
 def decrypt_by_private_key(ciphertext, private_key):
@@ -34,4 +34,4 @@ def decrypt_by_private_key(ciphertext, private_key):
     rsakey = RSA.importKey(private_key)
     cipher = PKCS1_v1_5.new(rsakey)
     plaintext = cipher.decrypt(base64.b64decode(ciphertext), None)
-    return plaintext.decode('utf8')
+    return plaintext.decode()

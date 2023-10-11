@@ -7,7 +7,7 @@ from typing import Final
 from loguru import logger
 
 from pymeter.functions.function import Function
-from pymeter.utils import rsa_util as rsa_cryptor
+from pymeter.utils import rsa_util
 
 
 class RSA(Function):
@@ -32,7 +32,7 @@ class RSA(Function):
         if not public_key.endswith(RSA.PUBLIC_KEY_SUFFIX):
             public_key = public_key + RSA.PUBLIC_KEY_SUFFIX
 
-        return rsa_cryptor.encrypt_by_public_key(plaintext, public_key).decode(encoding='UTF-8')
+        return rsa_util.encrypt_by_public_key(plaintext, public_key)
 
     def set_parameters(self, params: list):
         # 校验函数实参数量

@@ -8,6 +8,7 @@ import gevent
 from gevent import Greenlet
 from loguru import logger
 
+from pymeter.assertions.assertion import Assertion
 from pymeter.assertions.assertion import AssertionResult
 from pymeter.controls.controller import IteratingController
 from pymeter.controls.loop_controller import LoopController
@@ -786,7 +787,7 @@ class Coroutine(Greenlet):
             logger.debug(f'线程:[ {self.thread_name} ] 后置处理器:[ {post_processor.name} ] 正在运行中')
             post_processor.process()
 
-    def __check_assertions(self, assertions: list, result: SampleResult, context: ThreadContext) -> None:
+    def __check_assertions(self, assertions: list[Assertion], result: SampleResult, context: ThreadContext) -> None:
         """断言取样结果"""
         for assertion in assertions:
             logger.debug(f'线程:[ {self.thread_name} ] 断言器:[ {assertion.name} ] 正在运行中')
@@ -798,7 +799,7 @@ class Coroutine(Greenlet):
         # 存储取样结果
         context.variables.put(self.LAST_SAMPLE_OK, result.success)
 
-    def __process_assertion(self, assertion, sample_result: SampleResult) -> None:
+    def __process_assertion(self, assertion: Assertion, sample_result: SampleResult) -> None:
         """执行断言"""
         assertion_result = None
         try:
