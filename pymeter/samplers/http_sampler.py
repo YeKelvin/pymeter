@@ -32,8 +32,14 @@ class HTTPSampler(Sampler):
     # 请求头管理器
     HEADERS: Final = 'HTTPSampler__headers'
 
-    # 请求参数
+    # 查询参数
     PARAMS: Final = 'HTTPSampler__params'
+
+    # 表单参数
+    FORMS: Final = 'HTTPSampler__forms'
+
+    # 文件参数
+    FILES: Final = 'HTTPSampler__files'
 
     # 请求主体
     DATA: Final = 'HTTPSampler__data'
@@ -81,7 +87,7 @@ class HTTPSampler(Sampler):
 
     @property
     def form_manager(self) -> Arguments:
-        return self.get_property(self.DATA).get_obj()
+        return self.get_property(self.FORMS).get_obj()
 
     @property
     def forms(self) -> dict:
@@ -90,7 +96,7 @@ class HTTPSampler(Sampler):
 
     @property
     def file_manager(self) -> Arguments:
-        return self.get_property(self.DATA).get_obj()
+        return self.get_property(self.FILES).get_obj()
 
     @property
     def files(self) -> list[HTTPFileArgument]:

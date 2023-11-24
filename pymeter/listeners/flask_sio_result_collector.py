@@ -190,6 +190,7 @@ def sample_result_to_dict(result: SampleResult):
         'startTime': to_strftime(result.start_time),
         'endTime': to_strftime(result.end_time),
         'elapsedTime': result.elapsed_time,
+        'assertions': [],
         'failedAssertion': next(
             (
                 {'message': assertion.message}

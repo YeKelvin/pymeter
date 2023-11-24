@@ -14,7 +14,7 @@ from pymeter.listeners.result_collector import ResultCollector
 from pymeter.tools.exceptions import StopTestException
 from pymeter.workers.context import ContextService
 from pymeter.workers.setup_worker import SetupWorker
-from pymeter.workers.teardown_worker import TearDownWorker
+from pymeter.workers.teardown_worker import TeardownWorker
 from pymeter.workers.test_worker import TestWorker
 
 
@@ -46,10 +46,10 @@ class StandardEngine(Engine):
         self._remove_workers(collection_component_list)  # 删除 TestWorker 节点
         self._add_level(collection_component_list)       # 添加层级
 
-        # 查找 SetupWorker / TestWorker / TearDownWorker 对象
+        # 查找 SetupWorker / TestWorker / TeardownWorker 对象
         setup_worker_searcher = SearchByClass(SetupWorker)
         test_worker_searcher = SearchByClass(TestWorker)
-        teardown_worker_searcher = SearchByClass(TearDownWorker)
+        teardown_worker_searcher = SearchByClass(TeardownWorker)
 
         # 遍历查找
         self.collection_tree.traverse(setup_worker_searcher)
@@ -124,7 +124,7 @@ class StandardEngine(Engine):
         while self.running:
             try:
                 test_worker: TestWorker = next(test_worker_iter)
-                if isinstance(test_worker, SetupWorker | TearDownWorker):
+                if isinstance(test_worker, SetupWorker | TeardownWorker):
                     continue
                 worker_count += 1
                 worker_name = test_worker.name
@@ -161,7 +161,7 @@ class StandardEngine(Engine):
         teardown_worker_iter = iter(teardown_worker_searcher.get_search_result())
         while self.running:
             try:
-                teardown_worker: TearDownWorker = next(teardown_worker_iter)
+                teardown_worker: TeardownWorker = next(teardown_worker_iter)
                 worker_count += 1
                 worker_name = teardown_worker.name
                 logger.info(f'工作者:[ {worker_name} ] 初始化第 {worker_count} 个 #后置工作者#')

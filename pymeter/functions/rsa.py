@@ -26,11 +26,8 @@ class RSA(Function):
         plaintext = self.plaintext.execute().strip()
         public_key = self.public_key.execute().strip()
 
-        if not public_key.startswith(RSA.PUBLIC_KEY_PREFIX):
-            public_key = RSA.PUBLIC_KEY_PREFIX + public_key
-
-        if not public_key.endswith(RSA.PUBLIC_KEY_SUFFIX):
-            public_key = public_key + RSA.PUBLIC_KEY_SUFFIX
+        if 'RSA PUBLIC KEY' not in public_key:
+            public_key = RSA.PUBLIC_KEY_PREFIX + public_key + RSA.PUBLIC_KEY_SUFFIX
 
         return rsa_util.encrypt_by_public_key(plaintext, public_key)
 

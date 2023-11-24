@@ -9,9 +9,9 @@ modules = {
     'TestCollection': 'pymeter.collections.test_collection',
 
     # 工作线程
-    'SetupWorker': 'pymeter.workers.setup_worker',
     'TestWorker': 'pymeter.workers.test_worker',
-    'TearDownWorker': 'pymeter.workers.teardown_worker',
+    'SetupWorker': 'pymeter.workers.setup_worker',
+    'TeardownWorker': 'pymeter.workers.teardown_worker',
 
     # 配置器
     'Arguments': 'pymeter.configs.arguments',

@@ -61,7 +61,7 @@ class Runner:
         })
 
         try:
-            logger.debug(f'脚本:\n{to_pretty_json(script)}')
+            logger.debug(f'测试脚本\n{to_pretty_json(script)}')
             Runner.run(script, extra, stop_event)
         except Exception:
             logger.exception('Exception Occurred')

@@ -39,7 +39,7 @@ class DatabaseEngine(ConfigTestElement, TestCollectionListener, NoConfigMerge, N
     PORT: Final = 'DatabaseEngine__port'
 
     # 连接串query参数
-    QUERY: Final = 'DatabaseEngine__query'
+    QUERY: Final = 'DatabaseEngine__querys'
 
     # 库名
     DATABASE: Final = 'DatabaseEngine__database'

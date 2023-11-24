@@ -122,7 +122,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
 
     def insert_test_collection_result(self):
         with self.flask_instance.app_context():
-            self.TTestCollectionResult.no_record_insert(
+            self.TTestCollectionResult.norecord_insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_NO=self.collection_no,
                 COLLECTION_ID=self.collection_id,
@@ -137,7 +137,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
 
     def insert_test_worker_result(self):
         with self.flask_instance.app_context():
-            self.TTestWorkerResult.no_record_insert(
+            self.TTestWorkerResult.norecord_insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
                 WORKER_ID=self.worker_id,
@@ -161,7 +161,7 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
                 failed_assertion_data = assertions[0].message
 
         with self.flask_instance.app_context():
-            self.TTestSamplerResult.no_record_insert(
+            self.TTestSamplerResult.norecord_insert(
                 REPORT_NO=self.report_no,
                 COLLECTION_ID=self.collection_id,
                 WORKER_ID=self.worker_id,
@@ -207,12 +207,16 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
     def update_test_collection_result(self):
         elapsed_time = int(self.collection_end_time * 1000) - int(self.collection_start_time * 1000)
         with self.flask_instance.app_context():
-            self.TTestCollectionResult.filter_by(COLLECTION_ID=str(self.collection_id)).update({
-                'END_TIME': timestmp_to_utc8_datetime(self.collection_end_time),
-                'ELAPSED_TIME': elapsed_time,
-                'SUCCESS': self.success,
-                'UPDATED_BY': 'PyMeter'
-            })
+            (
+                self.TTestCollectionResult
+                .filter_by(COLLECTION_ID=str(self.collection_id))
+                .update({
+                    'END_TIME': timestmp_to_utc8_datetime(self.collection_end_time),
+                    'ELAPSED_TIME': elapsed_time,
+                    'SUCCESS': self.success,
+                    'UPDATED_BY': 'PyMeter'
+                })
+            )
             self.db_instance.session.commit()
 
     def update_test_worker_result(self):
@@ -221,10 +225,14 @@ class FlaskDBResultStorage(TestElement, TestCollectionListener, TestWorkerListen
         worker_end_time = getattr(self.worker, 'end_time')
         elapsed_time = int(worker_end_time * 1000) - int(worker_start_time * 1000)
         with self.flask_instance.app_context():
-            self.TTestWorkerResult.filter_by(WORKER_ID=str(self.worker_id)).update({
-                'END_TIME': timestmp_to_utc8_datetime(worker_end_time),
-                'ELAPSED_TIME': elapsed_time,
-                'SUCCESS': worker_success,
-                'UPDATED_BY': 'PyMeter'
-            })
+            (
+                self.TTestWorkerResult
+                .filter_by(WORKER_ID=str(self.worker_id))
+                .update({
+                    'END_TIME': timestmp_to_utc8_datetime(worker_end_time),
+                    'ELAPSED_TIME': elapsed_time,
+                    'SUCCESS': worker_success,
+                    'UPDATED_BY': 'PyMeter'
+                })
+            )
             self.db_instance.session.commit()
