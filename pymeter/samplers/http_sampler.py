@@ -3,6 +3,7 @@
 # @Time    : 2020/2/13 16:14
 # @Author  : Kelvin.Ye
 from typing import Final
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import httpx
@@ -62,6 +63,10 @@ class HTTPSampler(Sampler):
     @property
     def url(self) -> str:
         return self.get_property_as_str(self.URL)
+
+    @property
+    def path(self) -> str:
+        return urlparse(self.url).path
 
     @property
     def method(self) -> str:
@@ -125,8 +130,8 @@ class HTTPSampler(Sampler):
 
     def __init__(self, name: str = None):
         super().__init__(name=name)
-        self.session_manager = None
         self.content_type = None
+        self.session_manager = None
         self.payload_decoded = None
 
     def initialize(self):
@@ -225,6 +230,10 @@ class HTTPSampler(Sampler):
                 return None
 
         return data.encode(encoding=self.encoding) if (data := self.data) else None
+
+    def get_body_str(self) -> str:
+        body = self.get_body_data()
+        return body.decode(self.encoding) if body else ''
 
     def get_form_urlencoded(self) -> bytes:
         forms = self.forms
