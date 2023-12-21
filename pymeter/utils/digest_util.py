@@ -8,25 +8,27 @@ import hmac
 from hashlib import sha256
 
 
-def md5(data, charset='utf-8'):
-    return hashlib.md5(data.encode(encoding=charset)).hexdigest()
+def md5(data: str| bytes, charset='utf-8'):
+    if isinstance(data, str):
+        data = data.encode(encoding=charset)
+    return hashlib.md5(data).hexdigest()
 
 
-def hmac_sha256(data, key=None, charset='utf-8') -> bytes:
-    if key:
+def hmac_sha256(key: str| bytes, data: str| bytes, charset='utf-8') -> bytes:
+    if isinstance(key, str):
         key = key.encode(charset)
-    return hmac.new(key, data.encode(charset), digestmod=sha256).digest()
+    if isinstance(data, str):
+        data = data.encode(charset)
+    return hmac.new(key, data, digestmod=sha256).digest()
 
 
-def hmac_sha256_hex(data, key=None, charset='utf-8') -> str:
-    if key:
+def hmac_sha256_hex(key: str| bytes, data: str| bytes, charset='utf-8') -> str:
+    if isinstance(key, str):
         key = key.encode(charset)
-    return hmac.new(key, data.encode(charset), digestmod=sha256).hexdigest().upper()
+    if isinstance(data, str):
+        data = data.encode(charset)
+    return hmac.new(key, data, digestmod=sha256).hexdigest().upper()
 
 
-def hmac_sha256_base64(data, key=None, charset='utf-8') -> str:
-    if key:
-        key = key.encode(charset)
-    return base64.b64encode(
-        hmac.new(key, data.encode(charset), digestmod=sha256).digest()
-    ).decode(charset)
+def hmac_sha256_base64(key: str| bytes, data: str| bytes, charset='utf-8') -> str:
+    return base64.b64encode(hmac_sha256(key, data, charset)).decode(charset)
