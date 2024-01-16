@@ -56,7 +56,7 @@ class HTTPHeaderManager(ConfigTestElement):
 
     def __init__(self):
         super().__init__()
-        self.set_property(self.HEADERS, CollectionProperty(self.HEADERS))
+        self.add_property(self.HEADERS, CollectionProperty(self.HEADERS))
 
     @property
     def headers_as_list(self) -> list[HTTPHeader]:

@@ -26,7 +26,7 @@ def get_number(length: int, prefix: str = '', suffix: str = '') -> str:
     :return:        随机数
     """
     number = [str(randint(0, 9)) for _ in range(length)]
-    return prefix.join(number).join(suffix)
+    return prefix + ''.join(number) + suffix
 
 
 def get_idcard():
