@@ -7,8 +7,8 @@ from .function import Function  # noqa
 
 # 加密相关
 from .aes import AES  # noqa
-from .aes_128_cbc import AES128CBC  # noqa
-from .aes_128_ecb import AES128ECB  # noqa
+from .aes_cbc_128 import AESCBC128  # noqa
+from .aes_ecb_128 import AESECB128  # noqa
 from .base64 import Base64  # noqa
 from .md5 import MD5  # noqa
 from .hex import Hex  # noqa
@@ -17,6 +17,11 @@ from .google_auth import GoogleAuth  # noqa
 
 # 功能相关
 from .eval import Eval  # noqa
+from .python_eval import PythonEval  # noqa
+from .property_set import PropertySet  # noqa
+from .variable_set import VariableSet  # noqa
+from .lowercase import LowerCase  # noqa
+from .uppercase import UpperCase  # noqa
 
 # 伪造数据
 from .fake import Fake  # noqa
@@ -35,6 +40,7 @@ from .random_int import RandomInt  # noqa
 from .random import Random  # noqa
 from .phone import Phone  # noqa
 from .ulid import ULID  # noqa
+from .uuid import UUID  # noqa
 
 # 时间相关
 from .time import Time  # noqa

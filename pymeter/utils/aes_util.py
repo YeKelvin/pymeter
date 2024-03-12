@@ -37,12 +37,12 @@ BLOCK_SIZES = {
 }
 
 
-def encrypt(plaintext, key, size='128', mode='ECB', iv=None, encoding=None) -> [str, bytes]:
+def encrypt(data, key, mode='ECB', size='128', iv=None, encoding=None) -> str | bytes:
     if mode not in AES_MODES:
         raise KeyError('aes mode 不存在')
 
     cipher = AES.new(key.encode('utf8'), AES_MODES[mode], iv)
-    bdata = pad(plaintext.encode('utf8'), int(BLOCK_SIZES[size]))
+    bdata = pad(data.encode('utf8'), int(BLOCK_SIZES[size]))
     ciphertext = cipher.encrypt(bdata)
 
     if encoding == 'base64':
@@ -53,7 +53,7 @@ def encrypt(plaintext, key, size='128', mode='ECB', iv=None, encoding=None) -> [
         return ciphertext
 
 
-def decrypt(ciphertext, key, size='128', mode='ECB', iv=None, encoding=None):
+def decrypt(ciphertext, key, mode='ECB', size='128', iv=None, encoding=None):
     if mode not in AES_MODES:
         raise KeyError('aes mode 不存在')
 
