@@ -35,7 +35,7 @@ class SimpleVariable:
         elif self.name in properties:
             return properties.get(self.name)
         else:
-            logger.debug(f'变量:[ {self.name} ] 找不到变量，返回原始字符')
+            logger.debug(f'变量:[ {self.name} ] 变量不存在，返回原始字符')
             return '${' + self.name + '}'
 
 
@@ -53,7 +53,7 @@ class CompoundVariable:
         self.has_function = False
         # 动态函数
         self.dynamic = False
-        # 已编译完成的组件
+        # 编译完成的组件
         self.compiled_components = []
         # 结果缓存
         self.permanent_results = None
@@ -69,7 +69,7 @@ class CompoundVariable:
             return self.permanent_results
 
         if not self.compiled_components:
-            logger.debug('已编译组件为空')
+            # logger.debug('编译组件为空')
             return ''
 
         results = []
@@ -109,7 +109,7 @@ class CompoundVariable:
         self.compiled_components = FunctionParser.compile_string(parameters)
 
         if len(self.compiled_components) > 1 or not isinstance(self.compiled_components[0], str):
-            # logger.debug('已编译字符串中存在函数')
+            # logger.debug('编译的字符串中存在函数')
             self.has_function = True
 
         # 在首次执行时进行计算和缓存
@@ -147,7 +147,7 @@ class StringReader:
         self.__iter: iter = string.__iter__()
 
     @property
-    def next(self) -> str or None:
+    def next(self) -> str | None:
         try:
             return self.__iter.__next__()
         except StopIteration:
@@ -185,7 +185,7 @@ class FunctionParser:
                 buffer.append(current)
             elif current == '{' and previous == '$':  # 匹配 "${" 占位符前缀
                 # logger.debug('found a "${"')
-                buffer = buffer[:-1]
+                buffer = buffer[:-1]  # 删除 "$" 字符
                 if len(buffer) > 0:  # 保存 "${" 占位符前的字符串
                     before_placeholder_str = ''.join(buffer)
                     # logger.debug(f'save the string before the placeholder: {before_placeholder_str}')
@@ -206,22 +206,22 @@ class FunctionParser:
         return result
 
     @staticmethod
-    def __make_function(reader: StringReader) -> Function or str:
+    def __make_function(reader: StringReader) -> Function | str:
         buffer = []
         previous = ''
         while True:
             current = reader.next
-            if current is None:  # end of reader
+            if current is None:  # 结束
                 # logger.debug('end of reader')
                 break
-            if current == '\\':
+            if current == '\\':  # 匹配 "\" 转义符
                 current = reader.next
-                if current is None:  # end of reader
+                if current is None:  # 结束
                     # logger.debug('end of reader')
                     break
                 previous = ''
                 buffer.append(current)
-            elif current == '(' and previous != '':
+            elif current == '(' and previous != '':  # 匹配 "(" 参数开始符
                 func_name = ''.join(buffer)
                 # logger.debug(f'function reference key: {func_name}')
                 function = CompoundVariable.get_named_function(func_name)
@@ -233,7 +233,7 @@ class FunctionParser:
                     return function
                 else:  # 函数不存在，按普通字符处理
                     buffer.append(current)
-            elif current == '}':  # 变量 或者没有参数的函数
+            elif current == '}':  # 变量 或者 没有参数的函数
                 func_name = ''.join(buffer)
                 # logger.debug(f'function reference key:[ {func_name} ]')
                 function = CompoundVariable.get_named_function(func_name)
@@ -246,7 +246,7 @@ class FunctionParser:
                 previous = current
 
         str_buffer = ''.join(buffer)
-        logger.warning(f'may be invalid function string: {str_buffer}')
+        logger.warning(f'May be invalid function string: {str_buffer}')
         return str_buffer
 
     @staticmethod
@@ -254,34 +254,37 @@ class FunctionParser:
         result = []
         buffer = []
         previous = ''
-        function_recursion = 0
+        # 函数递归计数器
+        func_recursion = 0
+        # 参数递归计数器， TODO：是否应该叫做 args_recursion 呢?
         parent_recursion = 0
+        # logger.debug('start parse parameters')
         while True:
             current = reader.next
-            if current is None:  # end of reader
+            if current is None:  # 结束
                 # logger.debug('end of reader')
                 break
-            if current == '\\':
-                buffer.append(current)  # Store the \
+            if current == '\\':  # 匹配 "\" 转义符
+                buffer.append(current)  # Store the "\"
                 current = reader.next
-                if current is None:  # end of reader
+                if current is None:  # 结束
                     # logger.debug('end of reader')
                     break
                 previous = ''
                 buffer.append(current)
-            elif current == ',' and function_recursion == 0:
+            elif current == ',' and func_recursion == 0:
+                # logger.debug('found a ","')
                 param_str = ''.join(buffer)
-                # logger.debug(f'parameter str: {param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
                 result.append(param)
-            elif current == ')' and function_recursion == 0 and parent_recursion == 0:
-                # 检测 function name，防止生成空字符串作为参数
+            elif current == ')' and func_recursion == 0 and parent_recursion == 0:
+                # logger.debug('found a ")", exit')
+                # 检测缓冲区和结果，防止生成空字符串作为参数
                 if not buffer and not result:
                     return result
                 # 正常退出
                 param_str = ''.join(buffer)
-                # logger.debug(f'raw parameter: {param_str}')
                 param = CompoundVariable(param_str)
                 buffer.clear()
                 result.append(param)
@@ -289,26 +292,31 @@ class FunctionParser:
             elif current == '{' and previous == '$':
                 buffer.append(current)
                 previous = current
-                function_recursion += function_recursion
-            elif current == '}' and function_recursion > 0:
+                func_recursion = func_recursion + 1 # 匹配到 "${" 占位符，递归计数器加一
+                # logger.debug(f'found a "${{", func_recursion + 1: {func_recursion}')
+            elif current == '}' and func_recursion > 0:
                 buffer.append(current)
                 previous = current
-                function_recursion -= function_recursion
-            elif current == ')' and function_recursion == 0 and parent_recursion > 0:
+                func_recursion = func_recursion - 1 # 匹配到 "}" 结束符，递归计数器减一
+                # logger.debug(f'found a "}}", func_recursion - 1: {func_recursion}')
+            elif current == ')' and func_recursion == 0 and parent_recursion > 0:
                 buffer.append(current)
                 previous = current
-                parent_recursion -= parent_recursion
-            elif current[0] == '(' and function_recursion == 0:
+                parent_recursion = parent_recursion - 1  # 匹配到 ")" 参数结束符，参数递归计数器减一
+                # logger.debug(f'found a ")", parent_recursion - 1: {parent_recursion}')
+            elif current == '(' and func_recursion == 0:
                 buffer.append(current)
                 previous = current[0]
-                parent_recursion += parent_recursion
+                parent_recursion = parent_recursion + 1  # 匹配到 "(" 参数开始符，参数递归计数器加一
+                # logger.debug(f'found a "(", parent_recursion + 1: {parent_recursion}')
             else:
+                # logger.debug(f'current char: {current}')
                 buffer.append(current)
                 previous = current
 
         # 退出，未匹配到参数列表结束符 ")"
         str_buffer = ''.join(buffer)
-        logger.warning(f'may be invalid function string: {str_buffer}')
+        logger.warning(f'May be invalid function string: {str_buffer}')
         var = CompoundVariable()
         var.set_parameters(str_buffer)
         result.append(var)
