@@ -110,9 +110,8 @@ class HTTPHeaderManager(ConfigTestElement):
         header.value = value
         self.headers_as_list.append(header)
 
-    def set_header(self, name: str, value: str) -> None:
-        if header := self.get_header(name):
-            header.name = name
+    def set_header(self, name: str, value: str, force=False) -> None:
+        if header := self.get_header(name) and force:
             header.value = value
         else:
             header = HTTPHeader()
