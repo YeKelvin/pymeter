@@ -24,7 +24,7 @@ class PythonPostProcessor(PostProcessor):
     @property
     def raw_function(self):
         func = [
-            'def function(log, ctx, vars, props, sampler, result):\n',
+            'def function(log, ctx, args, vars, props, result, sampler):\n',
             DEFAULT_LOCAL_IMPORT_MODULE
         ]
 
@@ -38,19 +38,18 @@ class PythonPostProcessor(PostProcessor):
         return ''.join(func)
 
     def process(self) -> None:
-        # noinspection PyBroadException
         try:
             ctx = ContextService.get_context()
-            props = ctx.properties
             params = {'self': self}
             exec(self.raw_function, params, params)
             self.dynamic_function(  # noqa
                 log=logger,
                 ctx=ctx,
+                args=ctx.arguments,
                 vars=ctx.variables,
-                props=props,
-                sampler=ctx.current_sampler,
-                result=ctx.previous_result
+                props=ctx.properties,
+                result=ctx.previous_result,
+                sampler=ctx.current_sampler
             )
         except Exception:
             logger.exception('Exception Occurred')

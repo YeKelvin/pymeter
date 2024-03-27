@@ -9,8 +9,8 @@ from loguru import logger
 from pymeter.collections.test_collection import TestCollection
 from pymeter.engines.context import EngineContext
 from pymeter.engines.hashtree import HashTree
-from pymeter.engines.properties import Properties
 from pymeter.engines.traverser import SearchByClass
+from pymeter.engines.variables import Variables
 from pymeter.tools.exceptions import EngineException
 
 
@@ -26,7 +26,7 @@ class Engine(Greenlet):
         self.workers = []
         self.context = EngineContext()
         self.extra = kwargs.get('extra', {})
-        self.properties = Properties()
+        self.properties = Variables()
         self.properties.update(kwargs.get('props', {}))
         self.stop_event: Event = kwargs.get('stop_event', None)
 

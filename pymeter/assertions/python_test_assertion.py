@@ -1,5 +1,5 @@
 #!/usr/bin python3
-# @File    : python_assertion.py
+# @File    : python_test_assertion.py
 # @Time    : 2020/2/17 16:39
 # @Author  : Kelvin.Ye
 from typing import Final
@@ -26,7 +26,7 @@ class PythonAssertion(Assertion):
     @property
     def raw_function(self):
         func = [
-            'def function(log, ctx, vars, props, prev, sampler, result):\n',
+            'def function(log, ctx, args, vars, props, prev, result, sampler):\n',
             DEFAULT_LOCAL_IMPORT_MODULE
         ]
 
@@ -44,7 +44,6 @@ class PythonAssertion(Assertion):
 
         try:
             ctx = ContextService.get_context()
-            props = ctx.properties
             params = {
                 'self': self,
                 'failure': not response.success,
@@ -54,11 +53,12 @@ class PythonAssertion(Assertion):
             self.dynamic_function(  # noqa
                 log=logger,
                 ctx=ctx,
+                args=ctx.arguments,
                 vars=ctx.variables,
-                props=props,
+                props=ctx.properties,
                 prev=ctx.previous_result,
-                sampler=ctx.current_sampler,
-                result=response
+                result=response,
+                sampler=ctx.current_sampler
             )
         except AssertionError as e:
             # 断言失败时，判断是否有定义失败信息，没有则返回断言脚本内容

@@ -24,7 +24,7 @@ class PythonPrevProcessor(PrevProcessor):
     @property
     def raw_function(self):
         func = [
-            'def function(log, ctx, vars, props, prev, sampler):\n',
+            'def function(log, ctx, args, vars, props, prev, sampler):\n',
             DEFAULT_LOCAL_IMPORT_MODULE
         ]
 
@@ -38,17 +38,16 @@ class PythonPrevProcessor(PrevProcessor):
         return ''.join(func)
 
     def process(self) -> None:
-        # noinspection PyBroadException
         try:
             ctx = ContextService.get_context()
-            props = ctx.properties
             params = {'self': self}
             exec(self.raw_function, params, params)
             self.dynamic_function(  # noqa
                 log=logger,
                 ctx=ctx,
+                args=ctx.arguments,
                 vars=ctx.variables,
-                props=props,
+                props=ctx.properties,
                 prev=ctx.previous_result,
                 sampler=ctx.current_sampler
             )

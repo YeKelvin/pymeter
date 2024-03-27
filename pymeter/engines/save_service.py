@@ -53,8 +53,8 @@ modules = {
     'JsonPathPostProcessor': 'pymeter.processors.jsonpath_post_processor',
 
     # 断言器
-    'PythonAssertion': 'pymeter.assertions.python_assertion',
-    'JsonPathAssertion': 'pymeter.assertions.jsonpath_assertion',
+    'PythonAssertion': 'pymeter.assertions.python_test_assertion',
+    'JsonPathAssertion': 'pymeter.assertions.jsonpath_test_assertion',
 
     # 监听器
     'ResultCollector': 'pymeter.listeners.result_collector',

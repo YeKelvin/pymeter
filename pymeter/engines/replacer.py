@@ -18,6 +18,10 @@ class SimpleVariable:
         self.name = name
 
     @property
+    def arguments(self):
+        return ContextService.get_context().arguments
+
+    @property
     def variables(self):
         return ContextService.get_context().variables
 
@@ -27,10 +31,13 @@ class SimpleVariable:
 
     @property
     def value(self):
+        arguments = self.arguments or {}
         variables = self.variables or {}
         properties = self.properties or {}
 
-        if self.name in variables:
+        if self.name in arguments:
+            return arguments.get(self.name)
+        elif self.name in variables:
             return variables.get(self.name)
         elif self.name in properties:
             return properties.get(self.name)

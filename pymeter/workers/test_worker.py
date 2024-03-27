@@ -25,6 +25,7 @@ from pymeter.engines.traverser import FindTestElementsUpToRoot
 from pymeter.engines.traverser import SearchByClass
 from pymeter.engines.traverser import TestCompiler
 from pymeter.engines.traverser import TreeCloner
+from pymeter.engines.variables import Variables
 from pymeter.samplers.sample_result import SampleResult
 from pymeter.samplers.sampler import Sampler
 from pymeter.tools.exceptions import StopTestException
@@ -34,7 +35,6 @@ from pymeter.tools.exceptions import UserInterruptedError
 from pymeter.workers.context import ContextService
 from pymeter.workers.context import ThreadContext
 from pymeter.workers.package import SamplePackage
-from pymeter.workers.variables import Variables
 from pymeter.workers.worker import LogicalAction
 from pymeter.workers.worker import Worker
 
@@ -750,7 +750,7 @@ class Coroutine(Greenlet):
     def _notify_test_iteration_listeners(self) -> None:
         """遍历执行 TestIterationListener"""
         logger.debug(f'线程:[ {self.thread_name} ] 遍历触发 TestIterationListener 的开始事件')
-        self.variables.inc_iteration()
+        self.variables.iteration += 1
         for listener in self.test_iteration_listeners:
             listener.test_iteration_start(self.worker_main_controller, self.variables.iteration)
             if isinstance(listener, TestElement):

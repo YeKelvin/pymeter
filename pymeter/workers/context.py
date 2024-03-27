@@ -6,8 +6,8 @@ from contextvars import ContextVar
 
 from loguru._logger import context as logurucontext
 
+from pymeter.engines.variables import Variables
 from pymeter.utils import time_util
-from pymeter.workers.variables import Variables
 
 
 class ThreadContext:
@@ -15,6 +15,10 @@ class ThreadContext:
     @property
     def properties(self) -> dict:
         return getattr(self.engine, 'properties', {})
+
+    @property
+    def arguments(self) -> dict:
+        return getattr(self.current_sampler, '__args__', {})
 
     @property
     def extra(self) -> dict:

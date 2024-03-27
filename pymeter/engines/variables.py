@@ -1,10 +1,14 @@
 #!/usr/bin python3
-# @File    : properties.py
-# @Time    : 2023-07-04 16:25:40
+# @File    : variables.py
+# @Time    : 2020/3/4 15:12
 # @Author  : Kelvin.Ye
 
 
-class Properties(dict):
+class Variables(dict):
+
+    def __init__(self):
+        super().__init__()
+        self.iteration = 0
 
     def put(self, key: str, value: any) -> None:
         self[key] = value
